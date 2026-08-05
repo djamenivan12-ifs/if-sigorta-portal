@@ -4,9 +4,8 @@ import { ChangeEvent, useRef } from "react";
 
 type DocumentUploaderProps = {
   label: string;
-  description?: string;
+  description: string;
   file: File | null;
-  required?: boolean;
   onChange: (file: File | null) => void;
 };
 
@@ -22,7 +21,6 @@ export default function DocumentUploader({
   label,
   description,
   file,
-  required = true,
   onChange,
 }: DocumentUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,18 +72,14 @@ export default function DocumentUploader({
   return (
     <div className="rounded-xl border border-slate-300 bg-white p-4">
       <div className="mb-3">
-        <label className="font-semibold text-slate-900">
+        <p className="font-semibold text-slate-900">
           {label}
-          {required && (
-            <span className="ml-1 text-red-600">*</span>
-          )}
-        </label>
+          <span className="ml-1 text-red-600">*</span>
+        </p>
 
-        {description && (
-          <p className="mt-1 text-sm text-slate-500">
-            {description}
-          </p>
-        )}
+        <p className="mt-1 text-sm text-slate-500">
+          {description}
+        </p>
       </div>
 
       {!file ? (

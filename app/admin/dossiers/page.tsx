@@ -16,6 +16,7 @@ type RequestRow = {
   calculated_price: number;
   insurance_duration_years: number;
   created_at: string;
+
   client: {
     first_name: string;
     last_name: string;
@@ -26,8 +27,14 @@ type RequestRow = {
 };
 
 const statusOptions = [
-  { value: "", label: "Tous les statuts" },
-  { value: "draft", label: "Brouillon" },
+  {
+    value: "",
+    label: "Tous les statuts",
+  },
+  {
+    value: "draft",
+    label: "Brouillon",
+  },
   {
     value: "waiting_payment",
     label: "Paiement attendu",
@@ -69,30 +76,37 @@ const statusLabels: Record<
     label: "Brouillon",
     className: "bg-slate-100 text-slate-700",
   },
+
   waiting_payment: {
     label: "Paiement attendu",
     className: "bg-amber-100 text-amber-800",
   },
+
   payment_review: {
     label: "Paiement à vérifier",
     className: "bg-orange-100 text-orange-800",
   },
+
   payment_confirmed: {
     label: "Paiement confirmé",
     className: "bg-green-100 text-green-800",
   },
+
   policy_preparation: {
     label: "Assurance en préparation",
     className: "bg-blue-100 text-blue-800",
   },
+
   policy_available: {
     label: "Assurance disponible",
     className: "bg-emerald-100 text-emerald-800",
   },
+
   payment_rejected: {
     label: "Paiement refusé",
     className: "bg-red-100 text-red-800",
   },
+
   cancelled: {
     label: "Dossier annulé",
     className: "bg-slate-200 text-slate-800",
@@ -163,11 +177,18 @@ async function getRequests({
       ? `${request.client.first_name} ${request.client.last_name}`
       : "";
 
+    const reverseFullName = request.client
+      ? `${request.client.last_name} ${request.client.first_name}`
+      : "";
+
     return (
       request.request_code
         .toLocaleLowerCase("fr-FR")
         .includes(normalizedSearch) ||
       fullName
+        .toLocaleLowerCase("fr-FR")
+        .includes(normalizedSearch) ||
+      reverseFullName
         .toLocaleLowerCase("fr-FR")
         .includes(normalizedSearch)
     );

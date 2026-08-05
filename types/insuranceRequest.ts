@@ -10,6 +10,8 @@ export type AddressData = {
 };
 
 export type InsuranceRequestData = {
+  requestCode: string;
+
   lastName: string;
   firstName: string;
   fatherName: string;

@@ -1,6 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import DocumentUploader from "@/components/DocumentUploader";
@@ -21,7 +26,6 @@ function cleanCodeValue(value: string): string {
 
 function getInitial(value: string): string {
   const cleanedValue = cleanCodeValue(value);
-
   return cleanedValue.charAt(0) || "X";
 }
 
@@ -97,13 +101,36 @@ export default function Etape5Page() {
   const {
     requestData,
     updateRequestData,
+    resetRequestData,
   } = useInsuranceRequest();
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [submitError, setSubmitError] =
+    useState("");
 
   const requiredInformationIsPresent =
     requestData.lastName.trim() !== "" &&
     requestData.firstName.trim() !== "" &&
+    requestData.fatherName.trim() !== "" &&
+    requestData.birthDate !== "" &&
+    requestData.gender !== "" &&
+    requestData.nationality.trim() !== "" &&
+    requestData.whatsappNumber.trim() !== "" &&
     requestData.kimlikNumber.trim() !== "" &&
-    requestData.passportNumber.trim() !== "";
+    requestData.kimlikExpirationDate !== "" &&
+    requestData.passportNumber.trim() !== "" &&
+    requestData.address.provinceId !== "" &&
+    requestData.address.districtId !== "" &&
+    requestData.address.neighborhoodId !== "" &&
+    requestData.address.street.trim() !== "" &&
+    requestData.address.buildingNumber.trim() !== "";
+
+  const documentsArePresent =
+    requestData.passportFile !== null &&
+    requestData.kimlikFrontFile !== null &&
+    requestData.kimlikBackFile !== null;
 
   const generatedRequestCode = useMemo(() => {
     if (!requiredInformationIsPresent) {
@@ -113,13 +140,10 @@ export default function Etape5Page() {
     return generateRequestCode({
       kimlikNumber:
         requestData.kimlikNumber,
-
       lastName:
         requestData.lastName,
-
       firstName:
         requestData.firstName,
-
       passportNumber:
         requestData.passportNumber,
     });
@@ -138,8 +162,7 @@ export default function Etape5Page() {
         generatedRequestCode
     ) {
       updateRequestData({
-        requestCode:
-          generatedRequestCode,
+        requestCode: generatedRequestCode,
       });
     }
   }, [
@@ -152,89 +175,178 @@ export default function Etape5Page() {
     requestData.paymentReceiptFile !== null;
 
   const priceIsAvailable =
+    requestData.calculatedAge !== null &&
     requestData.calculatedPrice !== null;
 
   const canConfirmPayment =
     requiredInformationIsPresent &&
-    generatedRequestCode !== "" &&
+    documentsArePresent &&
+    paymentReceiptIsPresent &&
     priceIsAvailable &&
-    paymentReceiptIsPresent;
+    generatedRequestCode !== "" &&
+    !isSubmitting;
 
-  function handleSubmit(
+  async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
-    if (!requiredInformationIsPresent) {
-      alert(
-        "Le nom, le prénom, le numéro de Kimlik ou le numéro de passeport est absent. Revenez aux étapes précédentes.",
-      );
+    setSubmitError("");
 
+    if (!requiredInformationIsPresent) {
+      setSubmitError(
+        "Certaines informations obligatoires sont absentes. Revenez aux étapes précédentes.",
+      );
       return;
     }
 
-    if (!generatedRequestCode) {
-      alert(
-        "Le code du dossier n’a pas pu être généré.",
+    if (!documentsArePresent) {
+      setSubmitError(
+        "Le passeport, le Kimlik recto et le Kimlik verso sont obligatoires.",
       );
-
       return;
     }
 
     if (
+      requestData.calculatedAge === null ||
       requestData.calculatedPrice === null
     ) {
-      alert(
-        "Le montant de l’assurance n’est pas disponible.",
+      setSubmitError(
+        "L’âge ou le montant de l’assurance n’est pas disponible.",
       );
+      return;
+    }
 
+    if (!requestData.paymentReceiptFile) {
+      setSubmitError(
+        "Veuillez téléverser votre dekont avant de confirmer le paiement.",
+      );
       return;
     }
 
     if (
-      !requestData.paymentReceiptFile
+      !requestData.passportFile ||
+      !requestData.kimlikFrontFile ||
+      !requestData.kimlikBackFile
     ) {
-      alert(
-        "Veuillez téléverser votre dekont avant de confirmer le paiement.",
+      setSubmitError(
+        "Les trois documents d’identité sont obligatoires.",
       );
-
       return;
     }
 
-    updateRequestData({
-      requestCode:
-        generatedRequestCode,
-    });
+    setIsSubmitting(true);
 
-    console.log(
-      "Dossier prêt pour Supabase :",
-      {
-        requestCode:
-          generatedRequestCode,
+    try {
+      const payload = {
+        requestCode: generatedRequestCode,
 
-        amount:
+        lastName:
+          requestData.lastName,
+        firstName:
+          requestData.firstName,
+        fatherName:
+          requestData.fatherName,
+        birthDate:
+          requestData.birthDate,
+        gender:
+          requestData.gender,
+        nationality:
+          requestData.nationality,
+
+        whatsappCountryCode:
+          requestData.whatsappCountryCode,
+        whatsappNumber:
+          requestData.whatsappNumber,
+
+        address:
+          requestData.address,
+
+        kimlikNumber:
+          requestData.kimlikNumber,
+        kimlikExpirationDate:
+          requestData.kimlikExpirationDate,
+        passportNumber:
+          requestData.passportNumber,
+
+        duration:
+          requestData.duration,
+        calculatedAge:
+          requestData.calculatedAge,
+        calculatedPrice:
           requestData.calculatedPrice,
+      };
 
-        paymentReceipt:
-          requestData.paymentReceiptFile,
+      const formData = new FormData();
 
-        requestData: {
-          ...requestData,
-          requestCode:
-            generatedRequestCode,
+      formData.append(
+        "payload",
+        JSON.stringify(payload),
+      );
+
+      formData.append(
+        "passportFile",
+        requestData.passportFile,
+      );
+
+      formData.append(
+        "kimlikFrontFile",
+        requestData.kimlikFrontFile,
+      );
+
+      formData.append(
+        "kimlikBackFile",
+        requestData.kimlikBackFile,
+      );
+
+      formData.append(
+        "paymentReceiptFile",
+        requestData.paymentReceiptFile,
+      );
+
+      const response = await fetch(
+        "/api/requests",
+        {
+          method: "POST",
+          body: formData,
         },
-      },
-    );
+      );
 
-    alert(
-      [
-        "Votre déclaration de paiement a été enregistrée provisoirement.",
-        "",
-        `Code du dossier : ${generatedRequestCode}`,
-        "",
-        "Votre virement devra être vérifié par un agent IF Sigorta.",
-      ].join("\n"),
-    );
+      const result = (await response.json()) as {
+        success?: boolean;
+        requestId?: string;
+        requestCode?: string;
+        status?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error ||
+            "Le dossier n’a pas pu être enregistré.",
+        );
+      }
+
+      const confirmedCode =
+        result.requestCode ||
+        generatedRequestCode;
+
+      resetRequestData();
+
+      router.push(
+        `/demande/confirmation?code=${encodeURIComponent(
+          confirmedCode,
+        )}`,
+      );
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Une erreur inattendue est survenue.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -268,19 +380,18 @@ export default function Etape5Page() {
           </h1>
 
           <p className="mt-2 text-slate-600">
-            Effectuez le virement en
-            indiquant votre code comme
-            référence, puis téléversez
-            obligatoirement votre dekont.
+            Effectuez le virement en indiquant
+            votre code comme référence, puis
+            téléversez obligatoirement votre
+            dekont.
           </p>
 
           {!requiredInformationIsPresent && (
             <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-              Le nom, le prénom, le numéro
-              de Kimlik ou le numéro de
-              passeport est absent. Revenez
-              aux étapes précédentes avant
-              d’effectuer le paiement.
+              Certaines informations sont
+              absentes. Revenez aux étapes
+              précédentes avant d’effectuer le
+              paiement.
             </div>
           )}
 
@@ -313,11 +424,9 @@ export default function Etape5Page() {
                 </h2>
 
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Le bouton « J’ai effectué
-                  le paiement » restera
-                  désactivé tant que le
-                  dekont n’aura pas été
-                  ajouté.
+                  Le bouton restera désactivé
+                  tant que le dekont n’aura pas
+                  été ajouté.
                 </p>
               </div>
 
@@ -349,36 +458,42 @@ export default function Etape5Page() {
               </div>
             </section>
 
+            {submitError && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+                {submitError}
+              </div>
+            )}
+
             <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
               Le téléversement du dekont ne
-              confirme pas automatiquement
-              le paiement. Un agent IF
-              Sigorta vérifiera le montant,
-              le bénéficiaire et la
-              référence du virement.
+              confirme pas automatiquement le
+              paiement. Un agent IF Sigorta
+              vérifiera le montant, le
+              bénéficiaire et la référence.
             </div>
 
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={() =>
                   router.push(
                     "/demande/etape-4",
                   )
                 }
-                className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 ← Précédent
               </button>
 
               <button
                 type="submit"
-                disabled={
-                  !canConfirmPayment
-                }
+                disabled={!canConfirmPayment}
                 className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
-                J’ai effectué le paiement
+                {isSubmitting
+                  ? "Enregistrement en cours..."
+                  : "J’ai effectué le paiement"}
               </button>
             </div>
           </form>

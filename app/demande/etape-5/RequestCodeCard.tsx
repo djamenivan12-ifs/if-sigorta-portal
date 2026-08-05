@@ -8,11 +8,17 @@ export default function RequestCodeCard({
   requestCode,
 }: RequestCodeCardProps) {
   async function copyRequestCode() {
+    if (!requestCode) {
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(requestCode);
       alert("Code du dossier copié.");
     } catch {
-      alert("Impossible de copier automatiquement le code.");
+      alert(
+        "Impossible de copier automatiquement le code. Vous pouvez le copier manuellement.",
+      );
     }
   }
 
@@ -27,20 +33,19 @@ export default function RequestCodeCard({
           {requestCode || "Génération du code..."}
         </p>
 
-        {requestCode && (
-          <button
-            type="button"
-            onClick={copyRequestCode}
-            className="shrink-0 rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
-          >
-            Copier le code
-          </button>
-        )}
+        <button
+          type="button"
+          disabled={!requestCode}
+          onClick={copyRequestCode}
+          className="shrink-0 rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Copier le code
+        </button>
       </div>
 
       <p className="mt-4 text-sm leading-6 text-slate-600">
         Conservez ce code. Il servira de référence pour le virement et
-        permettra de suivre votre demande avec votre numéro WhatsApp.
+        permettra ensuite de suivre votre demande.
       </p>
     </section>
   );

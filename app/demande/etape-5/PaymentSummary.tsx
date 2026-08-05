@@ -18,8 +18,8 @@ export default function PaymentSummary({
       </p>
 
       <p className="mt-3 text-sm leading-6 text-slate-600">
-        Vérifiez que le montant du virement correspond exactement au montant
-        affiché.
+        Le montant du virement doit correspondre exactement au montant
+        indiqué ci-dessus.
       </p>
     </section>
   );

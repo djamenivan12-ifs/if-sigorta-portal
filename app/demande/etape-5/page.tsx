@@ -10,45 +10,85 @@ import BankCard from "./BankCard";
 import PaymentSummary from "./PaymentSummary";
 import RequestCodeCard from "./RequestCodeCard";
 
-function getInitial(value: string) {
-  const cleanedValue = value.trim();
-
-  if (!cleanedValue) {
-    return "X";
-  }
-
-  return cleanedValue
-    .charAt(0)
+function cleanCodeValue(value: string): string {
+  return value
+    .trim()
     .toLocaleUpperCase("tr-TR")
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function getInitial(value: string): string {
+  const cleanedValue = cleanCodeValue(value);
+
+  return cleanedValue.charAt(0) || "X";
+}
+
+function getPassportCharacters(
+  passportNumber: string,
+): string {
+  const cleanedPassport =
+    cleanCodeValue(passportNumber);
+
+  if (!cleanedPassport) {
+    return "XX";
+  }
+
+  const firstCharacter =
+    cleanedPassport.charAt(0);
+
+  const lastCharacter =
+    cleanedPassport.charAt(
+      cleanedPassport.length - 1,
+    );
+
+  return `${firstCharacter}${lastCharacter}`;
 }
 
 function generateRequestCode({
   kimlikNumber,
   lastName,
   firstName,
+  passportNumber,
 }: {
   kimlikNumber: string;
   lastName: string;
   firstName: string;
-}) {
-  const now = new Date();
+  passportNumber: string;
+}): string {
+  const creationDate = new Date();
 
-  const year = String(now.getFullYear()).slice(-2);
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+  const year = String(
+    creationDate.getFullYear(),
+  ).slice(-2);
+
+  const month = String(
+    creationDate.getMonth() + 1,
+  ).padStart(2, "0");
+
+  const day = String(
+    creationDate.getDate(),
+  ).padStart(2, "0");
 
   const datePart = `${year}${month}${day}`;
 
-  const numericKimlik = kimlikNumber.replace(/\D/g, "");
+  const numericKimlik =
+    kimlikNumber.replace(/\D/g, "");
+
   const lastTwoKimlikDigits =
     numericKimlik.slice(-2).padStart(2, "0");
 
-  const lastNameInitial = getInitial(lastName);
-  const firstNameInitial = getInitial(firstName);
+  const lastNameInitial =
+    getInitial(lastName);
 
-  return `IFS-${datePart}-${lastTwoKimlikDigits}${lastNameInitial}${firstNameInitial}${lastTwoKimlikDigits}`;
+  const firstNameInitial =
+    getInitial(firstName);
+
+  const passportCharacters =
+    getPassportCharacters(passportNumber);
+
+  return `IFS-${datePart}-${lastTwoKimlikDigits}${lastNameInitial}${firstNameInitial}${passportCharacters}`;
 }
 
 export default function Etape5Page() {
@@ -59,27 +99,47 @@ export default function Etape5Page() {
     updateRequestData,
   } = useInsuranceRequest();
 
-  const generatedRequestCode = useMemo(
-    () =>
-      generateRequestCode({
-        kimlikNumber: requestData.kimlikNumber,
-        lastName: requestData.lastName,
-        firstName: requestData.firstName,
-      }),
-    [
-      requestData.kimlikNumber,
-      requestData.lastName,
-      requestData.firstName,
-    ],
-  );
+  const requiredInformationIsPresent =
+    requestData.lastName.trim() !== "" &&
+    requestData.firstName.trim() !== "" &&
+    requestData.kimlikNumber.trim() !== "" &&
+    requestData.passportNumber.trim() !== "";
+
+  const generatedRequestCode = useMemo(() => {
+    if (!requiredInformationIsPresent) {
+      return "";
+    }
+
+    return generateRequestCode({
+      kimlikNumber:
+        requestData.kimlikNumber,
+
+      lastName:
+        requestData.lastName,
+
+      firstName:
+        requestData.firstName,
+
+      passportNumber:
+        requestData.passportNumber,
+    });
+  }, [
+    requiredInformationIsPresent,
+    requestData.kimlikNumber,
+    requestData.lastName,
+    requestData.firstName,
+    requestData.passportNumber,
+  ]);
 
   useEffect(() => {
     if (
       generatedRequestCode &&
-      requestData.requestCode !== generatedRequestCode
+      requestData.requestCode !==
+        generatedRequestCode
     ) {
       updateRequestData({
-        requestCode: generatedRequestCode,
+        requestCode:
+          generatedRequestCode,
       });
     }
   }, [
@@ -94,15 +154,11 @@ export default function Etape5Page() {
   const priceIsAvailable =
     requestData.calculatedPrice !== null;
 
-  const requiredInformationIsPresent =
-    requestData.lastName.trim() !== "" &&
-    requestData.firstName.trim() !== "" &&
-    requestData.kimlikNumber.trim() !== "";
-
   const canConfirmPayment =
-    paymentReceiptIsPresent &&
+    requiredInformationIsPresent &&
+    generatedRequestCode !== "" &&
     priceIsAvailable &&
-    requiredInformationIsPresent;
+    paymentReceiptIsPresent;
 
   function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -111,13 +167,23 @@ export default function Etape5Page() {
 
     if (!requiredInformationIsPresent) {
       alert(
-        "Certaines informations nécessaires à la création du code sont absentes. Revenez aux étapes précédentes.",
+        "Le nom, le prénom, le numéro de Kimlik ou le numéro de passeport est absent. Revenez aux étapes précédentes.",
       );
 
       return;
     }
 
-    if (requestData.calculatedPrice === null) {
+    if (!generatedRequestCode) {
+      alert(
+        "Le code du dossier n’a pas pu être généré.",
+      );
+
+      return;
+    }
+
+    if (
+      requestData.calculatedPrice === null
+    ) {
       alert(
         "Le montant de l’assurance n’est pas disponible.",
       );
@@ -125,7 +191,9 @@ export default function Etape5Page() {
       return;
     }
 
-    if (!requestData.paymentReceiptFile) {
+    if (
+      !requestData.paymentReceiptFile
+    ) {
       alert(
         "Veuillez téléverser votre dekont avant de confirmer le paiement.",
       );
@@ -133,12 +201,30 @@ export default function Etape5Page() {
       return;
     }
 
-    console.log("Dossier prêt pour Supabase :", {
-      requestCode: generatedRequestCode,
-      amount: requestData.calculatedPrice,
-      paymentReceipt: requestData.paymentReceiptFile,
-      requestData,
+    updateRequestData({
+      requestCode:
+        generatedRequestCode,
     });
+
+    console.log(
+      "Dossier prêt pour Supabase :",
+      {
+        requestCode:
+          generatedRequestCode,
+
+        amount:
+          requestData.calculatedPrice,
+
+        paymentReceipt:
+          requestData.paymentReceiptFile,
+
+        requestData: {
+          ...requestData,
+          requestCode:
+            generatedRequestCode,
+        },
+      },
+    );
 
     alert(
       [
@@ -157,7 +243,9 @@ export default function Etape5Page() {
         <button
           type="button"
           onClick={() =>
-            router.push("/demande/etape-4")
+            router.push(
+              "/demande/etape-4",
+            )
           }
           className="mb-6 font-medium text-blue-700 hover:underline"
         >
@@ -180,14 +268,19 @@ export default function Etape5Page() {
           </h1>
 
           <p className="mt-2 text-slate-600">
-            Effectuez le virement avec votre code comme référence, puis
-            téléversez obligatoirement votre dekont.
+            Effectuez le virement en
+            indiquant votre code comme
+            référence, puis téléversez
+            obligatoirement votre dekont.
           </p>
 
           {!requiredInformationIsPresent && (
             <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-              Le nom, le prénom ou le numéro de Kimlik est absent. Revenez aux
-              étapes précédentes avant d’effectuer le paiement.
+              Le nom, le prénom, le numéro
+              de Kimlik ou le numéro de
+              passeport est absent. Revenez
+              aux étapes précédentes avant
+              d’effectuer le paiement.
             </div>
           )}
 
@@ -196,15 +289,21 @@ export default function Etape5Page() {
             className="mt-8 space-y-6"
           >
             <RequestCodeCard
-              requestCode={generatedRequestCode}
+              requestCode={
+                generatedRequestCode
+              }
             />
 
             <PaymentSummary
-              amount={requestData.calculatedPrice}
+              amount={
+                requestData.calculatedPrice
+              }
             />
 
             <BankCard
-              requestCode={generatedRequestCode}
+              requestCode={
+                generatedRequestCode
+              }
             />
 
             <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -214,16 +313,23 @@ export default function Etape5Page() {
                 </h2>
 
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Le bouton « J’ai effectué le paiement » restera désactivé
-                  tant que le dekont n’aura pas été ajouté.
+                  Le bouton « J’ai effectué
+                  le paiement » restera
+                  désactivé tant que le
+                  dekont n’aura pas été
+                  ajouté.
                 </p>
               </div>
 
               <DocumentUploader
                 label="Dekont"
                 description="Ajoutez une preuve lisible de votre virement bancaire."
-                file={requestData.paymentReceiptFile}
-                onChange={(paymentReceiptFile) =>
+                file={
+                  requestData.paymentReceiptFile
+                }
+                onChange={(
+                  paymentReceiptFile,
+                ) =>
                   updateRequestData({
                     paymentReceiptFile,
                   })
@@ -244,16 +350,21 @@ export default function Etape5Page() {
             </section>
 
             <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-              Le téléversement du dekont ne confirme pas automatiquement le
-              paiement. Un agent IF Sigorta vérifiera le montant et le
-              bénéficiaire du virement.
+              Le téléversement du dekont ne
+              confirme pas automatiquement
+              le paiement. Un agent IF
+              Sigorta vérifiera le montant,
+              le bénéficiaire et la
+              référence du virement.
             </div>
 
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               <button
                 type="button"
                 onClick={() =>
-                  router.push("/demande/etape-4")
+                  router.push(
+                    "/demande/etape-4",
+                  )
                 }
                 className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
               >
@@ -262,7 +373,9 @@ export default function Etape5Page() {
 
               <button
                 type="submit"
-                disabled={!canConfirmPayment}
+                disabled={
+                  !canConfirmPayment
+                }
                 className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
                 J’ai effectué le paiement

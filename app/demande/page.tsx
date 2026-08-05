@@ -1,33 +1,26 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+
 import AddressSelector, {
   AddressValue,
 } from "@/components/AddressSelector";
+
+import PhoneInput from "@/components/PhoneInput";
+
 import {
   calculateInsurancePrice,
   InsuranceDuration,
 } from "@/lib/insurance/calculatePrice";
 
-const countryCodes = [
-  { country: "Türkiye", flag: "🇹🇷", code: "+90" },
-  { country: "Cameroun", flag: "🇨🇲", code: "+237" },
-  { country: "Nigeria", flag: "🇳🇬", code: "+234" },
-  { country: "Ghana", flag: "🇬🇭", code: "+233" },
-  { country: "Sénégal", flag: "🇸🇳", code: "+221" },
-  { country: "Côte d’Ivoire", flag: "🇨🇮", code: "+225" },
-  { country: "Tchad", flag: "🇹🇩", code: "+235" },
-  { country: "Gabon", flag: "🇬🇦", code: "+241" },
-  { country: "Congo", flag: "🇨🇬", code: "+242" },
-  { country: "RDC", flag: "🇨🇩", code: "+243" },
-];
-
 export default function DemandePage() {
   const [birthDate, setBirthDate] = useState("");
+
   const [duration, setDuration] =
     useState<InsuranceDuration>(1);
 
   const [countryCode, setCountryCode] = useState("+90");
+
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const [address, setAddress] = useState<AddressValue>({
@@ -50,14 +43,14 @@ export default function DemandePage() {
     );
   }, [birthDate, duration]);
 
-  function handlePhoneChange(value: string) {
-    setPhoneNumber(value.replace(/\D/g, ""));
-  }
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(
+      event.currentTarget,
+    );
 
     const completeWhatsappNumber =
       `${countryCode}${phoneNumber}`;
@@ -69,20 +62,40 @@ export default function DemandePage() {
       birthDate,
       gender: formData.get("gender"),
       nationality: formData.get("nationality"),
-      kimlikNumber: formData.get("kimlikNumber"),
+
+      kimlikNumber:
+        formData.get("kimlikNumber"),
+
       kimlikExpirationDate:
         formData.get("kimlikExpirationDate"),
-      passportNumber: formData.get("passportNumber"),
+
+      passportNumber:
+        formData.get("passportNumber"),
+
       insuranceDurationYears: duration,
-      calculatedAge: priceResult?.age ?? null,
-      calculatedPrice: priceResult?.price ?? null,
-      whatsapp: completeWhatsappNumber,
+
+      calculatedAge:
+        priceResult?.age ?? null,
+
+      calculatedPrice:
+        priceResult?.price ?? null,
+
+      whatsappCountryCode: countryCode,
+      whatsappNumber: phoneNumber,
+      whatsappComplete:
+        completeWhatsappNumber,
+
       address,
     };
 
-    console.log("Données de la demande :", requestData);
+    console.log(
+      "Données de la demande :",
+      requestData,
+    );
 
-    alert("Informations validées.");
+    alert(
+      "Informations validées. Nous ajouterons ensuite les documents.",
+    );
   }
 
   const inputClassName =
@@ -112,11 +125,15 @@ export default function DemandePage() {
           </h1>
 
           <p className="mb-8 text-slate-600">
-            Remplissez les informations exactement comme elles
-            apparaissent sur vos documents officiels.
+            Remplissez les informations exactement
+            comme elles apparaissent sur vos
+            documents officiels.
           </p>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form
+            className="space-y-8"
+            onSubmit={handleSubmit}
+          >
             <section className="space-y-5">
               <h2 className="text-xl font-bold text-slate-900">
                 Informations personnelles
@@ -187,7 +204,9 @@ export default function DemandePage() {
                   type="date"
                   value={birthDate}
                   onChange={(event) =>
-                    setBirthDate(event.target.value)
+                    setBirthDate(
+                      event.target.value,
+                    )
                   }
                   required
                   className={inputClassName}
@@ -209,12 +228,20 @@ export default function DemandePage() {
                   required
                   className={inputClassName}
                 >
-                  <option value="" disabled>
+                  <option
+                    value=""
+                    disabled
+                  >
                     Sélectionner
                   </option>
 
-                  <option value="male">Homme</option>
-                  <option value="female">Femme</option>
+                  <option value="male">
+                    Homme
+                  </option>
+
+                  <option value="female">
+                    Femme
+                  </option>
                 </select>
               </div>
 
@@ -234,9 +261,23 @@ export default function DemandePage() {
                   className={inputClassName}
                 />
               </div>
+
+              <PhoneInput
+                countryCode={countryCode}
+                phoneNumber={phoneNumber}
+                onCountryCodeChange={
+                  setCountryCode
+                }
+                onPhoneNumberChange={
+                  setPhoneNumber
+                }
+              />
             </section>
 
-            <AddressSelector value={address} onChange={setAddress} />
+            <AddressSelector
+              value={address}
+              onChange={setAddress}
+            />
 
             <section className="space-y-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
               <h2 className="text-xl font-bold text-slate-900">
@@ -303,15 +344,18 @@ export default function DemandePage() {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-600">
-                  Le tarif est calculé selon l’année de naissance
-                  et la durée choisie.
+                  Le tarif est calculé selon
+                  l’année de naissance et la durée
+                  choisie.
                 </p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setDuration(1)}
+                  onClick={() =>
+                    setDuration(1)
+                  }
                   className={`rounded-xl border px-4 py-4 text-left transition ${
                     duration === 1
                       ? "border-blue-700 bg-white ring-2 ring-blue-100"
@@ -325,7 +369,9 @@ export default function DemandePage() {
 
                 <button
                   type="button"
-                  onClick={() => setDuration(2)}
+                  onClick={() =>
+                    setDuration(2)
+                  }
                   className={`rounded-xl border px-4 py-4 text-left transition ${
                     duration === 2
                       ? "border-blue-700 bg-white ring-2 ring-blue-100"
@@ -357,8 +403,11 @@ export default function DemandePage() {
                       </p>
 
                       <p className="text-2xl font-bold text-slate-900">
-                        {priceResult.duration} an
-                        {priceResult.duration === 2 ? "s" : ""}
+                        {priceResult.duration}{" "}
+                        an
+                        {priceResult.duration === 2
+                          ? "s"
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -380,58 +429,15 @@ export default function DemandePage() {
                       </>
                     ) : (
                       <p className="font-semibold text-amber-700">
-                        Tarif non disponible automatiquement.
-                        Contactez IF Sigorta.
+                        Tarif non disponible
+                        automatiquement. Contactez
+                        IF Sigorta.
                       </p>
                     )}
                   </div>
                 </div>
               )}
             </section>
-
-            <div>
-              <label
-                htmlFor="phoneNumber"
-                className="mb-2 block font-medium text-slate-800"
-              >
-                Numéro WhatsApp
-              </label>
-
-              <div className="flex overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-blue-700 focus-within:ring-2 focus-within:ring-blue-100">
-                <select
-                  id="countryCode"
-                  name="countryCode"
-                  value={countryCode}
-                  onChange={(event) =>
-                    setCountryCode(event.target.value)
-                  }
-                  aria-label="Indicatif téléphonique"
-                  className="max-w-[155px] border-r border-slate-300 bg-slate-50 px-3 py-3 text-slate-900 outline-none"
-                >
-                  {countryCodes.map((item) => (
-                    <option
-                      key={`${item.country}-${item.code}`}
-                      value={item.code}
-                    >
-                      {item.flag} {item.code}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  inputMode="numeric"
-                  value={phoneNumber}
-                  onChange={(event) =>
-                    handlePhoneChange(event.target.value)
-                  }
-                  required
-                  className="min-w-0 flex-1 px-4 py-3 text-slate-900 outline-none"
-                />
-              </div>
-            </div>
 
             <button
               type="submit"
@@ -440,7 +446,7 @@ export default function DemandePage() {
                 !priceResult.available ||
                 priceResult.price === null
               }
-              className="mt-4 w-full rounded-xl bg-blue-700 px-5 py-4 text-lg font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="w-full rounded-xl bg-blue-700 px-5 py-4 text-lg font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               Continuer vers les documents
             </button>

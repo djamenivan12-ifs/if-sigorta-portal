@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import { createClient } from "@/lib/supabase/client";
+
 import SearchableSelect, {
   SelectOption,
 } from "@/components/SearchableSelect";
@@ -17,52 +22,323 @@ export type AddressValue = {
 
 type AddressSelectorProps = {
   value: AddressValue;
-  onChange: (value: AddressValue) => void;
+
+  onChange: (
+    value: AddressValue,
+  ) => void;
+};
+
+type Language =
+  | "fr"
+  | "en"
+  | "tr";
+
+const translations = {
+  fr: {
+    title:
+      "Adresse en Turquie",
+
+    description:
+      "Recherchez et sélectionnez votre province, district et quartier.",
+
+    provinceLabel:
+      "İl — Province",
+
+    provincePlaceholder:
+      "Sélectionner une province",
+
+    districtLabel:
+      "İlçe — District",
+
+    districtPlaceholder:
+      "Sélectionner un district",
+
+    neighborhoodLabel:
+      "Mahalle — Quartier",
+
+    neighborhoodPlaceholder:
+      "Sélectionner un quartier",
+
+    street:
+      "Cadde / Sokak",
+
+    buildingNumber:
+      "Bina No",
+
+    apartmentNumber:
+      "Daire No",
+
+    provincesError:
+      "Impossible de charger les provinces.",
+
+    districtsError:
+      "Impossible de charger les districts.",
+
+    neighborhoodsError:
+      "Impossible de charger les quartiers.",
+  },
+
+  en: {
+    title:
+      "Address in Türkiye",
+
+    description:
+      "Search and select your province, district and neighborhood.",
+
+    provinceLabel:
+      "İl — Province",
+
+    provincePlaceholder:
+      "Select a province",
+
+    districtLabel:
+      "İlçe — District",
+
+    districtPlaceholder:
+      "Select a district",
+
+    neighborhoodLabel:
+      "Mahalle — Neighborhood",
+
+    neighborhoodPlaceholder:
+      "Select a neighborhood",
+
+    street:
+      "Street / Avenue",
+
+    buildingNumber:
+      "Building No",
+
+    apartmentNumber:
+      "Apartment No",
+
+    provincesError:
+      "Unable to load provinces.",
+
+    districtsError:
+      "Unable to load districts.",
+
+    neighborhoodsError:
+      "Unable to load neighborhoods.",
+  },
+
+  tr: {
+    title:
+      "Türkiye adresi",
+
+    description:
+      "İl, ilçe ve mahallenizi arayın ve seçin.",
+
+    provinceLabel:
+      "İl",
+
+    provincePlaceholder:
+      "İl seçin",
+
+    districtLabel:
+      "İlçe",
+
+    districtPlaceholder:
+      "İlçe seçin",
+
+    neighborhoodLabel:
+      "Mahalle",
+
+    neighborhoodPlaceholder:
+      "Mahalle seçin",
+
+    street:
+      "Cadde / Sokak",
+
+    buildingNumber:
+      "Bina No",
+
+    apartmentNumber:
+      "Daire No",
+
+    provincesError:
+      "İller yüklenemedi.",
+
+    districtsError:
+      "İlçeler yüklenemedi.",
+
+    neighborhoodsError:
+      "Mahalleler yüklenemedi.",
+  },
 };
 
 export default function AddressSelector({
   value,
   onChange,
 }: AddressSelectorProps) {
-  const [provinces, setProvinces] = useState<SelectOption[]>([]);
-  const [districts, setDistricts] = useState<SelectOption[]>([]);
-  const [neighborhoods, setNeighborhoods] = useState<SelectOption[]>([]);
+  const [
+    language,
+    setLanguage,
+  ] =
+    useState<Language>(
+      "fr",
+    );
 
-  const [loadingProvinces, setLoadingProvinces] = useState(true);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [loadingNeighborhoods, setLoadingNeighborhoods] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [
+    provinces,
+    setProvinces,
+  ] =
+    useState<
+      SelectOption[]
+    >([]);
+
+  const [
+    districts,
+    setDistricts,
+  ] =
+    useState<
+      SelectOption[]
+    >([]);
+
+  const [
+    neighborhoods,
+    setNeighborhoods,
+  ] =
+    useState<
+      SelectOption[]
+    >([]);
+
+  const [
+    loadingProvinces,
+    setLoadingProvinces,
+  ] =
+    useState(true);
+
+  const [
+    loadingDistricts,
+    setLoadingDistricts,
+  ] =
+    useState(false);
+
+  const [
+    loadingNeighborhoods,
+    setLoadingNeighborhoods,
+  ] =
+    useState(false);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState("");
+
+  useEffect(() => {
+    const savedLanguage =
+      window.localStorage.getItem(
+        "if-sigorta-language",
+      );
+
+    if (
+      savedLanguage === "fr" ||
+      savedLanguage === "en" ||
+      savedLanguage === "tr"
+    ) {
+      setLanguage(
+        savedLanguage,
+      );
+    }
+
+    function handleLanguageChange(
+      event: Event,
+    ) {
+      const customEvent =
+        event as CustomEvent<{
+          language:
+            Language;
+        }>;
+
+      const nextLanguage =
+        customEvent.detail?.language;
+
+      if (
+        nextLanguage === "fr" ||
+        nextLanguage === "en" ||
+        nextLanguage === "tr"
+      ) {
+        setLanguage(
+          nextLanguage,
+        );
+      }
+    }
+
+    window.addEventListener(
+      "if-sigorta-language-change",
+      handleLanguageChange,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "if-sigorta-language-change",
+        handleLanguageChange,
+      );
+    };
+  }, []);
+
+  const t =
+    translations[
+      language
+    ];
 
   useEffect(() => {
     async function loadProvinces() {
-      setLoadingProvinces(true);
+      setLoadingProvinces(
+        true,
+      );
+
       setErrorMessage("");
 
-      const supabase = createClient();
+      const supabase =
+        createClient();
 
-      const { data, error } = await supabase
-        .from("provinces")
-        .select("id, name")
-        .order("name");
+      const {
+        data,
+        error,
+      } =
+        await supabase
+          .from(
+            "provinces",
+          )
+          .select(
+            "id, name",
+          )
+          .order(
+            "name",
+          );
 
       if (error) {
-        setErrorMessage("Impossible de charger les provinces.");
+        setErrorMessage(
+          t.provincesError,
+        );
       } else {
-        setProvinces(data ?? []);
+        setProvinces(
+          data ?? [],
+        );
       }
 
-      setLoadingProvinces(false);
+      setLoadingProvinces(
+        false,
+      );
     }
 
-    loadProvinces();
-  }, []);
+    void loadProvinces();
+  }, [
+    t.provincesError,
+  ]);
 
-  async function selectProvince(provinceId: string) {
+  async function selectProvince(
+    provinceId: string,
+  ) {
     onChange({
       ...value,
       provinceId,
       districtId: "",
-      neighborhoodId: "",
+      neighborhoodId:
+        "",
     });
 
     setDistricts([]);
@@ -72,31 +348,59 @@ export default function AddressSelector({
       return;
     }
 
-    setLoadingDistricts(true);
+    setLoadingDistricts(
+      true,
+    );
+
     setErrorMessage("");
 
-    const supabase = createClient();
+    const supabase =
+      createClient();
 
-    const { data, error } = await supabase
-      .from("districts")
-      .select("id, name")
-      .eq("province_id", Number(provinceId))
-      .order("name");
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "districts",
+        )
+        .select(
+          "id, name",
+        )
+        .eq(
+          "province_id",
+          Number(
+            provinceId,
+          ),
+        )
+        .order(
+          "name",
+        );
 
     if (error) {
-      setErrorMessage("Impossible de charger les districts.");
+      setErrorMessage(
+        t.districtsError,
+      );
     } else {
-      setDistricts(data ?? []);
+      setDistricts(
+        data ?? [],
+      );
     }
 
-    setLoadingDistricts(false);
+    setLoadingDistricts(
+      false,
+    );
   }
 
-  async function selectDistrict(districtId: string) {
+  async function selectDistrict(
+    districtId: string,
+  ) {
     onChange({
       ...value,
       districtId,
-      neighborhoodId: "",
+      neighborhoodId:
+        "",
     });
 
     setNeighborhoods([]);
@@ -105,70 +409,139 @@ export default function AddressSelector({
       return;
     }
 
-    setLoadingNeighborhoods(true);
+    setLoadingNeighborhoods(
+      true,
+    );
+
     setErrorMessage("");
 
-    const supabase = createClient();
+    const supabase =
+      createClient();
 
-    const { data, error } = await supabase
-      .from("neighborhoods")
-      .select("id, name")
-      .eq("district_id", Number(districtId))
-      .order("name");
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "neighborhoods",
+        )
+        .select(
+          "id, name",
+        )
+        .eq(
+          "district_id",
+          Number(
+            districtId,
+          ),
+        )
+        .order(
+          "name",
+        );
 
     if (error) {
-      setErrorMessage("Impossible de charger les quartiers.");
+      setErrorMessage(
+        t.neighborhoodsError,
+      );
     } else {
-      setNeighborhoods(data ?? []);
+      setNeighborhoods(
+        data ?? [],
+      );
     }
 
-    setLoadingNeighborhoods(false);
+    setLoadingNeighborhoods(
+      false,
+    );
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-      <h2 className="mb-1 text-xl font-bold text-slate-900">
-        Adresse en Turquie
+    <section>
+      <h2 className="text-xl font-bold text-slate-900">
+        {t.title}
       </h2>
 
-      <p className="mb-5 text-sm text-slate-600">
-        Recherchez et sélectionnez votre province, district et quartier.
+      <p className="mb-5 mt-2 text-sm text-slate-600">
+        {
+          t.description
+        }
       </p>
 
       {errorMessage && (
         <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-          {errorMessage}
+          {
+            errorMessage
+          }
         </p>
       )}
 
       <div className="space-y-5">
         <SearchableSelect
-          label="İl — Province"
-          placeholder="Sélectionner une province"
-          options={provinces}
-          value={value.provinceId}
-          loading={loadingProvinces}
-          onChange={selectProvince}
+          label={
+            t.provinceLabel
+          }
+          placeholder={
+            t.provincePlaceholder
+          }
+          options={
+            provinces
+          }
+          value={
+            value.provinceId
+          }
+          loading={
+            loadingProvinces
+          }
+          onChange={
+            selectProvince
+          }
         />
 
         <SearchableSelect
-          label="İlçe — District"
-          placeholder="Sélectionner un district"
-          options={districts}
-          value={value.districtId}
-          disabled={!value.provinceId}
-          loading={loadingDistricts}
-          onChange={selectDistrict}
+          label={
+            t.districtLabel
+          }
+          placeholder={
+            t.districtPlaceholder
+          }
+          options={
+            districts
+          }
+          value={
+            value.districtId
+          }
+          disabled={
+            !value.provinceId
+          }
+          loading={
+            loadingDistricts
+          }
+          onChange={
+            selectDistrict
+          }
         />
 
         <SearchableSelect
-          label="Mahalle — Quartier"
-          placeholder="Sélectionner un quartier"
-          options={neighborhoods}
-          value={value.neighborhoodId}
-          disabled={!value.districtId}
-          loading={loadingNeighborhoods}
-          onChange={(neighborhoodId) =>
+          label={
+            t.neighborhoodLabel
+          }
+          placeholder={
+            t.neighborhoodPlaceholder
+          }
+          options={
+            neighborhoods
+          }
+          value={
+            value.neighborhoodId
+          }
+          disabled={
+            !value.districtId
+          }
+          loading={
+            loadingNeighborhoods
+          }
+          onChange={(
+            neighborhoodId,
+          ) =>
             onChange({
               ...value,
               neighborhoodId,
@@ -181,18 +554,25 @@ export default function AddressSelector({
             htmlFor="street"
             className="mb-2 block font-medium text-slate-800"
           >
-            Cadde / Sokak
+            {
+              t.street
+            }
           </label>
 
           <input
             id="street"
             type="text"
             required
-            value={value.street}
-            onChange={(event) =>
+            value={
+              value.street
+            }
+            onChange={(
+              event,
+            ) =>
               onChange({
                 ...value,
-                street: event.target.value,
+                street:
+                  event.target.value,
               })
             }
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
@@ -205,18 +585,25 @@ export default function AddressSelector({
               htmlFor="buildingNumber"
               className="mb-2 block font-medium text-slate-800"
             >
-              Bina No
+              {
+                t.buildingNumber
+              }
             </label>
 
             <input
               id="buildingNumber"
               type="text"
               required
-              value={value.buildingNumber}
-              onChange={(event) =>
+              value={
+                value.buildingNumber
+              }
+              onChange={(
+                event,
+              ) =>
                 onChange({
                   ...value,
-                  buildingNumber: event.target.value,
+                  buildingNumber:
+                    event.target.value,
                 })
               }
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
@@ -228,17 +615,24 @@ export default function AddressSelector({
               htmlFor="apartmentNumber"
               className="mb-2 block font-medium text-slate-800"
             >
-              Daire No
+              {
+                t.apartmentNumber
+              }
             </label>
 
             <input
               id="apartmentNumber"
               type="text"
-              value={value.apartmentNumber}
-              onChange={(event) =>
+              value={
+                value.apartmentNumber
+              }
+              onChange={(
+                event,
+              ) =>
                 onChange({
                   ...value,
-                  apartmentNumber: event.target.value,
+                  apartmentNumber:
+                    event.target.value,
                 })
               }
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"

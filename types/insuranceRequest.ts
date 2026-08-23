@@ -1,6 +1,8 @@
+export type Gender = "male" | "female" | "";
+
 export type InsuranceDuration = 1 | 2;
 
-export type AddressData = {
+export type InsuranceAddress = {
   provinceId: string;
   districtId: string;
   neighborhoodId: string;
@@ -10,22 +12,32 @@ export type AddressData = {
 };
 
 export type InsuranceRequestData = {
+  requestId: string;
   requestCode: string;
 
   lastName: string;
   firstName: string;
   fatherName: string;
   birthDate: string;
-  gender: string;
+  gender: Gender;
   nationality: string;
 
   whatsappCountryCode: string;
   whatsappNumber: string;
 
-  address: AddressData;
+  address: InsuranceAddress;
+
+  hasKimlik: boolean;
 
   kimlikNumber: string;
   kimlikExpirationDate: string;
+
+  /**
+   * Demandée uniquement lorsque le client
+   * ne possède pas encore de Kimlik.
+   */
+  insuranceStartDate: string;
+
   passportNumber: string;
 
   duration: InsuranceDuration;

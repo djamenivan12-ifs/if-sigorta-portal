@@ -1,16 +1,28 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import "server-only";
+
+import {
+  createServerClient,
+} from "@supabase/ssr";
+
+import {
+  cookies,
+} from "next/headers";
 
 export async function createServerSupabaseClient() {
-  const cookieStore = await cookies();
+  const cookieStore =
+    await cookies();
 
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const supabasePublishableKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    process.env
+      .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  if (!supabaseUrl || !supabasePublishableKey) {
+  if (
+    !supabaseUrl ||
+    !supabasePublishableKey
+  ) {
     throw new Error(
       "Les variables publiques Supabase sont absentes.",
     );
@@ -20,15 +32,26 @@ export async function createServerSupabaseClient() {
     supabaseUrl,
     supabasePublishableKey,
     {
+      auth: {
+        detectSessionInUrl:
+          false,
+      },
+
       cookies: {
         getAll() {
           return cookieStore.getAll();
         },
 
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet,
+        ) {
           try {
             cookiesToSet.forEach(
-              ({ name, value, options }) => {
+              ({
+                name,
+                value,
+                options,
+              }) => {
                 cookieStore.set(
                   name,
                   value,
@@ -37,8 +60,14 @@ export async function createServerSupabaseClient() {
               },
             );
           } catch {
-            // L'écriture des cookies peut être impossible
-            // depuis certains Server Components.
+            /*
+             * Certains Server Components
+             * ne peuvent pas modifier les
+             * cookies directement.
+             *
+             * Les Route Handlers / Server
+             * Actions autorisés s'en chargent.
+             */
           }
         },
       },

@@ -1,15 +1,27 @@
-import { createBrowserClient } from "@supabase/ssr";
+import {
+  createBrowserClient,
+} from "@supabase/ssr";
 
 export function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabasePublishableKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseUrl =
+    process.env
+      .NEXT_PUBLIC_SUPABASE_URL;
 
-  if (!supabaseUrl || !supabasePublishableKey) {
+  const supabasePublishableKey =
+    process.env
+      .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (
+    !supabaseUrl ||
+    !supabasePublishableKey
+  ) {
     throw new Error(
-      "Les variables Supabase sont absentes du fichier .env.local.",
+      "Les variables publiques Supabase sont absentes.",
     );
   }
 
-  return createBrowserClient(supabaseUrl, supabasePublishableKey);
+  return createBrowserClient(
+    supabaseUrl,
+    supabasePublishableKey,
+  );
 }

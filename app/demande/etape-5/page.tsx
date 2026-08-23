@@ -3,9 +3,9 @@
 import {
   FormEvent,
   useEffect,
-  useMemo,
   useState,
 } from "react";
+
 import { useRouter } from "next/navigation";
 
 import DocumentUploader from "@/components/DocumentUploader";
@@ -15,111 +15,366 @@ import BankCard from "./BankCard";
 import PaymentSummary from "./PaymentSummary";
 import RequestCodeCard from "./RequestCodeCard";
 
-function cleanCodeValue(value: string): string {
-  return value
-    .trim()
-    .toLocaleUpperCase("tr-TR")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "");
-}
+type Language =
+  | "fr"
+  | "en"
+  | "tr";
 
-function getInitial(value: string): string {
-  const cleanedValue = cleanCodeValue(value);
-  return cleanedValue.charAt(0) || "X";
-}
+const translations = {
+  fr: {
+    backSummary:
+      "← Retour au récapitulatif",
 
-function getPassportCharacters(
-  passportNumber: string,
-): string {
-  const cleanedPassport =
-    cleanCodeValue(passportNumber);
+    step:
+      "Étape 5 sur 5",
 
-  if (!cleanedPassport) {
-    return "XX";
-  }
+    title:
+      "Paiement par virement",
 
-  const firstCharacter =
-    cleanedPassport.charAt(0);
+    description:
+      "Effectuez le virement en indiquant votre code comme référence, puis téléversez obligatoirement votre dekont.",
 
-  const lastCharacter =
-    cleanedPassport.charAt(
-      cleanedPassport.length - 1,
-    );
+    missingInformation:
+      "Certaines informations sont absentes. Revenez aux étapes précédentes avant d’effectuer le paiement.",
 
-  return `${firstCharacter}${lastCharacter}`;
-}
+    desiredStartDate:
+      "Date souhaitée de début de l’assurance",
 
-function generateRequestCode({
-  kimlikNumber,
-  lastName,
-  firstName,
-  passportNumber,
-}: {
-  kimlikNumber: string;
-  lastName: string;
-  firstName: string;
-  passportNumber: string;
-}): string {
-  const creationDate = new Date();
+    transferProof:
+      "Preuve du virement",
 
-  const year = String(
-    creationDate.getFullYear(),
-  ).slice(-2);
+    transferProofDescription:
+      "Le bouton restera désactivé tant que le dekont n’aura pas été ajouté.",
 
-  const month = String(
-    creationDate.getMonth() + 1,
-  ).padStart(2, "0");
+    receiptLabel:
+      "Dekont",
 
-  const day = String(
-    creationDate.getDate(),
-  ).padStart(2, "0");
+    receiptDescription:
+      "Ajoutez une preuve lisible de votre virement bancaire.",
 
-  const datePart = `${year}${month}${day}`;
+    receiptAdded:
+      "✓ Dekont ajouté. Vous pouvez déclarer votre paiement.",
 
-  const numericKimlik =
-    kimlikNumber.replace(/\D/g, "");
+    receiptMissing:
+      "Téléversez votre dekont pour activer le bouton.",
 
-  const lastTwoKimlikDigits =
-    numericKimlik.slice(-2).padStart(2, "0");
+    paymentWarning:
+      "Le téléversement du dekont ne confirme pas automatiquement le paiement. Un agent IF Sigorta vérifiera le montant, le bénéficiaire et la référence.",
 
-  const lastNameInitial =
-    getInitial(lastName);
+    previous:
+      "← Précédent",
 
-  const firstNameInitial =
-    getInitial(firstName);
+    submitting:
+      "Enregistrement en cours...",
 
-  const passportCharacters =
-    getPassportCharacters(passportNumber);
+    confirmPayment:
+      "J’ai effectué le paiement",
 
-  return `IFS-${datePart}-${lastTwoKimlikDigits}${lastNameInitial}${firstNameInitial}${passportCharacters}`;
-}
+    missingRequiredInformation:
+      "Certaines informations obligatoires sont absentes. Revenez aux étapes précédentes.",
+
+    agePriceUnavailable:
+      "L’âge ou le montant de l’assurance n’est pas disponible.",
+
+    receiptRequired:
+      "Veuillez téléverser votre dekont avant de confirmer le paiement.",
+
+    paymentRouteError:
+      "La route de paiement a renvoyé une erreur",
+
+    paymentSaveError:
+      "Le paiement n’a pas pu être enregistré.",
+
+    unexpectedError:
+      "Une erreur inattendue est survenue.",
+  },
+
+  en: {
+    backSummary:
+      "← Back to summary",
+
+    step:
+      "Step 5 of 5",
+
+    title:
+      "Bank transfer payment",
+
+    description:
+      "Make the bank transfer using your request code as the reference, then upload your payment receipt.",
+
+    missingInformation:
+      "Some information is missing. Go back to the previous steps before making the payment.",
+
+    desiredStartDate:
+      "Desired insurance start date",
+
+    transferProof:
+      "Proof of transfer",
+
+    transferProofDescription:
+      "The button will remain disabled until the payment receipt has been added.",
+
+    receiptLabel:
+      "Payment receipt",
+
+    receiptDescription:
+      "Upload a clear proof of your bank transfer.",
+
+    receiptAdded:
+      "✓ Payment receipt added. You can now declare your payment.",
+
+    receiptMissing:
+      "Upload your payment receipt to activate the button.",
+
+    paymentWarning:
+      "Uploading the payment receipt does not automatically confirm the payment. An IF Sigorta agent will verify the amount, beneficiary and reference.",
+
+    previous:
+      "← Previous",
+
+    submitting:
+      "Saving...",
+
+    confirmPayment:
+      "I have made the payment",
+
+    missingRequiredInformation:
+      "Some required information is missing. Go back to the previous steps.",
+
+    agePriceUnavailable:
+      "The calculated age or insurance amount is unavailable.",
+
+    receiptRequired:
+      "Please upload your payment receipt before confirming the payment.",
+
+    paymentRouteError:
+      "The payment route returned an error",
+
+    paymentSaveError:
+      "The payment could not be saved.",
+
+    unexpectedError:
+      "An unexpected error occurred.",
+  },
+
+  tr: {
+    backSummary:
+      "← Özete dön",
+
+    step:
+      "5 adımın 5.'si",
+
+    title:
+      "Banka havalesi ile ödeme",
+
+    description:
+      "Başvuru kodunuzu açıklama olarak yazarak havaleyi yapın, ardından dekontunuzu yükleyin.",
+
+    missingInformation:
+      "Bazı bilgiler eksik. Ödeme yapmadan önce önceki adımlara geri dönün.",
+
+    desiredStartDate:
+      "İstenen sigorta başlangıç tarihi",
+
+    transferProof:
+      "Havale dekontu",
+
+    transferProofDescription:
+      "Dekont eklenene kadar buton devre dışı kalacaktır.",
+
+    receiptLabel:
+      "Dekont",
+
+    receiptDescription:
+      "Banka havalenize ait okunaklı bir dekont yükleyin.",
+
+    receiptAdded:
+      "✓ Dekont eklendi. Ödemenizi bildirebilirsiniz.",
+
+    receiptMissing:
+      "Butonu etkinleştirmek için dekontunuzu yükleyin.",
+
+    paymentWarning:
+      "Dekont yüklemek ödemeyi otomatik olarak onaylamaz. IF Sigorta temsilcisi tutarı, alıcıyı ve açıklamayı kontrol edecektir.",
+
+    previous:
+      "← Önceki",
+
+    submitting:
+      "Kaydediliyor...",
+
+    confirmPayment:
+      "Ödemeyi yaptım",
+
+    missingRequiredInformation:
+      "Bazı zorunlu bilgiler eksik. Önceki adımlara geri dönün.",
+
+    agePriceUnavailable:
+      "Hesaplanan yaş veya sigorta tutarı mevcut değil.",
+
+    receiptRequired:
+      "Ödemeyi onaylamadan önce dekontunuzu yükleyin.",
+
+    paymentRouteError:
+      "Ödeme adresi hata döndürdü",
+
+    paymentSaveError:
+      "Ödeme kaydedilemedi.",
+
+    unexpectedError:
+      "Beklenmeyen bir hata oluştu.",
+  },
+};
 
 export default function Etape5Page() {
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const {
     requestData,
     updateRequestData,
     resetRequestData,
-  } = useInsuranceRequest();
+  } =
+    useInsuranceRequest();
 
-  const [isSubmitting, setIsSubmitting] =
+  const [
+    language,
+    setLanguage,
+  ] =
+    useState<Language>(
+      "fr",
+    );
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
     useState(false);
 
-  const [submitError, setSubmitError] =
+  const [
+    submitError,
+    setSubmitError,
+  ] =
     useState("");
 
-  const requiredInformationIsPresent =
+  /*
+   * ============================
+   * LANGUE
+   * ============================
+   */
+
+  useEffect(() => {
+    function readSavedLanguage() {
+      const savedLanguage =
+        window.localStorage.getItem(
+          "if-sigorta-language",
+        );
+
+      if (
+        savedLanguage === "fr" ||
+        savedLanguage === "en" ||
+        savedLanguage === "tr"
+      ) {
+        setLanguage(
+          savedLanguage,
+        );
+      }
+    }
+
+    readSavedLanguage();
+
+    function handleLanguageChange(
+      event: Event,
+    ) {
+      const customEvent =
+        event as CustomEvent<{
+          language?: Language;
+        }>;
+
+      const nextLanguage =
+        customEvent.detail?.language;
+
+      if (
+        nextLanguage === "fr" ||
+        nextLanguage === "en" ||
+        nextLanguage === "tr"
+      ) {
+        setLanguage(
+          nextLanguage,
+        );
+
+        return;
+      }
+
+      readSavedLanguage();
+    }
+
+    window.addEventListener(
+      "if-sigorta-language-change",
+      handleLanguageChange,
+    );
+
+    window.addEventListener(
+      "storage",
+      readSavedLanguage,
+    );
+
+    window.addEventListener(
+      "focus",
+      readSavedLanguage,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "if-sigorta-language-change",
+        handleLanguageChange,
+      );
+
+      window.removeEventListener(
+        "storage",
+        readSavedLanguage,
+      );
+
+      window.removeEventListener(
+        "focus",
+        readSavedLanguage,
+      );
+    };
+  }, []);
+
+  const t =
+    translations[
+      language
+    ];
+
+  /*
+   * ============================
+   * VÉRIFICATION DU DOSSIER
+   * ============================
+   *
+   * Important :
+   *
+   * Les fichiers passeport / Kimlik
+   * ont déjà été envoyés au serveur
+   * lors de l'étape 4.
+   *
+   * Après F5, les objets File ne
+   * peuvent pas être restaurés depuis
+   * sessionStorage.
+   *
+   * Ils ne doivent donc PAS être
+   * exigés à cette étape.
+   */
+
+  const commonInformationIsPresent =
     requestData.lastName.trim() !== "" &&
     requestData.firstName.trim() !== "" &&
     requestData.fatherName.trim() !== "" &&
     requestData.birthDate !== "" &&
     requestData.gender !== "" &&
     requestData.nationality.trim() !== "" &&
+    requestData.whatsappCountryCode.trim() !== "" &&
     requestData.whatsappNumber.trim() !== "" &&
-    requestData.kimlikNumber.trim() !== "" &&
-    requestData.kimlikExpirationDate !== "" &&
     requestData.passportNumber.trim() !== "" &&
     requestData.address.provinceId !== "" &&
     requestData.address.districtId !== "" &&
@@ -127,176 +382,153 @@ export default function Etape5Page() {
     requestData.address.street.trim() !== "" &&
     requestData.address.buildingNumber.trim() !== "";
 
-  const documentsArePresent =
-    requestData.passportFile !== null &&
-    requestData.kimlikFrontFile !== null &&
-    requestData.kimlikBackFile !== null;
+  const kimlikInformationIsPresent =
+    !requestData.hasKimlik ||
+    (
+      requestData.kimlikNumber.trim() !== "" &&
+      requestData.kimlikExpirationDate !== ""
+    );
 
-  const generatedRequestCode = useMemo(() => {
-    if (!requiredInformationIsPresent) {
-      return "";
-    }
+  const insuranceStartDateIsPresent =
+    requestData.hasKimlik ||
+    requestData.insuranceStartDate !== "";
 
-    return generateRequestCode({
-      kimlikNumber:
-        requestData.kimlikNumber,
-      lastName:
-        requestData.lastName,
-      firstName:
-        requestData.firstName,
-      passportNumber:
-        requestData.passportNumber,
-    });
-  }, [
-    requiredInformationIsPresent,
-    requestData.kimlikNumber,
-    requestData.lastName,
-    requestData.firstName,
-    requestData.passportNumber,
-  ]);
+  const requiredInformationIsPresent =
+    commonInformationIsPresent &&
+    kimlikInformationIsPresent &&
+    insuranceStartDateIsPresent;
 
-  useEffect(() => {
-    if (
-      generatedRequestCode &&
-      requestData.requestCode !==
-        generatedRequestCode
-    ) {
-      updateRequestData({
-        requestCode: generatedRequestCode,
-      });
-    }
-  }, [
-    generatedRequestCode,
-    requestData.requestCode,
-    updateRequestData,
-  ]);
+  /*
+   * Le dossier doit déjà avoir été
+   * créé par l'étape 4.
+   */
 
-  const paymentReceiptIsPresent =
-    requestData.paymentReceiptFile !== null;
+  const serverRequestIsPresent =
+    requestData.requestId.trim() !== "" &&
+    requestData.requestCode.trim() !== "";
+
+  /*
+   * Le prix calculé doit toujours
+   * être disponible.
+   */
 
   const priceIsAvailable =
     requestData.calculatedAge !== null &&
     requestData.calculatedPrice !== null;
 
+  /*
+   * À l'étape 5, le seul fichier
+   * réellement nécessaire est le dekont.
+   */
+
+  const paymentReceiptIsPresent =
+    requestData.paymentReceiptFile !==
+    null;
+
   const canConfirmPayment =
+    serverRequestIsPresent &&
     requiredInformationIsPresent &&
-    documentsArePresent &&
-    paymentReceiptIsPresent &&
     priceIsAvailable &&
-    generatedRequestCode !== "" &&
+    paymentReceiptIsPresent &&
     !isSubmitting;
 
+  const dateLocale =
+    language === "en"
+      ? "en-US"
+      : language === "tr"
+        ? "tr-TR"
+        : "fr-FR";
+
+  /*
+   * ============================
+   * ENVOI DU DEKONT
+   * ============================
+   */
+
   async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
+    event:
+      FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
     setSubmitError("");
 
-    if (!requiredInformationIsPresent) {
-      setSubmitError(
-        "Certaines informations obligatoires sont absentes. Revenez aux étapes précédentes.",
-      );
-      return;
-    }
+    /*
+     * Le dossier doit déjà exister
+     * côté serveur.
+     */
 
-    if (!documentsArePresent) {
+    if (
+      !requestData.requestId ||
+      !requestData.requestCode
+    ) {
       setSubmitError(
-        "Le passeport, le Kimlik recto et le Kimlik verso sont obligatoires.",
+        t.missingRequiredInformation,
       );
+
       return;
     }
 
     if (
-      requestData.calculatedAge === null ||
-      requestData.calculatedPrice === null
+      !requiredInformationIsPresent
     ) {
       setSubmitError(
-        "L’âge ou le montant de l’assurance n’est pas disponible.",
+        t.missingRequiredInformation,
       );
-      return;
-    }
 
-    if (!requestData.paymentReceiptFile) {
-      setSubmitError(
-        "Veuillez téléverser votre dekont avant de confirmer le paiement.",
-      );
       return;
     }
 
     if (
-      !requestData.passportFile ||
-      !requestData.kimlikFrontFile ||
-      !requestData.kimlikBackFile
+      requestData.calculatedAge ===
+        null ||
+      requestData.calculatedPrice ===
+        null
     ) {
       setSubmitError(
-        "Les trois documents d’identité sont obligatoires.",
+        t.agePriceUnavailable,
       );
+
       return;
     }
 
-    setIsSubmitting(true);
+    if (
+      !requestData.paymentReceiptFile
+    ) {
+      setSubmitError(
+        t.receiptRequired,
+      );
+
+      return;
+    }
+
+    setIsSubmitting(
+      true,
+    );
 
     try {
-      const payload = {
-        requestCode: generatedRequestCode,
+      /*
+       * On envoie uniquement les
+       * informations nécessaires
+       * pour déclarer le paiement.
+       */
 
-        lastName:
-          requestData.lastName,
-        firstName:
-          requestData.firstName,
-        fatherName:
-          requestData.fatherName,
-        birthDate:
-          requestData.birthDate,
-        gender:
-          requestData.gender,
-        nationality:
-          requestData.nationality,
-
-        whatsappCountryCode:
-          requestData.whatsappCountryCode,
-        whatsappNumber:
-          requestData.whatsappNumber,
-
-        address:
-          requestData.address,
-
-        kimlikNumber:
-          requestData.kimlikNumber,
-        kimlikExpirationDate:
-          requestData.kimlikExpirationDate,
-        passportNumber:
-          requestData.passportNumber,
-
-        duration:
-          requestData.duration,
-        calculatedAge:
-          requestData.calculatedAge,
-        calculatedPrice:
-          requestData.calculatedPrice,
-      };
-
-      const formData = new FormData();
+      const formData =
+        new FormData();
 
       formData.append(
-        "payload",
-        JSON.stringify(payload),
+        "requestCode",
+        requestData.requestCode,
       );
 
       formData.append(
-        "passportFile",
-        requestData.passportFile,
+        "whatsappCountryCode",
+        requestData.whatsappCountryCode,
       );
 
       formData.append(
-        "kimlikFrontFile",
-        requestData.kimlikFrontFile,
-      );
-
-      formData.append(
-        "kimlikBackFile",
-        requestData.kimlikBackFile,
+        "whatsappNumber",
+        requestData.whatsappNumber,
       );
 
       formData.append(
@@ -304,34 +536,92 @@ export default function Etape5Page() {
         requestData.paymentReceiptFile,
       );
 
-      const response = await fetch(
-        "/api/requests",
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response =
+        await fetch(
+          `/api/requests/${encodeURIComponent(
+            requestData.requestId,
+          )}/payment`,
+          {
+            method:
+              "POST",
 
-      const result = (await response.json()) as {
-        success?: boolean;
-        requestId?: string;
-        requestCode?: string;
-        status?: string;
-        error?: string;
-      };
+            body:
+              formData,
+          },
+        );
 
-      if (!response.ok || !result.success) {
+      const contentType =
+        response.headers.get(
+          "content-type",
+        ) ?? "";
+
+      /*
+       * Protection contre une réponse
+       * HTML ou autre réponse inattendue.
+       */
+
+      if (
+        !contentType.includes(
+          "application/json",
+        )
+      ) {
+        const responseText =
+          await response.text();
+
+        console.error(
+          "Réponse non JSON reçue :",
+          response.status,
+          responseText,
+        );
+
         throw new Error(
-          result.error ||
-            "Le dossier n’a pas pu être enregistré.",
+          `${t.paymentRouteError} (${response.status}).`,
         );
       }
 
+      const result =
+        (await response.json()) as {
+          success?: boolean;
+
+          requestId?: string;
+
+          requestCode?: string;
+
+          status?: string;
+
+          error?: string;
+        };
+
+      if (
+        !response.ok ||
+        !result.success
+      ) {
+        throw new Error(
+          result.error ||
+            t.paymentSaveError,
+        );
+      }
+
+      /*
+       * On conserve le code avant
+       * de vider le contexte.
+       */
+
       const confirmedCode =
         result.requestCode ||
-        generatedRequestCode;
+        requestData.requestCode;
+
+      /*
+       * resetRequestData supprime aussi
+       * les données sauvegardées dans
+       * sessionStorage.
+       */
 
       resetRequestData();
+
+      /*
+       * Redirection vers la confirmation.
+       */
 
       router.push(
         `/demande/confirmation?code=${encodeURIComponent(
@@ -342,10 +632,12 @@ export default function Etape5Page() {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "Une erreur inattendue est survenue.",
+          : t.unexpectedError,
       );
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(
+        false,
+      );
     }
   }
 
@@ -361,13 +653,23 @@ export default function Etape5Page() {
           }
           className="mb-6 font-medium text-blue-700 hover:underline"
         >
-          ← Retour au récapitulatif
+          {
+            t.backSummary
+          }
         </button>
 
         <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-10">
+          {/*
+           * ============================
+           * PROGRESSION
+           * ============================
+           */}
+
           <div className="mb-8">
             <p className="mb-2 text-sm font-semibold text-blue-700">
-              Étape 5 sur 5
+              {
+                t.step
+              }
             </p>
 
             <div className="h-2 overflow-hidden rounded-full bg-slate-200">
@@ -375,35 +677,93 @@ export default function Etape5Page() {
             </div>
           </div>
 
+          {/*
+           * ============================
+           * TITRE
+           * ============================
+           */}
+
           <h1 className="text-3xl font-bold text-slate-900">
-            Paiement par virement
+            {
+              t.title
+            }
           </h1>
 
           <p className="mt-2 text-slate-600">
-            Effectuez le virement en indiquant
-            votre code comme référence, puis
-            téléversez obligatoirement votre
-            dekont.
+            {
+              t.description
+            }
           </p>
 
-          {!requiredInformationIsPresent && (
+          {/*
+           * ============================
+           * DONNÉES MANQUANTES
+           * ============================
+           */}
+
+          {(
+            !requiredInformationIsPresent ||
+            !serverRequestIsPresent ||
+            !priceIsAvailable
+          ) && (
             <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-              Certaines informations sont
-              absentes. Revenez aux étapes
-              précédentes avant d’effectuer le
-              paiement.
+              {
+                t.missingInformation
+              }
             </div>
           )}
 
+          {/*
+           * ============================
+           * DATE DE DÉBUT
+           * ============================
+           */}
+
+          {!requestData.hasKimlik &&
+            requestData.insuranceStartDate && (
+              <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-800">
+                {
+                  t.desiredStartDate
+                }
+                :{" "}
+
+                <span className="font-semibold">
+                  {new Intl.DateTimeFormat(
+                    dateLocale,
+                  ).format(
+                    new Date(
+                      `${requestData.insuranceStartDate}T00:00:00`,
+                    ),
+                  )}
+                </span>
+              </div>
+            )}
+
+          {/*
+           * ============================
+           * FORMULAIRE
+           * ============================
+           */}
+
           <form
-            onSubmit={handleSubmit}
+            onSubmit={
+              handleSubmit
+            }
             className="mt-8 space-y-6"
           >
+            {/*
+             * Matricule créé par le serveur.
+             */}
+
             <RequestCodeCard
               requestCode={
-                generatedRequestCode
+                requestData.requestCode
               }
             />
+
+            {/*
+             * Prix calculé.
+             */}
 
             <PaymentSummary
               amount={
@@ -411,30 +771,49 @@ export default function Etape5Page() {
               }
             />
 
+            {/*
+             * Coordonnées bancaires.
+             */}
+
             <BankCard
               requestCode={
-                generatedRequestCode
+                requestData.requestCode
               }
             />
+
+            {/*
+             * ============================
+             * DEKONT
+             * ============================
+             */}
 
             <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
               <div className="mb-5">
                 <h2 className="text-xl font-bold text-slate-900">
-                  Preuve du virement
+                  {
+                    t.transferProof
+                  }
                 </h2>
 
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Le bouton restera désactivé
-                  tant que le dekont n’aura pas
-                  été ajouté.
+                  {
+                    t.transferProofDescription
+                  }
                 </p>
               </div>
 
               <DocumentUploader
-                label="Dekont"
-                description="Ajoutez une preuve lisible de votre virement bancaire."
+                label={
+                  t.receiptLabel
+                }
+                description={
+                  t.receiptDescription
+                }
                 file={
                   requestData.paymentReceiptFile
+                }
+                language={
+                  language
                 }
                 onChange={(
                   paymentReceiptFile,
@@ -453,29 +832,49 @@ export default function Etape5Page() {
                 }`}
               >
                 {paymentReceiptIsPresent
-                  ? "✓ Dekont ajouté. Vous pouvez déclarer votre paiement."
-                  : "Téléversez votre dekont pour activer le bouton."}
+                  ? t.receiptAdded
+                  : t.receiptMissing}
               </div>
             </section>
 
+            {/*
+             * ============================
+             * ERREUR
+             * ============================
+             */}
+
             {submitError && (
               <div className="rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-                {submitError}
+                {
+                  submitError
+                }
               </div>
             )}
 
+            {/*
+             * ============================
+             * AVERTISSEMENT
+             * ============================
+             */}
+
             <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-              Le téléversement du dekont ne
-              confirme pas automatiquement le
-              paiement. Un agent IF Sigorta
-              vérifiera le montant, le
-              bénéficiaire et la référence.
+              {
+                t.paymentWarning
+              }
             </div>
+
+            {/*
+             * ============================
+             * NAVIGATION
+             * ============================
+             */}
 
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               <button
                 type="button"
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting
+                }
                 onClick={() =>
                   router.push(
                     "/demande/etape-4",
@@ -483,17 +882,21 @@ export default function Etape5Page() {
                 }
                 className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                ← Précédent
+                {
+                  t.previous
+                }
               </button>
 
               <button
                 type="submit"
-                disabled={!canConfirmPayment}
+                disabled={
+                  !canConfirmPayment
+                }
                 className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
                 {isSubmitting
-                  ? "Enregistrement en cours..."
-                  : "J’ai effectué le paiement"}
+                  ? t.submitting
+                  : t.confirmPayment}
               </button>
             </div>
           </form>

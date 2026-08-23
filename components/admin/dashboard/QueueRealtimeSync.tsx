@@ -1,0 +1,52 @@
+"use client";
+
+import {
+  useEffect,
+} from "react";
+
+import {
+  useRouter,
+} from "next/navigation";
+
+import {
+  createClient,
+} from "@/lib/supabase/client";
+
+export default function QueueRealtimeSync() {
+  const router =
+    useRouter();
+
+  useEffect(() => {
+    const supabase =
+      createClient();
+
+    const channel =
+      supabase
+        .channel(
+          "insurance-requests-queue-sync",
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table:
+              "insurance_requests",
+          },
+          () => {
+            router.refresh();
+          },
+        )
+        .subscribe();
+
+    return () => {
+      void supabase.removeChannel(
+        channel,
+      );
+    };
+  }, [
+    router,
+  ]);
+
+  return null;
+}

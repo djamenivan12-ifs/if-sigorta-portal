@@ -1097,20 +1097,20 @@ export default async function DossiersPage({
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-7xl">
-        <header className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1500px]">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 IF Sigorta
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Tous les dossiers
               </h1>
 
-              <p className="mt-2 text-slate-600">
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
                 Consultez, recherchez et prenez en charge les demandes clients.
               </p>
             </div>
@@ -1154,14 +1154,14 @@ export default async function DossiersPage({
                       }
                     : {}),
                 }).toString()}`}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
               >
                 📊 Export Excel
               </a>
 
               <Link
                 href="/admin/tableau-de-bord"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 ← Tableau de bord
               </Link>
@@ -1169,9 +1169,9 @@ export default async function DossiersPage({
           </div>
         </header>
 
-        <section className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
           <div className="mb-5">
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-semibold text-[#102B20]">
               Recherche et filtres
             </h2>
 
@@ -1200,7 +1200,7 @@ export default async function DossiersPage({
                   search
                 }
                 placeholder="Matricule, nom, prénom, WhatsApp, passeport ou Kimlik"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
               />
             </div>
 
@@ -1219,7 +1219,7 @@ export default async function DossiersPage({
                   defaultValue={
                     status
                   }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                 >
                   {statusOptions.map(
                     (
@@ -1257,7 +1257,7 @@ export default async function DossiersPage({
                   defaultValue={
                     nationality
                   }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                 >
                   <option value="">
                     Toutes les nationalités
@@ -1298,7 +1298,7 @@ export default async function DossiersPage({
                   defaultValue={
                     duration
                   }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                 >
                   <option value="">
                     Toutes les durées
@@ -1328,7 +1328,7 @@ export default async function DossiersPage({
                   defaultValue={
                     agent
                   }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                 >
                   <option value="">
                     Tous les responsables
@@ -1385,7 +1385,7 @@ export default async function DossiersPage({
                   defaultValue={
                     dateFrom
                   }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                 />
               </div>
             </div>
@@ -1406,14 +1406,14 @@ export default async function DossiersPage({
                   defaultValue={
                     dateTo
                   }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                 />
               </div>
 
               <div className="flex items-end gap-3">
                 <button
                   type="submit"
-                  className="min-h-12 rounded-xl bg-[#2F2963] px-6 font-semibold text-white transition hover:bg-[#24204F]"
+                  className="min-h-12 rounded-xl bg-[#0B5D3B] px-6 font-black text-white transition hover:bg-[#084A2F]"
                 >
                   Appliquer les filtres
                 </button>
@@ -1437,10 +1437,10 @@ export default async function DossiersPage({
           </div>
         )}
 
-        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="flex items-center justify-between border-b border-slate-200 p-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Résultats
               </h2>
 
@@ -1648,14 +1648,14 @@ export default async function DossiersPage({
                               </span>
                             ) : role ===
                               "admin" ? (
-                              <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                              <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
                                 Pris en charge par{" "}
                                 {
                                   assignedAgentName
                                 }
                               </span>
                             ) : isMine ? (
-                              <span className="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                              <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
                                 Vous
                               </span>
                             ) : (
@@ -1746,7 +1746,7 @@ export default async function DossiersPage({
                       dateTo,
                       agent,
                     })}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
                   >
                     ← Précédent
                   </Link>
@@ -1775,8 +1775,8 @@ export default async function DossiersPage({
                       className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${
                         pageNumber ===
                         currentPage
-                          ? "bg-[#2F2963] text-white"
-                          : "border border-slate-300 text-slate-700"
+                          ? "bg-[#0B5D3B] text-white"
+                          : "border border-slate-200 bg-white text-slate-600 hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
                       }`}
                     >
                       {
@@ -1802,7 +1802,7 @@ export default async function DossiersPage({
                       dateTo,
                       agent,
                     })}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
                   >
                     Suivant →
                   </Link>

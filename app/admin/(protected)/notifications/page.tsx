@@ -463,7 +463,7 @@ function getRequestPriority({
       "Pris en charge",
 
     className:
-      "bg-blue-100 text-blue-700",
+      "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
 
     title:
       "Dossier sous votre responsabilité",
@@ -1262,29 +1262,29 @@ export default async function NotificationsPage() {
     ).length;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <NotificationsRealtimeSync />
 
-      <div className="mx-auto max-w-6xl">
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="mx-auto max-w-[1500px]">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 IF Sigorta
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Notifications
               </h1>
 
-              <p className="mt-2 text-slate-600">
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
                 Dossiers à traiter et renouvellements arrivant à échéance.
               </p>
             </div>
 
             <Link
               href="/admin/tableau-de-bord"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               ← Tableau de bord
             </Link>
@@ -1297,7 +1297,7 @@ export default async function NotificationsPage() {
             value={
               notifications.length
             }
-            className="bg-[#2F2963]/10 text-[#2F2963]"
+            className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <SummaryCard
@@ -1305,7 +1305,7 @@ export default async function NotificationsPage() {
             value={
               requestCount
             }
-            className="bg-blue-50 text-blue-700"
+            className="bg-[#EEF6EC] text-[#31513B]"
           />
 
           <SummaryCard
@@ -1313,7 +1313,7 @@ export default async function NotificationsPage() {
             value={
               renewalCount
             }
-            className="bg-violet-50 text-violet-700"
+            className="bg-[#F1F6EA] text-[#49613E]"
           />
 
           <SummaryCard
@@ -1334,9 +1334,9 @@ export default async function NotificationsPage() {
           />
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="border-b border-slate-200 p-6">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               À traiter
             </h2>
 
@@ -1370,7 +1370,7 @@ export default async function NotificationsPage() {
                     key={
                       notification.key
                     }
-                    className="p-5 transition hover:bg-slate-50 sm:p-6"
+                    className="p-5 transition hover:bg-[#FAFCFA] sm:p-6"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                       <div className="min-w-0">
@@ -1387,7 +1387,7 @@ export default async function NotificationsPage() {
                             className={
                               notification.kind ===
                               "renewal"
-                                ? "rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700"
+                                ? "rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]"
                                 : "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
                             }
                           >
@@ -1411,7 +1411,7 @@ export default async function NotificationsPage() {
                               "admin" &&
                             !notification.isUnassigned &&
                             notification.assignedAgentName && (
-                              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
                                 Pris en charge par{" "}
                                 {
                                   notification.assignedAgentName
@@ -1425,19 +1425,19 @@ export default async function NotificationsPage() {
                               "agent" &&
                             notification.assignedAgentId ===
                               user.id && (
-                              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
                                 Pris en charge par vous
                               </span>
                             )}
 
-                          <span className="text-sm font-bold text-[#2F2963]">
+                          <span className="text-sm font-black text-[#0B5D3B]">
                             {
                               notification.requestCode
                             }
                           </span>
                         </div>
 
-                        <h3 className="mt-3 text-base font-bold text-slate-900">
+                        <h3 className="mt-3 text-base font-semibold text-[#102B20]">
                           {
                             notification.title
                           }
@@ -1586,7 +1586,7 @@ IF Sigorta`}
 
                         <Link
                           href={`/admin/dossiers/${notification.requestId}`}
-                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#2F2963]/20 bg-white px-5 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                         >
                           Ouvrir le dossier →
                         </Link>
@@ -1595,7 +1595,7 @@ IF Sigorta`}
                           "renewal" && (
                             <Link
                               href="/admin/renouvellements"
-                              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+                              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
                             >
                               Renouvellements
                             </Link>
@@ -1625,16 +1625,16 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <div
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </div>
 
-      <p className="mt-4 text-3xl font-bold text-slate-900">
+      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
         {value.toLocaleString(
           "fr-FR",
         )}

@@ -15,7 +15,6 @@ import UserMenu from "./UserMenu";
 
 import {
   Bell,
-  Globe2,
   Menu,
   Plus,
   Search,
@@ -39,6 +38,9 @@ type HeaderProps = {
 
   notificationLevel:
     NotificationLevel;
+
+  onOpenMobileMenu:
+    () => void;
 };
 
 export default function Header({
@@ -46,6 +48,7 @@ export default function Header({
   role,
   notificationCount,
   notificationLevel,
+  onOpenMobileMenu,
 }: HeaderProps) {
   const router =
     useRouter();
@@ -93,23 +96,26 @@ export default function Header({
     );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-20 items-center gap-4 px-5 lg:px-8">
-        {/* Menu mobile */}
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+      <div className="flex h-20 items-center gap-3 px-4 sm:px-5 lg:px-8">
+        {/* MOBILE MENU */}
+
         <button
           type="button"
           aria-label="Ouvrir le menu"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-50 lg:hidden"
+          onClick={
+            onOpenMobileMenu
+          }
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 lg:hidden"
         >
-          <Menu className="h-5 w-5 text-slate-600" />
+          <Menu className="h-5 w-5" />
         </button>
 
-        {/* Recherche desktop */}
+        {/* DESKTOP SEARCH */}
+
         <div className="hidden min-w-0 flex-1 lg:block">
           <form
-            onSubmit={(
-              event,
-            ) =>
+            onSubmit={(event) =>
               submitSearch(
                 event,
                 desktopSearch,
@@ -117,55 +123,45 @@ export default function Header({
             }
             className="relative max-w-2xl"
           >
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <input
               type="search"
               value={
                 desktopSearch
               }
-              onChange={(
-                event,
-              ) =>
+              onChange={(event) =>
                 setDesktopSearch(
                   event.target.value,
                 )
               }
               placeholder="Matricule, client, WhatsApp, passeport, Kimlik..."
-              className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-28 text-sm outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-[#2F2963] focus:bg-white focus:ring-4 focus:ring-[#2F2963]/10"
+              className="h-11 w-full rounded-2xl border border-slate-200 bg-[#F8FAF8] pl-11 pr-28 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
 
             <button
               type="submit"
-              className="absolute right-1.5 top-1/2 inline-flex h-9 -translate-y-1/2 items-center justify-center rounded-xl bg-[#2F2963] px-4 text-xs font-semibold text-white transition hover:bg-[#24204F]"
+              className="absolute right-1.5 top-1/2 inline-flex h-8 -translate-y-1/2 items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-xs font-semibold text-white transition hover:bg-[#084A2F]"
             >
               Rechercher
             </button>
           </form>
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          {/* Nouvelle demande */}
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          {/* NEW REQUEST */}
+
           <Link
             href="/demande/etape-1"
-            className="hidden items-center gap-2 rounded-xl bg-[#18C100] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#13a300] md:flex"
+            className="hidden min-h-11 items-center gap-2 rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] md:flex"
           >
             <Plus className="h-4 w-4" />
 
             Nouvelle demande
           </Link>
 
-          {/* Langue */}
-          <button
-            type="button"
-            className="hidden h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 md:flex"
-          >
-            <Globe2 className="h-4 w-4" />
+          {/* NOTIFICATIONS */}
 
-            FR
-          </button>
-
-          {/* Notifications */}
           <Link
             href="/admin/notifications"
             aria-label={
@@ -191,7 +187,7 @@ export default function Header({
                     : notificationLevel ===
                         "watch"
                       ? "text-amber-600"
-                      : "text-slate-700"
+                      : "text-slate-600"
               }`}
             />
 
@@ -208,24 +204,22 @@ export default function Header({
             )}
           </Link>
 
-          {/* Utilisateur */}
+          {/* USER */}
+
           <UserMenu
             userEmail={
               userEmail
             }
-            role={
-              role
-            }
+            role={role}
           />
         </div>
       </div>
 
-      {/* Recherche mobile */}
-      <div className="border-t border-slate-100 p-4 lg:hidden">
+      {/* MOBILE SEARCH */}
+
+      <div className="border-t border-slate-100 px-4 py-3 lg:hidden">
         <form
-          onSubmit={(
-            event,
-          ) =>
+          onSubmit={(event) =>
             submitSearch(
               event,
               mobileSearch,
@@ -241,21 +235,19 @@ export default function Header({
               value={
                 mobileSearch
               }
-              onChange={(
-                event,
-              ) =>
+              onChange={(event) =>
                 setMobileSearch(
                   event.target.value,
                 )
               }
               placeholder="Rechercher..."
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none transition focus:border-[#2F2963] focus:bg-white focus:ring-4 focus:ring-[#2F2963]/10"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAF8] pl-10 pr-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#2F2963] px-4 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-sm font-semibold text-white transition hover:bg-[#084A2F]"
           >
             <Search className="h-4 w-4 sm:hidden" />
 

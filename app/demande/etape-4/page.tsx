@@ -1001,448 +1001,419 @@ export default function Etape4Page() {
         ? "tr-TR"
         : "fr-FR";
 
+  const formEyebrow =
+    language === "fr"
+      ? "Votre demande"
+      : language === "en"
+        ? "Your application"
+        : "Başvurunuz";
+
+  const sideTitle =
+    language === "fr"
+      ? "Un dernier contrôle avant le paiement."
+      : language === "en"
+        ? "One final check before payment."
+        : "Ödemeden önce son bir kontrol.";
+
+  const sideText =
+    language === "fr"
+      ? "Relisez vos informations et vérifiez que chaque document correspond bien à votre dossier."
+      : language === "en"
+        ? "Review your information and make sure each document matches your application."
+        : "Bilgilerinizi gözden geçirin ve her belgenin başvurunuzla eşleştiğinden emin olun.";
+
+  const reviewInfo =
+    language === "fr"
+      ? "Vous pouvez encore modifier vos informations avant de continuer."
+      : language === "en"
+        ? "You can still edit your information before continuing."
+        : "Devam etmeden önce bilgilerinizi hâlâ düzenleyebilirsiniz.";
+
+  const paymentInfo =
+    language === "fr"
+      ? "Aucun paiement n’est lancé tant que vous n’avez pas confirmé cette page."
+      : language === "en"
+        ? "No payment starts until you confirm this page."
+        : "Bu sayfayı onaylamadan ödeme işlemi başlamaz.";
+
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-3xl">
-        <button
-          type="button"
-          onClick={() =>
-            router.push(
-              "/demande/etape-3",
-            )
-          }
-          className="mb-6 font-medium text-blue-700 hover:underline"
-        >
-          {
-            t.backStep3
-          }
-        </button>
+    <main className="min-h-screen bg-[#F6F8F5]">
+      {/* TOP BAR */}
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-10">
-          <div className="mb-8">
-            <p className="mb-2 text-sm font-semibold text-blue-700">
-              {
-                t.step
-              }
-            </p>
-
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-4/5 rounded-full bg-blue-700" />
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-bold text-slate-900">
-            {
-              t.title
-            }
-          </h1>
-
-          <p className="mt-2 text-slate-600">
-            {
-              t.description
-            }
-          </p>
-
-          <form
-            onSubmit={
-              handleSubmit
-            }
-            className="mt-8 space-y-6"
+      <div className="border-b border-slate-200/80 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+          <a
+            href="/"
+            className="flex items-center"
+            aria-label="IF Sigorta"
           >
-            <section className="rounded-2xl border border-slate-200 p-5">
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {
-                    t.personalInfo
-                  }
-                </h2>
+            <img
+              src="/if-sigorta-logo-light.png"
+              alt="IF Sigorta"
+              className="h-[72px] w-auto object-contain object-left sm:h-[82px]"
+            />
+          </a>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/demande/etape-1",
+          <button
+            type="button"
+            onClick={() =>
+              router.push(
+                "/demande/etape-3",
+              )
+            }
+            className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
+          >
+            {t.backStep3}
+          </button>
+        </div>
+      </div>
+
+      {/* PAGE */}
+
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
+          {/* LEFT PANEL */}
+
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <div className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 lg:min-h-[650px] lg:px-8 lg:py-10">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
+              <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
+
+              <div className="relative z-10 flex h-full flex-col">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#B8E83D]">
+                    {formEyebrow}
+                  </p>
+
+                  <p className="mt-4 text-sm font-semibold text-white/60">
+                    {t.step}
+                  </p>
+
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/15">
+                    <div className="h-full w-4/5 rounded-full bg-[#B8E83D]" />
+                  </div>
+
+                  <h2 className="mt-8 max-w-sm text-3xl font-semibold leading-[1.05] tracking-[-0.04em] sm:text-4xl">
+                    {sideTitle}
+                  </h2>
+
+                  <p className="mt-5 max-w-sm text-sm leading-7 text-white/65 sm:text-base">
+                    {sideText}
+                  </p>
+                </div>
+
+                <div className="mt-10 space-y-4 lg:mt-auto">
+                  <div className="flex gap-3 border-t border-white/10 pt-5">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {reviewInfo}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {paymentInfo}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* REVIEW */}
+
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:p-8 lg:p-10">
+            <div className="max-w-2xl">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+                {t.step}
+              </p>
+
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                {t.title}
+              </h1>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+                {t.description}
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="mt-9 space-y-6"
+            >
+              {/* PERSONAL INFO */}
+
+              <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC]">
+                <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                      01
+                    </p>
+
+                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                      {t.personalInfo}
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        "/demande/etape-1",
+                      )
+                    }
+                    className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EEF6EC]"
+                  >
+                    {t.edit}
+                  </button>
+                </div>
+
+                <dl className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
+                  <ReviewItem label={t.lastName} value={requestData.lastName} />
+                  <ReviewItem label={t.firstName} value={requestData.firstName} />
+                  <ReviewItem label={t.fatherName} value={requestData.fatherName} />
+                  <ReviewItem label={t.birthDate} value={requestData.birthDate} />
+                  <ReviewItem label={t.gender} value={genderLabel} />
+                  <ReviewItem label={t.nationality} value={requestData.nationality} />
+                  <ReviewItem
+                    label={t.whatsapp}
+                    value={`${requestData.whatsappCountryCode} ${requestData.whatsappNumber}`.trim()}
+                  />
+                </dl>
+
+                <div className="border-t border-slate-100 px-5 py-5 sm:px-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    {t.address}
+                  </p>
+
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">
+                    {loadingAddress
+                      ? t.loadingAddress
+                      : completeAddress || "—"}
+                  </p>
+                </div>
+              </section>
+
+              {/* IDENTITY + INSURANCE */}
+
+              <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC]">
+                <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                      02
+                    </p>
+
+                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                      {t.identityInsurance}
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        "/demande/etape-2",
+                      )
+                    }
+                    className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EEF6EC]"
+                  >
+                    {t.edit}
+                  </button>
+                </div>
+
+                <dl className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
+                  <ReviewItem
+                    label={t.kimlikNumber}
+                    value={
+                      requestData.hasKimlik
+                        ? requestData.kimlikNumber || "—"
+                        : t.notApplicable
+                    }
+                  />
+
+                  <ReviewItem
+                    label={t.kimlikExpiration}
+                    value={
+                      requestData.hasKimlik
+                        ? requestData.kimlikExpirationDate || "—"
+                        : t.notApplicable
+                    }
+                  />
+
+                  <ReviewItem
+                    label={t.passportNumber}
+                    value={requestData.passportNumber}
+                  />
+
+                  <ReviewItem
+                    label={t.retainedAge}
+                    value={ageLabel}
+                  />
+
+                  <ReviewItem
+                    label={t.duration}
+                    value={durationLabel}
+                  />
+                </dl>
+
+                <div className="border-t border-[#DCE9DD] bg-[#F3F8F2] px-5 py-5 sm:px-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#52705B]">
+                    {t.totalPrice}
+                  </p>
+
+                  <p className="mt-1 text-4xl font-semibold tracking-[-0.04em] text-[#0B5D3B]">
+                    {requestData.calculatedPrice?.toLocaleString(
+                      priceLocale,
+                    ) ?? "—"}{" "}
+                    <span className="text-2xl">TL</span>
+                  </p>
+                </div>
+              </section>
+
+              {/* DOCUMENTS */}
+
+              <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC]">
+                <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                      03
+                    </p>
+
+                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                      {t.documents}
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        "/demande/etape-3",
+                      )
+                    }
+                    className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EEF6EC]"
+                  >
+                    {t.edit}
+                  </button>
+                </div>
+
+                <div className="space-y-3 p-5 sm:p-6">
+                  <DocumentRow
+                    label={t.passport}
+                    file={requestData.passportFile}
+                    addedLabel={t.added}
+                    missingLabel={t.missing}
+                    missingDocumentLabel={t.documentMissing}
+                  />
+
+                  {requestData.hasKimlik && (
+                    <>
+                      <DocumentRow
+                        label={t.kimlikFront}
+                        file={requestData.kimlikFrontFile}
+                        addedLabel={t.added}
+                        missingLabel={t.missing}
+                        missingDocumentLabel={t.documentMissing}
+                      />
+
+                      <DocumentRow
+                        label={t.kimlikBack}
+                        file={requestData.kimlikBackFile}
+                        addedLabel={t.added}
+                        missingLabel={t.missing}
+                        missingDocumentLabel={t.documentMissing}
+                      />
+                    </>
+                  )}
+                </div>
+              </section>
+
+              {/* CONFIRMATION */}
+
+              <label
+                className={`flex cursor-pointer items-start gap-4 rounded-[1.5rem] border p-5 transition sm:p-6 ${
+                  confirmed
+                    ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/10"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={confirmed}
+                  onChange={(event) =>
+                    setConfirmed(
+                      event.target.checked,
                     )
                   }
-                  className="text-sm font-semibold text-blue-700 hover:underline"
-                >
-                  {
-                    t.edit
-                  }
-                </button>
-              </div>
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-[#0B5D3B]"
+                />
 
-              <dl className="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.lastName
-                    }
-                  </dt>
+                <span className="text-sm leading-6 text-slate-700">
+                  {t.confirmation}
+                </span>
+              </label>
 
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.lastName
-                    }
-                  </dd>
-                </div>
+              {/* ACTIONS */}
 
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.firstName
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.firstName
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.fatherName
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.fatherName
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.birthDate
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.birthDate
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.gender
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      genderLabel
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.nationality
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.nationality
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.whatsapp
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.whatsappCountryCode
-                    }{" "}
-                    {
-                      requestData.whatsappNumber
-                    }
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="mt-5 border-t border-slate-200 pt-5">
-                <p className="text-sm text-slate-500">
-                  {
-                    t.address
-                  }
-                </p>
-
-                <p className="mt-1 font-semibold text-slate-900">
-                  {loadingAddress
-                    ? t.loadingAddress
-                    : completeAddress ||
-                      "—"}
-                </p>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-slate-200 p-5">
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {
-                    t.identityInsurance
-                  }
-                </h2>
-
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      "/demande/etape-2",
-                    )
-                  }
-                  className="text-sm font-semibold text-blue-700 hover:underline"
-                >
-                  {
-                    t.edit
-                  }
-                </button>
-              </div>
-
-              <dl className="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.kimlikNumber
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {requestData.hasKimlik
-                      ? requestData.kimlikNumber ||
-                        "—"
-                      : t.notApplicable}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.kimlikExpiration
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {requestData.hasKimlik
-                      ? requestData.kimlikExpirationDate ||
-                        "—"
-                      : t.notApplicable}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.passportNumber
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      requestData.passportNumber
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.retainedAge
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      ageLabel
-                    }
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-slate-500">
-                    {
-                      t.duration
-                    }
-                  </dt>
-
-                  <dd className="font-semibold text-slate-900">
-                    {
-                      durationLabel
-                    }
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="mt-5 rounded-xl bg-blue-50 p-5">
-                <p className="text-sm text-slate-600">
-                  {
-                    t.totalPrice
-                  }
-                </p>
-
-                <p className="mt-1 text-4xl font-bold text-blue-700">
-                  {requestData.calculatedPrice?.toLocaleString(
-                    priceLocale,
-                  ) ?? "—"}{" "}
-                  TL
-                </p>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-slate-200 p-5">
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {
-                    t.documents
-                  }
-                </h2>
-
-                <button
-                  type="button"
+                  disabled={isSubmitting}
                   onClick={() =>
                     router.push(
                       "/demande/etape-3",
                     )
                   }
-                  className="text-sm font-semibold text-blue-700 hover:underline"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {
-                    t.edit
+                  {t.previous}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={
+                    !confirmed ||
+                    isSubmitting
                   }
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                >
+                  {isSubmitting
+                    ? "..."
+                    : t.continuePayment}
                 </button>
               </div>
-
-              <div className="space-y-3">
-                <DocumentRow
-                  label={
-                    t.passport
-                  }
-                  file={
-                    requestData.passportFile
-                  }
-                  addedLabel={
-                    t.added
-                  }
-                  missingLabel={
-                    t.missing
-                  }
-                  missingDocumentLabel={
-                    t.documentMissing
-                  }
-                />
-
-                {requestData.hasKimlik && (
-                  <>
-                    <DocumentRow
-                      label={
-                        t.kimlikFront
-                      }
-                      file={
-                        requestData.kimlikFrontFile
-                      }
-                      addedLabel={
-                        t.added
-                      }
-                      missingLabel={
-                        t.missing
-                      }
-                      missingDocumentLabel={
-                        t.documentMissing
-                      }
-                    />
-
-                    <DocumentRow
-                      label={
-                        t.kimlikBack
-                      }
-                      file={
-                        requestData.kimlikBackFile
-                      }
-                      addedLabel={
-                        t.added
-                      }
-                      missingLabel={
-                        t.missing
-                      }
-                      missingDocumentLabel={
-                        t.documentMissing
-                      }
-                    />
-                  </>
-                )}
-              </div>
-            </section>
-
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-300 bg-slate-50 p-5">
-              <input
-                type="checkbox"
-                checked={
-                  confirmed
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setConfirmed(
-                    event.target.checked,
-                  )
-                }
-                className="mt-1 h-5 w-5"
-              />
-
-              <span className="text-sm leading-6 text-slate-700">
-                {
-                  t.confirmation
-                }
-              </span>
-            </label>
-
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    "/demande/etape-3",
-                  )
-                }
-                className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                {
-                  t.previous
-                }
-              </button>
-
-              <button
-                type="submit"
-                disabled={
-                  !confirmed ||
-                  isSubmitting
-                }
-                className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-              >
-                {isSubmitting
-                  ? "..."
-                  : t.continuePayment}
-              </button>
-            </div>
-          </form>
+            </form>
+          </section>
         </div>
       </div>
     </main>
+  );
+}
+
+function ReviewItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+        {label}
+      </dt>
+
+      <dd className="mt-1.5 text-sm font-semibold leading-6 text-slate-800">
+        {value || "—"}
+      </dd>
+    </div>
   );
 }
 

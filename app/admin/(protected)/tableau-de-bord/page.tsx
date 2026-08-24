@@ -1401,7 +1401,7 @@ for (
     );
 
     return (
-      <main className="px-4 py-8 sm:px-6 lg:px-8">
+      <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
         <div className="mx-auto max-w-4xl">
           <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
             <div className="rounded-xl bg-red-50 p-5">
@@ -1794,8 +1794,8 @@ if (role === "agent") {
  * tableau de bord ADMIN.
  */
 return (
-  <main className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1600px]">
+  <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1500px]">
         <DashboardHeader
           userName={
             userName
@@ -1805,7 +1805,7 @@ return (
         />
 
         {/* Statistiques principales */}
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Demandes aujourd’hui"
             value={todayRequests.toLocaleString(
@@ -1819,7 +1819,7 @@ return (
               todayTrend.direction
             }
             href="/admin/dossiers"
-            accentClassName="bg-blue-50 text-blue-700"
+            accentClassName="bg-[#EEF6EC] text-[#0B5D3B]"
             icon={
               <FileText className="h-5 w-5" />
             }
@@ -1859,7 +1859,7 @@ return (
             }
             trendDirection="neutral"
             href="/admin/dossiers?status=policy_preparation"
-            accentClassName="bg-violet-50 text-violet-700"
+            accentClassName="bg-[#F3F8F2] text-[#31513B]"
             icon={
               <ShieldCheck className="h-5 w-5" />
             }
@@ -1880,7 +1880,7 @@ return (
             }
           />
         </section>
-<section className="mt-8">
+<section className="mt-6">
   <DelaySummary
     watchCount={watchDelayCount}
     lateCount={lateDelayCount}
@@ -1901,7 +1901,7 @@ return (
             trendDirection={
               monthTrend.direction
             }
-            accentClassName="bg-cyan-50 text-cyan-700"
+            accentClassName="bg-[#EEF6EC] text-[#0B5D3B]"
             icon={
               <TrendingUp className="h-5 w-5" />
             }
@@ -1941,7 +1941,7 @@ return (
             )} % des demandes du mois`}
             trendValue="Ce mois"
             trendDirection="neutral"
-            accentClassName="bg-indigo-50 text-indigo-700"
+            accentClassName="bg-[#F3F8F2] text-[#31513B]"
             icon={
               <ShieldCheck className="h-5 w-5" />
             }
@@ -1967,7 +1967,7 @@ return (
         </section>
 
         {/* Graphique + notifications */}
-        <section className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_420px]">
+        <section className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_420px]">
           <DashboardOverviewChart
             data={
               chartData
@@ -1988,7 +1988,7 @@ return (
         </section>
 
         {/* Analyse mensuelle */}
-        <section className="mt-8">
+        <section className="mt-6">
           <MonthlyPerformance
             totalRequests={
               currentMonthRequests
@@ -2015,7 +2015,7 @@ return (
         </section>
 
         {/* Nationalités */}
-        <section className="mt-8">
+        <section className="mt-6">
           <NationalityStats
             data={
               nationalityData
@@ -2027,12 +2027,12 @@ return (
         </section>
 
         {/* Rapport PDF */}
-        <section className="mt-8">
+        <section className="mt-6">
           <MonthlyReportButton />
         </section>
 
         {/* Dossiers récents + actions */}
-        <section className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_420px]">
+        <section className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_420px]">
           <RecentRequestsTable
             requests={
               recentRequests

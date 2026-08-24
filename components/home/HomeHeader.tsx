@@ -1,19 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  Globe2,
   Menu,
   X,
 } from "lucide-react";
 
 import {
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -22,108 +18,69 @@ type Language =
   | "en"
   | "tr";
 
-const translations = {
+const labels = {
   fr: {
-    howItWorks:
-      "Comment ça marche",
+    home:
+      "Accueil",
 
-    whyUs:
-      "Pourquoi nous",
+    apply:
+      "Faire une demande",
 
     track:
       "Suivre mon dossier",
 
-    support:
-      "Assistance",
+    about:
+      "À propos",
 
-    insurance:
-      "Obtenir mon assurance",
+    contact:
+      "Contact",
 
-    french:
-      "Français",
-
-    english:
-      "English",
-
-    turkish:
-      "Türkçe",
+    cta:
+      "Faire une demande",
   },
 
   en: {
-    howItWorks:
-      "How it works",
+    home:
+      "Home",
 
-    whyUs:
-      "Why choose us",
+    apply:
+      "Apply",
 
     track:
       "Track my request",
 
-    support:
-      "Support",
+    about:
+      "About",
 
-    insurance:
-      "Get insured",
+    contact:
+      "Contact",
 
-    french:
-      "Français",
-
-    english:
-      "English",
-
-    turkish:
-      "Türkçe",
+    cta:
+      "Apply now",
   },
 
   tr: {
-    howItWorks:
-      "Nasıl çalışır?",
+    home:
+      "Ana sayfa",
 
-    whyUs:
-      "Neden biz?",
+    apply:
+      "Başvuru",
 
     track:
       "Başvurumu takip et",
 
-    support:
-      "Destek",
+    about:
+      "Hakkımızda",
 
-    insurance:
-      "Sigorta başvurusu yap",
+    contact:
+      "İletişim",
 
-    french:
-      "Français",
-
-    english:
-      "English",
-
-    turkish:
-      "Türkçe",
+    cta:
+      "Başvuru yap",
   },
 };
 
-const languageLabels: Record<
-  Language,
-  string
-> = {
-  fr: "FR",
-  en: "EN",
-  tr: "TR",
-};
-
 export default function HomeHeader() {
-  const [
-    mobileOpen,
-    setMobileOpen,
-  ] =
-    useState(false);
-
-  const [
-    languageOpen,
-    setLanguageOpen,
-  ] =
-    useState(false);
-
   const [
     language,
     setLanguage,
@@ -132,77 +89,41 @@ export default function HomeHeader() {
       "fr",
     );
 
-  const languageMenuRef =
-    useRef<HTMLDivElement>(
-      null,
+  const [
+    menuOpen,
+    setMenuOpen,
+  ] =
+    useState(
+      false,
     );
 
-  const t =
-    translations[
-      language
-    ];
-
   useEffect(() => {
-    const storedLanguage =
+    const saved =
       window.localStorage.getItem(
         "if-sigorta-language",
       );
 
     if (
-      storedLanguage ===
-        "fr" ||
-      storedLanguage ===
-        "en" ||
-      storedLanguage ===
-        "tr"
+      saved === "fr" ||
+      saved === "en" ||
+      saved === "tr"
     ) {
       setLanguage(
-        storedLanguage,
+        saved,
       );
     }
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(
-      event:
-        MouseEvent,
-    ) {
-      if (
-        languageMenuRef.current &&
-        !languageMenuRef.current.contains(
-          event.target as Node,
-        )
-      ) {
-        setLanguageOpen(
-          false,
-        );
-      }
-    }
-
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside,
-    );
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside,
-      );
-    };
   }, []);
 
   function changeLanguage(
-    value:
-      Language,
+    nextLanguage: Language,
   ) {
     setLanguage(
-      value,
+      nextLanguage,
     );
 
     window.localStorage.setItem(
       "if-sigorta-language",
-      value,
+      nextLanguage,
     );
 
     window.dispatchEvent(
@@ -211,359 +132,282 @@ export default function HomeHeader() {
         {
           detail: {
             language:
-              value,
+              nextLanguage,
           },
         },
       ),
     );
-
-    setLanguageOpen(
-      false,
-    );
-
-    setMobileOpen(
-      false,
-    );
   }
 
+  const t =
+    labels[
+      language
+    ];
+
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-        {/* LOGO */}
+    <header className="absolute inset-x-0 top-0 z-50">
+      <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8">
+        <div className="flex h-[82px] items-center justify-between px-1 sm:px-3 lg:px-5">
+          {/* LOGO */}
 
-        <Link
-          href="/"
-          className="flex items-center gap-3"
-        >
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2F2963] text-lg font-black text-white shadow-sm">
-            IF
+          <Link
+            href="/"
+            aria-label="IF Sigorta"
+            className="flex shrink-0 items-center"
+          >
+            <div className="relative h-[100px] w-[240px] shrink-0 sm:h-[110px] sm:w-[270px] lg:h-[120px] lg:w-[310px]">
+              <Image
+              src="/if-sigorta-logo.png"
+              alt="IF Sigorta"
+              fill
+              priority
+              sizes="310px"
+              className="object-contain object-left"
+             />
           </div>
-
-          <div>
-            <p className="text-lg font-black tracking-tight text-slate-900">
-              IF Sigorta
-            </p>
-
-            <p className="text-xs text-slate-500">
-              Assurance santé
-            </p>
-          </div>
-        </Link>
-
-        {/* NAVIGATION DESKTOP */}
-
-        <nav className="hidden items-center gap-8 lg:flex">
-          <Link
-            href="#fonctionnement"
-            className="text-sm font-semibold text-slate-600 transition hover:text-[#2F2963]"
-          >
-            {
-              t.howItWorks
-            }
           </Link>
 
-          <Link
-            href="#avantages"
-            className="text-sm font-semibold text-slate-600 transition hover:text-[#2F2963]"
-          >
-            {
-              t.whyUs
-            }
-          </Link>
+          {/* NAVIGATION DESKTOP */}
 
-          <Link
-            href="#suivi"
-            className="text-sm font-semibold text-slate-600 transition hover:text-[#2F2963]"
-          >
-            {
-              t.track
-            }
-          </Link>
-
-          <Link
-            href="#assistance"
-            className="text-sm font-semibold text-slate-600 transition hover:text-[#2F2963]"
-          >
-            {
-              t.support
-            }
-          </Link>
-        </nav>
-
-        {/* ACTIONS DESKTOP */}
-
-        <div className="hidden items-center gap-3 lg:flex">
-          {/* LANGUE */}
-
-          <div
-            ref={
-              languageMenuRef
-            }
-            className="relative"
-          >
-            <button
-              type="button"
-              onClick={() =>
-                setLanguageOpen(
-                  !languageOpen,
-                )
-              }
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              <Globe2 className="h-4 w-4" />
-
+          <nav className="hidden items-center gap-6 xl:flex">
+            <NavLink href="/">
               {
-                languageLabels[
-                  language
-                ]
+                t.home
               }
+            </NavLink>
 
-              <ChevronDown
-                className={`h-4 w-4 transition ${
-                  languageOpen
-                    ? "rotate-180"
-                    : ""
-                }`}
-              />
-            </button>
+            <NavLink href="/demande/etape-1">
+              {
+                t.apply
+              }
+            </NavLink>
 
-            {languageOpen && (
-              <div className="absolute right-0 top-[calc(100%+10px)] w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10">
-                <LanguageButton
-                  active={
-                    language ===
-                    "fr"
-                  }
-                  label={
-                    t.french
-                  }
-                  code="FR"
-                  onClick={() =>
-                    changeLanguage(
-                      "fr",
-                    )
-                  }
-                />
+            <NavLink href="/suivi">
+              {
+                t.track
+              }
+            </NavLink>
 
-                <LanguageButton
-                  active={
-                    language ===
-                    "en"
-                  }
-                  label={
-                    t.english
-                  }
-                  code="EN"
-                  onClick={() =>
-                    changeLanguage(
-                      "en",
-                    )
-                  }
-                />
+            <NavLink href="/#fonctionnement">
+              {
+                t.about
+              }
+            </NavLink>
 
-                <LanguageButton
-                  active={
-                    language ===
-                    "tr"
-                  }
-                  label={
-                    t.turkish
-                  }
-                  code="TR"
-                  onClick={() =>
-                    changeLanguage(
-                      "tr",
-                    )
-                  }
-                />
-              </div>
-            )}
-          </div>
+            <NavLink href="/#assistance">
+              {
+                t.contact
+              }
+            </NavLink>
+          </nav>
 
-          <Link
-            href="/suivi"
-            className="inline-flex h-11 items-center justify-center rounded-xl border border-[#2F2963]/20 px-5 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
-          >
-            {
-              t.track
-            }
-          </Link>
+          {/* ACTIONS DESKTOP */}
 
-          <Link
-            href="/demande/etape-1"
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#18C100] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#13a300]"
-          >
-            {
-              t.insurance
-            }
+          <div className="hidden items-center gap-3 xl:flex">
+            <div className="flex items-center rounded-xl border border-white/20 bg-black/10 p-1 backdrop-blur-md">
+              {(
+                [
+                  "fr",
+                  "en",
+                  "tr",
+                ] as Language[]
+              ).map(
+                (
+                  item,
+                ) => (
+                  <button
+                    key={
+                      item
+                    }
+                    type="button"
+                    onClick={() =>
+                      changeLanguage(
+                        item,
+                      )
+                    }
+                    className={[
+                      "rounded-lg px-3 py-1.5 text-[11px] font-black uppercase transition",
 
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        {/* MOBILE BUTTON */}
-
-        <button
-          type="button"
-          onClick={() =>
-            setMobileOpen(
-              !mobileOpen,
-            )
-          }
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 lg:hidden"
-          aria-label="Menu"
-          aria-expanded={
-            mobileOpen
-          }
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </button>
-      </div>
-
-      {/* MOBILE MENU */}
-
-      {mobileOpen && (
-        <div className="border-t border-slate-100 bg-white lg:hidden">
-          <div className="mx-auto max-w-7xl px-5 py-5">
-            <nav className="flex flex-col gap-1">
-              <MobileLink
-                href="#fonctionnement"
-                onClick={() =>
-                  setMobileOpen(
-                    false,
-                  )
-                }
-              >
-                {
-                  t.howItWorks
-                }
-              </MobileLink>
-
-              <MobileLink
-                href="#avantages"
-                onClick={() =>
-                  setMobileOpen(
-                    false,
-                  )
-                }
-              >
-                {
-                  t.whyUs
-                }
-              </MobileLink>
-
-              <MobileLink
-                href="#suivi"
-                onClick={() =>
-                  setMobileOpen(
-                    false,
-                  )
-                }
-              >
-                {
-                  t.track
-                }
-              </MobileLink>
-
-              <MobileLink
-                href="#assistance"
-                onClick={() =>
-                  setMobileOpen(
-                    false,
-                  )
-                }
-              >
-                {
-                  t.support
-                }
-              </MobileLink>
-            </nav>
-
-            <div className="my-5 border-t border-slate-100" />
-
-            {/* LANGUES MOBILE */}
-
-            <div>
-              <p className="px-3 text-xs font-bold uppercase tracking-wider text-slate-400">
-                Langue
-              </p>
-
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <MobileLanguageButton
-                  active={
-                    language ===
-                    "fr"
-                  }
-                  label="FR"
-                  onClick={() =>
-                    changeLanguage(
-                      "fr",
-                    )
-                  }
-                />
-
-                <MobileLanguageButton
-                  active={
-                    language ===
-                    "en"
-                  }
-                  label="EN"
-                  onClick={() =>
-                    changeLanguage(
-                      "en",
-                    )
-                  }
-                />
-
-                <MobileLanguageButton
-                  active={
-                    language ===
-                    "tr"
-                  }
-                  label="TR"
-                  onClick={() =>
-                    changeLanguage(
-                      "tr",
-                    )
-                  }
-                />
-              </div>
+                      language ===
+                      item
+                        ? "bg-white text-[#0B5D3B] shadow-sm"
+                        : "text-white/65 hover:text-white",
+                    ].join(
+                      " ",
+                    )}
+                  >
+                    {
+                      item
+                    }
+                  </button>
+                ),
+              )}
             </div>
 
-            <div className="mt-5 grid gap-3">
-              <Link
-                href="/suivi"
-                onClick={() =>
-                  setMobileOpen(
+            <Link
+              href="/demande/etape-1"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#14361F] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#C8F24D]"
+            >
+              {
+                t.cta
+              }
+            </Link>
+          </div>
+
+          {/* MENU MOBILE / TABLETTE */}
+
+          <button
+            type="button"
+            aria-label={
+              menuOpen
+                ? "Fermer le menu"
+                : "Ouvrir le menu"
+            }
+            aria-expanded={
+              menuOpen
+            }
+            onClick={() =>
+              setMenuOpen(
+                (
+                  current,
+                ) =>
+                  !current,
+              )
+            }
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-black/10 text-white backdrop-blur-md transition hover:bg-white/10 xl:hidden"
+          >
+            {menuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* MENU MOBILE */}
+
+      {menuOpen && (
+        <div className="mx-auto max-w-[1600px] px-4 pt-2 sm:px-6 lg:px-8 xl:hidden">
+          <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#073E2A]/95 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl">
+            <nav className="flex flex-col">
+              <MobileLink
+                href="/"
+                label={
+                  t.home
+                }
+                close={() =>
+                  setMenuOpen(
                     false,
                   )
                 }
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#2F2963]/20 px-5 text-sm font-semibold text-[#2F2963]"
-              >
-                {
+              />
+
+              <MobileLink
+                href="/demande/etape-1"
+                label={
+                  t.apply
+                }
+                close={() =>
+                  setMenuOpen(
+                    false,
+                  )
+                }
+              />
+
+              <MobileLink
+                href="/suivi"
+                label={
                   t.track
                 }
-              </Link>
-
-              <Link
-                href="/demande/etape-1"
-                onClick={() =>
-                  setMobileOpen(
+                close={() =>
+                  setMenuOpen(
                     false,
                   )
                 }
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#18C100] px-5 text-sm font-bold text-white"
-              >
-                {
-                  t.insurance
-                }
+              />
 
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <MobileLink
+                href="/#fonctionnement"
+                label={
+                  t.about
+                }
+                close={() =>
+                  setMenuOpen(
+                    false,
+                  )
+                }
+              />
+
+              <MobileLink
+                href="/#assistance"
+                label={
+                  t.contact
+                }
+                close={() =>
+                  setMenuOpen(
+                    false,
+                  )
+                }
+              />
+            </nav>
+
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center rounded-xl border border-white/15 bg-white/10 p-1">
+                  {(
+                    [
+                      "fr",
+                      "en",
+                      "tr",
+                    ] as Language[]
+                  ).map(
+                    (
+                      item,
+                    ) => (
+                      <button
+                        key={
+                          item
+                        }
+                        type="button"
+                        onClick={() =>
+                          changeLanguage(
+                            item,
+                          )
+                        }
+                        className={[
+                          "rounded-lg px-3 py-1.5 text-xs font-black uppercase transition",
+
+                          language ===
+                          item
+                            ? "bg-white text-[#0B5D3B]"
+                            : "text-white/60",
+                        ].join(
+                          " ",
+                        )}
+                      >
+                        {
+                          item
+                        }
+                      </button>
+                    ),
+                  )}
+                </div>
+
+                <Link
+                  href="/demande/etape-1"
+                  onClick={() =>
+                    setMenuOpen(
+                      false,
+                    )
+                  }
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-xs font-black text-[#14361F]"
+                >
+                  {
+                    t.cta
+                  }
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -572,106 +416,42 @@ export default function HomeHeader() {
   );
 }
 
-function LanguageButton({
-  active,
-  label,
-  code,
-  onClick,
-}: {
-  active:
-    boolean;
-
-  label:
-    string;
-
-  code:
-    string;
-
-  onClick:
-    () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={
-        onClick
-      }
-      className={[
-        "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition",
-        active
-          ? "bg-[#2F2963]/5 text-[#2F2963]"
-          : "text-slate-700 hover:bg-slate-50",
-      ].join(
-        " ",
-      )}
-    >
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-xs font-black">
-        {
-          code
-        }
-      </span>
-
-      <span className="flex-1 font-semibold">
-        {
-          label
-        }
-      </span>
-
-      {active && (
-        <Check className="h-4 w-4" />
-      )}
-    </button>
-  );
-}
-
-function MobileLanguageButton({
-  active,
-  label,
-  onClick,
-}: {
-  active:
-    boolean;
-
-  label:
-    string;
-
-  onClick:
-    () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={
-        onClick
-      }
-      className={[
-        "min-h-11 rounded-xl border text-sm font-bold transition",
-        active
-          ? "border-[#2F2963] bg-[#2F2963] text-white"
-          : "border-slate-200 bg-white text-slate-700",
-      ].join(
-        " ",
-      )}
-    >
-      {
-        label
-      }
-    </button>
-  );
-}
-
-function MobileLink({
+function NavLink({
   href,
   children,
-  onClick,
 }: {
   href:
     string;
 
   children:
     React.ReactNode;
+}) {
+  return (
+    <Link
+      href={
+        href
+      }
+      className="relative py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#B8E83D] after:transition-all hover:after:w-full"
+    >
+      {
+        children
+      }
+    </Link>
+  );
+}
 
-  onClick:
+function MobileLink({
+  href,
+  label,
+  close,
+}: {
+  href:
+    string;
+
+  label:
+    string;
+
+  close:
     () => void;
 }) {
   return (
@@ -680,12 +460,12 @@ function MobileLink({
         href
       }
       onClick={
-        onClick
+        close
       }
-      className="rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-[#2F2963]"
+      className="rounded-xl px-3 py-3.5 text-sm font-semibold text-white/85 transition hover:bg-white/10 hover:text-white"
     >
       {
-        children
+        label
       }
     </Link>
   );

@@ -518,29 +518,29 @@ export default async function PaymentsPage({
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Finance
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Paiements
               </h1>
 
-              <p className="mt-2 max-w-3xl text-slate-600">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                 Consultez et traitez les paiements associés aux demandes d’assurance.
               </p>
             </div>
 
             <Link
               href="/admin/tableau-de-bord"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               ← Tableau de bord
             </Link>
@@ -569,7 +569,7 @@ export default async function PaymentsPage({
               )
             }
             description="Paiements validés"
-            className="bg-green-50 text-green-700"
+            className="bg-[#EEF6EC] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -591,13 +591,13 @@ export default async function PaymentsPage({
               )
             }
             description="Valeur des paiements affichés"
-            className="bg-violet-50 text-violet-700"
+            className="bg-[#F3F8F2] text-[#31513B]"
           />
         </section>
 
         {/* FILTRES */}
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
           <form
             method="GET"
             className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]"
@@ -609,7 +609,7 @@ export default async function PaymentsPage({
                 search
               }
               placeholder="Client, code dossier ou WhatsApp..."
-              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
 
             <select
@@ -617,7 +617,7 @@ export default async function PaymentsPage({
               defaultValue={
                 statusFilter
               }
-              className="min-h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none"
+              className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             >
               <option value="">
                 Tous les paiements
@@ -638,14 +638,14 @@ export default async function PaymentsPage({
 
             <button
               type="submit"
-              className="min-h-11 rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white hover:bg-[#24204F]"
+              className="min-h-11 rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
             >
               Filtrer
             </button>
 
             <Link
               href="/admin/paiements"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               Réinitialiser
             </Link>
@@ -654,9 +654,9 @@ export default async function PaymentsPage({
 
         {/* TABLE */}
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="border-b border-slate-200 p-6">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Liste des paiements
             </h2>
 
@@ -760,7 +760,7 @@ export default async function PaymentsPage({
                           <TableCell className="whitespace-nowrap">
                             <Link
                               href={`/admin/dossiers/${payment.requestId}`}
-                              className="font-semibold text-[#2F2963] hover:underline"
+                              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
                             >
                               {
                                 payment.requestCode
@@ -774,7 +774,7 @@ export default async function PaymentsPage({
                                 href={`https://wa.me/${payment.whatsapp.replace(/\D/g, "")}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="font-medium text-green-700 hover:underline"
+                                className="font-medium text-[#0B5D3B] transition hover:text-[#084A2F]"
                               >
                                 {
                                   payment.whatsapp
@@ -823,7 +823,7 @@ export default async function PaymentsPage({
                           <TableCell className="whitespace-nowrap text-right">
                             <Link
                               href={`/admin/dossiers/${payment.requestId}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#2F2963] px-4 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0B5D3B] px-4 text-sm font-black text-white transition hover:bg-[#084A2F]"
                             >
                               {payment.requestStatus ===
                               "payment_review"
@@ -859,16 +859,16 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <span
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-bold text-slate-900">
+      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {
           value
         }

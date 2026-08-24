@@ -85,19 +85,19 @@ const statusLabels: Record<
   payment_confirmed: {
     label: "Paiement confirmé",
     className:
-      "bg-green-100 text-green-800",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
     className:
-      "bg-blue-100 text-blue-800",
+      "border border-amber-200 bg-amber-50 text-amber-700",
   },
 
   policy_available: {
     label: "Assurance disponible",
     className:
-      "bg-emerald-100 text-emerald-800",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   payment_rejected: {
@@ -600,29 +600,29 @@ export default async function ClientsPage({
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 CRM
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Clients
               </h1>
 
-              <p className="mt-2 max-w-3xl text-slate-600">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                 Consultez les clients, leurs dossiers et accédez à leur fiche CRM complète.
               </p>
             </div>
 
             <Link
               href="/demande/etape-1"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
             >
               Nouvelle demande
             </Link>
@@ -640,7 +640,7 @@ export default async function ClientsPage({
               )
             }
             description="Clients visibles"
-            className="bg-[#2F2963]/10 text-[#2F2963]"
+            className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -651,7 +651,7 @@ export default async function ClientsPage({
               )
             }
             description="Au moins un dossier actif"
-            className="bg-blue-50 text-blue-700"
+            className="bg-[#EEF6EC] text-[#31513B]"
           />
 
           <StatCard
@@ -662,7 +662,7 @@ export default async function ClientsPage({
               )
             }
             description="Dossiers associés"
-            className="bg-emerald-50 text-emerald-700"
+            className="bg-[#EAF4E8] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -673,13 +673,13 @@ export default async function ClientsPage({
               )
             }
             description="Montant cumulé"
-            className="bg-violet-50 text-violet-700"
+            className="bg-[#F1F6EA] text-[#49613E]"
           />
         </section>
 
         {/* FILTRES */}
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
           <form
             method="GET"
             className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px_auto_auto]"
@@ -691,7 +691,7 @@ export default async function ClientsPage({
                 search
               }
               placeholder="Nom, WhatsApp, nationalité, matricule..."
-              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
 
             <select
@@ -699,7 +699,7 @@ export default async function ClientsPage({
               defaultValue={
                 nationalityFilter
               }
-              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             >
               <option value="">
                 Toutes les nationalités
@@ -727,7 +727,7 @@ export default async function ClientsPage({
 
             <button
               type="submit"
-              className="min-h-11 rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+              className="min-h-11 rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
             >
               Filtrer
             </button>
@@ -743,10 +743,10 @@ export default async function ClientsPage({
 
         {/* TABLE */}
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="flex flex-col gap-2 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Liste des clients
               </h2>
 
@@ -884,7 +884,7 @@ export default async function ClientsPage({
                                 href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="font-medium text-green-700 hover:underline"
+                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                               >
                                 {
                                   client.whatsapp
@@ -908,7 +908,7 @@ export default async function ClientsPage({
                               className={`inline-flex min-w-9 justify-center rounded-full px-3 py-1 text-xs font-bold ${
                                 client.activeRequestCount >
                                 0
-                                  ? "bg-blue-50 text-blue-700"
+                                  ? "bg-[#EEF6EC] text-[#31513B]"
                                   : "bg-slate-100 text-slate-600"
                               }`}
                             >
@@ -928,7 +928,7 @@ export default async function ClientsPage({
                             {latestRequest ? (
                               <Link
                                 href={`/admin/dossiers/${latestRequest.id}`}
-                                className="font-semibold text-[#2F2963] hover:underline"
+                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                               >
                                 {
                                   latestRequest.request_code
@@ -964,7 +964,7 @@ export default async function ClientsPage({
                           <TableCell className="whitespace-nowrap text-right">
                             <Link
                               href={`/admin/clients/${client.id}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                             >
                               Voir le client
                             </Link>
@@ -997,16 +997,16 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <span
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-bold text-slate-900">
+      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {
           value
         }

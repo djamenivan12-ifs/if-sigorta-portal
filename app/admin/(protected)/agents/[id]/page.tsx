@@ -87,19 +87,19 @@ const statusLabels: Record<
   payment_confirmed: {
     label: "Paiement confirmé",
     className:
-      "bg-green-100 text-green-800",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
     className:
-      "bg-blue-100 text-blue-800",
+      "border border-amber-200 bg-amber-50 text-amber-700",
   },
 
   policy_available: {
     label: "Assurance disponible",
     className:
-      "bg-emerald-100 text-emerald-800",
+      "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
   },
 
   payment_rejected: {
@@ -629,41 +629,41 @@ const agentIsDisabled =
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1500px]">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/admin/agents/performance"
-            className="font-semibold text-[#2F2963] hover:underline"
+            className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
           >
             ← Performance des agents
           </Link>
 
           <Link
             href="/admin/agents"
-            className="font-semibold text-[#2F2963] hover:underline"
+            className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
           >
             Gestion des agents
           </Link>
         </div>
 
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Agent IF Sigorta
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 {agentName}
               </h1>
 
-              <p className="mt-2 text-slate-600">
+              <p className="mt-3 text-sm leading-7 text-slate-500">
                 {agent.email}
               </p>
             </div>
 
-            <span className="inline-flex w-fit rounded-full bg-[#2F2963]/10 px-4 py-2 text-sm font-semibold text-[#2F2963]">
+            <span className="inline-flex w-fit rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-sm font-semibold text-[#0B5D3B]">
               {role ===
               "admin"
                 ? "Administrateur"
@@ -672,13 +672,13 @@ const agentIsDisabled =
           </div>
         </header>
 
-<section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+<section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
   <div className="mb-6">
-    <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+    <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
       Gestion du compte
     </p>
 
-    <h2 className="mt-1 text-xl font-bold text-slate-900">
+    <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
       Informations de l’utilisateur
     </h2>
 
@@ -706,19 +706,19 @@ const agentIsDisabled =
           <SummaryCard
             label="Dossiers attribués"
             value={total}
-            className="bg-[#2F2963]/10 text-[#2F2963]"
+            className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <SummaryCard
             label="En cours"
             value={active}
-            className="bg-blue-50 text-blue-700"
+            className="bg-[#EEF6EC] text-[#31513B]"
           />
 
           <SummaryCard
             label="Terminés"
             value={completed}
-            className="bg-green-50 text-green-700"
+            className="bg-[#EAF4E8] text-[#0B5D3B]"
           />
 
           <SummaryCard
@@ -731,19 +731,19 @@ const agentIsDisabled =
                   ? "bg-orange-50 text-orange-700"
                   : watchCount > 0
                     ? "bg-amber-50 text-amber-700"
-                    : "bg-green-50 text-green-700"
+                    : "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
             }
           />
         </section>
 
         {/* Retards */}
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Priorités
             </p>
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Retards de l’agent
             </h2>
 
@@ -822,10 +822,10 @@ const agentIsDisabled =
         </section>
 
         {/* Dossiers */}
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Dossiers de l’agent
               </h2>
 
@@ -836,7 +836,7 @@ const agentIsDisabled =
 
             <Link
               href={`/admin/dossiers?responsable=${agent.id}`}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#2F2963]/20 bg-[#2F2963]/5 px-4 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/10"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
             >
               Voir tous les dossiers
             </Link>
@@ -856,7 +856,7 @@ const agentIsDisabled =
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+                <thead className="bg-[#FAFCFA]">
                   <tr>
                     <TableHeader>
                       Matricule
@@ -938,7 +938,7 @@ const agentIsDisabled =
                         "Normal";
 
                       let delayClassName =
-                        "bg-green-50 text-green-700";
+                        "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]";
 
                       if (
                         completedRequest
@@ -947,7 +947,7 @@ const agentIsDisabled =
                           "Terminé";
 
                         delayClassName =
-                          "bg-emerald-50 text-emerald-700";
+                          "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]";
                       } else if (
                         request.status ===
                         "payment_rejected"
@@ -991,7 +991,7 @@ const agentIsDisabled =
                           key={
                             request.id
                           }
-                          className="transition hover:bg-slate-50"
+                          className="transition hover:bg-[#FAFCFA]"
                         >
                           <TableCell>
                             <strong className="text-slate-900">
@@ -1064,7 +1064,7 @@ const agentIsDisabled =
                           <TableCell>
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="font-semibold text-[#2F2963] hover:underline"
+                              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                             >
                               Ouvrir
                             </Link>
@@ -1095,14 +1095,14 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <span
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {label}
       </span>
 
-      <p className="mt-4 text-3xl font-bold text-slate-900">
+      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
         {value.toLocaleString(
           "fr-FR",
         )}
@@ -1138,7 +1138,7 @@ function DelayCard({
         )}
       </p>
 
-      <p className="mt-3 font-bold text-slate-900">
+      <p className="mt-3 font-semibold text-[#102B20]">
         {label}
       </p>
 
@@ -1161,7 +1161,7 @@ function MetricCard({
   description,
 }: MetricCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <p className="text-sm font-medium text-slate-500">
         {label}
       </p>

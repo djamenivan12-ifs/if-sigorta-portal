@@ -144,19 +144,19 @@ const statusLabels: Record<
   payment_confirmed: {
     label: "Paiement confirmé",
     className:
-      "bg-green-100 text-green-800",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
     className:
-      "bg-blue-100 text-blue-800",
+      "border border-amber-200 bg-amber-50 text-amber-700",
   },
 
   policy_available: {
     label: "Assurance disponible",
     className:
-      "bg-emerald-100 text-emerald-800",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   payment_rejected: {
@@ -188,19 +188,19 @@ const paymentStatusLabels: Record<
   submitted: {
     label: "Envoyé",
     className:
-      "bg-blue-50 text-blue-700",
+      "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
   },
 
   verified: {
     label: "Validé",
     className:
-      "bg-green-50 text-green-700",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   confirmed: {
     label: "Validé",
     className:
-      "bg-green-50 text-green-700",
+      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   rejected: {
@@ -454,7 +454,7 @@ function getActivityDot(
       "policy_replaced",
     )
   ) {
-    return "bg-green-500";
+    return "bg-[#0B5D3B]";
   }
 
   if (
@@ -472,14 +472,14 @@ function getActivityDot(
     action ===
       "request_unassigned"
   ) {
-    return "bg-cyan-500";
+    return "bg-[#7AA88A]";
   }
 
   if (
     action ===
       "policy_preparation_started"
   ) {
-    return "bg-blue-500";
+    return "bg-[#31513B]";
   }
 
   return "bg-slate-400";
@@ -1210,14 +1210,14 @@ export default async function ClientDetailsPage({
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         {/* Navigation */}
 
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/admin/clients"
-            className="font-semibold text-[#2F2963] hover:underline"
+            className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
           >
             ← Retour aux clients
           </Link>
@@ -1225,7 +1225,7 @@ export default async function ClientDetailsPage({
           {latestRequest && (
             <Link
               href={`/admin/dossiers/${latestRequest.id}`}
-              className="font-semibold text-[#2F2963] hover:underline"
+              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
             >
               Dernier dossier →
             </Link>
@@ -1234,11 +1234,11 @@ export default async function ClientDetailsPage({
 
         {/* En-tête client */}
 
-        <header className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header className="overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="p-6 sm:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#2F2963] text-xl font-bold text-white">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#0B5D3B] text-xl font-black text-white">
                   {getInitials({
                     firstName:
                       client.first_name,
@@ -1248,11 +1248,11 @@ export default async function ClientDetailsPage({
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                     Fiche client
                   </p>
 
-                  <h1 className="mt-1 text-3xl font-bold text-slate-900">
+                  <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                     {clientName}
                   </h1>
 
@@ -1280,7 +1280,7 @@ export default async function ClientDetailsPage({
                     href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-green-200 bg-green-50 px-5 text-sm font-semibold text-green-700 transition hover:bg-green-100"
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-5 text-sm font-bold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
                   >
                     Ouvrir WhatsApp
                   </a>
@@ -1288,7 +1288,7 @@ export default async function ClientDetailsPage({
 
                 <Link
                   href="/demande/etape-1"
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
                 >
                   Nouvelle demande
                 </Link>
@@ -1308,7 +1308,7 @@ export default async function ClientDetailsPage({
               )
             }
             description="Dossiers visibles"
-            className="bg-[#2F2963]/10 text-[#2F2963]"
+            className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -1319,7 +1319,7 @@ export default async function ClientDetailsPage({
               )
             }
             description="Dossiers actifs"
-            className="bg-blue-50 text-blue-700"
+            className="border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]"
           />
 
           <StatCard
@@ -1330,7 +1330,7 @@ export default async function ClientDetailsPage({
               )
             }
             description={`${policyYearsCount} police(s) déposée(s)`}
-            className="bg-green-50 text-green-700"
+            className="border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -1341,7 +1341,7 @@ export default async function ClientDetailsPage({
               )
             }
             description="Paiements confirmés"
-            className="bg-emerald-50 text-emerald-700"
+            className="border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -1352,18 +1352,18 @@ export default async function ClientDetailsPage({
               )
             }
             description="Montant cumulé"
-            className="bg-violet-50 text-violet-700"
+            className="bg-[#F1F6EA] text-[#49613E]"
           />
         </section>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+        <div className="mt-6 grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
           {/* Colonne gauche */}
 
-          <aside className="space-y-6">
+          <aside className="space-y-5">
             {/* Identité */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-[#102B20]">
                 Identité
               </h2>
 
@@ -1425,8 +1425,8 @@ export default async function ClientDetailsPage({
 
             {/* Contact */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-[#102B20]">
                 Contact & adresse
               </h2>
 
@@ -1450,8 +1450,8 @@ export default async function ClientDetailsPage({
 
             {/* Responsables */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-[#102B20]">
                 Agents associés
               </h2>
 
@@ -1468,7 +1468,7 @@ export default async function ClientDetailsPage({
                         key={
                           agent.id
                         }
-                        className="rounded-xl bg-slate-50 px-4 py-3"
+                        className="rounded-xl border border-slate-100 bg-[#FAFCFA] px-4 py-3"
                       >
                         <p className="font-semibold text-slate-800">
                           {agent.name}
@@ -1483,13 +1483,13 @@ export default async function ClientDetailsPage({
 
           {/* Colonne principale */}
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Dossiers */}
 
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <section className="overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
               <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                     Dossiers du client
                   </h2>
 
@@ -1599,7 +1599,7 @@ export default async function ClientDetailsPage({
                             >
                               <TableCell>
                                 <div>
-                                  <p className="font-bold text-[#2F2963]">
+                                  <p className="font-black text-[#0B5D3B]">
                                     {
                                       request.request_code
                                     }
@@ -1680,7 +1680,7 @@ export default async function ClientDetailsPage({
                               <TableCell>
                                 <Link
                                   href={`/admin/dossiers/${request.id}`}
-                                  className="font-semibold text-[#2F2963] hover:underline"
+                                  className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                                 >
                                   Ouvrir
                                 </Link>
@@ -1697,8 +1697,8 @@ export default async function ClientDetailsPage({
 
             {/* Paiements */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Paiements
               </h2>
 
@@ -1742,12 +1742,12 @@ export default async function ClientDetailsPage({
                         key={
                           request.id
                         }
-                        className="flex flex-col gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
                           <Link
                             href={`/admin/dossiers/${request.id}`}
-                            className="font-bold text-[#2F2963] hover:underline"
+                            className="font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                           >
                             {
                               request.request_code
@@ -1789,10 +1789,10 @@ export default async function ClientDetailsPage({
 
             {/* Documents */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                     Documents
                   </h2>
 
@@ -1876,8 +1876,8 @@ export default async function ClientDetailsPage({
 
             {/* Notes internes agrégées */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Notes internes
               </h2>
 
@@ -1910,10 +1910,10 @@ export default async function ClientDetailsPage({
                           key={
                             note.id
                           }
-                          className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"
+                          className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-xs font-semibold text-[#2F2963]">
+                            <p className="text-xs font-black text-[#0B5D3B]">
                               {request?.request_code ??
                                 "Dossier"}
                             </p>
@@ -1950,8 +1950,8 @@ export default async function ClientDetailsPage({
 
             {/* Historique global */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Historique récent
               </h2>
 
@@ -2010,7 +2010,7 @@ export default async function ClientDetailsPage({
                               {request && (
                                 <Link
                                   href={`/admin/dossiers/${request.id}`}
-                                  className="text-xs font-semibold text-[#2F2963] hover:underline"
+                                  className="text-xs font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                                 >
                                   {
                                     request.request_code
@@ -2068,16 +2068,16 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <span
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-bold text-slate-900">
+      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {
           value
         }
@@ -2124,8 +2124,8 @@ function DocumentCounter({
   value: number;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-      <p className="text-2xl font-bold text-slate-900">
+    <div className="rounded-xl border border-slate-100 bg-[#FAFCFA] p-4">
+      <p className="text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {value.toLocaleString(
           "fr-FR",
         )}

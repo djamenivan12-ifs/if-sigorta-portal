@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+
+import {
+  usePathname,
+} from "next/navigation";
 
 import {
   BarChart3,
@@ -19,14 +22,22 @@ import {
 } from "lucide-react";
 
 type NavigationProps = {
-  role: "admin" | "agent";
-  urgentRenewalCount?: number;
+  role:
+    | "admin"
+    | "agent";
+
+  urgentRenewalCount?:
+    number;
+
+  onNavigate?:
+    () => void;
 };
 
 type NavigationLink = {
   href: string;
   label: string;
-  icon: typeof LayoutDashboard;
+  icon:
+    typeof LayoutDashboard;
   adminOnly?: boolean;
   badge?: number;
 };
@@ -34,8 +45,10 @@ type NavigationLink = {
 export default function Navigation({
   role,
   urgentRenewalCount = 0,
+  onNavigate,
 }: NavigationProps) {
-  const pathname = usePathname();
+  const pathname =
+    usePathname();
 
   const links: NavigationLink[] = [
     {
@@ -43,71 +56,61 @@ export default function Navigation({
       label: "Tableau de bord",
       icon: LayoutDashboard,
     },
-
     {
       href: "/admin/dossiers",
       label: "Dossiers",
       icon: FolderOpen,
     },
-
     {
       href: "/admin/paiements",
       label: "Paiements",
       icon: CreditCard,
     },
-
     {
       href: "/admin/polices",
       label: "Polices",
       icon: FileCheck2,
     },
-
     {
       href: "/admin/clients",
       label: "Clients",
       icon: Users,
     },
-
     {
       href: "/admin/renouvellements",
       label: "Renouvellements",
       icon: RefreshCcw,
-      badge: urgentRenewalCount,
+      badge:
+        urgentRenewalCount,
     },
-
     {
       href: "/admin/recherche",
       label: "Recherche",
       icon: Search,
     },
-
     {
       href: "/admin/notifications",
       label: "Notifications",
       icon: Bell,
     },
-
     {
       href: "/admin/statistiques",
       label: "Statistiques",
       icon: BarChart3,
       adminOnly: true,
     },
-
     {
       href: "/admin/agents",
       label: "Agents",
       icon: UserCog,
       adminOnly: true,
     },
-
     {
       href: "/admin/agents/performance",
       label: "Performance agents",
       icon: Gauge,
       adminOnly: true,
     },
-
     {
       href: "/admin/parametres",
       label: "Paramètres",
@@ -135,10 +138,11 @@ export default function Navigation({
     );
 
   return (
-    <nav className="space-y-1">
+    <nav className="space-y-1.5">
       {visibleLinks.map(
         (link) => {
-          const Icon = link.icon;
+          const Icon =
+            link.icon;
 
           const active =
             isActive(
@@ -147,16 +151,36 @@ export default function Navigation({
 
           return (
             <Link
-              key={link.href}
-              href={link.href}
+              key={
+                link.href
+              }
+              href={
+                link.href
+              }
+              onClick={
+                onNavigate
+              }
               className={[
-                "group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition",
+                "group flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition",
                 active
-                  ? "bg-[#2F2963] text-white shadow-md"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-              ].join(" ")}
+                  ? "bg-[#123F2C] text-white shadow-sm"
+                  : "text-slate-600 hover:bg-[#F3F8F2] hover:text-[#123F2C]",
+              ].join(
+                " ",
+              )}
             >
-              <Icon className="h-5 w-5 shrink-0" />
+              <div
+                className={[
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
+                  active
+                    ? "bg-white/10 text-[#B8E83D]"
+                    : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-[#0B5D3B]",
+                ].join(
+                  " ",
+                )}
+              >
+                <Icon className="h-[17px] w-[17px]" />
+              </div>
 
               <span className="min-w-0 flex-1 truncate">
                 {link.label}
@@ -167,13 +191,16 @@ export default function Navigation({
                 link.badge > 0 && (
                   <span
                     className={[
-                      "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold",
+                      "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-black",
                       active
                         ? "bg-white text-red-600"
                         : "bg-red-500 text-white",
-                    ].join(" ")}
+                    ].join(
+                      " ",
+                    )}
                   >
-                    {link.badge > 99
+                    {link.badge >
+                    99
                       ? "99+"
                       : link.badge}
                   </span>

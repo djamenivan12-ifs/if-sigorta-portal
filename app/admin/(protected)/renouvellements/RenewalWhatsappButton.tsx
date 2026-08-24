@@ -4,6 +4,10 @@ import {
   useState,
 } from "react";
 
+import {
+  useRouter,
+} from "next/navigation";
+
 type RenewalWhatsappButtonProps = {
   renewalId: string;
   whatsapp: string;
@@ -15,6 +19,9 @@ export default function RenewalWhatsappButton({
   whatsapp,
   message,
 }: RenewalWhatsappButtonProps) {
+  const router =
+    useRouter();
+
   const [
     loading,
     setLoading,
@@ -28,9 +35,7 @@ export default function RenewalWhatsappButton({
     useState("");
 
   async function handleClick() {
-    if (
-      !whatsapp
-    ) {
+    if (!whatsapp) {
       return;
     }
 
@@ -79,6 +84,8 @@ export default function RenewalWhatsappButton({
         "_blank",
         "noopener,noreferrer",
       );
+
+      router.refresh();
     } catch (
       error
     ) {
@@ -103,7 +110,7 @@ export default function RenewalWhatsappButton({
           loading ||
           !whatsapp
         }
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#18C100] px-5 text-sm font-semibold text-white transition hover:bg-[#13a300] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-5 text-sm font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading
           ? "Ouverture..."

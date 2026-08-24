@@ -5,70 +5,23 @@ import {
   useState,
 } from "react";
 
+import {
+  countryCodes,
+} from "@/lib/countryCodes";
+
 type Language =
   | "fr"
   | "en"
   | "tr";
 
-const countryCodes = [
-  {
-    country: "Türkiye",
-    flag: "🇹🇷",
-    code: "+90",
-  },
-  {
-    country: "Cameroun",
-    flag: "🇨🇲",
-    code: "+237",
-  },
-  {
-    country: "Nigeria",
-    flag: "🇳🇬",
-    code: "+234",
-  },
-  {
-    country: "Ghana",
-    flag: "🇬🇭",
-    code: "+233",
-  },
-  {
-    country: "Sénégal",
-    flag: "🇸🇳",
-    code: "+221",
-  },
-  {
-    country: "Côte d’Ivoire",
-    flag: "🇨🇮",
-    code: "+225",
-  },
-  {
-    country: "Tchad",
-    flag: "🇹🇩",
-    code: "+235",
-  },
-  {
-    country: "Gabon",
-    flag: "🇬🇦",
-    code: "+241",
-  },
-  {
-    country: "Congo",
-    flag: "🇨🇬",
-    code: "+242",
-  },
-  {
-    country: "RDC",
-    flag: "🇨🇩",
-    code: "+243",
-  },
-];
-
 type PhoneInputProps = {
   countryCode: string;
   phoneNumber: string;
+
   onCountryCodeChange: (
     value: string,
   ) => void;
+
   onPhoneNumberChange: (
     value: string,
   ) => void;
@@ -76,19 +29,25 @@ type PhoneInputProps = {
 
 const translations = {
   fr: {
-    label: "Numéro WhatsApp",
+    label:
+      "Numéro WhatsApp",
+
     countryCode:
       "Indicatif téléphonique",
   },
 
   en: {
-    label: "WhatsApp number",
+    label:
+      "WhatsApp number",
+
     countryCode:
       "Country calling code",
   },
 
   tr: {
-    label: "WhatsApp numarası",
+    label:
+      "WhatsApp numarası",
+
     countryCode:
       "Telefon ülke kodu",
   },
@@ -188,7 +147,7 @@ export default function PhoneInput({
         {t.label}
       </label>
 
-      <div className="flex overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-blue-700 focus-within:ring-2 focus-within:ring-blue-100">
+      <div className="flex overflow-hidden rounded-xl border border-slate-300 bg-white transition focus-within:border-[#0B5D3B] focus-within:ring-4 focus-within:ring-[#0B5D3B]/10">
         <select
           id="countryCode"
           name="countryCode"
@@ -205,10 +164,12 @@ export default function PhoneInput({
           aria-label={
             t.countryCode
           }
-          className="max-w-[155px] border-r border-slate-300 bg-slate-50 px-3 py-3 text-slate-900 outline-none"
+          className="max-w-[180px] border-r border-slate-300 bg-slate-50 px-3 py-3 text-slate-900 outline-none"
         >
           {countryCodes.map(
-            (item) => (
+            (
+              item,
+            ) => (
               <option
                 key={`${item.country}-${item.code}`}
                 value={

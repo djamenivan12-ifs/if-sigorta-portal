@@ -42,13 +42,6 @@ export default function ClaimRequestButton({
   const router =
     useRouter();
 
-  /*
-   * État local de l'attribution.
-   *
-   * Cela permet au bouton de changer
-   * immédiatement après le clic,
-   * sans attendre le refresh serveur.
-   */
   const [
     localAssignedAgentId,
     setLocalAssignedAgentId,
@@ -82,11 +75,6 @@ export default function ClaimRequestButton({
   ] =
     useState("");
 
-  /*
-   * Si les données serveur changent
-   * après router.refresh(),
-   * on synchronise l'état local.
-   */
   useEffect(() => {
     setLocalAssignedAgentId(
       assignedAgentId,
@@ -101,18 +89,10 @@ export default function ClaimRequestButton({
     assignedAgentName,
   ]);
 
-  /*
-   * Le dossier appartient
-   * à l'utilisateur connecté.
-   */
   const alreadyMine =
     localAssignedAgentId ===
     currentUserId;
 
-  /*
-   * Le dossier appartient
-   * à un autre agent.
-   */
   const assignedToSomeoneElse =
     Boolean(
       localAssignedAgentId &&
@@ -120,9 +100,6 @@ export default function ClaimRequestButton({
           currentUserId,
     );
 
-  /*
-   * Aucun responsable.
-   */
   const isAvailable =
     !localAssignedAgentId;
 
@@ -172,19 +149,10 @@ export default function ClaimRequestButton({
           error?: string;
         };
 
-      /*
-       * Un autre agent a été
-       * plus rapide.
-       */
       if (
         response.status ===
         409
       ) {
-        /*
-         * On recharge les données
-         * pour connaître le nouveau
-         * responsable.
-         */
         router.refresh();
 
         return;
@@ -200,12 +168,6 @@ export default function ClaimRequestButton({
         );
       }
 
-      /*
-       * IMPORTANT :
-       *
-       * On change immédiatement
-       * le bouton en "Ouvrir".
-       */
       setLocalAssignedAgentId(
         result.agentId ??
           currentUserId,
@@ -216,10 +178,6 @@ export default function ClaimRequestButton({
           "Vous",
       );
 
-      /*
-       * Puis on synchronise
-       * avec la base de données.
-       */
       router.refresh();
     } catch (
       error
@@ -236,48 +194,32 @@ export default function ClaimRequestButton({
     }
   }
 
-  /*
-   * =========================================
-   * DOSSIER À MOI
-   *
-   * "Prendre en charge"
-   * devient "Ouvrir"
-   * =========================================
-   */
   if (alreadyMine) {
     return (
       <Link
         href={`/admin/dossiers/${requestId}`}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#18C100] px-5 text-sm font-semibold text-white transition hover:bg-[#14A300]"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
       >
         Ouvrir
       </Link>
     );
   }
 
-  /*
-   * =========================================
-   * DOSSIER PRIS PAR QUELQU'UN D'AUTRE
-   * =========================================
-   */
   if (
     assignedToSomeoneElse
   ) {
-    /*
-     * ADMIN
-     */
     if (
       currentUserRole ===
       "admin"
     ) {
       return (
         <div className="space-y-2">
-          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-center">
+          <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-center">
             <p className="text-xs font-medium text-slate-500">
               Pris en charge par
             </p>
 
-            <p className="mt-1 text-sm font-bold text-[#2F2963]">
+            <p className="mt-1 text-sm font-semibold text-[#0B5D3B]">
               {localAssignedAgentName ||
                 "Agent"}
             </p>
@@ -285,7 +227,7 @@ export default function ClaimRequestButton({
 
           <Link
             href={`/admin/dossiers/${requestId}`}
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#2F2963]/20 bg-white px-4 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
           >
             Ouvrir
           </Link>
@@ -293,21 +235,13 @@ export default function ClaimRequestButton({
       );
     }
 
-    /*
-     * AUTRE AGENT
-     */
     return (
-      <div className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-600">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">
         Déjà pris en charge
       </div>
     );
   }
 
-  /*
-   * =========================================
-   * DOSSIER LIBRE
-   * =========================================
-   */
   return (
     <div>
       <button
@@ -318,7 +252,7 @@ export default function ClaimRequestButton({
         disabled={
           loading
         }
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading
           ? "Prise en charge..."
@@ -326,7 +260,7 @@ export default function ClaimRequestButton({
       </button>
 
       {errorMessage && (
-        <div className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {errorMessage}
         </div>
       )}

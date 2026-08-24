@@ -103,7 +103,9 @@ export default function ContactSettingsForm({
       );
 
       router.refresh();
-    } catch (error) {
+    } catch (
+      error
+    ) {
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -114,8 +116,11 @@ export default function ContactSettingsForm({
     }
   }
 
+  const inputClassName =
+    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div className="grid gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
         <div>
           <label
@@ -142,7 +147,9 @@ export default function ContactSettingsForm({
               setSuccessMessage("");
             }}
             placeholder="+90"
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+            className={
+              inputClassName
+            }
           />
         </div>
 
@@ -175,17 +182,19 @@ export default function ContactSettingsForm({
               setSuccessMessage("");
             }}
             placeholder="5XXXXXXXXX"
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+            className={
+              inputClassName
+            }
           />
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
+      <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm leading-6 text-[#31513B]">
         Numéro utilisé par les clients pour contacter IF Sigorta sur WhatsApp.
       </div>
 
       {errorMessage && (
-        <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {
             errorMessage
           }
@@ -193,7 +202,7 @@ export default function ContactSettingsForm({
       )}
 
       {successMessage && (
-        <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+        <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-medium text-[#0B5D3B]">
           {
             successMessage
           }
@@ -208,7 +217,7 @@ export default function ContactSettingsForm({
         disabled={
           loading
         }
-        className="mt-5 rounded-xl bg-[#2F2963] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#24204F] disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         {loading
           ? "Enregistrement..."

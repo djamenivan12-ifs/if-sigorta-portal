@@ -725,17 +725,17 @@ export default async function AgentDashboard({
    */
 
   return (
-    <main className="px-4 py-8 sm:px-6 lg:px-8">
+    <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <QueueRealtimeSync />
       <div className="mx-auto max-w-[1500px]">
         {/* BIENVENUE */}
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+        <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-6 sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#0B5D3B]">
             Espace agent
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
             Hey{" "}
             {
               userName
@@ -749,14 +749,14 @@ export default async function AgentDashboard({
 
         {/* FILE D'ATTENTE */}
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-[#2F2963]/20 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-[#CFE3CF] bg-white">
           <div className="flex flex-col gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#0B5D3B]">
                 File d’attente
               </p>
 
-              <h2 className="mt-1 text-xl font-bold text-slate-900">
+              <h2 className="mt-1 text-xl font-semibold text-[#102B20]">
                 Nouvelles demandes disponibles
               </h2>
 
@@ -766,7 +766,7 @@ export default async function AgentDashboard({
             </div>
 
             <div className="flex shrink-0 items-center gap-3">
-              <span className="flex h-12 min-w-12 items-center justify-center rounded-full bg-[#2F2963] px-3 text-lg font-bold text-white">
+              <span className="flex h-12 min-w-12 items-center justify-center rounded-full bg-[#0B5D3B] px-3 text-lg font-bold text-white">
                 {
                   availableRequests.length
                 }
@@ -774,7 +774,7 @@ export default async function AgentDashboard({
 
               <Link
                 href="/admin/dossiers?agent=unassigned"
-                className="hidden text-sm font-semibold text-[#2F2963] hover:underline sm:block"
+                className="hidden text-sm font-semibold text-[#0B5D3B] hover:text-[#084A2F] sm:block"
               >
                 Voir tous →
               </Link>
@@ -784,7 +784,7 @@ export default async function AgentDashboard({
           {availableRequests.length ===
           0 ? (
             <div className="p-10 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-700">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B]">
                 ✓
               </div>
 
@@ -839,7 +839,7 @@ export default async function AgentDashboard({
                       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <strong className="text-[#2F2963]">
+                            <strong className="text-[#0B5D3B]">
                               {
                                 request.request_code
                               }
@@ -915,7 +915,7 @@ export default async function AgentDashboard({
 
                           <Link
                             href={`/admin/dossiers/${request.id}`}
-                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#2F2963]/20 bg-white px-5 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                           >
                             Ouvrir
                           </Link>
@@ -981,7 +981,7 @@ export default async function AgentDashboard({
 
         <section className="mt-6">
           <div className="mb-4">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-semibold text-[#102B20]">
               Mes priorités
             </h2>
 
@@ -1080,10 +1080,10 @@ export default async function AgentDashboard({
 
         {/* MES DOSSIERS */}
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-semibold text-[#102B20]">
                 Mes dossiers récents
               </h2>
 
@@ -1094,7 +1094,7 @@ export default async function AgentDashboard({
 
             <Link
               href="/admin/dossiers?agent=me"
-              className="font-semibold text-[#2F2963] hover:underline"
+              className="font-semibold text-[#0B5D3B] hover:text-[#084A2F]"
             >
               Voir tous mes dossiers →
             </Link>
@@ -1155,7 +1155,7 @@ export default async function AgentDashboard({
                     "Normal";
 
                   let priorityClassName =
-                    "bg-green-50 text-green-700";
+                    "bg-[#EEF6EC] text-[#0B5D3B]";
 
                   if (
                     completedRequests.has(
@@ -1217,7 +1217,7 @@ export default async function AgentDashboard({
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="font-bold text-[#2F2963] hover:underline"
+                              className="font-semibold text-[#0B5D3B] hover:text-[#084A2F]"
                             >
                               {
                                 request.request_code
@@ -1263,7 +1263,7 @@ export default async function AgentDashboard({
 
                         <Link
                           href={`/admin/dossiers/${request.id}`}
-                          className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#2F2963]/20 px-4 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+                          className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                         >
                           Ouvrir →
                         </Link>
@@ -1295,12 +1295,12 @@ function StatCard({
   icon,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F2963]/10 text-[#2F2963]">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B5D3B]/10 text-[#0B5D3B]">
         {icon}
       </div>
 
-      <p className="mt-4 text-3xl font-bold text-slate-900">
+      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
         {value.toLocaleString(
           "fr-FR",
         )}
@@ -1377,14 +1377,14 @@ function MetricCard({
   description,
 }: MetricCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <p className="text-sm font-medium text-slate-500">
         {
           label
         }
       </p>
 
-      <p className="mt-2 text-2xl font-bold text-slate-900">
+      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {
           value
         }

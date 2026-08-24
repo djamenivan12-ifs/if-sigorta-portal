@@ -806,15 +806,15 @@ export default function RequestTimeline({
       : null;
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       {/* En-tête */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
             Progression
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900">
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
             Progression du dossier
           </h2>
 
@@ -824,7 +824,7 @@ export default function RequestTimeline({
         </div>
 
         <div className="shrink-0 lg:text-right">
-          <p className="text-3xl font-bold text-[#2F2963]">
+          <p className="text-3xl font-semibold tracking-[-0.04em] text-[#0B5D3B]">
             {progress} %
           </p>
 
@@ -846,7 +846,7 @@ export default function RequestTimeline({
                 : status ===
                     "payment_rejected"
                   ? "bg-red-500"
-                  : "bg-[#2F2963]"
+                  : "bg-[#0B5D3B]"
             }`}
             style={{
               width:
@@ -876,7 +876,7 @@ export default function RequestTimeline({
           />
 
           <div>
-            <p className="font-bold">
+            <p className="font-semibold">
               {
                 delayInformation.label
               }
@@ -893,12 +893,12 @@ export default function RequestTimeline({
 
       {/* Indicateurs */}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-[#2F2963]/5 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#2F2963]">
+        <div className="rounded-xl bg-[#F3F8F2] px-4 py-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0B5D3B]">
             Temps total
           </p>
 
-          <p className="mt-1 text-lg font-bold text-slate-900">
+          <p className="mt-1 text-lg font-semibold text-[#102B20]">
             {totalProcessingTime ??
               "—"}
           </p>
@@ -915,7 +915,7 @@ export default function RequestTimeline({
             Sans progression
           </p>
 
-          <p className="mt-1 text-lg font-bold text-slate-900">
+          <p className="mt-1 text-lg font-semibold text-[#102B20]">
             {isCompleted
               ? "Terminé"
               : currentWaitingTime ??
@@ -990,7 +990,7 @@ export default function RequestTimeline({
                       className={`min-h-24 w-0.5 flex-1 ${
                         step.status ===
                           "completed"
-                          ? "bg-green-300"
+                          ? "bg-[#A8D8B5]"
                           : step.status ===
                               "error"
                             ? "bg-red-200"
@@ -1011,7 +1011,7 @@ export default function RequestTimeline({
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-slate-900">
+                        <h3 className="font-semibold text-slate-900">
                           {
                             step.label
                           }
@@ -1097,7 +1097,7 @@ function TimelineDot({
 }) {
   const styles = {
     completed:
-      "border-green-500 bg-green-500 text-white",
+      "border-[#0B5D3B] bg-[#0B5D3B] text-white",
 
     current:
       "border-amber-500 bg-amber-100 text-amber-700",
@@ -1139,7 +1139,7 @@ function TimelineBadge({
         "Terminé",
 
       className:
-        "bg-green-100 text-green-700",
+        "bg-[#EEF6EC] text-[#0B5D3B]",
     },
 
     current: {

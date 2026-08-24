@@ -216,29 +216,31 @@ export default async function SettingsPage() {
       | null;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1400px]">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Paramètres
               </h1>
 
-              <p className="mt-2 max-w-3xl text-slate-600">
-                Gérez les tarifs, les coordonnées bancaires, le numéro WhatsApp et les réglages généraux du portail IF Sigorta.
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
+                Gérez les tarifs, les coordonnées bancaires,
+                le numéro WhatsApp et les réglages généraux
+                du portail IF Sigorta.
               </p>
             </div>
 
             <Link
               href="/admin/tableau-de-bord"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               ← Tableau de bord
             </Link>
@@ -249,16 +251,17 @@ export default async function SettingsPage() {
 
         <section className="mt-8">
           <div className="mb-5">
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Tarification
             </p>
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Tarifs d’assurance
             </h2>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-              Modifiez les tarifs selon l’âge du client et la durée de l’assurance.
+              Modifiez les tarifs selon l’âge du client et
+              la durée de l’assurance.
             </p>
           </div>
 
@@ -273,16 +276,17 @@ export default async function SettingsPage() {
 
         <section className="mt-12">
           <div className="mb-5">
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Paiement
             </p>
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Coordonnées bancaires
             </h2>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-              Ces informations sont utilisées pour les virements bancaires effectués par les clients.
+              Ces informations sont utilisées pour les
+              virements bancaires effectués par les clients.
             </p>
           </div>
 
@@ -306,16 +310,17 @@ export default async function SettingsPage() {
 
         <section className="mt-12">
           <div className="mb-5">
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Contact
             </p>
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               WhatsApp IF Sigorta
             </h2>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-              Numéro public utilisé par les clients pour contacter directement IF Sigorta.
+              Numéro public utilisé par les clients pour
+              contacter directement IF Sigorta.
             </p>
           </div>
 

@@ -928,26 +928,26 @@ export default async function StatisticsPage() {
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
                 Statistiques
               </h1>
 
-              <p className="mt-2 max-w-3xl text-slate-600">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                 Analyse globale de l’activité IF Sigorta et des performances du mois.
               </p>
 
-              <p className="mt-2 text-sm font-semibold capitalize text-[#2F2963]">
+              <p className="mt-3 text-sm font-semibold capitalize text-[#0B5D3B]">
                 {monthLabel}
               </p>
             </div>
@@ -955,14 +955,14 @@ export default async function StatisticsPage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/admin/agents/performance"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
               >
                 Performance agents
               </Link>
 
               <Link
                 href="/admin/tableau-de-bord"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 ← Tableau de bord
               </Link>
@@ -974,7 +974,7 @@ export default async function StatisticsPage() {
 
         <section className="mt-6">
           <div className="mb-4">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Vue globale
             </h2>
 
@@ -992,7 +992,7 @@ export default async function StatisticsPage() {
                 )
               }
               description="Total des demandes enregistrées"
-              className="bg-blue-50 text-blue-700"
+              className="bg-[#EEF6EC] text-[#31513B]"
             />
 
             <StatCard
@@ -1003,7 +1003,7 @@ export default async function StatisticsPage() {
                 )
               }
               description="Polices finalisées"
-              className="bg-emerald-50 text-emerald-700"
+              className="bg-[#EAF4E8] text-[#0B5D3B]"
             />
 
             <StatCard
@@ -1014,7 +1014,7 @@ export default async function StatisticsPage() {
                 )
               }
               description="Paiements validés"
-              className="bg-green-50 text-green-700"
+              className="bg-[#F3F8F2] text-[#0B5D3B]"
             />
 
             <StatCard
@@ -1025,7 +1025,7 @@ export default async function StatisticsPage() {
                 )
               }
               description="Somme des paiements confirmés"
-              className="bg-violet-50 text-violet-700"
+              className="bg-[#F1F6EA] text-[#49613E]"
             />
           </div>
         </section>
@@ -1035,13 +1035,13 @@ export default async function StatisticsPage() {
         <section className="mt-6 grid gap-4 md:grid-cols-2">
           <Link
             href="/admin/paiements?status=review"
-            className="rounded-2xl border border-orange-200 bg-orange-50 p-6 transition hover:shadow-sm"
+            className="rounded-[1.5rem] border border-orange-200 bg-orange-50 p-6 transition hover:-translate-y-0.5"
           >
-            <p className="text-sm font-semibold uppercase tracking-wide text-orange-700">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-700">
               Paiements
             </p>
 
-            <p className="mt-3 text-3xl font-bold text-orange-900">
+            <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-orange-900">
               {paymentsToReview.toLocaleString(
                 "fr-FR",
               )}
@@ -1059,19 +1059,19 @@ export default async function StatisticsPage() {
 
           <Link
             href="/admin/polices?status=preparation"
-            className="rounded-2xl border border-blue-200 bg-blue-50 p-6 transition hover:shadow-sm"
+            className="rounded-[1.5rem] border border-[#CFE3CF] bg-[#F3F8F2] p-6 transition hover:-translate-y-0.5"
           >
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Polices
             </p>
 
-            <p className="mt-3 text-3xl font-bold text-blue-900">
+            <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
               {policiesToPrepare.toLocaleString(
                 "fr-FR",
               )}
             </p>
 
-            <p className="mt-2 text-sm text-blue-700">
+            <p className="mt-2 text-sm text-[#31513B]">
               police
               {policiesToPrepare !==
               1
@@ -1084,13 +1084,13 @@ export default async function StatisticsPage() {
 
         {/* ÉVOLUTION DU MOIS */}
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Évolution
             </p>
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Comparaison mensuelle
             </h2>
 
@@ -1100,12 +1100,12 @@ export default async function StatisticsPage() {
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
               <p className="text-sm font-medium text-slate-500">
                 Nouvelles demandes
               </p>
 
-              <p className="mt-2 text-3xl font-bold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
                 {currentMonthRequests.toLocaleString(
                   "fr-FR",
                 )}
@@ -1131,12 +1131,12 @@ export default async function StatisticsPage() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
               <p className="text-sm font-medium text-slate-500">
                 Chiffre d’affaires du mois
               </p>
 
-              <p className="mt-2 text-3xl font-bold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
                 {formatCurrency(
                   currentMonthRevenue,
                 )}
@@ -1194,7 +1194,7 @@ export default async function StatisticsPage() {
 
         {/* NATIONALITÉS + RAPPORT */}
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        <div className="mt-6 grid gap-5 xl:grid-cols-2">
           <NationalityStats
             data={
               nationalityData
@@ -1209,14 +1209,14 @@ export default async function StatisticsPage() {
 
         {/* ÉQUIPE */}
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Équipe
               </p>
 
-              <h2 className="mt-1 text-xl font-bold text-slate-900">
+              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Performance des agents
               </h2>
 
@@ -1227,7 +1227,7 @@ export default async function StatisticsPage() {
 
             <Link
               href="/admin/agents/performance"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
             >
               Voir les performances →
             </Link>
@@ -1252,16 +1252,16 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <span
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-bold text-slate-900">
+      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {
           value
         }

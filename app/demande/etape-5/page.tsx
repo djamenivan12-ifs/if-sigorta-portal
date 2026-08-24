@@ -641,265 +641,209 @@ export default function Etape5Page() {
     }
   }
 
+  const formEyebrow =
+    language === "fr"
+      ? "Votre demande"
+      : language === "en"
+        ? "Your application"
+        : "Başvurunuz";
+
+  const sideTitle =
+    language === "fr"
+      ? "Finalisez votre demande en toute sérénité."
+      : language === "en"
+        ? "Complete your application with confidence."
+        : "Başvurunuzu güvenle tamamlayın.";
+
+  const sideText =
+    language === "fr"
+      ? "Effectuez votre virement avec le bon montant et le bon code de référence, puis ajoutez votre dekont."
+      : language === "en"
+        ? "Make your transfer using the correct amount and reference code, then upload your receipt."
+        : "Doğru tutar ve referans koduyla havalenizi yapın, ardından dekontunuzu yükleyin.";
+
+  const transferInfo =
+    language === "fr"
+      ? "Utilisez exactement le code du dossier comme référence du virement."
+      : language === "en"
+        ? "Use the exact request code as the transfer reference."
+        : "Havale açıklamasında başvuru kodunu aynen kullanın.";
+
+  const verificationInfo =
+    language === "fr"
+      ? "Votre paiement sera vérifié par un agent avant validation."
+      : language === "en"
+        ? "Your payment will be reviewed by an agent before approval."
+        : "Ödemeniz onaylanmadan önce bir temsilci tarafından kontrol edilecektir.";
+
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-3xl">
-        <button
-          type="button"
-          onClick={() =>
-            router.push(
-              "/demande/etape-4",
-            )
-          }
-          className="mb-6 font-medium text-blue-700 hover:underline"
-        >
-          {
-            t.backSummary
-          }
-        </button>
+    <main className="min-h-screen bg-[#F6F8F5]">
+      <div className="border-b border-slate-200/80 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+          <a href="/" className="flex items-center" aria-label="IF Sigorta">
+            <img
+              src="/if-sigorta-logo-light.png"
+              alt="IF Sigorta"
+              className="h-[72px] w-auto object-contain object-left sm:h-[82px]"
+            />
+          </a>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-10">
-          {/*
-           * ============================
-           * PROGRESSION
-           * ============================
-           */}
+          <button
+            type="button"
+            onClick={() => router.push("/demande/etape-4")}
+            className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
+          >
+            {t.backSummary}
+          </button>
+        </div>
+      </div>
 
-          <div className="mb-8">
-            <p className="mb-2 text-sm font-semibold text-blue-700">
-              {
-                t.step
-              }
-            </p>
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <div className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 lg:min-h-[650px] lg:px-8 lg:py-10">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
+              <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
 
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-full rounded-full bg-blue-700" />
+              <div className="relative z-10 flex h-full flex-col">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#B8E83D]">
+                    {formEyebrow}
+                  </p>
+
+                  <p className="mt-4 text-sm font-semibold text-white/60">
+                    {t.step}
+                  </p>
+
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/15">
+                    <div className="h-full w-full rounded-full bg-[#B8E83D]" />
+                  </div>
+
+                  <h2 className="mt-8 max-w-sm text-3xl font-semibold leading-[1.05] tracking-[-0.04em] sm:text-4xl">
+                    {sideTitle}
+                  </h2>
+
+                  <p className="mt-5 max-w-sm text-sm leading-7 text-white/65 sm:text-base">
+                    {sideText}
+                  </p>
+                </div>
+
+                <div className="mt-10 space-y-4 lg:mt-auto">
+                  <div className="flex gap-3 border-t border-white/10 pt-5">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">✓</div>
+                    <p className="text-sm leading-6 text-white/70">{transferInfo}</p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white">✓</div>
+                    <p className="text-sm leading-6 text-white/70">{verificationInfo}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </aside>
 
-          {/*
-           * ============================
-           * TITRE
-           * ============================
-           */}
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:p-8 lg:p-10">
+            <div className="max-w-2xl">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+                {t.step}
+              </p>
 
-          <h1 className="text-3xl font-bold text-slate-900">
-            {
-              t.title
-            }
-          </h1>
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                {t.title}
+              </h1>
 
-          <p className="mt-2 text-slate-600">
-            {
-              t.description
-            }
-          </p>
-
-          {/*
-           * ============================
-           * DONNÉES MANQUANTES
-           * ============================
-           */}
-
-          {(
-            !requiredInformationIsPresent ||
-            !serverRequestIsPresent ||
-            !priceIsAvailable
-          ) && (
-            <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-              {
-                t.missingInformation
-              }
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+                {t.description}
+              </p>
             </div>
-          )}
 
-          {/*
-           * ============================
-           * DATE DE DÉBUT
-           * ============================
-           */}
+            {(
+              !requiredInformationIsPresent ||
+              !serverRequestIsPresent ||
+              !priceIsAvailable
+            ) && (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm leading-6 text-red-700">
+                {t.missingInformation}
+              </div>
+            )}
 
-          {!requestData.hasKimlik &&
-            requestData.insuranceStartDate && (
-              <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-800">
-                {
-                  t.desiredStartDate
-                }
-                :{" "}
-
+            {!requestData.hasKimlik && requestData.insuranceStartDate && (
+              <div className="mt-6 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] px-4 py-3.5 text-sm leading-6 text-[#31513B]">
+                {t.desiredStartDate}:{" "}
                 <span className="font-semibold">
-                  {new Intl.DateTimeFormat(
-                    dateLocale,
-                  ).format(
-                    new Date(
-                      `${requestData.insuranceStartDate}T00:00:00`,
-                    ),
+                  {new Intl.DateTimeFormat(dateLocale).format(
+                    new Date(`${requestData.insuranceStartDate}T00:00:00`),
                   )}
                 </span>
               </div>
             )}
 
-          {/*
-           * ============================
-           * FORMULAIRE
-           * ============================
-           */}
+            <form onSubmit={handleSubmit} className="mt-9 space-y-6">
+              <RequestCodeCard requestCode={requestData.requestCode} />
 
-          <form
-            onSubmit={
-              handleSubmit
-            }
-            className="mt-8 space-y-6"
-          >
-            {/*
-             * Matricule créé par le serveur.
-             */}
+              <PaymentSummary amount={requestData.calculatedPrice} />
 
-            <RequestCodeCard
-              requestCode={
-                requestData.requestCode
-              }
-            />
+              <BankCard requestCode={requestData.requestCode} />
 
-            {/*
-             * Prix calculé.
-             */}
+              <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+                <div className="mb-5">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">04</p>
+                  <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.transferProof}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{t.transferProofDescription}</p>
+                </div>
 
-            <PaymentSummary
-              amount={
-                requestData.calculatedPrice
-              }
-            />
-
-            {/*
-             * Coordonnées bancaires.
-             */}
-
-            <BankCard
-              requestCode={
-                requestData.requestCode
-              }
-            />
-
-            {/*
-             * ============================
-             * DEKONT
-             * ============================
-             */}
-
-            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-              <div className="mb-5">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {
-                    t.transferProof
+                <DocumentUploader
+                  label={t.receiptLabel}
+                  description={t.receiptDescription}
+                  file={requestData.paymentReceiptFile}
+                  language={language}
+                  onChange={(paymentReceiptFile) =>
+                    updateRequestData({ paymentReceiptFile })
                   }
-                </h2>
+                />
 
-                <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {
-                    t.transferProofDescription
-                  }
-                </p>
+                <div
+                  className={`mt-5 rounded-2xl border px-4 py-3.5 text-sm font-semibold leading-6 ${
+                    paymentReceiptIsPresent
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-amber-200 bg-amber-50 text-amber-800"
+                  }`}
+                >
+                  {paymentReceiptIsPresent ? t.receiptAdded : t.receiptMissing}
+                </div>
+              </section>
+
+              {submitError && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm leading-6 text-red-700">
+                  {submitError}
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm leading-6 text-amber-800">
+                {t.paymentWarning}
               </div>
 
-              <DocumentUploader
-                label={
-                  t.receiptLabel
-                }
-                description={
-                  t.receiptDescription
-                }
-                file={
-                  requestData.paymentReceiptFile
-                }
-                language={
-                  language
-                }
-                onChange={(
-                  paymentReceiptFile,
-                ) =>
-                  updateRequestData({
-                    paymentReceiptFile,
-                  })
-                }
-              />
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => router.push("/demande/etape-4")}
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {t.previous}
+                </button>
 
-              <div
-                className={`mt-5 rounded-xl px-4 py-3 text-sm font-semibold ${
-                  paymentReceiptIsPresent
-                    ? "bg-green-50 text-green-700"
-                    : "bg-amber-50 text-amber-700"
-                }`}
-              >
-                {paymentReceiptIsPresent
-                  ? t.receiptAdded
-                  : t.receiptMissing}
+                <button
+                  type="submit"
+                  disabled={!canConfirmPayment}
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                >
+                  {isSubmitting ? t.submitting : t.confirmPayment}
+                </button>
               </div>
-            </section>
-
-            {/*
-             * ============================
-             * ERREUR
-             * ============================
-             */}
-
-            {submitError && (
-              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-                {
-                  submitError
-                }
-              </div>
-            )}
-
-            {/*
-             * ============================
-             * AVERTISSEMENT
-             * ============================
-             */}
-
-            <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-              {
-                t.paymentWarning
-              }
-            </div>
-
-            {/*
-             * ============================
-             * NAVIGATION
-             * ============================
-             */}
-
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-              <button
-                type="button"
-                disabled={
-                  isSubmitting
-                }
-                onClick={() =>
-                  router.push(
-                    "/demande/etape-4",
-                  )
-                }
-                className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {
-                  t.previous
-                }
-              </button>
-
-              <button
-                type="submit"
-                disabled={
-                  !canConfirmPayment
-                }
-                className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-              >
-                {isSubmitting
-                  ? t.submitting
-                  : t.confirmPayment}
-              </button>
-            </div>
-          </form>
+            </form>
+          </section>
         </div>
       </div>
     </main>

@@ -326,9 +326,13 @@ export default function ClientNotes({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-900">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+          CRM
+        </p>
+
+        <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
           Notes client
         </h2>
 
@@ -361,7 +365,7 @@ export default function ClientNotes({
           maxLength={
             3000
           }
-          className="w-full resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+          className="w-full resize-y rounded-xl border border-slate-200 bg-[#FAFCFA] px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10"
         />
 
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
@@ -377,7 +381,7 @@ export default function ClientNotes({
             disabled={
               loading
             }
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading
               ? "Enregistrement..."
@@ -387,7 +391,7 @@ export default function ClientNotes({
       </form>
 
       {error && (
-        <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {
             error
           }
@@ -397,7 +401,7 @@ export default function ClientNotes({
       <div className="mt-6 border-t border-slate-100 pt-6">
         {notes.length ===
         0 ? (
-          <div className="rounded-xl bg-slate-50 p-5 text-sm text-slate-500">
+          <div className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5 text-sm text-slate-500">
             Aucune note enregistrée pour ce client.
           </div>
         ) : (
@@ -424,7 +428,7 @@ export default function ClientNotes({
                     key={
                       note.id
                     }
-                    className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"
+                    className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4"
                   >
                     {editing ? (
                       <>
@@ -445,7 +449,7 @@ export default function ClientNotes({
                           maxLength={
                             3000
                           }
-                          className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+                          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
                         />
 
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
@@ -465,7 +469,7 @@ export default function ClientNotes({
                               onClick={
                                 cancelEditing
                               }
-                              className="min-h-9 rounded-lg border border-slate-300 px-3 text-xs font-semibold text-slate-700 transition hover:bg-white disabled:opacity-50"
+                              className="min-h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                             >
                               Annuler
                             </button>
@@ -480,7 +484,7 @@ export default function ClientNotes({
                                   note.id,
                                 )
                               }
-                              className="min-h-9 rounded-lg bg-[#2F2963] px-3 text-xs font-semibold text-white transition hover:bg-[#24204F] disabled:opacity-50"
+                              className="min-h-9 rounded-lg bg-[#0B5D3B] px-3 text-xs font-bold text-white transition hover:bg-[#084A2F] disabled:opacity-50"
                             >
                               {busy
                                 ? "Enregistrement..."
@@ -524,7 +528,7 @@ export default function ClientNotes({
                                     note,
                                   )
                                 }
-                                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                               >
                                 Modifier
                               </button>

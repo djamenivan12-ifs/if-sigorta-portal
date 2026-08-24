@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  useState,
+} from "react";
+
+import {
+  useRouter,
+} from "next/navigation";
 
 type BankSettingsFormProps = {
   initialBeneficiary: string;
@@ -14,24 +19,49 @@ export default function BankSettingsForm({
   initialBankName,
   initialIban,
 }: BankSettingsFormProps) {
-  const router = useRouter();
+  const router =
+    useRouter();
 
-  const [beneficiary, setBeneficiary] =
-    useState(initialBeneficiary);
+  const [
+    beneficiary,
+    setBeneficiary,
+  ] =
+    useState(
+      initialBeneficiary,
+    );
 
-  const [bankName, setBankName] =
-    useState(initialBankName);
+  const [
+    bankName,
+    setBankName,
+  ] =
+    useState(
+      initialBankName,
+    );
 
-  const [iban, setIban] =
-    useState(initialIban);
+  const [
+    iban,
+    setIban,
+  ] =
+    useState(
+      initialIban,
+    );
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(false);
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
     useState("");
 
-  const [successMessage, setSuccessMessage] =
+  const [
+    successMessage,
+    setSuccessMessage,
+  ] =
     useState("");
 
   async function save() {
@@ -40,21 +70,26 @@ export default function BankSettingsForm({
     setSuccessMessage("");
 
     try {
-      const response = await fetch(
-        "/api/admin/settings/bank",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type":
-              "application/json",
+      const response =
+        await fetch(
+          "/api/admin/settings/bank",
+          {
+            method:
+              "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                beneficiary,
+                bankName,
+                iban,
+              }),
           },
-          body: JSON.stringify({
-            beneficiary,
-            bankName,
-            iban,
-          }),
-        },
-      );
+        );
 
       const result =
         (await response.json()) as {
@@ -77,7 +112,9 @@ export default function BankSettingsForm({
       );
 
       router.refresh();
-    } catch (error) {
+    } catch (
+      error
+    ) {
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -88,8 +125,11 @@ export default function BankSettingsForm({
     }
   }
 
+  const inputClassName =
+    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
           <label
@@ -102,8 +142,12 @@ export default function BankSettingsForm({
           <input
             id="beneficiary"
             type="text"
-            value={beneficiary}
-            onChange={(event) => {
+            value={
+              beneficiary
+            }
+            onChange={(
+              event,
+            ) => {
               setBeneficiary(
                 event.target.value,
               );
@@ -111,7 +155,9 @@ export default function BankSettingsForm({
               setErrorMessage("");
               setSuccessMessage("");
             }}
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+            className={
+              inputClassName
+            }
           />
         </div>
 
@@ -126,8 +172,12 @@ export default function BankSettingsForm({
           <input
             id="bank-name"
             type="text"
-            value={bankName}
-            onChange={(event) => {
+            value={
+              bankName
+            }
+            onChange={(
+              event,
+            ) => {
               setBankName(
                 event.target.value,
               );
@@ -135,7 +185,9 @@ export default function BankSettingsForm({
               setErrorMessage("");
               setSuccessMessage("");
             }}
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+            className={
+              inputClassName
+            }
           />
         </div>
 
@@ -150,8 +202,12 @@ export default function BankSettingsForm({
           <input
             id="iban"
             type="text"
-            value={iban}
-            onChange={(event) => {
+            value={
+              iban
+            }
+            onChange={(
+              event,
+            ) => {
               setIban(
                 event.target.value.toUpperCase(),
               );
@@ -159,28 +215,36 @@ export default function BankSettingsForm({
               setErrorMessage("");
               setSuccessMessage("");
             }}
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 font-mono text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+            className={`${inputClassName} font-mono`}
           />
         </div>
       </div>
 
       {errorMessage && (
-        <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {errorMessage}
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {
+            errorMessage
+          }
         </div>
       )}
 
       {successMessage && (
-        <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {successMessage}
+        <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-medium text-[#0B5D3B]">
+          {
+            successMessage
+          }
         </div>
       )}
 
       <button
         type="button"
-        onClick={save}
-        disabled={loading}
-        className="mt-5 rounded-xl bg-[#2F2963] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#24204F] disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={
+          save
+        }
+        disabled={
+          loading
+        }
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         {loading
           ? "Enregistrement..."

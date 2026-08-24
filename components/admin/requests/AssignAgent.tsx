@@ -227,34 +227,34 @@ export default function AssignAgent({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
           Responsable
         </p>
 
-        <h2 className="mt-1 text-xl font-bold text-slate-900">
+        <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
           Agent responsable
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Gestion de la prise en charge du dossier.
+          Gérez la prise en charge et l’attribution de ce dossier.
         </p>
       </div>
 
       {currentAgentId && (
-        <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
+        <div className="mt-5 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#0B5D3B]">
             Actuellement attribué
           </p>
 
-          <p className="mt-1 font-bold text-slate-900">
+          <p className="mt-1 font-semibold text-[#102B20]">
             {currentAgent?.name ??
               "Agent"}
           </p>
 
           {isCurrentUserAssigned && (
-            <p className="mt-2 text-sm font-semibold text-green-700">
+            <p className="mt-2 text-sm font-semibold text-[#0B5D3B]">
               ✓ Ce dossier vous est attribué.
             </p>
           )}
@@ -262,7 +262,7 @@ export default function AssignAgent({
       )}
 
       {!currentAgentId && (
-        <div className="mt-5 rounded-xl bg-amber-50 p-4 text-sm font-medium text-amber-700">
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-700">
           Ce dossier n’est actuellement attribué à aucun agent.
         </div>
       )}
@@ -276,7 +276,7 @@ export default function AssignAgent({
           disabled={
             loading
           }
-          className="mt-5 w-full rounded-xl bg-[#18C100] px-5 py-3 font-semibold text-white transition hover:bg-[#14A300] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading
             ? "Prise en charge..."
@@ -312,7 +312,7 @@ export default function AssignAgent({
               disabled={
                 loading
               }
-              className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
               <option value="">
                 Aucun agent
@@ -342,8 +342,8 @@ export default function AssignAgent({
           </div>
 
           {selectedAgent && (
-            <div className="mt-3 rounded-xl bg-slate-50 px-4 py-3">
-              <p className="font-semibold text-slate-900">
+            <div className="mt-3 rounded-xl border border-slate-100 bg-[#FAFCFA] px-4 py-3">
+              <p className="font-semibold text-[#102B20]">
                 {selectedAgent.name}
               </p>
 
@@ -361,7 +361,7 @@ export default function AssignAgent({
             disabled={
               loading
             }
-            className="mt-5 w-full rounded-xl bg-[#2F2963] px-5 py-3 font-semibold text-white transition hover:bg-[#24204F] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading
               ? "Enregistrement..."
@@ -379,13 +379,13 @@ export default function AssignAgent({
       )}
 
       {errorMessage && (
-        <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessage}
         </div>
       )}
 
       {successMessage && (
-        <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {successMessage}
         </div>
       )}

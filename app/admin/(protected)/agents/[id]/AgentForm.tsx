@@ -5,7 +5,9 @@ import {
   useState,
 } from "react";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+} from "next/navigation";
 
 type Role =
   | "agent"
@@ -34,57 +36,66 @@ export default function AgentForm({
   const [
     firstName,
     setFirstName,
-  ] = useState(
-    initialFirstName,
-  );
+  ] =
+    useState(
+      initialFirstName,
+    );
 
   const [
     lastName,
     setLastName,
-  ] = useState(
-    initialLastName,
-  );
+  ] =
+    useState(
+      initialLastName,
+    );
 
   const [
     email,
     setEmail,
-  ] = useState(
-    initialEmail,
-  );
+  ] =
+    useState(
+      initialEmail,
+    );
 
   const [
     role,
     setRole,
-  ] = useState<Role>(
-    initialRole,
-  );
+  ] =
+    useState<Role>(
+      initialRole,
+    );
 
   const [
     password,
     setPassword,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     disabled,
     setDisabled,
-  ] = useState(
-    initialDisabled,
-  );
+  ] =
+    useState(
+      initialDisabled,
+    );
 
   const [
     loading,
     setLoading,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     errorMessage,
     setErrorMessage,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     successMessage,
     setSuccessMessage,
-  ] = useState("");
+  ] =
+    useState("");
 
   async function handleSubmit(
     event:
@@ -146,7 +157,9 @@ export default function AgentForm({
       );
 
       router.refresh();
-    } catch (error) {
+    } catch (
+      error
+    ) {
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -157,180 +170,388 @@ export default function AgentForm({
     }
   }
 
+  const inputClassName =
+    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100";
+
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <form
         onSubmit={
           handleSubmit
         }
-        className="space-y-6"
+        className="space-y-8"
       >
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-800">
-              Prénom
-            </label>
-
-            <input
-              value={
-                firstName
-              }
-              onChange={(
-                event,
-              ) =>
-                setFirstName(
-                  event.target.value,
-                )
-              }
-              required
-              className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-800">
-              Nom
-            </label>
-
-            <input
-              value={
-                lastName
-              }
-              onChange={(
-                event,
-              ) =>
-                setLastName(
-                  event.target.value,
-                )
-              }
-              required
-              className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
-            />
-          </div>
-        </div>
-
         <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-800">
-            Email
-          </label>
-
-          <input
-            type="email"
-            value={
-              email
-            }
-            onChange={(
-              event,
-            ) =>
-              setEmail(
-                event.target.value,
-              )
-            }
-            required
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-800">
-            Rôle
-          </label>
-
-          <select
-            value={role}
-            onChange={(
-              event,
-            ) =>
-              setRole(
-                event.target
-                  .value as Role,
-              )
-            }
-            className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
-          >
-            <option value="agent">
-              Agent
-            </option>
-
-            <option value="admin">
-              Administrateur
-            </option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-800">
-            Nouveau mot de passe
-          </label>
-
-          <input
-            type="password"
-            value={
-              password
-            }
-            onChange={(
-              event,
-            ) =>
-              setPassword(
-                event.target.value,
-              )
-            }
-            minLength={8}
-            placeholder="Laisser vide pour ne pas modifier"
-            className="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
-          />
-        </div>
-
-        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 p-4">
-          <div>
-            <p className="font-semibold text-slate-900">
-              Désactiver le compte
+          <div className="mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              Informations personnelles
             </p>
+
+            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+              Identité de l’utilisateur
+            </h3>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label
+                htmlFor="agent-first-name"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Prénom
+              </label>
+
+              <input
+                id="agent-first-name"
+                value={
+                  firstName
+                }
+                onChange={(
+                  event,
+                ) => {
+                  setFirstName(
+                    event.target.value,
+                  );
+
+                  setErrorMessage("");
+                  setSuccessMessage("");
+                }}
+                required
+                className={
+                  inputClassName
+                }
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="agent-last-name"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Nom
+              </label>
+
+              <input
+                id="agent-last-name"
+                value={
+                  lastName
+                }
+                onChange={(
+                  event,
+                ) => {
+                  setLastName(
+                    event.target.value,
+                  );
+
+                  setErrorMessage("");
+                  setSuccessMessage("");
+                }}
+                required
+                className={
+                  inputClassName
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-100 pt-8">
+          <div className="mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              Connexion
+            </p>
+
+            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+              Identifiants du compte
+            </h3>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label
+                htmlFor="agent-email"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Email
+              </label>
+
+              <input
+                id="agent-email"
+                type="email"
+                value={
+                  email
+                }
+                onChange={(
+                  event,
+                ) => {
+                  setEmail(
+                    event.target.value,
+                  );
+
+                  setErrorMessage("");
+                  setSuccessMessage("");
+                }}
+                required
+                className={
+                  inputClassName
+                }
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="agent-password"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Nouveau mot de passe
+              </label>
+
+              <input
+                id="agent-password"
+                type="password"
+                value={
+                  password
+                }
+                onChange={(
+                  event,
+                ) => {
+                  setPassword(
+                    event.target.value,
+                  );
+
+                  setErrorMessage("");
+                  setSuccessMessage("");
+                }}
+                minLength={8}
+                placeholder="Laisser vide pour ne pas modifier"
+                className={
+                  inputClassName
+                }
+              />
+
+              <p className="mt-2 text-xs text-slate-400">
+                Minimum 8 caractères si vous souhaitez le modifier.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-100 pt-8">
+          <div className="mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              Autorisations
+            </p>
+
+            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+              Rôle de l’utilisateur
+            </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              L’utilisateur ne pourra plus se connecter.
+              Sélectionnez le niveau d’accès à l’espace de gestion.
             </p>
           </div>
 
-          <input
-            type="checkbox"
-            checked={
+          <div className="grid gap-4 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setRole(
+                  "agent",
+                );
+
+                setErrorMessage("");
+                setSuccessMessage("");
+              }}
+              className={`relative rounded-2xl border p-5 text-left transition ${
+                role ===
+                "agent"
+                  ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/5"
+                  : "border-slate-200 bg-white hover:border-[#CFE3CF] hover:bg-[#FAFCFA]"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="block font-semibold text-[#102B20]">
+                    Agent
+                  </span>
+
+                  <span className="mt-2 block text-sm leading-6 text-slate-500">
+                    Peut traiter les dossiers et effectuer les opérations autorisées.
+                  </span>
+                </div>
+
+                <span
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                    role ===
+                    "agent"
+                      ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                      : "border-slate-300 bg-white"
+                  }`}
+                >
+                  {role ===
+                    "agent" && (
+                    <span className="h-2 w-2 rounded-full bg-white" />
+                  )}
+                </span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setRole(
+                  "admin",
+                );
+
+                setErrorMessage("");
+                setSuccessMessage("");
+              }}
+              className={`relative rounded-2xl border p-5 text-left transition ${
+                role ===
+                "admin"
+                  ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/5"
+                  : "border-slate-200 bg-white hover:border-[#CFE3CF] hover:bg-[#FAFCFA]"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="block font-semibold text-[#102B20]">
+                    Administrateur
+                  </span>
+
+                  <span className="mt-2 block text-sm leading-6 text-slate-500">
+                    Dispose de l’accès complet, y compris la gestion des agents.
+                  </span>
+                </div>
+
+                <span
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                    role ===
+                    "admin"
+                      ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                      : "border-slate-300 bg-white"
+                  }`}
+                >
+                  {role ===
+                    "admin" && (
+                    <span className="h-2 w-2 rounded-full bg-white" />
+                  )}
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-100 pt-8">
+          <div className="mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              État du compte
+            </p>
+
+            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+              Accès à la plateforme
+            </h3>
+          </div>
+
+          <label
+            className={`flex cursor-pointer items-center justify-between gap-5 rounded-2xl border p-5 transition ${
               disabled
-            }
-            onChange={(
-              event,
-            ) =>
-              setDisabled(
-                event.target.checked,
-              )
-            }
-            className="h-5 w-5"
-          />
-        </label>
+                ? "border-red-200 bg-red-50"
+                : "border-[#CFE3CF] bg-[#F3F8F2]"
+            }`}
+          >
+            <div>
+              <p
+                className={`font-semibold ${
+                  disabled
+                    ? "text-red-800"
+                    : "text-[#102B20]"
+                }`}
+              >
+                {disabled
+                  ? "Compte désactivé"
+                  : "Compte actif"}
+              </p>
+
+              <p
+                className={`mt-1 text-sm leading-6 ${
+                  disabled
+                    ? "text-red-600"
+                    : "text-slate-500"
+                }`}
+              >
+                {disabled
+                  ? "L’utilisateur ne peut actuellement plus se connecter."
+                  : "L’utilisateur peut actuellement accéder à son espace."}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="hidden text-xs font-semibold text-slate-500 sm:inline">
+                Désactiver
+              </span>
+
+              <button
+                type="button"
+                role="switch"
+                aria-checked={
+                  disabled
+                }
+                onClick={() => {
+                  setDisabled(
+                    !disabled,
+                  );
+
+                  setErrorMessage("");
+                  setSuccessMessage("");
+                }}
+                className={`relative h-7 w-12 rounded-full transition ${
+                  disabled
+                    ? "bg-red-500"
+                    : "bg-[#0B5D3B]"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition ${
+                    disabled
+                      ? "left-6"
+                      : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </label>
+        </div>
 
         {errorMessage && (
-          <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {errorMessage}
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {
+              errorMessage
+            }
           </div>
         )}
 
         {successMessage && (
-          <div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">
-            {successMessage}
+          <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]">
+            {
+              successMessage
+            }
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={
-            loading
-          }
-          className="w-full rounded-xl bg-[#18C100] px-5 py-3 font-semibold text-white transition hover:bg-[#14A300] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading
-            ? "Enregistrement..."
-            : "Enregistrer les modifications"}
-        </button>
+        <div className="border-t border-slate-100 pt-6">
+          <button
+            type="submit"
+            disabled={
+              loading
+            }
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+          >
+            {loading
+              ? "Enregistrement..."
+              : "Enregistrer les modifications"}
+          </button>
+        </div>
       </form>
     </section>
   );

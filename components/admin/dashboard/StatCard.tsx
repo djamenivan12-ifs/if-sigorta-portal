@@ -1,5 +1,9 @@
-import type { ReactNode } from "react";
+import type {
+  ReactNode,
+} from "react";
+
 import Link from "next/link";
+
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -29,19 +33,17 @@ export default function StatCard({
   href,
   trendValue,
   trendDirection = "neutral",
-  accentClassName = "bg-blue-50 text-blue-700",
+  accentClassName = "bg-[#EEF6EC] text-[#0B5D3B]",
 }: StatCardProps) {
-  const cardContent = (
-    <article className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 opacity-0 transition group-hover:opacity-100" />
-
+  const content = (
+    <article className="group relative h-full overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#CFE3CF] hover:shadow-[0_18px_50px_-35px_rgba(15,23,42,0.35)]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">
             {title}
           </p>
 
-          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
+          <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
             {value}
           </p>
         </div>
@@ -65,43 +67,39 @@ export default function StatCard({
         )}
 
         {description && (
-          <p className="text-xs leading-5 text-slate-500">
+          <p className="text-xs leading-5 text-slate-400">
             {description}
           </p>
         )}
       </div>
 
       {href && (
-        <p className="mt-5 text-sm font-semibold text-blue-700 transition group-hover:translate-x-1">
+        <p className="mt-5 text-sm font-semibold text-[#0B5D3B] transition group-hover:translate-x-1">
           Voir les détails →
         </p>
       )}
     </article>
   );
 
-  if (!href) {
-    return cardContent;
-  }
-
-  return (
+  return href ? (
     <Link
       href={href}
-      className="block"
+      className="block h-full"
     >
-      {cardContent}
+      {content}
     </Link>
+  ) : (
+    content
   );
 }
-
-type TrendBadgeProps = {
-  value: string;
-  direction: TrendDirection;
-};
 
 function TrendBadge({
   value,
   direction,
-}: TrendBadgeProps) {
+}: {
+  value: string;
+  direction: TrendDirection;
+}) {
   if (direction === "up") {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -121,7 +119,7 @@ function TrendBadge({
   }
 
   return (
-    <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+    <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
       {value}
     </span>
   );

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LogOut } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -38,20 +39,30 @@ export default function LogoutButton() {
   }
 
   return (
-    <div>
+    <div className="w-full">
       <button
         type="button"
         onClick={handleLogout}
         disabled={loading}
-        className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="group flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Déconnexion..." : "Se déconnecter"}
+        <LogOut
+          className="h-4 w-4 transition group-hover:-translate-x-0.5"
+          aria-hidden="true"
+        />
+
+        {loading
+          ? "Déconnexion..."
+          : "Se déconnecter"}
       </button>
 
       {errorMessage && (
-        <p className="mt-2 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700"
+        >
           {errorMessage}
-        </p>
+        </div>
       )}
     </div>
   );

@@ -331,14 +331,14 @@ function getStatusInfo(
       return {
         label: "Déjà contacté",
         className:
-          "bg-blue-100 text-blue-700",
+          "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
       };
 
     case "interested":
       return {
         label: "Intéressé",
         className:
-          "bg-green-100 text-green-700",
+          "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
       };
 
     default:
@@ -555,27 +555,27 @@ export default async function RenewalsPage() {
     ).length;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Suivi client
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Renouvellements
               </h1>
 
-              <p className="mt-2 max-w-3xl text-slate-600">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                 Assurances arrivant à expiration dans les 30 prochains jours ou déjà expirées.
               </p>
             </div>
 
             <Link
               href="/admin/notifications"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               ← Notifications
             </Link>
@@ -592,7 +592,7 @@ export default async function RenewalsPage() {
                   "pending",
               ).length
             }
-            className="bg-[#2F2963]/10 text-[#2F2963]"
+            className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <SummaryCard
@@ -623,7 +623,7 @@ export default async function RenewalsPage() {
         <section className="mt-6">
           {renewals.length ===
           0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+            <div className="rounded-[1.5rem] border border-slate-200/80 bg-white px-6 py-16 text-center">
               <p className="text-sm text-slate-500">
                 Aucun client à contacter pour un renouvellement.
               </p>
@@ -651,7 +651,7 @@ export default async function RenewalsPage() {
                       key={
                         renewal.id
                       }
-                      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                      className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6"
                     >
                       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0">
@@ -685,7 +685,7 @@ export default async function RenewalsPage() {
                             </span>
                           </div>
 
-                          <h2 className="mt-3 text-xl font-bold text-slate-900">
+                          <h2 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                             {
                               renewal.clientName
                             }
@@ -754,6 +754,14 @@ export default async function RenewalsPage() {
   />
 )}
 
+{renewal.status !== "interested" && (
+  <RenewalInterestButton
+    renewalId={
+      renewal.id
+    }
+  />
+)}
+
                           {renewal.clientId && (
                             <Link
                               href={`/admin/clients/${renewal.clientId}`}
@@ -765,7 +773,7 @@ export default async function RenewalsPage() {
 
                           <Link
                             href={`/admin/dossiers/${renewal.requestId}`}
-                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#2F2963]/20 bg-white px-5 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                           >
                             Ouvrir le dossier →
                           </Link>
@@ -795,16 +803,16 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <div
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </div>
 
-      <p className="mt-4 text-3xl font-bold text-slate-900">
+      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
         {
           value.toLocaleString(
             "fr-FR",

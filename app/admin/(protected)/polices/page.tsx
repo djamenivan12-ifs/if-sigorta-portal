@@ -706,29 +706,29 @@ export default async function PoliciesPage({
     ).length;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Assurances
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Polices
               </h1>
 
-              <p className="mt-2 max-w-3xl text-slate-600">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                 Suivez les polices en préparation et les assurances déjà disponibles.
               </p>
             </div>
 
             <Link
               href="/admin/tableau-de-bord"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               ← Tableau de bord
             </Link>
@@ -744,7 +744,7 @@ export default async function PoliciesPage({
               preparationCount
             }
             description="Polices en cours"
-            className="bg-blue-50 text-blue-700"
+            className="bg-amber-50 text-amber-700"
           />
 
           <StatCard
@@ -753,7 +753,7 @@ export default async function PoliciesPage({
               availableCount
             }
             description="Assurances terminées"
-            className="bg-emerald-50 text-emerald-700"
+            className="bg-[#EEF6EC] text-[#0B5D3B]"
           />
 
           <StatCard
@@ -762,7 +762,7 @@ export default async function PoliciesPage({
               oneYearCount
             }
             description="Demandes d’un an"
-            className="bg-violet-50 text-violet-700"
+            className="bg-[#F3F8F2] text-[#31513B]"
           />
 
           <StatCard
@@ -777,7 +777,7 @@ export default async function PoliciesPage({
 
         {/* FILTRES */}
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
           <form
             method="GET"
             className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]"
@@ -789,7 +789,7 @@ export default async function PoliciesPage({
                 search
               }
               placeholder="Client, code dossier ou WhatsApp..."
-              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#2F2963] focus:ring-4 focus:ring-[#2F2963]/10"
+              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
 
             <select
@@ -797,7 +797,7 @@ export default async function PoliciesPage({
               defaultValue={
                 statusFilter
               }
-              className="min-h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none"
+              className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             >
               <option value="">
                 Toutes les polices
@@ -814,14 +814,14 @@ export default async function PoliciesPage({
 
             <button
               type="submit"
-              className="min-h-11 rounded-xl bg-[#2F2963] px-5 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+              className="min-h-11 rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
             >
               Filtrer
             </button>
 
             <Link
               href="/admin/polices"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               Réinitialiser
             </Link>
@@ -830,9 +830,9 @@ export default async function PoliciesPage({
 
         {/* TABLEAU */}
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
           <div className="border-b border-slate-200 p-6">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
               Liste des polices
             </h2>
 
@@ -944,7 +944,7 @@ export default async function PoliciesPage({
                                   href={`https://wa.me/${item.whatsapp.replace(/\D/g, "")}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="mt-1 block text-xs font-medium text-green-700 hover:underline"
+                                  className="mt-1 block text-xs font-medium text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                                 >
                                   {
                                     item.whatsapp
@@ -957,7 +957,7 @@ export default async function PoliciesPage({
                           <TableCell className="whitespace-nowrap">
                             <Link
                               href={`/admin/dossiers/${item.requestId}`}
-                              className="font-semibold text-[#2F2963] hover:underline"
+                              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
                             >
                               {
                                 item.requestCode
@@ -1002,12 +1002,12 @@ export default async function PoliciesPage({
                                   }
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="inline-flex rounded-lg bg-green-50 px-3 py-2 text-xs font-semibold text-green-700 hover:bg-green-100"
+                                  className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
                                 >
                                   Ouvrir PDF
                                 </a>
                               ) : (
-                                <span className="text-xs font-semibold text-green-700">
+                                <span className="text-xs font-semibold text-[#0B5D3B]">
                                   Enregistrée
                                 </span>
                               )
@@ -1032,12 +1032,12 @@ export default async function PoliciesPage({
                                   }
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="inline-flex rounded-lg bg-green-50 px-3 py-2 text-xs font-semibold text-green-700 hover:bg-green-100"
+                                  className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
                                 >
                                   Ouvrir PDF
                                 </a>
                               ) : (
-                                <span className="text-xs font-semibold text-green-700">
+                                <span className="text-xs font-semibold text-[#0B5D3B]">
                                   Enregistrée
                                 </span>
                               )
@@ -1051,11 +1051,11 @@ export default async function PoliciesPage({
                           <TableCell className="whitespace-nowrap">
                             {item.status ===
                             "policy_available" ? (
-                              <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                              <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
                                 Disponible
                               </span>
                             ) : (
-                              <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                              <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
                                 En préparation
                               </span>
                             )}
@@ -1064,7 +1064,7 @@ export default async function PoliciesPage({
                           <TableCell className="whitespace-nowrap text-right">
                             <Link
                               href={`/admin/dossiers/${item.requestId}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#2F2963] px-4 text-sm font-semibold text-white transition hover:bg-[#24204F]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
                             >
                               {item.status ===
                               "policy_preparation"
@@ -1100,16 +1100,16 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
       <span
-        className={`inline-flex rounded-xl px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-3xl font-bold text-slate-900">
+      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
         {value.toLocaleString(
           "fr-FR",
         )}

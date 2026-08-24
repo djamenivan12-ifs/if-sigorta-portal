@@ -150,38 +150,38 @@ export default async function AgentsPage() {
       );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1500px]">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Administration
               </p>
 
-              <h1 className="mt-1 text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 Gestion des agents
               </h1>
 
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-3 text-sm leading-7 text-slate-500">
                 Gérez les comptes agents et administrateurs du portail.
               </p>
             </div>
 
             <Link
               href="/admin/agents/nouveau"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#18C100] px-5 text-sm font-semibold text-white transition hover:bg-[#14A300]"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
             >
               + Ajouter un agent
             </Link>
           </div>
         </header>
 
-        <section className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-5">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
+          <div className="border-b border-slate-100 px-6 py-5">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                   Utilisateurs internes
                 </h2>
 
@@ -196,7 +196,7 @@ export default async function AgentsPage() {
 
               <Link
                 href="/admin/agents/performance"
-                className="text-sm font-semibold text-[#2F2963] hover:underline"
+                className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
               >
                 Voir les performances →
               </Link>
@@ -251,13 +251,13 @@ export default async function AgentsPage() {
                           agent.id
                         }
                       >
-                        <TableCell className="whitespace-nowrap font-semibold text-slate-900">
+                        <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
                           {getDisplayName(
                             agent,
                           )}
                         </TableCell>
 
-                        <TableCell className="whitespace-nowrap">
+                        <TableCell className="whitespace-nowrap text-slate-600">
                           {
                             agent.email
                           }
@@ -265,11 +265,11 @@ export default async function AgentsPage() {
 
                         <TableCell className="whitespace-nowrap">
                           <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                            className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
                               agent.role ===
                               "admin"
-                                ? "bg-violet-100 text-violet-700"
-                                : "bg-blue-100 text-blue-700"
+                                ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                                : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
                             }`}
                           >
                             {agent.role ===
@@ -279,13 +279,13 @@ export default async function AgentsPage() {
                           </span>
                         </TableCell>
 
-                        <TableCell className="whitespace-nowrap">
+                        <TableCell className="whitespace-nowrap text-slate-600">
                           {formatDate(
                             agent.createdAt,
                           )}
                         </TableCell>
 
-                        <TableCell className="whitespace-nowrap">
+                        <TableCell className="whitespace-nowrap text-slate-600">
                           {formatDate(
                             agent.lastSignInAt,
                           )}
@@ -294,7 +294,7 @@ export default async function AgentsPage() {
                         <TableCell className="whitespace-nowrap text-right">
                           <Link
                             href={`/admin/agents/${agent.id}`}
-                            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-[#2F2963] transition hover:bg-[#2F2963]/5"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                           >
                             Modifier
                           </Link>

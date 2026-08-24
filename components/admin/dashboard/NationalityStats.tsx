@@ -1,4 +1,6 @@
-import { Globe2 } from "lucide-react";
+import {
+  Globe2,
+} from "lucide-react";
 
 type NationalityItem = {
   nationality: string;
@@ -6,63 +8,51 @@ type NationalityItem = {
   percentage: number;
 };
 
-type NationalityStatsProps = {
-  data: NationalityItem[];
-  total: number;
-};
-
 export default function NationalityStats({
   data,
   total,
-}: NationalityStatsProps) {
+}: {
+  data: NationalityItem[];
+  total: number;
+}) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
             Clients
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900">
+          <h2 className="mt-2 text-xl font-semibold text-[#102B20]">
             Répartition par nationalité
           </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Nationalités enregistrées dans les dossiers.
-          </p>
         </div>
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF6EC] text-[#0B5D3B]">
           <Globe2 className="h-5 w-5" />
         </div>
       </div>
 
       <div className="mt-6">
         {data.length === 0 ? (
-          <div className="rounded-xl bg-slate-50 px-4 py-8 text-center">
-            <p className="text-sm text-slate-500">
-              Aucune donnée disponible.
-            </p>
+          <div className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+            Aucune donnée disponible.
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {data.map((item) => (
-              <div
-                key={item.nationality}
-              >
+              <div key={item.nationality}>
                 <div className="mb-2 flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800">
-                      {item.nationality}
-                    </p>
-                  </div>
+                  <p className="truncate text-sm font-semibold text-slate-700">
+                    {item.nationality}
+                  </p>
 
                   <div className="flex shrink-0 items-center gap-3">
-                    <span className="text-sm font-bold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900">
                       {item.count}
                     </span>
 
-                    <span className="w-14 text-right text-xs font-medium text-slate-500">
+                    <span className="w-14 text-right text-xs text-slate-400">
                       {item.percentage.toLocaleString(
                         "fr-FR",
                         {
@@ -76,7 +66,7 @@ export default function NationalityStats({
 
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-[#2F2963] transition-all"
+                    className="h-full rounded-full bg-[#0B5D3B]"
                     style={{
                       width: `${Math.min(
                         item.percentage,
@@ -91,18 +81,14 @@ export default function NationalityStats({
         )}
       </div>
 
-      <div className="mt-6 border-t border-slate-100 pt-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-500">
-            Total clients
-          </span>
+      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+        <span className="text-sm text-slate-500">
+          Total clients
+        </span>
 
-          <span className="text-lg font-bold text-slate-900">
-            {total.toLocaleString(
-              "fr-FR",
-            )}
-          </span>
-        </div>
+        <span className="text-lg font-semibold text-[#102B20]">
+          {total.toLocaleString("fr-FR")}
+        </span>
       </div>
     </section>
   );

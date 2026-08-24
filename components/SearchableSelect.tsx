@@ -93,7 +93,9 @@ export default function SearchableSelect({
 
   const selectedOption =
     options.find(
-      (option) =>
+      (
+        option,
+      ) =>
         String(
           option.id,
         ) === value,
@@ -101,7 +103,9 @@ export default function SearchableSelect({
 
   const filteredOptions =
     options.filter(
-      (option) =>
+      (
+        option,
+      ) =>
         option.name
           .toLocaleLowerCase(
             "tr-TR",
@@ -198,7 +202,8 @@ export default function SearchableSelect({
     ];
 
   function selectOption(
-    option: SelectOption,
+    option:
+      SelectOption,
   ) {
     onChange(
       String(
@@ -231,11 +236,13 @@ export default function SearchableSelect({
         }
         onClick={() =>
           setOpen(
-            (current) =>
+            (
+              current,
+            ) =>
               !current,
           )
         }
-        className="flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-4 py-3 text-left text-slate-900 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+        className="flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-4 py-3 text-left text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
       >
         <span>
           {loading
@@ -279,7 +286,7 @@ export default function SearchableSelect({
                   t.search
                 }
                 autoFocus
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
               />
             </div>
 
@@ -300,7 +307,7 @@ export default function SearchableSelect({
                           option,
                         )
                       }
-                      className="w-full rounded-lg px-3 py-2 text-left hover:bg-blue-50 hover:text-blue-800"
+                      className="w-full rounded-lg px-3 py-2 text-left transition hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
                     >
                       {
                         option.name

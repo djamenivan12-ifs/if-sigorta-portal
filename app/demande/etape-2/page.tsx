@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 import { useInsuranceRequest } from "@/context/InsuranceRequestContext";
 import {
-  calculateInsurancePrice,
+  calculateInsuranceAge,
   InsuranceDuration,
 } from "@/lib/insurance/calculatePrice";
 
@@ -275,15 +275,160 @@ export default function Etape2Page() {
     .toISOString()
     .split("T")[0];
 
-  const priceResult = useMemo(() => {
+  const [priceResult, setPriceResult] =
+    useState<{
+      age: number;
+      duration: InsuranceDuration;
+      price: number | null;
+      available: boolean;
+    } | null>(null);
+
+  const [priceLoading, setPriceLoading] =
+    useState(false);
+
+  const calculatedAge = useMemo(() => {
     if (!requestData.birthDate) {
       return null;
     }
 
-    return calculateInsurancePrice(
+    return calculateInsuranceAge(
       requestData.birthDate,
-      requestData.duration,
     );
+  }, [
+    requestData.birthDate,
+  ]);
+
+  async function loadPrice(
+    duration: InsuranceDuration,
+  ) {
+    if (
+      !requestData.birthDate
+    ) {
+      setPriceResult(null);
+      return;
+    }
+
+    setPriceLoading(true);
+
+    try {
+      const response =
+        await fetch(
+          "/api/insurance/price",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              birthDate:
+                requestData.birthDate,
+
+              duration,
+            }),
+          },
+        );
+
+      const result =
+        (await response.json()) as {
+          age?: number;
+          duration?: InsuranceDuration;
+          price?: number | null;
+          available?: boolean;
+          error?: string;
+        };
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ??
+            "Impossible de calculer le tarif.",
+        );
+      }
+
+      const nextResult = {
+        age:
+          Number(
+            result.age,
+          ),
+
+        duration,
+
+        price:
+          typeof result.price === "number"
+            ? result.price
+            : null,
+
+        available:
+          Boolean(
+            result.available,
+          ),
+      };
+
+      setPriceResult(
+        nextResult,
+      );
+
+      updateRequestData({
+        duration,
+
+        calculatedAge:
+          nextResult.age,
+
+        calculatedPrice:
+          nextResult.price,
+      });
+    } catch (
+      error
+    ) {
+      console.error(
+        "Erreur calcul tarif :",
+        error,
+      );
+
+      setPriceResult(
+        calculatedAge === null
+          ? null
+          : {
+              age:
+                calculatedAge,
+
+              duration,
+
+              price:
+                null,
+
+              available:
+                false,
+            },
+      );
+
+      updateRequestData({
+        duration,
+
+        calculatedAge:
+          calculatedAge,
+
+        calculatedPrice:
+          null,
+      });
+    } finally {
+      setPriceLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (
+      requestData.birthDate
+    ) {
+      void loadPrice(
+        requestData.duration,
+      );
+    } else {
+      setPriceResult(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     requestData.birthDate,
     requestData.duration,
@@ -292,19 +437,13 @@ export default function Etape2Page() {
   function changeDuration(
     duration: InsuranceDuration,
   ) {
-    const result =
-      calculateInsurancePrice(
-        requestData.birthDate,
-        duration,
-      );
-
     updateRequestData({
       duration,
-      calculatedAge:
-        result?.age ?? null,
-      calculatedPrice:
-        result?.price ?? null,
     });
+
+    void loadPrice(
+      duration,
+    );
   }
 
   function changeKimlikStatus(
@@ -491,60 +630,173 @@ export default function Etape2Page() {
   }
 
   const inputClassName =
-    "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100";
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
 
   const kimlikInputClassName =
     kimlikError
-      ? "w-full rounded-xl border border-red-500 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-red-600 focus:ring-2 focus:ring-red-100"
+      ? "w-full rounded-2xl border border-red-400 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-100"
       : inputClassName;
 
+  const fieldLabelClassName =
+    "mb-2 block text-sm font-semibold text-slate-700";
+
+  const formEyebrow =
+    language === "fr"
+      ? "Votre demande"
+      : language === "en"
+        ? "Your application"
+        : "Başvurunuz";
+
+  const sideTitle =
+    language === "fr"
+      ? "Votre identité, puis votre tarif."
+      : language === "en"
+        ? "Your identity, then your price."
+        : "Kimliğiniz, ardından fiyatınız.";
+
+  const sideText =
+    language === "fr"
+      ? "Indiquez votre situation de séjour, votre passeport et la durée souhaitée. Le tarif est calculé automatiquement selon votre âge."
+      : language === "en"
+        ? "Enter your residence status, passport and desired duration. Your price is calculated automatically based on your age."
+        : "İkamet durumunuzu, pasaportunuzu ve istediğiniz süreyi belirtin. Fiyat yaşınıza göre otomatik hesaplanır.";
+
+  const exactIdentity =
+    language === "fr"
+      ? "Vérifiez soigneusement les numéros saisis avant de continuer."
+      : language === "en"
+        ? "Carefully check the numbers you enter before continuing."
+        : "Devam etmeden önce girdiğiniz numaraları dikkatlice kontrol edin.";
+
+  const priceInfo =
+    language === "fr"
+      ? "Le prix affiché correspond à la durée d’assurance sélectionnée."
+      : language === "en"
+        ? "The displayed price corresponds to the selected insurance duration."
+        : "Gösterilen fiyat seçilen sigorta süresine karşılık gelir.";
+
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-2xl">
-        <button
-          type="button"
-          onClick={() =>
-            router.push(
-              "/demande/etape-1",
-            )
-          }
-          className="mb-6 font-medium text-blue-700 hover:underline"
-        >
-          {t.backStep1}
-        </button>
+    <main className="min-h-screen bg-[#F6F8F5]">
+      {/* TOP BAR */}
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-10">
-          <div className="mb-8">
-            <p className="mb-2 text-sm font-semibold text-blue-700">
-              {t.step}
-            </p>
-
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-2/5 rounded-full bg-blue-700" />
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-bold text-slate-900">
-            {t.title}
-          </h1>
-
-          <p className="mt-2 text-slate-600">
-            {t.description}
-          </p>
-
-          {!requestData.birthDate && (
-            <div className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              {t.missingBirthDate}
-            </div>
-          )}
-
-          <form
-            onSubmit={handleSubmit}
-            className="mt-8 space-y-8"
+      <div className="border-b border-slate-200/80 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+          <a
+            href="/"
+            className="flex items-center"
+            aria-label="IF Sigorta"
           >
-            <section className="space-y-5">
-              <div>
-                <p className="mb-3 font-medium text-slate-800">
+            <img
+              src="/if-sigorta-logo-light.png"
+              alt="IF Sigorta"
+              className="h-[72px] w-auto object-contain object-left sm:h-[82px]"
+            />
+          </a>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.push(
+                "/demande/etape-1",
+              )
+            }
+            className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
+          >
+            {t.backStep1}
+          </button>
+        </div>
+      </div>
+
+      {/* PAGE */}
+
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
+          {/* LEFT PANEL */}
+
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <div className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 lg:min-h-[620px] lg:px-8 lg:py-10">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
+              <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
+
+              <div className="relative z-10 flex h-full flex-col">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#B8E83D]">
+                    {formEyebrow}
+                  </p>
+
+                  <p className="mt-4 text-sm font-semibold text-white/60">
+                    {t.step}
+                  </p>
+
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/15">
+                    <div className="h-full w-2/5 rounded-full bg-[#B8E83D]" />
+                  </div>
+
+                  <h2 className="mt-8 max-w-sm text-3xl font-semibold leading-[1.05] tracking-[-0.04em] sm:text-4xl">
+                    {sideTitle}
+                  </h2>
+
+                  <p className="mt-5 max-w-sm text-sm leading-7 text-white/65 sm:text-base">
+                    {sideText}
+                  </p>
+                </div>
+
+                <div className="mt-10 space-y-4 lg:mt-auto">
+                  <div className="flex gap-3 border-t border-white/10 pt-5">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {exactIdentity}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {priceInfo}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* FORM */}
+
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:p-8 lg:p-10">
+            <div className="max-w-2xl">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+                {t.step}
+              </p>
+
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                {t.title}
+              </h1>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+                {t.description}
+              </p>
+            </div>
+
+            {!requestData.birthDate && (
+              <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm leading-6 text-amber-800">
+                {t.missingBirthDate}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit}
+              className="mt-9 space-y-10"
+            >
+              {/* KIMLIK STATUS */}
+
+              <section>
+                <p className="mb-3 text-sm font-semibold text-slate-700">
                   {t.hasKimlik}
                 </p>
 
@@ -556,17 +808,17 @@ export default function Etape2Page() {
                         true,
                       )
                     }
-                    className={`rounded-xl border px-4 py-4 text-left transition ${
+                    className={`rounded-2xl border px-5 py-5 text-left transition ${
                       requestData.hasKimlik
-                        ? "border-blue-700 bg-blue-50 ring-2 ring-blue-100"
-                        : "border-slate-300 bg-white hover:bg-slate-50"
+                        ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="block font-semibold text-slate-900">
+                    <span className="block text-base font-semibold text-slate-900">
                       {t.yes}
                     </span>
 
-                    <span className="mt-1 block text-sm text-slate-600">
+                    <span className="mt-1.5 block text-sm leading-6 text-slate-500">
                       {t.yesDesc}
                     </span>
                   </button>
@@ -578,329 +830,327 @@ export default function Etape2Page() {
                         false,
                       )
                     }
-                    className={`rounded-xl border px-4 py-4 text-left transition ${
+                    className={`rounded-2xl border px-5 py-5 text-left transition ${
                       !requestData.hasKimlik
-                        ? "border-blue-700 bg-blue-50 ring-2 ring-blue-100"
-                        : "border-slate-300 bg-white hover:bg-slate-50"
+                        ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="block font-semibold text-slate-900">
+                    <span className="block text-base font-semibold text-slate-900">
                       {t.no}
                     </span>
 
-                    <span className="mt-1 block text-sm text-slate-600">
+                    <span className="mt-1.5 block text-sm leading-6 text-slate-500">
                       {t.noDesc}
                     </span>
                   </button>
                 </div>
-              </div>
+              </section>
 
-              {requestData.hasKimlik ? (
-                <>
-                  <div>
-                    <label
-                      htmlFor="kimlikNumber"
-                      className="mb-2 block font-medium text-slate-800"
-                    >
-                      {t.kimlikNumber}
-                    </label>
+              {/* IDENTITY FIELDS */}
 
-                    <input
-                      id="kimlikNumber"
-                      name="kimlikNumber"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      maxLength={11}
-                      value={
-                        requestData.kimlikNumber
-                      }
-                      onChange={(
-                        event,
-                      ) =>
-                        handleKimlikChange(
-                          event.target.value,
-                        )
-                      }
-                      aria-invalid={
-                        kimlikError
-                          ? "true"
-                          : "false"
-                      }
-                      aria-describedby={
-                        kimlikError
-                          ? "kimlik-error"
-                          : "kimlik-help"
-                      }
-                      required
-                      className={
-                        kimlikInputClassName
-                      }
-                    />
+              <section className="border-t border-slate-100 pt-8">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {requestData.hasKimlik ? (
+                    <>
+                      <div>
+                        <label
+                          htmlFor="kimlikNumber"
+                          className={fieldLabelClassName}
+                        >
+                          {t.kimlikNumber}
+                        </label>
 
-                    <p
-                      id="kimlik-help"
-                      className="mt-2 text-sm text-slate-500"
-                    >
-                      {t.kimlikHelp}
-                    </p>
-
-                    {kimlikError && (
-                      <p
-                        id="kimlik-error"
-                        className="mt-2 text-sm font-medium text-red-700"
-                      >
-                        {kimlikError}
-                      </p>
-                    )}
-
-                    <p className="mt-2 text-xs text-slate-500">
-                      {
-                        requestData
-                          .kimlikNumber.length
-                      }
-                      /11 {t.digits}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="kimlikExpirationDate"
-                      className="mb-2 block font-medium text-slate-800"
-                    >
-                      {
-                        t.kimlikExpiration
-                      }
-                    </label>
-
-                    <input
-                      id="kimlikExpirationDate"
-                      name="kimlikExpirationDate"
-                      type="date"
-                      defaultValue={
-                        requestData.kimlikExpirationDate
-                      }
-                      required
-                      className={
-                        inputClassName
-                      }
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-800">
-                    {t.noKimlikInfo}
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="insuranceStartDate"
-                      className="mb-2 block font-medium text-slate-800"
-                    >
-                      {t.startDate}
-                    </label>
-
-                    <input
-                      id="insuranceStartDate"
-                      name="insuranceStartDate"
-                      type="date"
-                      min={today}
-                      defaultValue={
-                        requestData.insuranceStartDate
-                      }
-                      required
-                      className={
-                        inputClassName
-                      }
-                    />
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      {t.startDateHelp}
-                    </p>
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label
-                  htmlFor="passportNumber"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {t.passportNumber}
-                </label>
-
-                <input
-                  id="passportNumber"
-                  name="passportNumber"
-                  type="text"
-                  defaultValue={
-                    requestData.passportNumber
-                  }
-                  required
-                  className={
-                    inputClassName
-                  }
-                />
-
-                <p className="mt-2 text-sm text-slate-500">
-                  {t.passportHelp}
-                </p>
-              </div>
-            </section>
-
-            <section className="space-y-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {t.durationTitle}
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-600">
-                  {t.durationHelp}
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    changeDuration(1)
-                  }
-                  className={`rounded-xl border px-4 py-4 text-left transition ${
-                    requestData.duration ===
-                    1
-                      ? "border-blue-700 bg-white ring-2 ring-blue-100"
-                      : "border-slate-300 bg-white"
-                  }`}
-                >
-                  <span className="block font-semibold text-slate-900">
-                    {t.oneYear}
-                  </span>
-
-                  <span className="mt-1 block text-sm text-slate-500">
-                    {t.onePolicy}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    changeDuration(2)
-                  }
-                  className={`rounded-xl border px-4 py-4 text-left transition ${
-                    requestData.duration ===
-                    2
-                      ? "border-blue-700 bg-white ring-2 ring-blue-100"
-                      : "border-slate-300 bg-white"
-                  }`}
-                >
-                  <span className="block font-semibold text-slate-900">
-                    {t.twoYears}
-                  </span>
-
-                  <span className="mt-1 block text-sm text-slate-500">
-                    {t.twoPolicies}
-                  </span>
-                </button>
-              </div>
-
-              {priceResult && (
-                <div className="rounded-xl bg-white p-5 shadow-sm">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <p className="text-sm text-slate-500">
-                        {t.retainedAge}
-                      </p>
-
-                      <p className="text-2xl font-bold text-slate-900">
-                        {priceResult.age}{" "}
-                        {priceResult.age >
-                        1
-                          ? t.years
-                          : t.year}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-slate-500">
-                        {t.duration}
-                      </p>
-
-                      <p className="text-2xl font-bold text-slate-900">
-                        {
-                          priceResult.duration
-                        }{" "}
-                        {priceResult.duration ===
-                        2
-                          ? t.years
-                          : t.year}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 border-t border-slate-200 pt-5">
-                    {priceResult.available &&
-                    priceResult.price !==
-                      null ? (
-                      <>
-                        <p className="text-sm text-slate-500">
-                          {
-                            t.totalPrice
+                        <input
+                          id="kimlikNumber"
+                          name="kimlikNumber"
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="off"
+                          maxLength={11}
+                          value={requestData.kimlikNumber}
+                          onChange={(event) =>
+                            handleKimlikChange(
+                              event.target.value,
+                            )
                           }
+                          aria-invalid={
+                            kimlikError
+                              ? "true"
+                              : "false"
+                          }
+                          aria-describedby={
+                            kimlikError
+                              ? "kimlik-error"
+                              : "kimlik-help"
+                          }
+                          required
+                          className={kimlikInputClassName}
+                        />
+
+                        <p
+                          id="kimlik-help"
+                          className="mt-2 text-xs leading-5 text-slate-500"
+                        >
+                          {t.kimlikHelp}
                         </p>
 
-                        <p className="text-4xl font-bold text-blue-700">
-                          {priceResult.price.toLocaleString(
-                            language ===
-                              "en"
-                              ? "en-US"
-                              : language ===
-                                  "tr"
-                                ? "tr-TR"
-                                : "fr-FR",
-                          )}{" "}
-                          TL
+                        {kimlikError && (
+                          <p
+                            id="kimlik-error"
+                            className="mt-2 text-sm font-medium text-red-700"
+                          >
+                            {kimlikError}
+                          </p>
+                        )}
+
+                        <p className="mt-1 text-xs text-slate-400">
+                          {requestData.kimlikNumber.length}/11{" "}
+                          {t.digits}
                         </p>
-                      </>
-                    ) : (
-                      <p className="font-semibold text-amber-700">
-                        {
-                          t.unavailablePrice
-                        }
-                      </p>
-                    )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="kimlikExpirationDate"
+                          className={fieldLabelClassName}
+                        >
+                          {t.kimlikExpiration}
+                        </label>
+
+                        <input
+                          id="kimlikExpirationDate"
+                          name="kimlikExpirationDate"
+                          type="date"
+                          defaultValue={
+                            requestData.kimlikExpirationDate
+                          }
+                          required
+                          className={inputClassName}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="sm:col-span-2">
+                      <div className="rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] px-4 py-3.5 text-sm leading-6 text-[#31513B]">
+                        {t.noKimlikInfo}
+                      </div>
+
+                      <div className="mt-5 max-w-md">
+                        <label
+                          htmlFor="insuranceStartDate"
+                          className={fieldLabelClassName}
+                        >
+                          {t.startDate}
+                        </label>
+
+                        <input
+                          id="insuranceStartDate"
+                          name="insuranceStartDate"
+                          type="date"
+                          min={today}
+                          defaultValue={
+                            requestData.insuranceStartDate
+                          }
+                          required
+                          className={inputClassName}
+                        />
+
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          {t.startDateHelp}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="sm:col-span-2">
+                    <label
+                      htmlFor="passportNumber"
+                      className={fieldLabelClassName}
+                    >
+                      {t.passportNumber}
+                    </label>
+
+                    <input
+                      id="passportNumber"
+                      name="passportNumber"
+                      type="text"
+                      defaultValue={requestData.passportNumber}
+                      required
+                      className={`${inputClassName} uppercase`}
+                    />
+
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      {t.passportHelp}
+                    </p>
                   </div>
                 </div>
-              )}
-            </section>
+              </section>
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    "/demande/etape-1",
-                  )
-                }
-                className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                {t.previous}
-              </button>
+              {/* DURATION + PRICE */}
 
-              <button
-                type="submit"
-                disabled={
-                  !priceResult ||
-                  !priceResult.available ||
-                  priceResult.price ===
-                    null
-                }
-                className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-              >
-                {t.next}
-              </button>
-            </div>
-          </form>
+              <section className="border-t border-slate-100 pt-8">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20] sm:text-2xl">
+                    {t.durationTitle}
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {t.durationHelp}
+                  </p>
+                </div>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      changeDuration(1)
+                    }
+                    className={`rounded-2xl border px-5 py-5 text-left transition ${
+                      requestData.duration ===
+                      1
+                        ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <span className="block text-base font-semibold text-slate-900">
+                      {t.oneYear}
+                    </span>
+
+                    <span className="mt-1.5 block text-sm text-slate-500">
+                      {t.onePolicy}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      changeDuration(2)
+                    }
+                    className={`rounded-2xl border px-5 py-5 text-left transition ${
+                      requestData.duration ===
+                      2
+                        ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <span className="block text-base font-semibold text-slate-900">
+                      {t.twoYears}
+                    </span>
+
+                    <span className="mt-1.5 block text-sm text-slate-500">
+                      {t.twoPolicies}
+                    </span>
+                  </button>
+                </div>
+
+                {priceLoading && (
+                  <div className="mt-5 rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6] px-5 py-4 text-sm font-medium text-[#31513B]">
+                    {language === "fr"
+                      ? "Calcul du tarif..."
+                      : language === "en"
+                        ? "Calculating price..."
+                        : "Fiyat hesaplanıyor..."}
+                  </div>
+                )}
+
+                {!priceLoading && priceResult && (
+                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[#DCE9DD] bg-[#F7FAF6]">
+                    <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                          {t.retainedAge}
+                        </p>
+
+                        <p className="mt-2 text-2xl font-semibold text-slate-900">
+                          {priceResult.age}{" "}
+                          {priceResult.age >
+                          1
+                            ? t.years
+                            : t.year}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                          {t.duration}
+                        </p>
+
+                        <p className="mt-2 text-2xl font-semibold text-slate-900">
+                          {priceResult.duration}{" "}
+                          {priceResult.duration ===
+                          2
+                            ? t.years
+                            : t.year}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-[#DCE9DD] bg-white px-5 py-5 sm:px-6">
+                      {priceResult.available &&
+                      priceResult.price !==
+                        null ? (
+                        <>
+                          <p className="text-sm font-medium text-slate-500">
+                            {t.totalPrice}
+                          </p>
+
+                          <p className="mt-1 text-4xl font-semibold tracking-[-0.04em] text-[#0B5D3B]">
+                            {priceResult.price.toLocaleString(
+                              language ===
+                                "en"
+                                ? "en-US"
+                                : language ===
+                                    "tr"
+                                  ? "tr-TR"
+                                  : "fr-FR",
+                            )}{" "}
+                            <span className="text-2xl">
+                              TL
+                            </span>
+                          </p>
+                        </>
+                      ) : (
+                        <p className="font-semibold text-amber-700">
+                          {t.unavailablePrice}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* ACTIONS */}
+
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      "/demande/etape-1",
+                    )
+                  }
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                >
+                  {t.previous}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={
+                    priceLoading ||
+                    !priceResult ||
+                    !priceResult.available ||
+                    priceResult.price ===
+                      null
+                  }
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                >
+                  {t.next}
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
       </div>
     </main>

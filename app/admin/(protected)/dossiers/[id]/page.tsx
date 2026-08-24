@@ -303,14 +303,14 @@ function getActivityDotClassName(
       "policy_replaced",
     )
   ) {
-    return "bg-green-500";
+    return "bg-[#0B5D3B]";
   }
 
   if (
     action ===
     "policy_preparation_started"
   ) {
-    return "bg-blue-500";
+    return "bg-[#0B5D3B]";
   }
 
   if (
@@ -324,7 +324,7 @@ function getActivityDotClassName(
     action ===
     "note_added"
   ) {
-    return "bg-violet-500";
+    return "bg-[#31513B]";
   }
 
   if (
@@ -333,7 +333,7 @@ function getActivityDotClassName(
     action ===
       "request_unassigned"
   ) {
-    return "bg-cyan-500";
+    return "bg-[#7AA88A]";
   }
 
   return "bg-slate-500";
@@ -969,38 +969,38 @@ export default async function DossierPage({
     false;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1500px]">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/admin/dossiers"
-            className="font-medium text-blue-700 hover:underline"
+            className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
           >
             ← Retour aux dossiers
           </Link>
 
           <Link
             href="/admin/tableau-de-bord"
-            className="font-medium text-blue-700 hover:underline"
+            className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
           >
             Tableau de bord
           </Link>
         </div>
 
-        <header className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Dossier d’assurance
               </p>
 
-              <h1 className="mt-2 break-all text-3xl font-bold text-slate-900">
+              <h1 className="mt-3 break-all text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 {
                   insuranceRequest.request_code
                 }
               </h1>
 
-              <p className="mt-2 text-slate-600">
+              <p className="mt-3 text-sm leading-7 text-slate-500">
                 Créé le{" "}
                 {formatDate(
                   insuranceRequest.created_at,
@@ -1018,10 +1018,10 @@ export default async function DossierPage({
           </div>
         </header>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-          <div className="space-y-6">
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="space-y-5">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Informations du client
               </h2>
 
@@ -1089,23 +1089,23 @@ export default async function DossierPage({
                   Adresse
                 </p>
 
-                <p className="mt-1 font-semibold leading-7 text-slate-900">
+                <p className="mt-1 font-semibold leading-7 text-[#102B20]">
                   {address ||
                     "—"}
                 </p>
               </div>
             </section>
 
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Identité et assurance
               </h2>
 
               <div
                 className={`mt-5 rounded-xl px-4 py-3 text-sm font-semibold ${
                   hasKimlik
-                    ? "bg-green-50 text-green-700"
-                    : "bg-blue-50 text-blue-700"
+                    ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                    : "border-blue-200 bg-blue-50 text-blue-700"
                 }`}
               >
                 {hasKimlik
@@ -1172,8 +1172,8 @@ export default async function DossierPage({
               </dl>
             </section>
 
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Documents
               </h2>
 
@@ -1222,7 +1222,7 @@ export default async function DossierPage({
                             }
                             target="_blank"
                             rel="noreferrer"
-                            className="shrink-0 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-center text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                            className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
                           >
                             Ouvrir
                           </a>
@@ -1252,7 +1252,7 @@ export default async function DossierPage({
             />
           </div>
 
-          <aside className="space-y-6">
+          <aside className="space-y-5">
             <AssignAgent
               requestId={
                 insuranceRequest.id
@@ -1267,8 +1267,8 @@ export default async function DossierPage({
               }
             />
 
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Paiement
               </h2>
 
@@ -1367,8 +1367,8 @@ export default async function DossierPage({
               />
             )}
 
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-[#102B20]">
                 Polices enregistrées
               </h2>
 
@@ -1383,7 +1383,7 @@ export default async function DossierPage({
                         key={
                           policyYear
                         }
-                        className="rounded-xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-700"
+                        className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]"
                       >
                         ✓ Police année{" "}
                         {
@@ -1400,9 +1400,9 @@ export default async function DossierPage({
               )}
             </section>
 
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-semibold text-[#102B20]">
                   Historique
                 </h2>
 
@@ -1493,8 +1493,8 @@ export default async function DossierPage({
               )}
             </section>
 
-            <section className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-[#102B20]">
                 Dernière mise à jour
               </h2>
 
@@ -1529,7 +1529,7 @@ function Information({
         {label}
       </dt>
 
-      <dd className="mt-1 break-words font-semibold text-slate-900">
+      <dd className="mt-1 break-words font-semibold text-[#102B20]">
         {value === null ||
         value === undefined ||
         value === ""

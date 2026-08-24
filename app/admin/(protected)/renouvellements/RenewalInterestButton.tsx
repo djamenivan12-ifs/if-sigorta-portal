@@ -84,7 +84,7 @@ export default function RenewalInterestButton({
         disabled={
           loading
         }
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-green-200 bg-green-50 px-5 text-sm font-semibold text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading
           ? "Mise à jour..."

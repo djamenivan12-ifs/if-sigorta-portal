@@ -566,6 +566,9 @@ export function InsuranceRequestProvider({
               ),
           );
 
+        let nextPendingCancellation =
+          pendingCancellation;
+
         /*
          * Avant de retirer la référence
          * du dossier courant, on la
@@ -581,75 +584,106 @@ export function InsuranceRequestProvider({
          */
 
         if (
-          dossierWasModified
+          dossierWasModified &&
+          !nextPendingCancellation
         ) {
+          nextPendingCancellation = {
+            requestId:
+              currentData.requestId,
+
+            requestCode:
+              currentData.requestCode,
+
+            whatsappCountryCode:
+              currentData.whatsappCountryCode,
+
+            whatsappNumber:
+              currentData.whatsappNumber,
+          };
+
           setPendingCancellation(
-            (
-              currentPending,
-            ) => {
-              /*
-               * Si un dossier attend déjà
-               * d'être annulé, on ne perd
-               * pas sa référence.
-               */
-
-              if (
-                currentPending
-              ) {
-                return currentPending;
-              }
-
-              return {
-                requestId:
-                  currentData.requestId,
-
-                requestCode:
-                  currentData.requestCode,
-
-                whatsappCountryCode:
-                  currentData.whatsappCountryCode,
-
-                whatsappNumber:
-                  currentData.whatsappNumber,
-              };
-            },
+            nextPendingCancellation,
           );
         }
 
-        return {
-          ...currentData,
-          ...values,
+        const nextRequestData:
+          InsuranceRequestData = {
+            ...currentData,
+            ...values,
 
-          address:
-            values.address
-              ? {
-                  ...currentData.address,
-                  ...values.address,
-                }
-              : currentData.address,
+            address:
+              values.address
+                ? {
+                    ...currentData.address,
+                    ...values.address,
+                  }
+                : currentData.address,
 
-          /*
-           * Si le dossier est devenu
-           * obsolète, l'étape 4 devra
-           * en créer un nouveau.
-           */
+            /*
+             * Si le dossier est devenu
+             * obsolète, l'étape 4 devra
+             * en créer un nouveau.
+             */
 
-          requestId:
-            dossierWasModified
-              ? ""
-              : (
-                  values.requestId ??
-                  currentData.requestId
-                ),
+            requestId:
+              dossierWasModified
+                ? ""
+                : (
+                    values.requestId ??
+                    currentData.requestId
+                  ),
 
-          requestCode:
-            dossierWasModified
-              ? ""
-              : (
-                  values.requestCode ??
-                  currentData.requestCode
-                ),
-        };
+            requestCode:
+              dossierWasModified
+                ? ""
+                : (
+                    values.requestCode ??
+                    currentData.requestCode
+                  ),
+          };
+
+        /*
+         * Sauvegarde immédiate.
+         *
+         * Cette écriture ne dépend pas du
+         * useEffect de sauvegarde automatique.
+         * Ainsi, un router.push() exécuté juste
+         * après updateRequestData() ne peut pas
+         * faire perdre les données de l'étape
+         * précédente.
+         */
+
+        if (
+          typeof window !==
+          "undefined"
+        ) {
+          try {
+            const storedData:
+              StoredSessionData = {
+                requestData:
+                  createStoredRequestData(
+                    nextRequestData,
+                  ),
+
+                pendingCancellation:
+                  nextPendingCancellation,
+              };
+
+            window.sessionStorage.setItem(
+              STORAGE_KEY,
+              JSON.stringify(
+                storedData,
+              ),
+            );
+          } catch (error) {
+            console.error(
+              "Impossible de sauvegarder immédiatement la demande d’assurance :",
+              error,
+            );
+          }
+        }
+
+        return nextRequestData;
       },
     );
   }

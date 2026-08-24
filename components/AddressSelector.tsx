@@ -456,7 +456,7 @@ export default function AddressSelector({
 
   return (
     <section>
-      <h2 className="text-xl font-bold text-slate-900">
+      <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
         {t.title}
       </h2>
 
@@ -467,7 +467,7 @@ export default function AddressSelector({
       </p>
 
       {errorMessage && (
-        <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {
             errorMessage
           }
@@ -575,7 +575,7 @@ export default function AddressSelector({
                   event.target.value,
               })
             }
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
           />
         </div>
 
@@ -606,7 +606,7 @@ export default function AddressSelector({
                     event.target.value,
                 })
               }
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
           </div>
 
@@ -635,7 +635,7 @@ export default function AddressSelector({
                     event.target.value,
                 })
               }
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
             />
           </div>
         </div>

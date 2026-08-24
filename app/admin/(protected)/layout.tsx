@@ -2,8 +2,7 @@ import type {
   ReactNode,
 } from "react";
 
-import Header from "@/components/admin/layout/Header";
-import Sidebar from "@/components/admin/layout/Sidebar";
+import AdminShell from "@/components/admin/layout/AdminShell";
 
 import {
   requireRole,
@@ -113,12 +112,6 @@ export default async function ProtectedAdminLayout({
       "admin",
     ]);
 
-  /*
-   * ============================================
-   * RENOUVELLEMENTS J-30
-   * ============================================
-   */
-
   let urgentRenewalCount =
     0;
 
@@ -178,11 +171,6 @@ export default async function ProtectedAdminLayout({
               return false;
             }
 
-            /*
-             * Un agent voit :
-             * - ses dossiers
-             * - les dossiers non attribués
-             */
             if (
               role ===
                 "agent" &&
@@ -206,11 +194,6 @@ export default async function ProtectedAdminLayout({
               return false;
             }
 
-            /*
-             * À partir de J-30.
-             * Les assurances déjà expirées
-             * restent également visibles.
-             */
             return (
               daysRemaining <=
               30
@@ -221,10 +204,6 @@ export default async function ProtectedAdminLayout({
   } catch (
     error
   ) {
-    /*
-     * Une erreur du compteur renouvellements
-     * ne doit jamais bloquer l'espace admin.
-     */
     console.error(
       "Erreur inattendue compteur renouvellements :",
       error,
@@ -234,24 +213,6 @@ export default async function ProtectedAdminLayout({
       0;
   }
 
-  /*
-   * ============================================
-   * NOTIFICATIONS GLOBALES
-   * ============================================
-   *
-   * Le helper gère déjà :
-   *
-   * - dossiers nécessitant une action
-   * - délais de traitement
-   * - paiements refusés
-   * - renouvellements J-30
-   * - priorité watch / late / critical
-   *
-   * Le helper possède également son propre
-   * try/catch : une erreur ne bloque donc
-   * pas le layout admin.
-   */
-
   const notificationSummary =
     await getNotificationSummary({
       role,
@@ -260,44 +221,20 @@ export default async function ProtectedAdminLayout({
     });
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* SIDEBAR DESKTOP */}
-
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-72">
-        <Sidebar
-          role={
-            role
-          }
-          urgentRenewalCount={
-            urgentRenewalCount
-          }
-        />
-      </div>
-
-      {/* CONTENU PRINCIPAL */}
-
-      <div className="min-h-screen lg:pl-72">
-        <Header
-          userEmail={
-            user.email
-          }
-          role={
-            role
-          }
-          notificationCount={
-            notificationSummary.count
-          }
-          notificationLevel={
-            notificationSummary.level
-          }
-        />
-
-        <div className="min-h-[calc(100vh-5rem)]">
-          {
-            children
-          }
-        </div>
-      </div>
-    </div>
+    <AdminShell
+      role={role}
+      userEmail={user.email}
+      urgentRenewalCount={
+        urgentRenewalCount
+      }
+      notificationCount={
+        notificationSummary.count
+      }
+      notificationLevel={
+        notificationSummary.level
+      }
+    >
+      {children}
+    </AdminShell>
   );
 }

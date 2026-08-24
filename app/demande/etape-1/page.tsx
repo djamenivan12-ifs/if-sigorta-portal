@@ -441,350 +441,391 @@ export default function Etape1Page() {
   }
 
   const inputClassName =
-    "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100";
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+
+  const fieldLabelClassName =
+    "mb-2 block text-sm font-semibold text-slate-700";
+
+  const formEyebrow =
+    language === "fr"
+      ? "Votre demande"
+      : language === "en"
+        ? "Your application"
+        : "Başvurunuz";
+
+  const sideTitle =
+    language === "fr"
+      ? "Une demande simple, étape par étape."
+      : language === "en"
+        ? "A simple application, step by step."
+        : "Kolay bir başvuru, adım adım.";
+
+  const sideText =
+    language === "fr"
+      ? "Vos informations sont enregistrées au fur et à mesure. Vous pourrez continuer votre demande sans tout recommencer."
+      : language === "en"
+        ? "Your information is saved as you go. You can continue your application without starting over."
+        : "Bilgileriniz ilerledikçe kaydedilir. Başvurunuza baştan başlamadan devam edebilirsiniz.";
+
+  const exactInfo =
+    language === "fr"
+      ? "Utilisez exactement les informations figurant sur vos documents."
+      : language === "en"
+        ? "Use exactly the information shown on your official documents."
+        : "Resmi belgelerinizde yer alan bilgileri aynen kullanın.";
+
+  const protectedData =
+    language === "fr"
+      ? "Vos informations sont utilisées uniquement pour le traitement de votre demande."
+      : language === "en"
+        ? "Your information is used only to process your insurance application."
+        : "Bilgileriniz yalnızca sigorta başvurunuzun işlenmesi için kullanılır.";
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-3xl">
-        <a
-          href="/"
-          className="mb-6 inline-block font-medium text-blue-700 hover:underline"
-        >
-          {
-            t.backHome
-          }
-        </a>
+    <main className="min-h-screen bg-[#F6F8F5]">
+      {/* TOP BAR */}
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-10">
-          <div className="mb-8">
-            <p className="mb-2 text-sm font-semibold text-blue-700">
-              {
-                t.step
-              }
-            </p>
+      <div className="border-b border-slate-200/80 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+          <a
+  href="/"
+  className="flex items-center"
+  aria-label="IF Sigorta"
+>
+  <img
+    src="/if-sigorta-logo-light.png"
+    alt="IF Sigorta"
+    className="h-[72px] w-auto object-contain object-left sm:h-[82px]"
+  />
+</a>
 
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-1/5 rounded-full bg-blue-700" />
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-bold text-slate-900">
-            {
-              t.title
-            }
-          </h1>
-
-          <p className="mt-2 text-slate-600">
-            {
-              t.description
-            }
-          </p>
-
-          <form
-            onSubmit={
-              handleSubmit
-            }
-            className="mt-8 space-y-8"
+          <a
+            href="/"
+            className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
           >
-            <section className="space-y-5">
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {
-                    t.firstName
-                  }
-                </label>
+            {t.backHome}
+          </a>
+        </div>
+      </div>
 
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  value={
-                    requestData.firstName ??
-                    ""
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    updateRequestData({
-                      firstName:
-                        toUpperCaseValue(
-                          event.target.value,
-                        ),
-                    })
-                  }
-                  required
-                  autoComplete="given-name"
-                  className={`${inputClassName} uppercase`}
-                />
+      {/* PAGE */}
+
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
+          {/* LEFT PANEL */}
+
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <div className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 lg:min-h-[560px] lg:px-8 lg:py-10">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
+              <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
+
+              <div className="relative z-10 flex h-full flex-col">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#B8E83D]">
+                    {formEyebrow}
+                  </p>
+
+                  <p className="mt-4 text-sm font-semibold text-white/60">
+                    {t.step}
+                  </p>
+
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/15">
+                    <div className="h-full w-1/5 rounded-full bg-[#B8E83D]" />
+                  </div>
+
+                  <h2 className="mt-8 max-w-sm text-3xl font-semibold leading-[1.05] tracking-[-0.04em] sm:text-4xl">
+                    {sideTitle}
+                  </h2>
+
+                  <p className="mt-5 max-w-sm text-sm leading-7 text-white/65 sm:text-base">
+                    {sideText}
+                  </p>
+                </div>
+
+                <div className="mt-10 space-y-4 lg:mt-auto">
+                  <div className="flex gap-3 border-t border-white/10 pt-5">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {exactInfo}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {protectedData}
+                    </p>
+                  </div>
+                </div>
               </div>
-
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {
-                    t.lastName
-                  }
-                </label>
-
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  value={
-                    requestData.lastName ??
-                    ""
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    updateRequestData({
-                      lastName:
-                        toUpperCaseValue(
-                          event.target.value,
-                        ),
-                    })
-                  }
-                  required
-                  autoComplete="family-name"
-                  className={`${inputClassName} uppercase`}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="fatherName"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {
-                    t.fatherName
-                  }
-                </label>
-
-                <input
-                  id="fatherName"
-                  name="fatherName"
-                  type="text"
-                  value={
-                    requestData.fatherName ??
-                    ""
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    updateRequestData({
-                      fatherName:
-                        toUpperCaseValue(
-                          event.target.value,
-                        ),
-                    })
-                  }
-                  required
-                  className={`${inputClassName} uppercase`}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="birthDate"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {
-                    t.birthDate
-                  }
-                </label>
-
-                <input
-                  id="birthDate"
-                  name="birthDate"
-                  type="date"
-                  defaultValue={
-                    requestData.birthDate ??
-                    ""
-                  }
-                  required
-                  className={
-                    inputClassName
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="gender"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {
-                    t.gender
-                  }
-                </label>
-
-                <select
-                  id="gender"
-                  name="gender"
-                  defaultValue={
-                    requestData.gender ??
-                    ""
-                  }
-                  required
-                  className={
-                    inputClassName
-                  }
-                >
-                  <option
-                    value=""
-                    disabled
-                  >
-                    {
-                      t.select
-                    }
-                  </option>
-
-                  <option value="male">
-                    {
-                      t.male
-                    }
-                  </option>
-
-                  <option value="female">
-                    {
-                      t.female
-                    }
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="nationality"
-                  className="mb-2 block font-medium text-slate-800"
-                >
-                  {
-                    t.nationality
-                  }
-                </label>
-
-                <select
-                  id="nationality"
-                  name="nationality"
-                  value={
-                    requestData.nationality ??
-                    ""
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    updateRequestData({
-                      nationality:
-                        event.target.value,
-                    })
-                  }
-                  required
-                  className={
-                    inputClassName
-                  }
-                >
-                  <option
-                    value=""
-                    disabled
-                  >
-                    {
-                      language === "fr"
-                        ? "Sélectionner un pays"
-                        : language === "en"
-                          ? "Select a country"
-                          : "Ülke seçin"
-                    }
-                  </option>
-
-                  {countries.map(
-                    (
-                      country,
-                    ) => (
-                      <option
-                        key={
-                          country.value
-                        }
-                        value={
-                          country.value
-                        }
-                      >
-                        {
-                          country[
-                            language
-                          ]
-                        }
-                      </option>
-                    ),
-                  )}
-                </select>
-              </div>
-
-              <PhoneInput
-                countryCode={
-                  requestData.whatsappCountryCode ??
-                  "+90"
-                }
-                phoneNumber={
-                  requestData.whatsappNumber ??
-                  ""
-                }
-                onCountryCodeChange={(
-                  value,
-                ) =>
-                  updateRequestData({
-                    whatsappCountryCode:
-                      value,
-                  })
-                }
-                onPhoneNumberChange={(
-                  value,
-                ) =>
-                  updateRequestData({
-                    whatsappNumber:
-                      value,
-                  })
-                }
-              />
-            </section>
-
-            <AddressSelector
-              value={
-                requestData.address
-              }
-              onChange={(
-                address,
-              ) =>
-                updateRequestData({
-                  address,
-                })
-              }
-            />
-
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <a
-                href="/"
-                className="rounded-xl border border-slate-300 px-6 py-3 text-center font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                {
-                  t.cancel
-                }
-              </a>
-
-              <button
-                type="submit"
-                className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white transition hover:bg-blue-800"
-              >
-                {
-                  t.next
-                }
-              </button>
             </div>
-          </form>
+          </aside>
+
+          {/* FORM */}
+
+          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:p-8 lg:p-10">
+            <div className="max-w-2xl">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+                {t.step}
+              </p>
+
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                {t.title}
+              </h1>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+                {t.description}
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="mt-9 space-y-10"
+            >
+              {/* PERSONAL INFORMATION */}
+
+              <section>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="firstName"
+                      className={fieldLabelClassName}
+                    >
+                      {t.firstName}
+                    </label>
+
+                    <input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      value={requestData.firstName ?? ""}
+                      onChange={(event) =>
+                        updateRequestData({
+                          firstName:
+                            toUpperCaseValue(
+                              event.target.value,
+                            ),
+                        })
+                      }
+                      required
+                      autoComplete="given-name"
+                      className={`${inputClassName} uppercase`}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="lastName"
+                      className={fieldLabelClassName}
+                    >
+                      {t.lastName}
+                    </label>
+
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      value={requestData.lastName ?? ""}
+                      onChange={(event) =>
+                        updateRequestData({
+                          lastName:
+                            toUpperCaseValue(
+                              event.target.value,
+                            ),
+                        })
+                      }
+                      required
+                      autoComplete="family-name"
+                      className={`${inputClassName} uppercase`}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label
+                      htmlFor="fatherName"
+                      className={fieldLabelClassName}
+                    >
+                      {t.fatherName}
+                    </label>
+
+                    <input
+                      id="fatherName"
+                      name="fatherName"
+                      type="text"
+                      value={requestData.fatherName ?? ""}
+                      onChange={(event) =>
+                        updateRequestData({
+                          fatherName:
+                            toUpperCaseValue(
+                              event.target.value,
+                            ),
+                        })
+                      }
+                      required
+                      className={`${inputClassName} uppercase`}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="birthDate"
+                      className={fieldLabelClassName}
+                    >
+                      {t.birthDate}
+                    </label>
+
+                    <input
+                      id="birthDate"
+                      name="birthDate"
+                      type="date"
+                      defaultValue={requestData.birthDate ?? ""}
+                      required
+                      className={inputClassName}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="gender"
+                      className={fieldLabelClassName}
+                    >
+                      {t.gender}
+                    </label>
+
+                    <select
+                      id="gender"
+                      name="gender"
+                      defaultValue={requestData.gender ?? ""}
+                      required
+                      className={inputClassName}
+                    >
+                      <option
+                        value=""
+                        disabled
+                      >
+                        {t.select}
+                      </option>
+
+                      <option value="male">
+                        {t.male}
+                      </option>
+
+                      <option value="female">
+                        {t.female}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label
+                      htmlFor="nationality"
+                      className={fieldLabelClassName}
+                    >
+                      {t.nationality}
+                    </label>
+
+                    <select
+                      id="nationality"
+                      name="nationality"
+                      value={requestData.nationality ?? ""}
+                      onChange={(event) =>
+                        updateRequestData({
+                          nationality:
+                            event.target.value,
+                        })
+                      }
+                      required
+                      className={inputClassName}
+                    >
+                      <option
+                        value=""
+                        disabled
+                      >
+                        {language === "fr"
+                          ? "Sélectionner un pays"
+                          : language === "en"
+                            ? "Select a country"
+                            : "Ülke seçin"}
+                      </option>
+
+                      {countries.map((country) => (
+                        <option
+                          key={country.value}
+                          value={country.value}
+                        >
+                          {country[language]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* CONTACT */}
+
+              <section className="border-t border-slate-100 pt-8">
+                <PhoneInput
+                  countryCode={
+                    requestData.whatsappCountryCode ??
+                    "+90"
+                  }
+                  phoneNumber={
+                    requestData.whatsappNumber ??
+                    ""
+                  }
+                  onCountryCodeChange={(value) =>
+                    updateRequestData({
+                      whatsappCountryCode:
+                        value,
+                    })
+                  }
+                  onPhoneNumberChange={(value) =>
+                    updateRequestData({
+                      whatsappNumber:
+                        value,
+                    })
+                  }
+                />
+              </section>
+
+              {/* ADDRESS */}
+
+              <section className="border-t border-slate-100 pt-8">
+                <AddressSelector
+                  value={requestData.address}
+                  onChange={(address) =>
+                    updateRequestData({
+                      address,
+                    })
+                  }
+                />
+              </section>
+
+              {/* ACTIONS */}
+
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
+                <a
+                  href="/"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                >
+                  {t.cancel}
+                </a>
+
+                <button
+                  type="submit"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F]"
+                >
+                  {t.next}
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
       </div>
     </main>

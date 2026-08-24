@@ -5,27 +5,18 @@ export default function Logo() {
   return (
     <Link
       href="/admin/tableau-de-bord"
-      className="group flex items-center gap-3"
+      className="group flex items-center"
+      aria-label="IF Sigorta - Tableau de bord"
     >
-      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition group-hover:shadow-md">
+      <div className="relative h-[82px] w-[220px]">
         <Image
-          src="/if-sigorta-logo.png"
+          src="/if-sigorta-logo-light.png"
           alt="IF Sigorta"
-          width={42}
-          height={42}
+          fill
           priority
-          className="object-contain"
+          sizes="220px"
+          className="object-contain object-left transition duration-200 group-hover:scale-[1.02]"
         />
-      </div>
-
-      <div className="min-w-0">
-        <h1 className="text-base font-bold tracking-tight text-[#2F2963]">
-          IF Sigorta
-        </h1>
-
-        <p className="text-xs text-slate-500">
-          Insurance Portal
-        </p>
       </div>
     </Link>
   );

@@ -382,200 +382,95 @@ export default function BankCard({
     }
   }
 
-  /*
-   * ============================
-   * CHARGEMENT
-   * ============================
-   */
-
-  if (
-    loading
-  ) {
+  if (loading) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="text-xl font-bold text-slate-900">
-          {
-            t.title
-          }
-        </h2>
-
-        <div className="mt-6 rounded-xl bg-slate-50 px-4 py-5 text-sm text-slate-600">
-          {
-            t.loading
-          }
+      <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
+        <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
+        <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+          {t.loading}
         </div>
       </section>
     );
   }
 
-  /*
-   * ============================
-   * ERREUR
-   * ============================
-   */
-
-  if (
-    !bankInformation
-  ) {
+  if (!bankInformation) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="text-xl font-bold text-slate-900">
-          {
-            t.title
-          }
-        </h2>
-
-        <div className="mt-6 rounded-xl bg-red-50 px-4 py-4 text-sm text-red-700">
-          {errorMessage ||
-            t.unavailable}
+      <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
+        <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
+          {errorMessage || t.unavailable}
         </div>
       </section>
     );
   }
-
-  /*
-   * ============================
-   * AFFICHAGE
-   * ============================
-   */
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="text-xl font-bold text-slate-900">
-        {
-          t.title
-        }
-      </h2>
+    <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
+      <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
 
-      <dl className="mt-6 space-y-5">
-        {/* BÉNÉFICIAIRE */}
-
-        <div>
-          <dt className="text-sm text-slate-500">
-            {
-              t.beneficiary
-            }
-          </dt>
-
+      <dl className="mt-6 divide-y divide-slate-100">
+        <div className="py-4 first:pt-0">
+          <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t.beneficiary}</dt>
           <dd className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="break-words font-semibold text-slate-900">
-              {
-                bankInformation.beneficiary
-              }
+            <span className="break-words text-sm font-semibold text-slate-900">
+              {bankInformation.beneficiary}
             </span>
-
             <button
               type="button"
-              onClick={() =>
-                copyText(
-                  bankInformation.beneficiary,
-                  t.beneficiaryCopied,
-                )
-              }
-              className="shrink-0 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              onClick={() => copyText(bankInformation.beneficiary, t.beneficiaryCopied)}
+              className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              {
-                t.copyBeneficiary
-              }
+              {t.copyBeneficiary}
             </button>
           </dd>
         </div>
 
-        {/* BANQUE */}
-
-        <div>
-          <dt className="text-sm text-slate-500">
-            {
-              t.bank
-            }
-          </dt>
-
-          <dd className="mt-1 font-semibold text-slate-900">
-            {
-              bankInformation.bankName
-            }
-          </dd>
+        <div className="py-4">
+          <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t.bank}</dt>
+          <dd className="mt-2 text-sm font-semibold text-slate-900">{bankInformation.bankName}</dd>
         </div>
 
-        {/* IBAN */}
-
-        <div>
-          <dt className="text-sm text-slate-500">
-            {
-              t.iban
-            }
-          </dt>
-
+        <div className="py-4">
+          <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t.iban}</dt>
           <dd className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="break-all font-mono font-semibold text-slate-900">
-              {
-                bankInformation.iban
-              }
+            <span className="break-all font-mono text-sm font-semibold text-slate-900">
+              {bankInformation.iban}
             </span>
-
             <button
               type="button"
               onClick={() =>
-                copyText(
-                  bankInformation.iban.replace(
-                    /\s/g,
-                    "",
-                  ),
-                  t.ibanCopied,
-                )
+                copyText(bankInformation.iban.replace(/\s/g, ""), t.ibanCopied)
               }
-              className="shrink-0 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              {
-                t.copyIban
-              }
+              {t.copyIban}
             </button>
           </dd>
         </div>
 
-        {/* RÉFÉRENCE DU VIREMENT */}
-
-        <div className="border-t border-slate-200 pt-5">
-          <dt className="text-sm text-slate-500">
-            {
-              t.transferReference
-            }
-          </dt>
-
+        <div className="pt-4">
+          <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t.transferReference}</dt>
           <dd className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="break-all font-semibold text-blue-700">
-              {
-                requestCode
-              }
+            <span className="break-all rounded-xl bg-[#EEF6EC] px-3 py-2 font-mono text-sm font-black text-[#0B5D3B]">
+              {requestCode}
             </span>
-
             <button
               type="button"
-              disabled={
-                !requestCode
-              }
-              onClick={() =>
-                copyText(
-                  requestCode,
-                  t.referenceCopied,
-                )
-              }
-              className="shrink-0 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!requestCode}
+              onClick={() => copyText(requestCode, t.referenceCopied)}
+              className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF3E9] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {
-                t.copyReference
-              }
+              {t.copyReference}
             </button>
           </dd>
         </div>
       </dl>
 
-      {/* AVERTISSEMENT */}
-
-      <div className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-        {
-          t.warning
-        }
+      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm leading-6 text-amber-800">
+        {t.warning}
       </div>
     </section>
   );

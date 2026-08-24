@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { logActivity } from "@/lib/activity/logActivity";
-import {
-  calculateInsurancePriceServer,
-} from "@/lib/insurance/calculatePriceServer";
-
+import { calculateInsurancePriceServer } from "@/lib/insurance/calculatePriceServer";
 import {
   consumeRateLimit,
   getClientIp,
 } from "@/lib/security/rateLimit";
-
 import { createServiceClient } from "@/lib/supabase/service";
 
 const BUCKET_NAME = "insurance-documents";
@@ -23,42 +19,10 @@ const ALLOWED_FILE_TYPES = [
 const MAX_FILE_SIZE =
   10 * 1024 * 1024;
 
-const IP_RATE_LIMIT =
-  8;
+const IP_RATE_LIMIT = 8;
 
 const IP_RATE_LIMIT_WINDOW_SECONDS =
   10 * 60;
-
-function rateLimitedResponse(
-  retryAfterSeconds: number,
-) {
-  return NextResponse.json(
-    {
-      success:
-        false,
-
-      error:
-        "Trop de demandes ont été envoyées. Veuillez patienter quelques minutes avant de réessayer.",
-    },
-    {
-      status:
-        429,
-
-      headers: {
-        "Retry-After":
-          String(
-            Math.max(
-              1,
-              retryAfterSeconds,
-            ),
-          ),
-
-        "Cache-Control":
-          "no-store",
-      },
-    },
-  );
-}
 
 type DocumentType =
   | "passport"
@@ -102,7 +66,7 @@ type RequestPayload = {
   calculatedPrice: number;
 };
 
-type UploadedFileData = {
+type UploadedDocumentPayload = {
   documentType: DocumentType;
   storagePath: string;
   originalFileName: string;
@@ -110,61 +74,136 @@ type UploadedFileData = {
   fileSize: number;
 };
 
-/*
- * Nettoie le nom du fichier avant
- * son enregistrement dans Supabase Storage.
- */
-function sanitizeFileName(
-  fileName: string,
-): string {
-  return fileName
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      "",
-    )
-    .replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_",
-    );
+type CreateRequestBody = {
+  payload?: RequestPayload;
+  uploadSessionId?: string;
+  documents?: UploadedDocumentPayload[];
+};
+
+type PreparedDocument = {
+  documentType: DocumentType;
+  sourcePath: string;
+  finalPath: string;
+  originalFileName: string;
+  mimeType: string;
+  fileSize: number;
+};
+
+function rateLimitedResponse(
+  retryAfterSeconds: number,
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      error:
+        "Trop de demandes ont été envoyées. Veuillez patienter quelques minutes avant de réessayer.",
+    },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(
+          Math.max(
+            1,
+            retryAfterSeconds,
+          ),
+        ),
+        "Cache-Control":
+          "no-store",
+      },
+    },
+  );
 }
 
-/*
- * Vérification des fichiers.
- */
-function validateFile(
-  file: File,
-  label: string,
+function isDocumentType(
+  value: unknown,
+): value is DocumentType {
+  return (
+    value === "passport" ||
+    value === "kimlik_front" ||
+    value === "kimlik_back"
+  );
+}
+
+function isValidUploadSessionId(
+  value: unknown,
+): value is string {
+  return (
+    typeof value === "string" &&
+    /^[a-f0-9-]{36}$/i.test(
+      value,
+    )
+  );
+}
+
+function validateUploadedDocument(
+  document: UploadedDocumentPayload,
+  uploadSessionId: string,
 ) {
   if (
-    !ALLOWED_FILE_TYPES.includes(
-      file.type,
+    !isDocumentType(
+      document.documentType,
     )
   ) {
     throw new Error(
-      `${label} : format non accepté. Utilisez PDF, JPG, JPEG ou PNG.`,
-    );
-  }
-
-  if (file.size === 0) {
-    throw new Error(
-      `${label} : le fichier est vide.`,
+      "Type de document invalide.",
     );
   }
 
   if (
-    file.size >
+    !document.originalFileName ||
+    typeof document.originalFileName !==
+      "string"
+  ) {
+    throw new Error(
+      "Nom de fichier manquant.",
+    );
+  }
+
+  if (
+    !ALLOWED_FILE_TYPES.includes(
+      document.mimeType,
+    )
+  ) {
+    throw new Error(
+      `${document.documentType} : format non accepté. Utilisez PDF, JPG, JPEG ou PNG.`,
+    );
+  }
+
+  if (
+    !Number.isFinite(
+      document.fileSize,
+    ) ||
+    document.fileSize <= 0
+  ) {
+    throw new Error(
+      `${document.documentType} : le fichier est vide ou invalide.`,
+    );
+  }
+
+  if (
+    document.fileSize >
     MAX_FILE_SIZE
   ) {
     throw new Error(
-      `${label} : le fichier ne doit pas dépasser 10 Mo.`,
+      `${document.documentType} : le fichier ne doit pas dépasser 10 Mo.`,
+    );
+  }
+
+  const expectedPrefix =
+    `pending/${uploadSessionId}/${document.documentType}/`;
+
+  if (
+    !document.storagePath ||
+    !document.storagePath.startsWith(
+      expectedPrefix,
+    )
+  ) {
+    throw new Error(
+      "Chemin de document invalide.",
     );
   }
 }
 
-/*
- * Vérification d'une date.
- */
 function isValidDate(
   value: string,
 ): boolean {
@@ -181,19 +220,12 @@ function isValidDate(
   );
 }
 
-/*
- * Date du jour au format YYYY-MM-DD.
- */
 function getTodayDate(): string {
   return new Date()
     .toISOString()
     .split("T")[0];
 }
 
-/*
- * Génération sécurisée du code dossier.
- * Le navigateur ne choisit jamais ce code.
- */
 function generateRequestCode(): string {
   const year =
     new Date().getFullYear();
@@ -207,94 +239,22 @@ function generateRequestCode(): string {
   return `IF-${year}-${randomPart}`;
 }
 
-/*
- * Upload d'un document vers
- * Supabase Storage.
- */
-async function uploadFile({
-  serviceClient,
-  requestId,
-  documentType,
-  file,
-}: {
-  serviceClient: ReturnType<
-    typeof createServiceClient
-  >;
+function buildFinalStoragePath(
+  requestId: string,
+  document: UploadedDocumentPayload,
+) {
+  const fileName =
+    document.storagePath
+      .split("/")
+      .pop() ||
+    `${Date.now()}-${crypto.randomUUID()}`;
 
-  requestId: string;
-
-  documentType: DocumentType;
-
-  file: File;
-}): Promise<UploadedFileData> {
-  validateFile(
-    file,
-    documentType,
-  );
-
-  const safeName =
-    sanitizeFileName(
-      file.name,
-    );
-
-  const storagePath =
-    `${requestId}/${documentType}/` +
-    `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-
-  const fileBuffer =
-    await file.arrayBuffer();
-
-  const {
-    error: uploadError,
-  } = await serviceClient.storage
-    .from(BUCKET_NAME)
-    .upload(
-      storagePath,
-      fileBuffer,
-      {
-        contentType:
-          file.type,
-
-        cacheControl:
-          "3600",
-
-        upsert: false,
-      },
-    );
-
-  if (uploadError) {
-    throw new Error(
-      `Téléversement impossible pour ${documentType} : ${uploadError.message}`,
-    );
-  }
-
-  return {
-    documentType,
-
-    storagePath,
-
-    originalFileName:
-      file.name,
-
-    mimeType:
-      file.type,
-
-    fileSize:
-      file.size,
-  };
+  return `${requestId}/${document.documentType}/${fileName}`;
 }
 
-/*
- * Création d'une nouvelle demande.
- */
 export async function POST(
   request: Request,
 ) {
-  /*
-   * ============================================
-   * RATE LIMIT PAR ADRESSE IP
-   * ============================================
-   */
   const clientIp =
     getClientIp(
       request,
@@ -304,13 +264,10 @@ export async function POST(
     await consumeRateLimit({
       namespace:
         "request-create-ip",
-
       identifier:
         clientIp,
-
       limit:
         IP_RATE_LIMIT,
-
       windowSeconds:
         IP_RATE_LIMIT_WINDOW_SECONDS,
     });
@@ -326,11 +283,6 @@ export async function POST(
   const serviceClient =
     createServiceClient();
 
-  /*
-   * Ces variables permettent
-   * d'annuler les opérations
-   * si une erreur survient.
-   */
   let createdClientId:
     | string
     | null = null;
@@ -339,27 +291,43 @@ export async function POST(
     | string
     | null = null;
 
-  const uploadedStoragePaths:
+  const pendingStoragePaths:
+    string[] = [];
+
+  const movedStoragePaths:
     string[] = [];
 
   try {
     /*
-     * Lecture du formulaire.
+     * ============================
+     * LECTURE DU PETIT JSON
+     * ============================
+     *
+     * Les fichiers ne transitent plus
+     * par cette route. Ils ont déjà été
+     * téléversés directement dans
+     * Supabase Storage.
      */
-    const formData =
-      await request.formData();
+    const body =
+      (await request.json()) as CreateRequestBody;
 
-    const payloadRaw =
-      formData.get(
-        "payload",
-      );
+    const payload =
+      body.payload;
 
-    if (
-      typeof payloadRaw !==
-      "string"
-    ) {
+    const uploadSessionId =
+      body.uploadSessionId;
+
+    const documents =
+      Array.isArray(
+        body.documents,
+      )
+        ? body.documents
+        : [];
+
+    if (!payload) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "Les données de la demande sont absentes.",
         },
@@ -369,22 +337,16 @@ export async function POST(
       );
     }
 
-    /*
-     * Conversion du payload JSON.
-     */
-    let payload:
-      RequestPayload;
-
-    try {
-      payload =
-        JSON.parse(
-          payloadRaw,
-        ) as RequestPayload;
-    } catch {
+    if (
+      !isValidUploadSessionId(
+        uploadSessionId,
+      )
+    ) {
       return NextResponse.json(
         {
+          success: false,
           error:
-            "Les données de la demande sont invalides.",
+            "La session de téléversement est invalide.",
         },
         {
           status: 400,
@@ -392,36 +354,47 @@ export async function POST(
       );
     }
 
-    /*
-     * Récupération des fichiers.
-     */
-    const passportFile =
-      formData.get(
-        "passportFile",
+    for (
+      const document of
+      documents
+    ) {
+      validateUploadedDocument(
+        document,
+        uploadSessionId,
       );
 
-    const kimlikFrontFile =
-      formData.get(
-        "kimlikFrontFile",
+      pendingStoragePaths.push(
+        document.storagePath,
+      );
+    }
+
+    const passportDocument =
+      documents.find(
+        (document) =>
+          document.documentType ===
+          "passport",
       );
 
-    const kimlikBackFile =
-      formData.get(
-        "kimlikBackFile",
+    const kimlikFrontDocument =
+      documents.find(
+        (document) =>
+          document.documentType ===
+          "kimlik_front",
       );
 
+    const kimlikBackDocument =
+      documents.find(
+        (document) =>
+          document.documentType ===
+          "kimlik_back",
+      );
 
-    /*
-     * Passeport obligatoire.
-     */
     if (
-      !(
-        passportFile instanceof
-        File
-      )
+      !passportDocument
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "Le passeport est obligatoire.",
         },
@@ -431,41 +404,35 @@ export async function POST(
       );
     }
 
-
-    /*
-     * Kimlik recto/verso obligatoires
-     * seulement si le client possède
-     * déjà un Kimlik.
-     */
-    if (payload.hasKimlik) {
-      if (
-        !(
-          kimlikFrontFile instanceof
-          File
-        ) ||
-        !(
-          kimlikBackFile instanceof
-          File
-        )
-      ) {
-        return NextResponse.json(
-          {
-            error:
-              "Le Kimlik recto et le Kimlik verso sont obligatoires.",
-          },
-          {
-            status: 400,
-          },
-        );
-      }
+    if (
+      payload.hasKimlik &&
+      (
+        !kimlikFrontDocument ||
+        !kimlikBackDocument
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Le Kimlik recto et le Kimlik verso sont obligatoires.",
+        },
+        {
+          status: 400,
+        },
+      );
     }
 
     /*
-     * Normalisation des données.
+     * ============================
+     * NORMALISATION
+     * ============================
      */
     const preferredLanguage =
-      payload.preferredLanguage === "en" ||
-      payload.preferredLanguage === "tr"
+      payload.preferredLanguage ===
+        "en" ||
+      payload.preferredLanguage ===
+        "tr"
         ? payload.preferredLanguage
         : "fr";
 
@@ -520,10 +487,6 @@ export async function POST(
         .toUpperCase() ??
       "";
 
-    /*
-     * Vérification des informations
-     * obligatoires.
-     */
     if (
       !lastName ||
       !firstName ||
@@ -537,6 +500,7 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "Certaines informations obligatoires sont absentes.",
         },
@@ -546,9 +510,6 @@ export async function POST(
       );
     }
 
-    /*
-     * Vérification du sexe.
-     */
     if (
       payload.gender !==
         "male" &&
@@ -557,6 +518,7 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "Le sexe renseigné est invalide.",
         },
@@ -566,15 +528,13 @@ export async function POST(
       );
     }
 
-    /*
-     * Vérification de la durée.
-     */
     if (
       payload.duration !== 1 &&
       payload.duration !== 2
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "La durée de l’assurance est invalide.",
         },
@@ -585,8 +545,6 @@ export async function POST(
     }
 
     /*
-     * Recalcul sécurisé du prix côté serveur.
-     *
      * Le prix envoyé par le navigateur
      * n'est jamais considéré comme fiable.
      */
@@ -604,6 +562,7 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "Le tarif d’assurance n’est pas disponible pour cet âge.",
         },
@@ -619,10 +578,6 @@ export async function POST(
     const calculatedPrice =
       serverPriceResult.price;
 
-    /*
-     * Vérification de la date
-     * de naissance.
-     */
     if (
       !isValidDate(
         payload.birthDate,
@@ -630,6 +585,7 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "La date de naissance est invalide.",
         },
@@ -639,9 +595,6 @@ export async function POST(
       );
     }
 
-    /*
-     * Vérification de l'adresse.
-     */
     if (
       !payload.address
         ?.provinceId ||
@@ -658,6 +611,7 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "L’adresse complète est obligatoire.",
         },
@@ -667,11 +621,9 @@ export async function POST(
       );
     }
 
-    /*
-     * Cas 1 :
-     * le client possède déjà un Kimlik.
-     */
-    if (payload.hasKimlik) {
+    if (
+      payload.hasKimlik
+    ) {
       const kimlikNumber =
         payload.kimlikNumber
           ?.replace(
@@ -687,6 +639,7 @@ export async function POST(
       ) {
         return NextResponse.json(
           {
+            success: false,
             error:
               "Le numéro de Kimlik doit contenir exactement 11 chiffres.",
           },
@@ -701,6 +654,7 @@ export async function POST(
       ) {
         return NextResponse.json(
           {
+            success: false,
             error:
               "La date d’expiration du Kimlik est obligatoire.",
           },
@@ -717,6 +671,7 @@ export async function POST(
       ) {
         return NextResponse.json(
           {
+            success: false,
             error:
               "La date d’expiration du Kimlik est invalide.",
           },
@@ -726,15 +681,12 @@ export async function POST(
         );
       }
     } else {
-      /*
-       * Cas 2 :
-       * première demande de Kimlik.
-       */
       if (
         !payload.insuranceStartDate
       ) {
         return NextResponse.json(
           {
+            success: false,
             error:
               "La date souhaitée de début de l’assurance est obligatoire.",
           },
@@ -751,6 +703,7 @@ export async function POST(
       ) {
         return NextResponse.json(
           {
+            success: false,
             error:
               "La date souhaitée de début de l’assurance est invalide.",
           },
@@ -766,6 +719,7 @@ export async function POST(
       ) {
         return NextResponse.json(
           {
+            success: false,
             error:
               "La date souhaitée de début de l’assurance ne peut pas être dans le passé.",
           },
@@ -774,33 +728,6 @@ export async function POST(
           },
         );
       }
-    }
-
-    /*
-     * Vérification des fichiers.
-     */
-    validateFile(
-      passportFile,
-      "Passeport",
-    );
-
-
-    if (
-      payload.hasKimlik &&
-      kimlikFrontFile instanceof
-        File &&
-      kimlikBackFile instanceof
-        File
-    ) {
-      validateFile(
-        kimlikFrontFile,
-        "Kimlik recto",
-      );
-
-      validateFile(
-        kimlikBackFile,
-        "Kimlik verso",
-      );
     }
 
     /*
@@ -836,6 +763,7 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          success: false,
           error:
             "Ce code de dossier existe déjà. Recommencez la soumission.",
         },
@@ -846,23 +774,10 @@ export async function POST(
     }
 
     /*
-     * ============================================
-     * RECHERCHE / CRÉATION DU CLIENT
-     * ============================================
-     *
-     * Objectif :
-     * éviter de créer plusieurs fiches CRM
-     * pour la même personne.
-     *
-     * Priorité :
-     * 1. Kimlik si disponible
-     * 2. Passeport sinon
-     *
-     * Une correspondance n'est acceptée que si
-     * le nom, le prénom et la date de naissance
-     * correspondent également.
+     * ============================
+     * RECHERCHE DU CLIENT EXISTANT
+     * ============================
      */
-
     const normalizedKimlikNumber =
       payload.hasKimlik
         ? payload.kimlikNumber.replace(
@@ -1019,36 +934,17 @@ export async function POST(
     let clientId:
       string;
 
-    /*
-     * ============================================
-     * CLIENT EXISTANT
-     * ============================================
-     */
-
     if (
       existingClientId
     ) {
       /*
-       * Client déjà connu.
-       *
-       * Sécurité :
-       * une demande publique ne doit jamais
-       * modifier automatiquement la fiche CRM
+       * Une demande publique ne modifie
+       * jamais automatiquement la fiche CRM
        * d'un client existant.
-       *
-       * On réutilise uniquement son identifiant.
        */
       clientId =
         existingClientId;
-    }
-
-    /*
-     * ============================================
-     * NOUVEAU CLIENT
-     * ============================================
-     */
-
-    else {
+    } else {
       const {
         data:
           newClient,
@@ -1137,19 +1033,14 @@ export async function POST(
       clientId =
         newClient.id;
 
-      /*
-       * Important :
-       * createdClientId ne doit être renseigné
-       * que pour un client réellement créé.
-       * Ainsi, le catch ne supprimera jamais
-       * une ancienne fiche client réutilisée.
-       */
       createdClientId =
         newClient.id;
     }
 
     /*
-     * Création du dossier.
+     * ============================
+     * CRÉATION DU DOSSIER
+     * ============================
      */
     const {
       data:
@@ -1229,123 +1120,114 @@ export async function POST(
 
     createdRequestId =
       insuranceRequest.id;
-    /*
-     * Liste des fichiers à téléverser.
-     */
-    const filesToUpload: Array<{
-      documentType: DocumentType;
-      file: File;
-    }> = [
-      {
-        documentType:
-          "passport",
-
-        file:
-          passportFile,
-      },
-
-    ];
 
     /*
-     * Si le client possède déjà
-     * un Kimlik, on ajoute les
-     * deux faces aux documents.
+     * ============================
+     * DÉPLACEMENT DES DOCUMENTS
+     * ============================
+     *
+     * pending/session/... -> requestId/...
      */
-    if (
-      payload.hasKimlik &&
-      kimlikFrontFile instanceof
-        File &&
-      kimlikBackFile instanceof
-        File
-    ) {
-      filesToUpload.push(
-        {
-          documentType:
-            "kimlik_front",
-
-          file:
-            kimlikFrontFile,
-        },
-
-        {
-          documentType:
-            "kimlik_back",
-
-          file:
-            kimlikBackFile,
-        },
-      );
-    }
-
-    /*
-     * Upload des fichiers vers
-     * Supabase Storage.
-     */
-    const uploadedFiles:
-      UploadedFileData[] = [];
+    const preparedDocuments:
+      PreparedDocument[] = [];
 
     for (
-      const item of
-      filesToUpload
+      const document of
+      documents
     ) {
-      const uploadedFile =
-        await uploadFile({
-          serviceClient,
+      const finalPath =
+        buildFinalStoragePath(
+          insuranceRequest.id,
+          document,
+        );
 
-          requestId:
-            insuranceRequest.id,
+      const {
+        error:
+          moveError,
+      } =
+        await serviceClient.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .move(
+            document.storagePath,
+            finalPath,
+          );
 
-          documentType:
-            item.documentType,
+      if (
+        moveError
+      ) {
+        throw new Error(
+          `Déplacement impossible pour ${document.documentType} : ${moveError.message}`,
+        );
+      }
 
-          file:
-            item.file,
-        });
-
-      uploadedFiles.push(
-        uploadedFile,
+      movedStoragePaths.push(
+        finalPath,
       );
 
-      uploadedStoragePaths.push(
-        uploadedFile.storagePath,
-      );
+      const pendingIndex =
+        pendingStoragePaths.indexOf(
+          document.storagePath,
+        );
+
+      if (
+        pendingIndex !== -1
+      ) {
+        pendingStoragePaths.splice(
+          pendingIndex,
+          1,
+        );
+      }
+
+      preparedDocuments.push({
+        documentType:
+          document.documentType,
+
+        sourcePath:
+          document.storagePath,
+
+        finalPath,
+
+        originalFileName:
+          document.originalFileName,
+
+        mimeType:
+          document.mimeType,
+
+        fileSize:
+          document.fileSize,
+      });
     }
 
-    /*
-     * Préparation des lignes pour
-     * uploaded_documents.
-     */
     const documentRows =
-      uploadedFiles.map(
+      preparedDocuments.map(
         (
-          uploadedFile,
+          document,
         ) => ({
           request_id:
             insuranceRequest.id,
 
           document_type:
-            uploadedFile.documentType,
+            document.documentType,
 
           storage_path:
-            uploadedFile.storagePath,
+            document.finalPath,
 
           original_file_name:
-            uploadedFile.originalFileName,
+            document.originalFileName,
 
           mime_type:
-            uploadedFile.mimeType,
+            document.mimeType,
 
           file_size:
-            uploadedFile.fileSize,
+            document.fileSize,
 
           uploaded_at:
             new Date().toISOString(),
         }),
       );
 
-    /*
-     * Enregistrement des documents.
-     */
     const {
       error:
         documentsError,
@@ -1366,7 +1248,6 @@ export async function POST(
       );
     }
 
-
     /*
      * Historique :
      * création du dossier.
@@ -1385,27 +1266,12 @@ export async function POST(
         "Le dossier d’assurance a été créé par le client.",
     });
 
-
     /*
-     * ============================================
+     * ============================
      * RENOUVELLEMENT AUTOMATIQUE
-     * ============================================
-     *
-     * Si le client avait déjà confirmé son intérêt
-     * pour renouveler une ancienne assurance,
-     * on relie cette ancienne assurance au nouveau
-     * dossier qui vient d'être créé.
-     *
-     * On utilise le numéro de passeport car chaque
-     * nouvelle demande crée actuellement un nouveau
-     * client_id.
+     * ============================
      */
-
     try {
-      /*
-       * On recherche les anciens dossiers
-       * appartenant au même numéro de passeport.
-       */
       const {
         data:
           previousRequestsData,
@@ -1461,13 +1327,6 @@ export async function POST(
           previousRequestIds.length >
           0
         ) {
-          /*
-           * On cherche uniquement un renouvellement :
-           *
-           * - déjà marqué "interested"
-           * - pas encore relié à une nouvelle demande
-           * - lié à un ancien dossier du même passeport
-           */
           const {
             data:
               interestedRenewal,
@@ -1586,18 +1445,15 @@ export async function POST(
     }
 
     /*
-     * Toutes les opérations importantes
-     * ont réussi.
-     *
-     * On vide cette liste afin d'éviter
-     * de supprimer les fichiers dans le catch.
+     * Tout est validé :
+     * ne rien supprimer dans le catch.
      */
-    uploadedStoragePaths.length =
+    movedStoragePaths.length =
       0;
 
-    /*
-     * Réponse envoyée au client.
-     */
+    pendingStoragePaths.length =
+      0;
+
     return NextResponse.json(
       {
         success:
@@ -1623,6 +1479,11 @@ export async function POST(
       {
         status:
           201,
+
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
       },
     );
   } catch (error) {
@@ -1632,45 +1493,64 @@ export async function POST(
     );
 
     /*
-     * Nettoyage des fichiers
-     * téléversés si une erreur
-     * survient avant la fin.
+     * Nettoyage des fichiers déjà déplacés.
      */
     if (
-      uploadedStoragePaths.length >
+      movedStoragePaths.length >
       0
     ) {
       const {
         error:
-          storageCleanupError,
+          movedCleanupError,
       } =
         await serviceClient.storage
           .from(
             BUCKET_NAME,
           )
           .remove(
-            uploadedStoragePaths,
+            movedStoragePaths,
           );
 
       if (
-        storageCleanupError
+        movedCleanupError
       ) {
         console.error(
-          "Nettoyage des fichiers impossible :",
-          storageCleanupError,
+          "Nettoyage des fichiers déplacés impossible :",
+          movedCleanupError,
         );
       }
     }
 
     /*
-     * Suppression du dossier.
-     *
-     * Comme les tables dépendantes
-     * utilisent normalement ON DELETE
-     * CASCADE, documents, paiement,
-     * activity_logs, etc. doivent
-     * également disparaître.
+     * Nettoyage des fichiers qui seraient
+     * encore dans pending/.
      */
+    if (
+      pendingStoragePaths.length >
+      0
+    ) {
+      const {
+        error:
+          pendingCleanupError,
+      } =
+        await serviceClient.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .remove(
+            pendingStoragePaths,
+          );
+
+      if (
+        pendingCleanupError
+      ) {
+        console.error(
+          "Nettoyage des fichiers temporaires impossible :",
+          pendingCleanupError,
+        );
+      }
+    }
+
     if (
       createdRequestId
     ) {
@@ -1698,10 +1578,6 @@ export async function POST(
       }
     }
 
-    /*
-     * Suppression du client créé
-     * pour cette demande.
-     */
     if (
       createdClientId
     ) {
@@ -1731,15 +1607,22 @@ export async function POST(
 
     return NextResponse.json(
       {
+        success:
+          false,
+
         error:
-          error instanceof
-          Error
+          error instanceof Error
             ? error.message
             : "Une erreur inattendue est survenue.",
       },
       {
         status:
           500,
+
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
       },
     );
   }

@@ -22,125 +22,108 @@ type AddressNames = {
   neighborhood: string;
 };
 
+type DocumentType =
+  | "passport"
+  | "kimlik_front"
+  | "kimlik_back";
+
+type UploadedDocument = {
+  documentType: DocumentType;
+  storagePath: string;
+  originalFileName: string;
+  mimeType: string;
+  fileSize: number;
+};
+
+type UploadUrlResponse = {
+  success?: boolean;
+  uploadSessionId?: string;
+  documentType?: DocumentType;
+  storagePath?: string;
+  token?: string;
+  error?: string;
+};
+
 const translations = {
   fr: {
     backStep3:
       "← Retour à l’étape 3",
-
     step:
       "Étape 4 sur 5",
-
     title:
       "Vérifiez votre demande",
-
     description:
       "Vérifiez attentivement les informations avant de continuer vers le paiement.",
-
     personalInfo:
       "Informations personnelles",
-
     edit:
       "Modifier",
-
     lastName:
       "Nom",
-
     firstName:
       "Prénom",
-
     fatherName:
       "Nom du père",
-
     birthDate:
       "Date de naissance",
-
     gender:
       "Sexe",
-
     male:
       "Homme",
-
     female:
       "Femme",
-
     nationality:
       "Nationalité",
-
     whatsapp:
       "WhatsApp",
-
     address:
       "Adresse",
-
     loadingAddress:
       "Chargement de l’adresse...",
-
     identityInsurance:
       "Identité et assurance",
-
     kimlikNumber:
       "Numéro de Kimlik",
-
     kimlikExpiration:
       "Expiration du Kimlik",
-
     passportNumber:
       "Numéro du passeport",
-
     retainedAge:
       "Âge retenu",
-
     duration:
       "Durée",
-
     year:
       "an",
-
     years:
       "ans",
-
     totalPrice:
       "Prix total",
-
     documents:
       "Documents",
-
     passport:
       "Passeport",
-
     kimlikFront:
       "Kimlik recto",
-
     kimlikBack:
       "Kimlik verso",
-
     confirmation:
       "Je confirme que les informations et les documents fournis sont exacts et correspondent à mes documents officiels.",
-
     previous:
       "← Précédent",
-
     continuePayment:
       "Continuer vers le paiement →",
-
     confirmationRequired:
       "Veuillez confirmer que toutes les informations sont exactes.",
-
     documentMissing:
       "Document absent",
-
     added:
       "Ajouté",
-
     missing:
       "Absent",
-
     notApplicable:
       "Non applicable",
-
     buildingNumber:
       "Bina No",
-
     apartmentNumber:
       "Daire No",
   },
@@ -148,121 +131,82 @@ const translations = {
   en: {
     backStep3:
       "← Back to step 3",
-
     step:
       "Step 4 of 5",
-
     title:
       "Review your request",
-
     description:
       "Carefully review your information before continuing to payment.",
-
     personalInfo:
       "Personal information",
-
     edit:
       "Edit",
-
     lastName:
       "Surname",
-
     firstName:
       "First name",
-
     fatherName:
       "Father's name",
-
     birthDate:
       "Date of birth",
-
     gender:
       "Gender",
-
     male:
       "Male",
-
     female:
       "Female",
-
     nationality:
       "Nationality",
-
     whatsapp:
       "WhatsApp",
-
     address:
       "Address",
-
     loadingAddress:
       "Loading address...",
-
     identityInsurance:
       "Identity and insurance",
-
     kimlikNumber:
       "Kimlik number",
-
     kimlikExpiration:
       "Kimlik expiration",
-
     passportNumber:
       "Passport number",
-
     retainedAge:
       "Calculated age",
-
     duration:
       "Duration",
-
     year:
       "year",
-
     years:
       "years",
-
     totalPrice:
       "Total price",
-
     documents:
       "Documents",
-
     passport:
       "Passport",
-
     kimlikFront:
       "Kimlik front",
-
     kimlikBack:
       "Kimlik back",
-
     confirmation:
       "I confirm that the information and documents provided are accurate and match my official documents.",
-
     previous:
       "← Previous",
-
     continuePayment:
       "Continue to payment →",
-
     confirmationRequired:
       "Please confirm that all information is correct.",
-
     documentMissing:
       "Document missing",
-
     added:
       "Added",
-
     missing:
       "Missing",
-
     notApplicable:
       "Not applicable",
-
     buildingNumber:
       "Building No",
-
     apartmentNumber:
       "Apartment No",
   },
@@ -270,125 +214,189 @@ const translations = {
   tr: {
     backStep3:
       "← 3. adıma dön",
-
     step:
       "5 adımın 4.'sü",
-
     title:
       "Başvurunuzu kontrol edin",
-
     description:
       "Ödemeye devam etmeden önce bilgilerinizi dikkatlice kontrol edin.",
-
     personalInfo:
       "Kişisel bilgiler",
-
     edit:
       "Düzenle",
-
     lastName:
       "Soyad",
-
     firstName:
       "Ad",
-
     fatherName:
       "Baba adı",
-
     birthDate:
       "Doğum tarihi",
-
     gender:
       "Cinsiyet",
-
     male:
       "Erkek",
-
     female:
       "Kadın",
-
     nationality:
       "Uyruk",
-
     whatsapp:
       "WhatsApp",
-
     address:
       "Adres",
-
     loadingAddress:
       "Adres yükleniyor...",
-
     identityInsurance:
       "Kimlik ve sigorta",
-
     kimlikNumber:
       "Kimlik numarası",
-
     kimlikExpiration:
       "Kimlik son geçerlilik tarihi",
-
     passportNumber:
       "Pasaport numarası",
-
     retainedAge:
       "Hesaplanan yaş",
-
     duration:
       "Süre",
-
     year:
       "yıl",
-
     years:
       "yıl",
-
     totalPrice:
       "Toplam fiyat",
-
     documents:
       "Belgeler",
-
     passport:
       "Pasaport",
-
     kimlikFront:
       "Kimlik ön yüz",
-
     kimlikBack:
       "Kimlik arka yüz",
-
     confirmation:
       "Verdiğim bilgilerin ve belgelerin doğru olduğunu ve resmi belgelerimle eşleştiğini onaylıyorum.",
-
     previous:
       "← Önceki",
-
     continuePayment:
       "Ödemeye devam et →",
-
     confirmationRequired:
       "Lütfen tüm bilgilerin doğru olduğunu onaylayın.",
-
     documentMissing:
       "Belge yok",
-
     added:
       "Eklendi",
-
     missing:
       "Eksik",
-
     notApplicable:
       "Uygulanamaz",
-
     buildingNumber:
       "Bina No",
-
     apartmentNumber:
       "Daire No",
   },
 };
+
+async function uploadDocumentDirectly({
+  file,
+  documentType,
+  uploadSessionId,
+}: {
+  file: File;
+  documentType: DocumentType;
+  uploadSessionId?: string;
+}) {
+  const response =
+    await fetch(
+      "/api/requests/upload-url",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify({
+            documentType,
+            fileName:
+              file.name,
+            mimeType:
+              file.type,
+            fileSize:
+              file.size,
+            uploadSessionId,
+          }),
+      },
+    );
+
+  const result =
+    (await response.json()) as UploadUrlResponse;
+
+  if (
+    !response.ok ||
+    !result.success ||
+    !result.uploadSessionId ||
+    !result.storagePath ||
+    !result.token
+  ) {
+    throw new Error(
+      result.error ||
+        "Impossible de préparer le téléversement du document.",
+    );
+  }
+
+  const supabase =
+    createClient();
+
+  const {
+    error:
+      uploadError,
+  } =
+    await supabase.storage
+      .from(
+        "insurance-documents",
+      )
+      .uploadToSignedUrl(
+        result.storagePath,
+        result.token,
+        file,
+        {
+          contentType:
+            file.type,
+          cacheControl:
+            "3600",
+        },
+      );
+
+  if (
+    uploadError
+  ) {
+    throw new Error(
+      `Téléversement impossible pour ${documentType} : ${uploadError.message}`,
+    );
+  }
+
+  const uploadedDocument:
+    UploadedDocument = {
+      documentType,
+      storagePath:
+        result.storagePath,
+      originalFileName:
+        file.name,
+      mimeType:
+        file.type,
+      fileSize:
+        file.size,
+    };
+
+  return {
+    uploadSessionId:
+      result.uploadSessionId,
+
+    document:
+      uploadedDocument,
+  };
+}
 
 export default function Etape4Page() {
   const router =
@@ -477,6 +485,7 @@ export default function Etape4Page() {
         setLanguage(
           nextLanguage,
         );
+
         return;
       }
 
@@ -634,19 +643,6 @@ export default function Etape4Page() {
       return;
     }
 
-    /*
-     * ============================================
-     * ANNULATION DE L'ANCIEN DOSSIER
-     * ============================================
-     *
-     * Si un dossier waiting_payment avait déjà
-     * été créé puis que le client a modifié ses
-     * informations, le contexte conserve son
-     * ancienne référence dans pendingCancellation.
-     *
-     * On annule ce dossier avant d'en créer un
-     * nouveau afin d'éviter les dossiers abandonnés.
-     */
     if (
       pendingCancellation
     ) {
@@ -739,12 +735,6 @@ export default function Etape4Page() {
       );
     }
 
-    /*
-     * Si le dossier a déjà été créé pendant
-     * cette session, on ne le crée pas une
-     * seconde fois lorsque le client revient
-     * sur l'étape 4.
-     */
     if (
       requestData.requestId &&
       requestData.requestCode
@@ -845,19 +835,28 @@ export default function Etape4Page() {
           requestData.calculatedPrice,
       };
 
-      const formData =
-        new FormData();
+      let uploadSessionId:
+        string | undefined;
 
-      formData.append(
-        "payload",
-        JSON.stringify(
-          payload,
-        ),
-      );
+      const documents:
+        UploadedDocument[] = [];
 
-      formData.append(
-        "passportFile",
-        requestData.passportFile,
+      const passportUpload =
+        await uploadDocumentDirectly({
+          file:
+            requestData.passportFile,
+
+          documentType:
+            "passport",
+
+          uploadSessionId,
+        });
+
+      uploadSessionId =
+        passportUpload.uploadSessionId;
+
+      documents.push(
+        passportUpload.document,
       );
 
       if (
@@ -865,14 +864,48 @@ export default function Etape4Page() {
         requestData.kimlikFrontFile &&
         requestData.kimlikBackFile
       ) {
-        formData.append(
-          "kimlikFrontFile",
-          requestData.kimlikFrontFile,
+        const kimlikFrontUpload =
+          await uploadDocumentDirectly({
+            file:
+              requestData.kimlikFrontFile,
+
+            documentType:
+              "kimlik_front",
+
+            uploadSessionId,
+          });
+
+        uploadSessionId =
+          kimlikFrontUpload.uploadSessionId;
+
+        documents.push(
+          kimlikFrontUpload.document,
         );
 
-        formData.append(
-          "kimlikBackFile",
-          requestData.kimlikBackFile,
+        const kimlikBackUpload =
+          await uploadDocumentDirectly({
+            file:
+              requestData.kimlikBackFile,
+
+            documentType:
+              "kimlik_back",
+
+            uploadSessionId,
+          });
+
+        uploadSessionId =
+          kimlikBackUpload.uploadSessionId;
+
+        documents.push(
+          kimlikBackUpload.document,
+        );
+      }
+
+      if (
+        !uploadSessionId
+      ) {
+        throw new Error(
+          "La session de téléversement n’a pas pu être créée.",
         );
       }
 
@@ -883,8 +916,17 @@ export default function Etape4Page() {
             method:
               "POST",
 
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
             body:
-              formData,
+              JSON.stringify({
+                payload,
+                uploadSessionId,
+                documents,
+              }),
           },
         );
 
@@ -1038,8 +1080,6 @@ export default function Etape4Page() {
 
   return (
     <main className="min-h-screen bg-[#F6F8F5]">
-      {/* TOP BAR */}
-
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
           <a
@@ -1068,12 +1108,8 @@ export default function Etape4Page() {
         </div>
       </div>
 
-      {/* PAGE */}
-
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
         <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
-          {/* LEFT PANEL */}
-
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <div className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 lg:min-h-[650px] lg:px-8 lg:py-10">
               <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
@@ -1127,8 +1163,6 @@ export default function Etape4Page() {
             </div>
           </aside>
 
-          {/* REVIEW */}
-
           <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:p-8 lg:p-10">
             <div className="max-w-2xl">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
@@ -1148,8 +1182,6 @@ export default function Etape4Page() {
               onSubmit={handleSubmit}
               className="mt-9 space-y-6"
             >
-              {/* PERSONAL INFO */}
-
               <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC]">
                 <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
                   <div>
@@ -1176,12 +1208,36 @@ export default function Etape4Page() {
                 </div>
 
                 <dl className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
-                  <ReviewItem label={t.lastName} value={requestData.lastName} />
-                  <ReviewItem label={t.firstName} value={requestData.firstName} />
-                  <ReviewItem label={t.fatherName} value={requestData.fatherName} />
-                  <ReviewItem label={t.birthDate} value={requestData.birthDate} />
-                  <ReviewItem label={t.gender} value={genderLabel} />
-                  <ReviewItem label={t.nationality} value={requestData.nationality} />
+                  <ReviewItem
+                    label={t.lastName}
+                    value={requestData.lastName}
+                  />
+
+                  <ReviewItem
+                    label={t.firstName}
+                    value={requestData.firstName}
+                  />
+
+                  <ReviewItem
+                    label={t.fatherName}
+                    value={requestData.fatherName}
+                  />
+
+                  <ReviewItem
+                    label={t.birthDate}
+                    value={requestData.birthDate}
+                  />
+
+                  <ReviewItem
+                    label={t.gender}
+                    value={genderLabel}
+                  />
+
+                  <ReviewItem
+                    label={t.nationality}
+                    value={requestData.nationality}
+                  />
+
                   <ReviewItem
                     label={t.whatsapp}
                     value={`${requestData.whatsappCountryCode} ${requestData.whatsappNumber}`.trim()}
@@ -1200,8 +1256,6 @@ export default function Etape4Page() {
                   </p>
                 </div>
               </section>
-
-              {/* IDENTITY + INSURANCE */}
 
               <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC]">
                 <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
@@ -1230,27 +1284,23 @@ export default function Etape4Page() {
 
                 <dl className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
                   <ReviewItem
-                    label={t.kimlikNumber}
-                    value={
-                      requestData.hasKimlik
-                        ? requestData.kimlikNumber || "—"
-                        : t.notApplicable
-                    }
-                  />
-
-                  <ReviewItem
-                    label={t.kimlikExpiration}
-                    value={
-                      requestData.hasKimlik
-                        ? requestData.kimlikExpirationDate || "—"
-                        : t.notApplicable
-                    }
-                  />
-
-                  <ReviewItem
                     label={t.passportNumber}
                     value={requestData.passportNumber}
                   />
+
+                  {requestData.hasKimlik ? (
+                    <>
+                      <ReviewItem
+                        label={t.kimlikNumber}
+                        value={requestData.kimlikNumber}
+                      />
+
+                      <ReviewItem
+                        label={t.kimlikExpiration}
+                        value={requestData.kimlikExpirationDate}
+                      />
+                    </>
+                  ) : null}
 
                   <ReviewItem
                     label={t.retainedAge}
@@ -1261,23 +1311,17 @@ export default function Etape4Page() {
                     label={t.duration}
                     value={durationLabel}
                   />
-                </dl>
 
-                <div className="border-t border-[#DCE9DD] bg-[#F3F8F2] px-5 py-5 sm:px-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#52705B]">
-                    {t.totalPrice}
-                  </p>
-
-                  <p className="mt-1 text-4xl font-semibold tracking-[-0.04em] text-[#0B5D3B]">
-                    {requestData.calculatedPrice?.toLocaleString(
+                  <ReviewItem
+                    label={t.totalPrice}
+                    value={`${Number(
+                      requestData.calculatedPrice ?? 0,
+                    ).toLocaleString(
                       priceLocale,
-                    ) ?? "—"}{" "}
-                    <span className="text-2xl">TL</span>
-                  </p>
-                </div>
+                    )} TL`}
+                  />
+                </dl>
               </section>
-
-              {/* DOCUMENTS */}
 
               <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC]">
                 <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
@@ -1305,45 +1349,56 @@ export default function Etape4Page() {
                 </div>
 
                 <div className="space-y-3 p-5 sm:p-6">
-                  <DocumentRow
+                  <DocumentStatus
                     label={t.passport}
-                    file={requestData.passportFile}
-                    addedLabel={t.added}
-                    missingLabel={t.missing}
-                    missingDocumentLabel={t.documentMissing}
+                    available={
+                      Boolean(
+                        requestData.passportFile,
+                      )
+                    }
+                    added={t.added}
+                    missing={t.missing}
                   />
 
-                  {requestData.hasKimlik && (
+                  {requestData.hasKimlik ? (
                     <>
-                      <DocumentRow
+                      <DocumentStatus
                         label={t.kimlikFront}
-                        file={requestData.kimlikFrontFile}
-                        addedLabel={t.added}
-                        missingLabel={t.missing}
-                        missingDocumentLabel={t.documentMissing}
+                        available={
+                          Boolean(
+                            requestData.kimlikFrontFile,
+                          )
+                        }
+                        added={t.added}
+                        missing={t.missing}
                       />
 
-                      <DocumentRow
+                      <DocumentStatus
                         label={t.kimlikBack}
-                        file={requestData.kimlikBackFile}
-                        addedLabel={t.added}
-                        missingLabel={t.missing}
-                        missingDocumentLabel={t.documentMissing}
+                        available={
+                          Boolean(
+                            requestData.kimlikBackFile,
+                          )
+                        }
+                        added={t.added}
+                        missing={t.missing}
                       />
                     </>
+                  ) : (
+                    <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <span className="text-sm font-semibold text-slate-700">
+                        Kimlik
+                      </span>
+
+                      <span className="text-sm font-medium text-slate-500">
+                        {t.notApplicable}
+                      </span>
+                    </div>
                   )}
                 </div>
               </section>
 
-              {/* CONFIRMATION */}
-
-              <label
-                className={`flex cursor-pointer items-start gap-4 rounded-[1.5rem] border p-5 transition sm:p-6 ${
-                  confirmed
-                    ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/10"
-                    : "border-slate-200 bg-white hover:border-slate-300"
-                }`}
-              >
+              <label className="flex cursor-pointer items-start gap-3 rounded-[1.5rem] border border-[#D9E9D9] bg-[#F3F8F2] p-5">
                 <input
                   type="checkbox"
                   checked={confirmed}
@@ -1352,40 +1407,34 @@ export default function Etape4Page() {
                       event.target.checked,
                     )
                   }
-                  className="mt-0.5 h-5 w-5 shrink-0 accent-[#0B5D3B]"
+                  className="mt-1 h-4 w-4 accent-[#0B5D3B]"
                 />
 
-                <span className="text-sm leading-6 text-slate-700">
+                <span className="text-sm leading-6 text-[#365742]">
                   {t.confirmation}
                 </span>
               </label>
 
-              {/* ACTIONS */}
-
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
-                  disabled={isSubmitting}
                   onClick={() =>
                     router.push(
                       "/demande/etape-3",
                     )
                   }
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
                   {t.previous}
                 </button>
 
                 <button
                   type="submit"
-                  disabled={
-                    !confirmed ||
-                    isSubmitting
-                  }
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  disabled={isSubmitting}
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   {isSubmitting
-                    ? "..."
+                    ? "Envoi..."
                     : t.continuePayment}
                 </button>
               </div>
@@ -1402,7 +1451,11 @@ function ReviewItem({
   value,
 }: {
   label: string;
-  value: string;
+  value:
+    | string
+    | number
+    | null
+    | undefined;
 }) {
   return (
     <div>
@@ -1410,53 +1463,44 @@ function ReviewItem({
         {label}
       </dt>
 
-      <dd className="mt-1.5 text-sm font-semibold leading-6 text-slate-800">
-        {value || "—"}
+      <dd className="mt-1.5 break-words text-sm font-semibold text-slate-800">
+        {value === null ||
+        value === undefined ||
+        value === ""
+          ? "—"
+          : value}
       </dd>
     </div>
   );
 }
 
-type DocumentRowProps = {
-  label: string;
-  file: File | null;
-  addedLabel: string;
-  missingLabel: string;
-  missingDocumentLabel: string;
-};
-
-function DocumentRow({
+function DocumentStatus({
   label,
-  file,
-  addedLabel,
-  missingLabel,
-  missingDocumentLabel,
-}: DocumentRowProps) {
+  available,
+  added,
+  missing,
+}: {
+  label: string;
+  available: boolean;
+  added: string;
+  missing: string;
+}) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3">
-      <div className="min-w-0">
-        <p className="font-semibold text-slate-900">
-          {
-            label
-          }
-        </p>
-
-        <p className="truncate text-sm text-slate-500">
-          {file?.name ??
-            missingDocumentLabel}
-        </p>
-      </div>
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <span className="text-sm font-semibold text-slate-700">
+        {label}
+      </span>
 
       <span
-        className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-          file
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
-        }`}
+        className={
+          available
+            ? "text-sm font-semibold text-[#0B5D3B]"
+            : "text-sm font-semibold text-red-600"
+        }
       >
-        {file
-          ? addedLabel
-          : missingLabel}
+        {available
+          ? `✓ ${added}`
+          : missing}
       </span>
     </div>
   );

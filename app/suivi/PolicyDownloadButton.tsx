@@ -31,48 +31,116 @@ type DownloadResponse = {
 
 const translations = {
   fr: {
-    routeError: "La route de téléchargement a renvoyé une erreur",
-    downloadError: "Impossible de télécharger la police année",
-    unavailable: "La police de l’année n’est pas disponible.",
-    unexpected: "Une erreur inattendue est survenue pendant le téléchargement.",
-    preparingYear1: "Préparation du PDF année 1...",
-    preparingYear2: "Préparation du PDF année 2...",
-    downloadInsurance: "Télécharger mon assurance",
-    downloadYear1: "Télécharger la police — Année 1",
-    downloadYear2: "Télécharger la police — Année 2",
-    secureInfo: "Chaque bouton télécharge un fichier PDF sécurisé. Le lien de téléchargement est temporaire.",
-    fileName: "assurance-annee",
+    routeError:
+      "La route de téléchargement a renvoyé une erreur",
+
+    downloadError:
+      "Impossible de télécharger la police année",
+
+    unavailable:
+      "La police de l’année n’est pas disponible.",
+
+    unexpected:
+      "Une erreur inattendue est survenue pendant le téléchargement.",
+
+    preparingYear1:
+      "Préparation du PDF année 1...",
+
+    preparingYear2:
+      "Préparation du PDF année 2...",
+
+    downloadInsurance:
+      "Télécharger mon assurance",
+
+    downloadYear1:
+      "Télécharger la police — Année 1",
+
+    downloadYear2:
+      "Télécharger la police — Année 2",
+
+    secureInfo:
+      "Chaque bouton télécharge un fichier PDF sécurisé. Le lien de téléchargement est temporaire.",
+
+    fileName:
+      "assurance-annee",
   },
+
   en: {
-    routeError: "The download route returned an error",
-    downloadError: "Unable to download policy year",
-    unavailable: "The policy for this year is not available.",
-    unexpected: "An unexpected error occurred during the download.",
-    preparingYear1: "Preparing year 1 PDF...",
-    preparingYear2: "Preparing year 2 PDF...",
-    downloadInsurance: "Download my insurance",
-    downloadYear1: "Download policy — Year 1",
-    downloadYear2: "Download policy — Year 2",
-    secureInfo: "Each button downloads a secure PDF file. The download link is temporary.",
-    fileName: "insurance-year",
+    routeError:
+      "The download route returned an error",
+
+    downloadError:
+      "Unable to download policy year",
+
+    unavailable:
+      "The policy for this year is not available.",
+
+    unexpected:
+      "An unexpected error occurred during the download.",
+
+    preparingYear1:
+      "Preparing year 1 PDF...",
+
+    preparingYear2:
+      "Preparing year 2 PDF...",
+
+    downloadInsurance:
+      "Download my insurance",
+
+    downloadYear1:
+      "Download policy — Year 1",
+
+    downloadYear2:
+      "Download policy — Year 2",
+
+    secureInfo:
+      "Each button downloads a secure PDF file. The download link is temporary.",
+
+    fileName:
+      "insurance-year",
   },
+
   tr: {
-    routeError: "İndirme adresi bir hata döndürdü",
-    downloadError: "Poliçe indirilemedi. Yıl",
-    unavailable: "Bu yıla ait poliçe mevcut değil.",
-    unexpected: "İndirme sırasında beklenmeyen bir hata oluştu.",
-    preparingYear1: "1. yıl PDF’i hazırlanıyor...",
-    preparingYear2: "2. yıl PDF’i hazırlanıyor...",
-    downloadInsurance: "Sigortamı indir",
-    downloadYear1: "Poliçeyi indir — 1. Yıl",
-    downloadYear2: "Poliçeyi indir — 2. Yıl",
-    secureInfo: "Her buton güvenli bir PDF dosyası indirir. İndirme bağlantısı geçicidir.",
-    fileName: "sigorta-yil",
+    routeError:
+      "İndirme adresi bir hata döndürdü",
+
+    downloadError:
+      "Poliçe indirilemedi. Yıl",
+
+    unavailable:
+      "Bu yıla ait poliçe mevcut değil.",
+
+    unexpected:
+      "İndirme sırasında beklenmeyen bir hata oluştu.",
+
+    preparingYear1:
+      "1. yıl PDF’i hazırlanıyor...",
+
+    preparingYear2:
+      "2. yıl PDF’i hazırlanıyor...",
+
+    downloadInsurance:
+      "Sigortamı indir",
+
+    downloadYear1:
+      "Poliçeyi indir — 1. Yıl",
+
+    downloadYear2:
+      "Poliçeyi indir — 2. Yıl",
+
+    secureInfo:
+      "Her buton güvenli bir PDF dosyası indirir. İndirme bağlantısı geçicidir.",
+
+    fileName:
+      "sigorta-yil",
   },
 };
 
 function getSavedLanguage(): Language {
-  if (typeof window === "undefined") {
+  if (
+    typeof window ===
+    "undefined"
+  ) {
     return "fr";
   }
 
@@ -98,18 +166,35 @@ export default function PolicyDownloadButton({
   whatsappNumber,
   durationYears,
 }: PolicyDownloadButtonProps) {
-  const [language, setLanguage] =
-    useState<Language>("fr");
+  const [
+    language,
+    setLanguage,
+  ] =
+    useState<Language>(
+      "fr",
+    );
 
-  const [loadingYear, setLoadingYear] =
-    useState<PolicyYear | null>(null);
+  const [
+    loadingYear,
+    setLoadingYear,
+  ] =
+    useState<
+      PolicyYear | null
+    >(
+      null,
+    );
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
     useState("");
 
   useEffect(() => {
     function refreshLanguage() {
-      setLanguage(getSavedLanguage());
+      setLanguage(
+        getSavedLanguage(),
+      );
     }
 
     refreshLanguage();
@@ -123,14 +208,21 @@ export default function PolicyDownloadButton({
         }>;
 
       const nextLanguage =
-        customEvent.detail?.language;
+        customEvent.detail
+          ?.language;
 
       if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
+        nextLanguage ===
+          "fr" ||
+        nextLanguage ===
+          "en" ||
+        nextLanguage ===
+          "tr"
       ) {
-        setLanguage(nextLanguage);
+        setLanguage(
+          nextLanguage,
+        );
+
         return;
       }
 
@@ -170,34 +262,53 @@ export default function PolicyDownloadButton({
     };
   }, []);
 
-  const t = translations[language];
+  const t =
+    translations[
+      language
+    ];
 
   async function downloadPolicy(
     policyYear: PolicyYear,
   ) {
-    if (loadingYear !== null) {
+    if (
+      loadingYear !==
+      null
+    ) {
       return;
     }
 
-    setLoadingYear(policyYear);
+    setLoadingYear(
+      policyYear,
+    );
+
     setErrorMessage("");
 
     try {
+      /*
+       * ============================
+       * 1. DEMANDE DU LIEN SIGNÉ
+       * ============================
+       */
+
       const response =
         await fetch(
           "/api/tracking/policy",
           {
-            method: "POST",
+            method:
+              "POST",
+
             headers: {
               "Content-Type":
                 "application/json",
             },
-            body: JSON.stringify({
-              requestCode,
-              whatsappCountryCode,
-              whatsappNumber,
-              policyYear,
-            }),
+
+            body:
+              JSON.stringify({
+                requestCode,
+                whatsappCountryCode,
+                whatsappNumber,
+                policyYear,
+              }),
           },
         );
 
@@ -219,6 +330,7 @@ export default function PolicyDownloadButton({
           {
             status:
               response.status,
+
             response:
               responseText,
           },
@@ -232,7 +344,9 @@ export default function PolicyDownloadButton({
       const result =
         (await response.json()) as DownloadResponse;
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           result.error ??
             `${t.downloadError} ${policyYear}.`,
@@ -249,24 +363,85 @@ export default function PolicyDownloadButton({
         );
       }
 
+      /*
+       * ============================
+       * 2. NOM DU FICHIER
+       * ============================
+       *
+       * Le serveur fournit normalement
+       * le nom final :
+       *
+       * 1 an :
+       * PRENOM_NOM_MATRICULE.pdf
+       *
+       * 2 ans :
+       * PRENOM_NOM_MATRICULE_1.pdf
+       * PRENOM_NOM_MATRICULE_2.pdf
+       */
+
       const fileName =
         result.fileName ??
         `${requestCode}-${t.fileName}-${policyYear}.pdf`;
 
+      /*
+       * ============================
+       * 3. RÉCUPÉRATION DU PDF
+       * ============================
+       *
+       * On télécharge d'abord le PDF
+       * dans le navigateur sous forme
+       * de Blob.
+       *
+       * Cela permet de contrôler
+       * réellement le nom du fichier.
+       */
+
+      const pdfResponse =
+        await fetch(
+          result.downloadUrl,
+        );
+
+      if (
+        !pdfResponse.ok
+      ) {
+        throw new Error(
+          `${t.downloadError} ${policyYear}.`,
+        );
+      }
+
+      const pdfBlob =
+        await pdfResponse.blob();
+
+      /*
+       * ============================
+       * 4. URL LOCALE TEMPORAIRE
+       * ============================
+       */
+
+      const objectUrl =
+        window.URL.createObjectURL(
+          pdfBlob,
+        );
+
       const downloadLink =
-        document.createElement("a");
+        document.createElement(
+          "a",
+        );
 
       downloadLink.href =
-        result.downloadUrl;
+        objectUrl;
 
       downloadLink.download =
         fileName;
 
-      downloadLink.target =
-        "_blank";
-
-      downloadLink.rel =
-        "noopener noreferrer";
+      /*
+       * On ne met surtout plus :
+       *
+       * target="_blank"
+       *
+       * car nous voulons forcer
+       * un vrai téléchargement.
+       */
 
       document.body.appendChild(
         downloadLink,
@@ -277,6 +452,19 @@ export default function PolicyDownloadButton({
       document.body.removeChild(
         downloadLink,
       );
+
+      /*
+       * Libération de la mémoire.
+       */
+
+      window.setTimeout(
+        () => {
+          window.URL.revokeObjectURL(
+            objectUrl,
+          );
+        },
+        1000,
+      );
     } catch (error) {
       console.error(
         "Erreur de téléchargement de la police :",
@@ -284,17 +472,21 @@ export default function PolicyDownloadButton({
       );
 
       setErrorMessage(
-        error instanceof Error
+        error instanceof
+          Error
           ? error.message
           : t.unexpected,
       );
     } finally {
-      setLoadingYear(null);
+      setLoadingYear(
+        null,
+      );
     }
   }
 
   const isDownloading =
-    loadingYear !== null;
+    loadingYear !==
+    null;
 
   return (
     <div>
@@ -302,28 +494,40 @@ export default function PolicyDownloadButton({
         <button
           type="button"
           onClick={() => {
-            void downloadPolicy(1);
+            void downloadPolicy(
+              1,
+            );
           }}
-          disabled={isDownloading}
+          disabled={
+            isDownloading
+          }
           className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-400"
         >
-          {loadingYear === 1
+          {loadingYear ===
+          1
             ? t.preparingYear1
-            : durationYears === 1
+            : durationYears ===
+                1
               ? t.downloadInsurance
               : t.downloadYear1}
         </button>
 
-        {durationYears === 2 && (
+        {durationYears ===
+          2 && (
           <button
             type="button"
             onClick={() => {
-              void downloadPolicy(2);
+              void downloadPolicy(
+                2,
+              );
             }}
-            disabled={isDownloading}
+            disabled={
+              isDownloading
+            }
             className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-black text-[#0B5D3B] transition hover:bg-[#F3F8F2] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
           >
-            {loadingYear === 2
+            {loadingYear ===
+            2
               ? t.preparingYear2
               : t.downloadYear2}
           </button>
@@ -332,12 +536,16 @@ export default function PolicyDownloadButton({
 
       {errorMessage && (
         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-          {errorMessage}
+          {
+            errorMessage
+          }
         </div>
       )}
 
       <p className="mt-3 text-xs leading-5 text-emerald-700">
-        {t.secureInfo}
+        {
+          t.secureInfo
+        }
       </p>
     </div>
   );

@@ -44,6 +44,22 @@ function cleanPhoneNumber(
   );
 }
 
+function sanitizeFileNamePart(
+  value: string,
+): string {
+  return value
+    .normalize("NFC")
+    .replace(
+      /[<>:"/\\|?*\x00-\x1F]/g,
+      "",
+    )
+    .replace(
+      /\s+/g,
+      " ",
+    )
+    .trim();
+}
+
 function rateLimitedResponse(
   retryAfterSeconds: number,
 ) {
@@ -334,6 +350,8 @@ export async function POST(
         )
         .select(
           `
+            first_name,
+            last_name,
             whatsapp_country_code,
             whatsapp_number
           `,
@@ -474,11 +492,35 @@ export async function POST(
      * 8. NOM DU FICHIER
      * ============================================
      */
+    const safeFirstName =
+      sanitizeFileNamePart(
+        client.first_name ??
+          "",
+      ) ||
+      "PRENOM";
+
+    const safeLastName =
+      sanitizeFileNamePart(
+        client.last_name ??
+          "",
+      ) ||
+      "NOM";
+
+    const safeRequestCode =
+      sanitizeFileNamePart(
+        insuranceRequest.request_code ??
+          requestCode,
+      ) ||
+      requestCode;
+
+    const baseFileName =
+      `${safeFirstName}_${safeLastName}_${safeRequestCode}`;
+
     const fileName =
       durationYears ===
       1
-        ? `${requestCode}-assurance.pdf`
-        : `${requestCode}-assurance-annee-${policyYear}.pdf`;
+        ? `${baseFileName}.pdf`
+        : `${baseFileName}_${policyYear}.pdf`;
 
     /*
      * ============================================

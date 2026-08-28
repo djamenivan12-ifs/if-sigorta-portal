@@ -2,6 +2,8 @@ import {
   NextResponse,
 } from "next/server";
 
+import { Resend } from "resend";
+
 import {
   logActivity,
 } from "@/lib/activity/logActivity";
@@ -116,6 +118,183 @@ function rateLimitedResponse(
     },
   );
 }
+
+
+function escapeEmailHtml(
+  value: string,
+) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function sendPaymentAdminEmail({
+  requestCode,
+  whatsappCountryCode,
+  whatsappNumber,
+  calculatedPrice,
+  firstName,
+  lastName,
+  durationYears,
+  isResubmission,
+}: {
+  requestCode: string;
+  whatsappCountryCode: string;
+  whatsappNumber: string;
+  calculatedPrice?: number | null;
+  firstName: string;
+  lastName: string;
+  durationYears?: number | null;
+  isResubmission: boolean;
+}) {
+  const apiKey =
+    process.env.RESEND_API_KEY;
+
+  const adminEmail =
+    process.env.ADMIN_NOTIFICATION_EMAIL;
+
+  if (
+    !apiKey ||
+    !adminEmail
+  ) {
+    console.error(
+      "Notification e-mail paiement non envoyée : configuration Resend absente.",
+    );
+
+    return;
+  }
+
+  try {
+    const resend =
+      new Resend(apiKey);
+
+    const subject =
+      isResubmission
+        ? `Nouveau dekont reçu — ${requestCode}`
+        : `Nouveau paiement reçu — ${requestCode}`;
+
+    const safeFirstName =
+      escapeEmailHtml(
+        firstName.trim() || "—",
+      );
+
+    const safeLastName =
+      escapeEmailHtml(
+        lastName.trim() || "—",
+      );
+
+    const safeRequestCode =
+      escapeEmailHtml(
+        requestCode,
+      );
+
+    const safeWhatsapp =
+      escapeEmailHtml(
+        `${whatsappCountryCode}${whatsappNumber}`,
+      );
+
+    const amountLabel =
+      typeof calculatedPrice === "number"
+        ? `${calculatedPrice.toLocaleString("fr-FR")} TL`
+        : "—";
+
+    const durationLabel =
+      typeof durationYears === "number"
+        ? `${durationYears} ${durationYears === 1 ? "an" : "ans"}`
+        : "—";
+
+    const {
+      data,
+      error,
+    } =
+      await resend.emails.send({
+        from:
+          "IF Sigorta <onboarding@resend.dev>",
+
+        to:
+          adminEmail,
+
+        subject,
+
+        html: `
+          <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:32px;color:#102B20;background:#F6F8F5">
+            <div style="background:#ffffff;border:1px solid #E2EAE0;border-radius:18px;padding:32px">
+              <div style="font-size:24px;font-weight:700;color:#0B5D3B;margin-bottom:24px">
+                IF Sigorta
+              </div>
+
+              <div style="font-size:20px;font-weight:700;margin-bottom:24px">
+                Nouveau paiement reçu
+              </div>
+
+              <table style="width:100%;border-collapse:collapse;margin-bottom:28px;font-size:15px">
+                <tr>
+                  <td style="padding:8px 0;font-weight:700">Client :</td>
+                  <td style="padding:8px 0">${safeFirstName} ${safeLastName}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:8px 0;font-weight:700">Matricule :</td>
+                  <td style="padding:8px 0">${safeRequestCode}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:8px 0;font-weight:700">WhatsApp :</td>
+                  <td style="padding:8px 0">${safeWhatsapp}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:8px 0;font-weight:700">Montant attendu :</td>
+                  <td style="padding:8px 0">${amountLabel}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:8px 0;font-weight:700">Durée :</td>
+                  <td style="padding:8px 0">${durationLabel}</td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 20px;line-height:1.7">
+                ${
+                  isResubmission
+                    ? "Le client vient de transmettre un nouveau justificatif de paiement après le refus du précédent."
+                    : "Le client vient de transmettre son justificatif de paiement."
+                }
+              </p>
+
+              <p style="margin:0;line-height:1.7">
+                Connectez-vous à l'espace administrateur pour vérifier le paiement.
+              </p>
+            </div>
+          </div>
+        `,
+      });
+
+    if (
+      error
+    ) {
+      console.error(
+        "Erreur notification e-mail paiement :",
+        error,
+      );
+    }
+  } catch (
+    emailError
+  ) {
+    /*
+     * Une erreur Resend ne doit jamais
+     * annuler le paiement ou le dekont.
+     */
+    console.error(
+      "Envoi de la notification e-mail paiement impossible :",
+      emailError,
+    );
+  }
+}
+
 
 export async function POST(
   request: Request,
@@ -372,8 +551,11 @@ export async function POST(
             request_code,
             status,
             calculated_price,
+            insurance_duration_years,
 
             client:clients (
+              first_name,
+              last_name,
               whatsapp_country_code,
               whatsapp_number
             )
@@ -436,6 +618,18 @@ export async function POST(
             null
           )
         : clientRelation;
+
+    const firstName =
+      client
+        ?.first_name
+        ?.trim() ??
+      "";
+
+    const lastName =
+      client
+        ?.last_name
+        ?.trim() ??
+      "";
 
     const storedCountryCode =
       client
@@ -852,6 +1046,24 @@ export async function POST(
 
       description:
         "Le justificatif de paiement (dekont) a été envoyé par le client.",
+    });
+
+    /*
+     * Notification e-mail admin après réception du paiement.
+     * Une erreur Resend ne doit jamais annuler le paiement.
+     */
+    await sendPaymentAdminEmail({
+      requestCode,
+      whatsappCountryCode,
+      whatsappNumber,
+      calculatedPrice:
+        insuranceRequest.calculated_price,
+      firstName,
+      lastName,
+      durationYears:
+        insuranceRequest.insurance_duration_years,
+      isResubmission:
+        false,
     });
 
     /*

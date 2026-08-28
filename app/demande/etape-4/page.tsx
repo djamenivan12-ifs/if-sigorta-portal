@@ -773,6 +773,10 @@ export default function Etape4Page() {
     setIsSubmitting(true);
 
     try {
+      console.log(
+  "ADRESSE ENVOYÉE :",
+  requestData.address,
+);
       const payload = {
         preferredLanguage:
           language,

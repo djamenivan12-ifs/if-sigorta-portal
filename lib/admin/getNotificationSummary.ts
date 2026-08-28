@@ -53,14 +53,20 @@ type RenewalRow = {
   request: RenewalRequestRelation;
 };
 
+/*
+ * IMPORTANT :
+ * cette liste doit rester identique à ACTION_STATUSES
+ * dans app/admin/(protected)/notifications/page.tsx.
+ *
+ * Ainsi, le nombre affiché sur la cloche correspond
+ * exactement aux dossiers visibles dans Notifications.
+ */
 const ACTIVE_REQUEST_STATUSES = [
   "draft",
   "waiting_payment",
   "payment_review",
   "payment_confirmed",
   "policy_preparation",
-  "policy_available",
-  "payment_rejected",
 ];
 
 const PROGRESS_ACTIONS = [
@@ -177,7 +183,6 @@ function getDaysRemaining(
 }
 
 function getRequestLevel({
-  status,
   assignedAgentId,
   minutes,
 }: {
@@ -187,17 +192,9 @@ function getRequestLevel({
     | null;
   minutes: number;
 }): NotificationLevel {
-  if (
-    status ===
-    "payment_rejected"
-  ) {
-    return "critical";
-  }
-
   /*
    * Tout dossier non attribué
-   * déclenche une notification
-   * immédiate.
+   * déclenche une notification immédiate.
    */
   if (
     assignedAgentId ===
@@ -222,6 +219,11 @@ function getRequestLevel({
 
   /*
    * Dossier déjà pris en charge.
+   *
+   * La page Notifications affiche aussi
+   * immédiatement les dossiers attribués.
+   * Le compteur de la cloche doit donc
+   * également les compter, même avant 5 min.
    */
   if (
     minutes >=
@@ -237,14 +239,7 @@ function getRequestLevel({
     return "late";
   }
 
-  if (
-    minutes >=
-    5
-  ) {
-    return "watch";
-  }
-
-  return "none";
+  return "watch";
 }
 
 function getRenewalLevel(

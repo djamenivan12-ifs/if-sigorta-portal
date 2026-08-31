@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import PartnerForm from "./PartnerForm";
+import PartnerPriceSettingsForm from "./PartnerPriceSettingsForm";
 
 import {
   requireRole,
@@ -22,6 +23,19 @@ type Partner = {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+};
+
+type PartnerPriceRangeRow = {
+  id: number;
+  minimum_age: number;
+  maximum_age: number;
+  one_year_price:
+    | number
+    | string;
+  two_year_price:
+    | number
+    | string;
+  is_active: boolean;
 };
 
 type PageProps = {
@@ -47,8 +61,10 @@ function formatDate(
   return new Intl.DateTimeFormat(
     "fr-FR",
     {
-      dateStyle: "medium",
-      timeStyle: "short",
+      dateStyle:
+        "medium",
+      timeStyle:
+        "short",
       timeZone:
         "Europe/Istanbul",
     },
@@ -70,12 +86,20 @@ export default async function PartnerPage({
   const supabase =
     createServiceClient();
 
+  /*
+   * ============================
+   * PARTENAIRE
+   * ============================
+   */
+
   const {
     data,
     error,
   } =
     await supabase
-      .from("partners")
+      .from(
+        "partners",
+      )
       .select(
         `
           id,
@@ -108,6 +132,12 @@ export default async function PartnerPage({
 
   const partner =
     data as Partner;
+
+  /*
+   * ============================
+   * NOMBRE DE DOSSIERS
+   * ============================
+   */
 
   const {
     count:
@@ -144,6 +174,87 @@ export default async function PartnerPage({
   const totalDossiers =
     dossierCount ?? 0;
 
+  /*
+   * ============================
+   * TARIFS DU PARTENAIRE
+   * ============================
+   */
+
+  const {
+    data:
+      priceRangesData,
+    error:
+      priceRangesError,
+  } =
+    await supabase
+      .from(
+        "partner_price_ranges",
+      )
+      .select(
+        `
+          id,
+          minimum_age,
+          maximum_age,
+          one_year_price,
+          two_year_price,
+          is_active
+        `,
+      )
+      .eq(
+        "partner_id",
+        partner.id,
+      )
+      .order(
+        "minimum_age",
+        {
+          ascending:
+            true,
+        },
+      );
+
+  if (
+    priceRangesError
+  ) {
+    throw new Error(
+      priceRangesError.message,
+    );
+  }
+
+  const priceRanges =
+    (
+      priceRangesData ??
+      []
+    ).map(
+      (row) => {
+        const item =
+          row as PartnerPriceRangeRow;
+
+        return {
+          id:
+            item.id,
+
+          minimumAge:
+            item.minimum_age,
+
+          maximumAge:
+            item.maximum_age,
+
+          oneYearPrice:
+            Number(
+              item.one_year_price,
+            ),
+
+          twoYearPrice:
+            Number(
+              item.two_year_price,
+            ),
+
+          isActive:
+            item.is_active,
+        };
+      },
+    );
+
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-5xl">
@@ -164,7 +275,9 @@ export default async function PartnerPage({
               <div className="flex items-start gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F3F8F2] text-xl font-black text-[#0B5D3B]">
                   {partner.company_name
-                    .charAt(0)
+                    .charAt(
+                      0,
+                    )
                     .toUpperCase()}
                 </div>
 
@@ -227,7 +340,9 @@ export default async function PartnerPage({
               </p>
 
               <p className="mt-2 break-all text-sm font-medium text-[#102B20]">
-                {partner.email}
+                {
+                  partner.email
+                }
               </p>
             </div>
 
@@ -272,7 +387,25 @@ export default async function PartnerPage({
           </div>
         </header>
 
-        <div className="mt-6">
+        {/* INFORMATIONS DU PARTENAIRE */}
+
+        <section className="mt-8">
+          <div className="mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              Informations
+            </p>
+
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              Informations du partenaire
+            </h2>
+
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+              Modifiez les coordonnées,
+              le responsable et le statut
+              de ce partenaire.
+            </p>
+          </div>
+
           <PartnerForm
             partner={{
               id:
@@ -303,7 +436,43 @@ export default async function PartnerPage({
               totalDossiers
             }
           />
-        </div>
+        </section>
+
+        {/* TARIFICATION DU PARTENAIRE */}
+
+        <section className="mt-12">
+          <div className="mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              Tarification
+            </p>
+
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              Tarifs du partenaire
+            </h2>
+
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+              Cette grille est propre à{" "}
+              <span className="font-semibold text-[#102B20]">
+                {
+                  partner.company_name
+                }
+              </span>
+              . Les modifications
+              effectuées ici n’affectent
+              ni les tarifs publics ni
+              les autres partenaires.
+            </p>
+          </div>
+
+          <PartnerPriceSettingsForm
+            partnerId={
+              partner.id
+            }
+            initialRanges={
+              priceRanges
+            }
+          />
+        </section>
       </div>
     </main>
   );

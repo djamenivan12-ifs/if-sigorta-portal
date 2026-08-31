@@ -13,6 +13,7 @@ import {
   FileCheck2,
   FolderOpen,
   Gauge,
+  Handshake,
   LayoutDashboard,
   RefreshCcw,
   Search,
@@ -97,6 +98,12 @@ export default function Navigation({
       href: "/admin/statistiques",
       label: "Statistiques",
       icon: BarChart3,
+      adminOnly: true,
+    },
+    {
+      href: "/admin/partenaires",
+      label: "Partenaires",
+      icon: Handshake,
       adminOnly: true,
     },
     {

@@ -12,6 +12,7 @@ type CreatePartnerPayload = {
   companyName?: string;
   managerName?: string;
   email?: string;
+  password?: string;
   whatsappCountryCode?: string;
   whatsappNumber?: string;
 };
@@ -39,6 +40,10 @@ function generatePartnerCode() {
 export async function POST(
   request: Request,
 ) {
+  let createdAuthUserId:
+    | string
+    | null = null;
+
   try {
     /*
      * Seul un administrateur connecté
@@ -73,6 +78,9 @@ export async function POST(
         .toLowerCase() ??
       "";
 
+    const password =
+      body.password ?? "";
+
     const whatsappCountryCode =
       body.whatsappCountryCode
         ?.trim() ??
@@ -91,6 +99,7 @@ export async function POST(
       !companyName ||
       !managerName ||
       !email ||
+      !password ||
       !whatsappCountryCode ||
       !whatsappNumber
     ) {
@@ -129,11 +138,32 @@ export async function POST(
       );
     }
 
+    if (
+      password.length < 8
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Le mot de passe doit contenir au moins 8 caractères.",
+        },
+        {
+          status: 400,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
     const serviceClient =
       createServiceClient();
 
     /*
-     * Vérification de l'adresse e-mail.
+     * Vérifier que l'adresse e-mail
+     * n'est pas déjà utilisée par
+     * un partenaire.
      */
     const {
       data: existingPartner,
@@ -176,10 +206,6 @@ export async function POST(
 
     /*
      * Génération du code partenaire.
-     *
-     * Une collision est extrêmement improbable,
-     * mais plusieurs tentatives sont prévues
-     * afin de garantir l'unicité.
      */
     let partnerCode = "";
 
@@ -228,12 +254,92 @@ export async function POST(
     }
 
     /*
-     * Création du partenaire.
+     * Création du compte Supabase Auth.
      *
-     * Aucun compte Supabase Auth n'est encore
-     * créé ici. Cette partie sera ajoutée
-     * pendant la phase d'authentification
-     * partenaire.
+     * Le rôle est stocké dans app_metadata
+     * afin qu'il ne puisse pas être modifié
+     * par le partenaire depuis le navigateur.
+     */
+    const {
+      data: authData,
+      error: authError,
+    } =
+      await serviceClient
+        .auth
+        .admin
+        .createUser({
+          email,
+          password,
+
+          email_confirm:
+            true,
+
+          user_metadata: {
+            name:
+              managerName,
+
+            company_name:
+              companyName,
+
+            partner_code:
+              partnerCode,
+          },
+
+          app_metadata: {
+            role:
+              "partner",
+          },
+        });
+
+    if (authError) {
+      const normalizedMessage =
+        authError.message
+          .toLowerCase();
+
+      if (
+        normalizedMessage.includes(
+          "already",
+        ) ||
+        normalizedMessage.includes(
+          "registered",
+        ) ||
+        normalizedMessage.includes(
+          "exists",
+        )
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Un compte existe déjà avec cette adresse e-mail.",
+          },
+          {
+            status: 409,
+            headers: {
+              "Cache-Control":
+                "no-store",
+            },
+          },
+        );
+      }
+
+      throw new Error(
+        authError.message,
+      );
+    }
+
+    if (!authData.user) {
+      throw new Error(
+        "Supabase n’a pas retourné l’utilisateur partenaire créé.",
+      );
+    }
+
+    createdAuthUserId =
+      authData.user.id;
+
+    /*
+     * Création de la fiche partenaire
+     * liée au compte Supabase Auth.
      */
     const {
       data: partner,
@@ -259,6 +365,9 @@ export async function POST(
           whatsapp_number:
             whatsappNumber,
 
+          auth_user_id:
+            createdAuthUserId,
+
           is_active:
             true,
         })
@@ -271,6 +380,7 @@ export async function POST(
             email,
             whatsapp_country_code,
             whatsapp_number,
+            auth_user_id,
             is_active,
             created_at
           `,
@@ -278,6 +388,33 @@ export async function POST(
         .single();
 
     if (insertError) {
+      /*
+       * Rollback :
+       * si la fiche partenaire échoue,
+       * supprimer immédiatement le compte
+       * Auth créé juste avant.
+       */
+      const {
+        error:
+          rollbackError,
+      } =
+        await serviceClient
+          .auth
+          .admin
+          .deleteUser(
+            createdAuthUserId,
+          );
+
+      if (rollbackError) {
+        console.error(
+          "Impossible de supprimer le compte Auth partenaire après échec de création :",
+          rollbackError,
+        );
+      }
+
+      createdAuthUserId =
+        null;
+
       const normalizedMessage =
         insertError.message
           .toLowerCase();

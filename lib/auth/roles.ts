@@ -1,6 +1,7 @@
 export const USER_ROLES = [
   "agent",
   "admin",
+  "partner",
 ] as const;
 
 export type UserRole =

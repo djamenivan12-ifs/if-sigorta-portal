@@ -14,6 +14,7 @@ type UpdatePartnerPayload = {
   companyName?: string;
   managerName?: string;
   email?: string;
+  password?: string;
   whatsappCountryCode?: string;
   whatsappNumber?: string;
   isActive?: boolean;
@@ -26,6 +27,38 @@ function cleanPhoneNumber(
     /\D/g,
     "",
   );
+}
+
+function isDuplicateError(
+  message: string,
+) {
+  const normalized =
+    message.toLowerCase();
+
+  return (
+    normalized.includes(
+      "duplicate",
+    ) ||
+    normalized.includes(
+      "unique",
+    ) ||
+    normalized.includes(
+      "already",
+    ) ||
+    normalized.includes(
+      "registered",
+    ) ||
+    normalized.includes(
+      "exists",
+    )
+  );
+}
+
+function noStoreHeaders() {
+  return {
+    "Cache-Control":
+      "no-store",
+  };
 }
 
 export async function PATCH(
@@ -44,9 +77,7 @@ export async function PATCH(
         "admin",
       ]);
 
-    if (
-      !auth.success
-    ) {
+    if (!auth.success) {
       return auth.response;
     }
 
@@ -55,9 +86,7 @@ export async function PATCH(
     } =
       await params;
 
-    if (
-      !id
-    ) {
+    if (!id) {
       return NextResponse.json(
         {
           success: false,
@@ -66,6 +95,8 @@ export async function PATCH(
         },
         {
           status: 400,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
@@ -85,6 +116,9 @@ export async function PATCH(
       body.email
         ?.trim()
         .toLowerCase();
+
+    const password =
+      body.password;
 
     const whatsappCountryCode =
       body.whatsappCountryCode
@@ -111,6 +145,8 @@ export async function PATCH(
         },
         {
           status: 400,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
@@ -128,28 +164,49 @@ export async function PATCH(
         },
         {
           status: 400,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
 
     if (
-      email !== undefined
-    ) {
-      if (
+      email !== undefined &&
+      (
         !email ||
         !email.includes("@")
-      ) {
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "L’adresse e-mail est invalide.",
-          },
-          {
-            status: 400,
-          },
-        );
-      }
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "L’adresse e-mail est invalide.",
+        },
+        {
+          status: 400,
+          headers:
+            noStoreHeaders(),
+        },
+      );
+    }
+
+    if (
+      password !== undefined &&
+      password.length < 8
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+        },
+        {
+          status: 400,
+          headers:
+            noStoreHeaders(),
+        },
+      );
     }
 
     if (
@@ -165,6 +222,8 @@ export async function PATCH(
         },
         {
           status: 400,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
@@ -182,6 +241,8 @@ export async function PATCH(
         },
         {
           status: 400,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
@@ -199,7 +260,16 @@ export async function PATCH(
         .select(
           `
             id,
-            email
+            code,
+            company_name,
+            manager_name,
+            email,
+            whatsapp_country_code,
+            whatsapp_number,
+            auth_user_id,
+            is_active,
+            created_at,
+            updated_at
           `,
         )
         .eq(
@@ -216,9 +286,7 @@ export async function PATCH(
       );
     }
 
-    if (
-      !existingPartner
-    ) {
+    if (!existingPartner) {
       return NextResponse.json(
         {
           success: false,
@@ -227,6 +295,26 @@ export async function PATCH(
         },
         {
           status: 404,
+          headers:
+            noStoreHeaders(),
+        },
+      );
+    }
+
+    if (
+      password &&
+      !existingPartner.auth_user_id
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Ce partenaire ne possède pas encore de compte de connexion.",
+        },
+        {
+          status: 409,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
@@ -274,80 +362,92 @@ export async function PATCH(
           },
           {
             status: 409,
+            headers:
+              noStoreHeaders(),
           },
         );
       }
     }
 
-    const updates: {
-      company_name?: string;
-      manager_name?: string;
-      email?: string;
-      whatsapp_country_code?: string;
-      whatsapp_number?: string;
-      is_active?: boolean;
-      updated_at: string;
-    } = {
-      updated_at:
-        new Date().toISOString(),
-    };
+    const finalCompanyName =
+      companyName ??
+      existingPartner.company_name;
 
-    if (
-      companyName !==
-      undefined
-    ) {
-      updates.company_name =
-        companyName;
-    }
+    const finalManagerName =
+      managerName ??
+      existingPartner.manager_name;
 
-    if (
-      managerName !==
-      undefined
-    ) {
-      updates.manager_name =
-        managerName;
-    }
+    const finalEmail =
+      email ??
+      existingPartner.email;
 
-    if (
-      email !== undefined
-    ) {
-      updates.email =
-        email;
-    }
+    const finalWhatsappCountryCode =
+      whatsappCountryCode ??
+      existingPartner.whatsapp_country_code;
 
-    if (
-      whatsappCountryCode !==
-      undefined
-    ) {
-      updates.whatsapp_country_code =
-        whatsappCountryCode;
-    }
+    const finalWhatsappNumber =
+      whatsappNumber ??
+      existingPartner.whatsapp_number;
 
-    if (
-      whatsappNumber !==
-      undefined
-    ) {
-      updates.whatsapp_number =
-        whatsappNumber;
-    }
-
-    if (
+    const finalIsActive =
       typeof body.isActive ===
       "boolean"
-    ) {
-      updates.is_active =
-        body.isActive;
-    }
+        ? body.isActive
+        : existingPartner.is_active;
+
+    const authNeedsUpdate =
+      Boolean(
+        existingPartner.auth_user_id,
+      ) &&
+      (
+        finalEmail !==
+          existingPartner.email ||
+        finalCompanyName !==
+          existingPartner.company_name ||
+        finalManagerName !==
+          existingPartner.manager_name ||
+        Boolean(password)
+      );
+
+    const updateTimestamp =
+      new Date().toISOString();
+
+    /*
+     * 1. On met d'abord à jour la fiche
+     * partenaire.
+     *
+     * Si cette étape échoue, Supabase Auth
+     * n'a encore subi aucune modification.
+     */
 
     const {
-      data: partner,
+      data: updatedPartner,
       error: updateError,
     } =
       await supabase
         .from("partners")
-        .update(
-          updates,
-        )
+        .update({
+          company_name:
+            finalCompanyName,
+
+          manager_name:
+            finalManagerName,
+
+          email:
+            finalEmail,
+
+          whatsapp_country_code:
+            finalWhatsappCountryCode,
+
+          whatsapp_number:
+            finalWhatsappNumber,
+
+          is_active:
+            finalIsActive,
+
+          updated_at:
+            updateTimestamp,
+        })
         .eq(
           "id",
           id,
@@ -361,6 +461,7 @@ export async function PATCH(
             email,
             whatsapp_country_code,
             whatsapp_number,
+            auth_user_id,
             is_active,
             created_at,
             updated_at
@@ -371,16 +472,9 @@ export async function PATCH(
     if (
       updateError
     ) {
-      const message =
-        updateError.message
-          .toLowerCase();
-
       if (
-        message.includes(
-          "duplicate",
-        ) ||
-        message.includes(
-          "unique",
+        isDuplicateError(
+          updateError.message,
         )
       ) {
         return NextResponse.json(
@@ -391,6 +485,8 @@ export async function PATCH(
           },
           {
             status: 409,
+            headers:
+              noStoreHeaders(),
           },
         );
       }
@@ -400,21 +496,179 @@ export async function PATCH(
       );
     }
 
+    /*
+     * 2. Synchronisation Supabase Auth.
+     *
+     * Elle n'est nécessaire que si les
+     * informations utilisées par le compte
+     * Auth ont changé ou si un nouveau mot
+     * de passe a été fourni.
+     */
+
+    if (
+      authNeedsUpdate &&
+      existingPartner.auth_user_id
+    ) {
+      const {
+        error:
+          authUpdateError,
+      } =
+        await supabase
+          .auth
+          .admin
+          .updateUserById(
+            existingPartner.auth_user_id,
+            {
+              email:
+                finalEmail,
+
+              ...(password
+                ? {
+                    password,
+                  }
+                : {}),
+
+              user_metadata: {
+                name:
+                  finalManagerName,
+
+                company_name:
+                  finalCompanyName,
+
+                partner_code:
+                  existingPartner.code,
+              },
+
+              app_metadata: {
+                role:
+                  "partner",
+              },
+            },
+          );
+
+      if (
+        authUpdateError
+      ) {
+        /*
+         * 3. Auth a échoué.
+         *
+         * On remet la fiche partenaire
+         * exactement dans son état précédent.
+         */
+
+        const {
+          error:
+            rollbackError,
+        } =
+          await supabase
+            .from("partners")
+            .update({
+              company_name:
+                existingPartner.company_name,
+
+              manager_name:
+                existingPartner.manager_name,
+
+              email:
+                existingPartner.email,
+
+              whatsapp_country_code:
+                existingPartner.whatsapp_country_code,
+
+              whatsapp_number:
+                existingPartner.whatsapp_number,
+
+              is_active:
+                existingPartner.is_active,
+
+              updated_at:
+                existingPartner.updated_at,
+            })
+            .eq(
+              "id",
+              id,
+            );
+
+        if (
+          rollbackError
+        ) {
+          console.error(
+            "Échec du rollback partenaire après erreur Supabase Auth :",
+            {
+              partnerId:
+                id,
+
+              authUserId:
+                existingPartner.auth_user_id,
+
+              authError:
+                authUpdateError.message,
+
+              rollbackError:
+                rollbackError.message,
+            },
+          );
+
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "La mise à jour du compte de connexion a échoué et la fiche partenaire n’a pas pu être restaurée automatiquement. Vérifiez ce partenaire dans Supabase.",
+            },
+            {
+              status: 500,
+              headers:
+                noStoreHeaders(),
+            },
+          );
+        }
+
+        if (
+          isDuplicateError(
+            authUpdateError.message,
+          )
+        ) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "Un compte existe déjà avec cette adresse e-mail.",
+            },
+            {
+              status: 409,
+              headers:
+                noStoreHeaders(),
+            },
+          );
+        }
+
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "La mise à jour du compte de connexion a échoué. Les informations précédentes ont été restaurées.",
+          },
+          {
+            status: 500,
+            headers:
+              noStoreHeaders(),
+          },
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
-        partner,
+        partner:
+          updatedPartner,
       },
       {
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
+        headers:
+          noStoreHeaders(),
       },
     );
-  } catch (
-    error
-  ) {
+  } catch (error) {
     console.error(
       "Erreur modification partenaire :",
       error,
@@ -423,6 +677,7 @@ export async function PATCH(
     return NextResponse.json(
       {
         success: false,
+
         error:
           error instanceof Error
             ? error.message
@@ -430,6 +685,8 @@ export async function PATCH(
       },
       {
         status: 500,
+        headers:
+          noStoreHeaders(),
       },
     );
   }
@@ -451,9 +708,7 @@ export async function DELETE(
         "admin",
       ]);
 
-    if (
-      !auth.success
-    ) {
+    if (!auth.success) {
       return auth.response;
     }
 
@@ -462,9 +717,7 @@ export async function DELETE(
     } =
       await params;
 
-    if (
-      !id
-    ) {
+    if (!id) {
       return NextResponse.json(
         {
           success: false,
@@ -473,6 +726,8 @@ export async function DELETE(
         },
         {
           status: 400,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
@@ -489,7 +744,8 @@ export async function DELETE(
         .select(
           `
             id,
-            company_name
+            company_name,
+            auth_user_id
           `,
         )
         .eq(
@@ -506,9 +762,7 @@ export async function DELETE(
       );
     }
 
-    if (
-      !partner
-    ) {
+    if (!partner) {
       return NextResponse.json(
         {
           success: false,
@@ -517,15 +771,12 @@ export async function DELETE(
         },
         {
           status: 404,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
 
-    /*
-     * Un partenaire ayant déjà créé des dossiers
-     * ne doit pas être supprimé afin de préserver
-     * l'historique et la traçabilité.
-     */
     const {
       count:
         requestCount,
@@ -570,9 +821,25 @@ export async function DELETE(
         },
         {
           status: 409,
+          headers:
+            noStoreHeaders(),
         },
       );
     }
+
+    const authUserId =
+      partner.auth_user_id;
+
+    /*
+     * On supprime d'abord la fiche partenaire.
+     *
+     * Le garde partenaire exige une ligne
+     * partners active liée à auth_user_id.
+     * Ainsi, même si la suppression Auth
+     * échoue ensuite, le compte orphelin
+     * ne peut plus accéder à l'espace
+     * partenaire.
+     */
 
     const {
       error: deleteError,
@@ -593,22 +860,61 @@ export async function DELETE(
       );
     }
 
+    if (authUserId) {
+      const {
+        error:
+          deleteAuthError,
+      } =
+        await supabase
+          .auth
+          .admin
+          .deleteUser(
+            authUserId,
+          );
+
+      if (
+        deleteAuthError
+      ) {
+        console.error(
+          "Fiche partenaire supprimée mais compte Auth non supprimé :",
+          {
+            partnerId:
+              id,
+
+            authUserId,
+
+            error:
+              deleteAuthError,
+          },
+        );
+
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "La fiche partenaire a été supprimée, mais le compte de connexion n’a pas pu être supprimé. Vérifiez Supabase Auth.",
+          },
+          {
+            status: 500,
+            headers:
+              noStoreHeaders(),
+          },
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
         message:
-          "Partenaire supprimé avec succès.",
+          "Partenaire et compte de connexion supprimés avec succès.",
       },
       {
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
+        headers:
+          noStoreHeaders(),
       },
     );
-  } catch (
-    error
-  ) {
+  } catch (error) {
     console.error(
       "Erreur suppression partenaire :",
       error,
@@ -617,6 +923,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
+
         error:
           error instanceof Error
             ? error.message
@@ -624,6 +931,8 @@ export async function DELETE(
       },
       {
         status: 500,
+        headers:
+          noStoreHeaders(),
       },
     );
   }

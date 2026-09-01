@@ -148,6 +148,11 @@ export default function NouveauPartenairePage() {
   ] = useState("");
 
   const [
+    password,
+    setPassword,
+  ] = useState("");
+
+  const [
     whatsappCountryCode,
     setWhatsappCountryCode,
   ] = useState("+90");
@@ -204,11 +209,22 @@ export default function NouveauPartenairePage() {
       !cleanedCompanyName ||
       !cleanedManagerName ||
       !cleanedEmail ||
+      !password ||
       !cleanedCountryCode ||
       !cleanedNumber
     ) {
       setErrorMessage(
         "Tous les champs sont obligatoires.",
+      );
+
+      return;
+    }
+
+    if (
+      password.length < 8
+    ) {
+      setErrorMessage(
+        "Le mot de passe doit contenir au moins 8 caractères.",
       );
 
       return;
@@ -238,6 +254,8 @@ export default function NouveauPartenairePage() {
 
                 email:
                   cleanedEmail,
+
+                password,
 
                 whatsappCountryCode:
                   cleanedCountryCode,
@@ -322,8 +340,9 @@ export default function NouveauPartenairePage() {
 
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
                   Enregistrez un nouvel apporteur
-                  d’affaires IF Sigorta. Ses tarifs
-                  seront configurés séparément.
+                  d’affaires IF Sigorta et créez
+                  son accès sécurisé à l’espace
+                  partenaire.
                 </p>
               </div>
             </div>
@@ -400,6 +419,86 @@ export default function NouveauPartenairePage() {
             <div className="mt-8 border-t border-slate-100 pt-8">
               <div className="mb-5">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                  Connexion
+                </p>
+
+                <h2 className="mt-2 text-lg font-semibold text-[#102B20]">
+                  Accès à l’espace partenaire
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  L’adresse e-mail et le mot de
+                  passe ci-dessous permettront au
+                  partenaire de se connecter à son
+                  espace.
+                </p>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                  >
+                    Adresse e-mail
+                  </label>
+
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => {
+                      setEmail(
+                        event.target.value,
+                      );
+
+                      setErrorMessage("");
+                    }}
+                    autoComplete="email"
+                    placeholder="exemple@email.com"
+                    required
+                    className={inputClassName}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                  >
+                    Mot de passe initial
+                  </label>
+
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(
+                        event.target.value,
+                      );
+
+                      setErrorMessage("");
+                    }}
+                    autoComplete="new-password"
+                    placeholder="8 caractères minimum"
+                    minLength={8}
+                    required
+                    className={inputClassName}
+                  />
+
+                  <p className="mt-2 text-xs leading-5 text-slate-400">
+                    Minimum 8 caractères. Communiquez
+                    ce mot de passe au partenaire de
+                    manière sécurisée.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <div className="mb-5">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
                   Contact
                 </p>
 
@@ -409,32 +508,6 @@ export default function NouveauPartenairePage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
-                >
-                  Adresse e-mail
-                </label>
-
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => {
-                    setEmail(
-                      event.target.value,
-                    );
-
-                    setErrorMessage("");
-                  }}
-                  autoComplete="email"
-                  placeholder="exemple@email.com"
-                  required
-                  className={inputClassName}
-                />
-              </div>
-
-              <div className="mt-5">
                 <label
                   htmlFor="whatsappNumber"
                   className="mb-2 block text-sm font-semibold text-slate-700"

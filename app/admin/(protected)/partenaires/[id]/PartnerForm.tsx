@@ -5,26 +5,30 @@ import {
   useState,
 } from "react";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  useRouter,
+} from "next/navigation";
+
+type Partner = {
+  id: string;
+  code: string;
+  companyName: string;
+  managerName: string;
+  email: string;
+  whatsappCountryCode: string;
+  whatsappNumber: string;
+  isActive: boolean;
+};
 
 type PartnerFormProps = {
-  partner: {
-    id: string;
-    code: string;
-    companyName: string;
-    managerName: string;
-    email: string;
-    whatsappCountryCode: string;
-    whatsappNumber: string;
-    isActive: boolean;
-  };
+  partner: Partner;
   dossierCount: number;
 };
 
 type ApiResponse = {
   success?: boolean;
   error?: string;
-  message?: string;
 };
 
 const PARTNER_COUNTRIES = [
@@ -169,6 +173,16 @@ export default function PartnerForm({
   );
 
   const [
+    password,
+    setPassword,
+  ] = useState("");
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+
+  const [
     whatsappCountryCode,
     setWhatsappCountryCode,
   ] = useState(
@@ -260,6 +274,28 @@ export default function PartnerForm({
       return;
     }
 
+    if (
+      password &&
+      password.length < 8
+    ) {
+      setErrorMessage(
+        "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+      );
+
+      return;
+    }
+
+    if (
+      password !==
+      confirmPassword
+    ) {
+      setErrorMessage(
+        "Les deux mots de passe ne correspondent pas.",
+      );
+
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -284,6 +320,10 @@ export default function PartnerForm({
 
                 email:
                   cleanedEmail,
+
+                password:
+                  password ||
+                  undefined,
 
                 whatsappCountryCode,
 
@@ -322,8 +362,13 @@ export default function PartnerForm({
         cleanedNumber,
       );
 
+      setPassword("");
+      setConfirmPassword("");
+
       setSuccessMessage(
-        "Les informations du partenaire ont été mises à jour.",
+        password
+          ? "Informations et mot de passe mis à jour avec succès."
+          : "Modifications enregistrées avec succès.",
       );
 
       router.refresh();
@@ -341,25 +386,7 @@ export default function PartnerForm({
   async function handleStatusChange() {
     clearMessages();
 
-    const nextStatus =
-      !isActive;
-
-    const confirmationMessage =
-      nextStatus
-        ? "Voulez-vous réactiver ce partenaire ?"
-        : "Voulez-vous désactiver ce partenaire ? Il ne pourra plus utiliser son espace partenaire tant qu’il restera inactif.";
-
-    if (
-      !window.confirm(
-        confirmationMessage,
-      )
-    ) {
-      return;
-    }
-
-    setChangingStatus(
-      true,
-    );
+    setChangingStatus(true);
 
     try {
       const response =
@@ -376,7 +403,7 @@ export default function PartnerForm({
             body:
               JSON.stringify({
                 isActive:
-                  nextStatus,
+                  !isActive,
               }),
           },
         );
@@ -393,6 +420,9 @@ export default function PartnerForm({
             "Le statut du partenaire n’a pas pu être modifié.",
         );
       }
+
+      const nextStatus =
+        !isActive;
 
       setIsActive(
         nextStatus,
@@ -412,9 +442,7 @@ export default function PartnerForm({
           : "Une erreur inattendue est survenue.",
       );
     } finally {
-      setChangingStatus(
-        false,
-      );
+      setChangingStatus(false);
     }
   }
 
@@ -425,7 +453,7 @@ export default function PartnerForm({
       dossierCount > 0
     ) {
       setErrorMessage(
-        "Ce partenaire possède déjà des dossiers. Il doit être désactivé afin de conserver l’historique.",
+        "Ce partenaire possède déjà des dossiers. Désactivez-le afin de conserver l’historique.",
       );
 
       return;
@@ -433,7 +461,7 @@ export default function PartnerForm({
 
     const confirmed =
       window.confirm(
-        `Supprimer définitivement ${partner.companyName} ? Cette action est irréversible.`,
+        `Supprimer définitivement ${partner.companyName} ? Cette action supprimera également son compte de connexion.`,
       );
 
     if (!confirmed) {
@@ -485,7 +513,7 @@ export default function PartnerForm({
       <section className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white">
         <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
-            Informations
+            Partenaire
           </p>
 
           <h2 className="mt-2 text-xl font-semibold text-[#102B20]">
@@ -493,8 +521,8 @@ export default function PartnerForm({
           </h2>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Modifiez les informations commerciales
-            et les coordonnées du partenaire.
+            Modifiez les informations commerciales,
+            les coordonnées et les accès du partenaire.
           </p>
         </div>
 
@@ -571,9 +599,85 @@ export default function PartnerForm({
 
                 clearMessages();
               }}
+              autoComplete="email"
               required
               className={inputClassName}
             />
+
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              Cette adresse sert également
+              d’identifiant de connexion du partenaire.
+            </p>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                Sécurité
+              </p>
+
+              <h3 className="mt-2 font-semibold text-[#102B20]">
+                Modifier le mot de passe
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Laissez les deux champs vides
+                si vous ne souhaitez pas modifier
+                le mot de passe du partenaire.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Nouveau mot de passe
+                </label>
+
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(
+                      event.target.value,
+                    );
+
+                    clearMessages();
+                  }}
+                  autoComplete="new-password"
+                  placeholder="8 caractères minimum"
+                  className={inputClassName}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Confirmer le mot de passe
+                </label>
+
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => {
+                    setConfirmPassword(
+                      event.target.value,
+                    );
+
+                    clearMessages();
+                  }}
+                  autoComplete="new-password"
+                  placeholder="Répétez le mot de passe"
+                  className={inputClassName}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="mt-5">
@@ -628,6 +732,7 @@ export default function PartnerForm({
 
                   clearMessages();
                 }}
+                autoComplete="tel"
                 required
                 className={inputClassName}
               />
@@ -719,15 +824,15 @@ export default function PartnerForm({
 
               <p className="font-semibold text-[#102B20]">
                 {isActive
-                  ? "Partenaire autorisé"
-                  : "Partenaire désactivé"}
+                  ? "Accès autorisé"
+                  : "Accès désactivé"}
               </p>
             </div>
 
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
               {isActive
-                ? "Ce partenaire est actuellement autorisé. Son accès à l’espace partenaire sera pris en compte lors de la mise en place de l’authentification."
-                : "Ce partenaire est désactivé et ne devra pas pouvoir accéder à son espace partenaire."}
+                ? "Le partenaire est actuellement actif."
+                : "Le partenaire est désactivé. Son historique reste conservé."}
             </p>
           </div>
 
@@ -737,14 +842,14 @@ export default function PartnerForm({
               handleStatusChange
             }
             disabled={
-              changingStatus ||
               saving ||
+              changingStatus ||
               deleting
             }
-            className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border px-5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
               isActive
-                ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                : "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B] hover:bg-[#E8F3E6]"
+                ? "border border-red-200 bg-white text-red-700 hover:bg-red-50"
+                : "bg-[#0B5D3B] text-white hover:bg-[#084A2F]"
             }`}
           >
             {changingStatus
@@ -758,7 +863,7 @@ export default function PartnerForm({
 
       <section className="overflow-hidden rounded-[1.75rem] border border-red-200 bg-white">
         <div className="border-b border-red-100 px-6 py-6 sm:px-8">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-red-500">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-red-600">
             Zone sensible
           </p>
 
@@ -769,41 +874,15 @@ export default function PartnerForm({
 
         <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
-            {dossierCount ===
-            0 ? (
-              <>
-                <p className="font-semibold text-[#102B20]">
-                  Suppression définitive
-                </p>
+            <p className="font-semibold text-[#102B20]">
+              Suppression définitive
+            </p>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Ce partenaire ne possède
-                  actuellement aucun dossier. Il
-                  peut donc être supprimé
-                  définitivement.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="font-semibold text-[#102B20]">
-                  Suppression impossible
-                </p>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Ce partenaire possède{" "}
-                  <strong>
-                    {dossierCount} dossier
-                    {dossierCount !==
-                    1
-                      ? "s"
-                      : ""}
-                  </strong>
-                  . Pour conserver la
-                  traçabilité, il doit être
-                  désactivé plutôt que supprimé.
-                </p>
-              </>
-            )}
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+              {dossierCount > 0
+                ? `Ce partenaire possède ${dossierCount} dossier${dossierCount > 1 ? "s" : ""}. Il ne peut donc pas être supprimé définitivement.`
+                : "Ce partenaire ne possède aucun dossier et peut être supprimé définitivement."}
+            </p>
           </div>
 
           <button
@@ -812,12 +891,12 @@ export default function PartnerForm({
               handleDelete
             }
             disabled={
-              deleting ||
+              dossierCount > 0 ||
               saving ||
               changingStatus ||
-              dossierCount > 0
+              deleting
             }
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-red-600 px-5 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
           >
             {deleting
               ? "Suppression..."
@@ -825,6 +904,19 @@ export default function PartnerForm({
           </button>
         </div>
       </section>
+
+      <div>
+        <Link
+          href="/admin/partenaires"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+        >
+          <span aria-hidden="true">
+            ←
+          </span>
+
+          Retour aux partenaires
+        </Link>
+      </div>
     </div>
   );
 }

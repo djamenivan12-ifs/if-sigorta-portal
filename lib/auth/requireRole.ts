@@ -9,8 +9,10 @@ import {
   createServerSupabaseClient,
 } from "@/lib/supabase/server";
 
-export async function requireRole(
-  allowedRoles: UserRole[],
+export async function requireRole<
+  TAllowedRole extends UserRole,
+>(
+  allowedRoles: readonly TAllowedRole[],
 ) {
   const supabase =
     await createServerSupabaseClient();
@@ -41,7 +43,7 @@ export async function requireRole(
   if (
     !role ||
     !allowedRoles.includes(
-      role,
+      role as TAllowedRole,
     )
   ) {
     redirect(
@@ -51,6 +53,7 @@ export async function requireRole(
 
   return {
     user,
-    role,
+    role:
+      role as TAllowedRole,
   };
 }

@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { requirePartner } from "@/lib/auth/requirePartner";
 import { createServiceClient } from "@/lib/supabase/service";
 
+import PartnerPaymentForm from "./PartnerPaymentForm";
+
 const BUCKET_NAME =
   "insurance-documents";
 
@@ -169,9 +171,8 @@ export default async function PartnerDossierPage({
   params,
 }: PageProps) {
   /*
-   * IMPORTANT :
-   * partner.id vient de la session
-   * authentifiée côté serveur.
+   * Le partenaire provient exclusivement
+   * de la session authentifiée.
    */
   const { partner } =
     await requirePartner();
@@ -183,12 +184,12 @@ export default async function PartnerDossierPage({
     createServiceClient();
 
   /*
-   * Le partner_id est appliqué
-   * directement dans la requête.
+   * ==================================================
+   * DOSSIER
+   * ==================================================
    *
-   * Un partenaire ne peut donc pas
-   * charger le dossier d'un autre
-   * partenaire en modifiant l'URL.
+   * Un partenaire ne peut charger que
+   * ses propres dossiers.
    */
   const {
     data: insuranceRequest,
@@ -205,14 +206,18 @@ export default async function PartnerDossierPage({
           source,
           partner_id,
           status,
+
           has_kimlik,
           kimlik_number,
           kimlik_expiration_date,
           insurance_start_date,
+
           passport_number,
+
           insurance_duration_years,
           calculated_age,
           calculated_price,
+
           created_at,
           updated_at,
 
@@ -269,10 +274,11 @@ export default async function PartnerDossierPage({
   }
 
   /*
-   * On charge uniquement les
-   * documents du dossier qui vient
-   * d'être autorisé ci-dessus.
+   * ==================================================
+   * DOCUMENTS CLIENT
+   * ==================================================
    */
+
   const {
     data: documentsData,
     error: documentsError,
@@ -321,6 +327,9 @@ export default async function PartnerDossierPage({
     (documentsData ??
       []) as DocumentRow[];
 
+  /*
+   * URL temporaires des documents.
+   */
   const documentsWithUrls =
     await Promise.all(
       documents.map(
@@ -352,6 +361,52 @@ export default async function PartnerDossierPage({
         },
       ),
     );
+
+  /*
+   * ==================================================
+   * PAIEMENT
+   * ==================================================
+   *
+   * Le motif du refus est lu uniquement pour
+   * le dossier partenaire actuellement affiché.
+   */
+
+  const {
+    data: paymentData,
+    error: paymentError,
+  } =
+    await serviceClient
+      .from(
+        "payments",
+      )
+      .select(
+        `
+          id,
+          status,
+          rejection_reason
+        `,
+      )
+      .eq(
+        "request_id",
+        insuranceRequest.id,
+      )
+      .maybeSingle();
+
+  if (paymentError) {
+    throw new Error(
+      paymentError.message,
+    );
+  }
+
+  const rejectionReason =
+    paymentData?.rejection_reason ??
+    null;
+
+  /*
+   * ==================================================
+   * NORMALISATION CLIENT
+   * ==================================================
+   */
 
   const client =
     Array.isArray(
@@ -409,6 +464,12 @@ export default async function PartnerDossierPage({
           .join(", ")
       : "—";
 
+  /*
+   * ==================================================
+   * DONNÉES D'AFFICHAGE
+   * ==================================================
+   */
+
   const status =
     statusLabels[
       insuranceRequest.status
@@ -431,8 +492,15 @@ export default async function PartnerDossierPage({
     insuranceRequest.has_kimlik !==
     false;
 
+  const calculatedPrice =
+    Number(
+      insuranceRequest.calculated_price,
+    );
+
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-5 lg:px-8 lg:py-8">
+      {/* Navigation */}
+
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/partenaire/dossiers"
@@ -448,6 +516,8 @@ export default async function PartnerDossierPage({
           Tableau de bord
         </Link>
       </div>
+
+      {/* En-tête */}
 
       <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -478,26 +548,127 @@ export default async function PartnerDossierPage({
         </div>
       </header>
 
+      {/* Messages selon statut */}
+
       {insuranceRequest.status ===
         "waiting_payment" && (
         <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5">
           <p className="font-black text-amber-900">
-            Dossier créé avec succès
+            Paiement du dossier requis
           </p>
 
           <p className="mt-1 text-sm leading-6 text-amber-800">
-            Le dossier est maintenant
-            enregistré. Le paiement de
-            ce dossier sera effectué
-            individuellement dans
-            l’étape suivante du
-            processus partenaire.
+            Effectuez le virement correspondant
+            au montant de ce dossier puis
+            transmettez votre justificatif de
+            paiement.
           </p>
         </div>
       )}
 
+      {insuranceRequest.status ===
+        "payment_review" && (
+        <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50 p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-lg">
+              ✓
+            </div>
+
+            <div>
+              <p className="font-black text-orange-900">
+                Justificatif reçu
+              </p>
+
+              <p className="mt-1 text-sm leading-6 text-orange-800">
+                Votre justificatif de paiement
+                a bien été transmis. IF Sigorta
+                vérifie actuellement le paiement.
+                Aucune autre action n'est
+                nécessaire pour le moment.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {insuranceRequest.status ===
+        "payment_confirmed" && (
+        <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+          <p className="font-black text-green-900">
+            Paiement confirmé
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-green-800">
+            Le paiement a été validé par
+            IF Sigorta. Le dossier peut maintenant
+            être traité.
+          </p>
+        </div>
+      )}
+
+      {insuranceRequest.status ===
+        "policy_preparation" && (
+        <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+          <p className="font-black text-blue-900">
+            Assurance en préparation
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-blue-800">
+            Le paiement est validé et l'assurance
+            du client est actuellement en cours de
+            préparation.
+          </p>
+        </div>
+      )}
+
+      {insuranceRequest.status ===
+        "policy_available" && (
+        <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <p className="font-black text-emerald-900">
+            Assurance disponible
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-emerald-800">
+            L'assurance est prête. Le téléchargement
+            sera disponible depuis cet espace.
+          </p>
+        </div>
+      )}
+
+      {insuranceRequest.status ===
+        "payment_rejected" && (
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
+          <p className="font-black text-red-900">
+            Paiement refusé
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-red-800">
+            Le justificatif transmis n'a pas été
+            validé. Consultez le motif du refus puis
+            envoyez un nouveau justificatif depuis
+            ce dossier.
+          </p>
+
+          {rejectionReason && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-white/70 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.12em] text-red-700">
+                Motif du refus
+              </p>
+
+              <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-red-950">
+                {rejectionReason}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Contenu */}
+
       <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-5">
+          {/* Informations client */}
+
           <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
               Informations du client
@@ -574,6 +745,8 @@ export default async function PartnerDossierPage({
             </div>
           </section>
 
+          {/* Identité */}
+
           <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
               Identité et assurance
@@ -640,6 +813,8 @@ export default async function PartnerDossierPage({
             </dl>
           </section>
 
+          {/* Documents */}
+
           <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
               Documents du client
@@ -704,24 +879,25 @@ export default async function PartnerDossierPage({
             </div>
 
             <p className="mt-4 text-xs leading-5 text-slate-500">
-              Les liens vers les
-              documents sont temporaires
-              et expirent après dix
-              minutes.
+              Les liens vers les documents
+              sont temporaires et expirent
+              après dix minutes.
             </p>
           </section>
         </div>
 
+        {/* Colonne droite */}
+
         <aside className="space-y-5">
+          {/* Tarif */}
+
           <section className="rounded-[1.5rem] border border-[#DCE9DD] bg-white p-5 shadow-sm sm:p-6">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
               Tarif partenaire
             </p>
 
             <p className="mt-3 text-4xl font-black tracking-tight text-[#0B5D3B]">
-              {Number(
-                insuranceRequest.calculated_price,
-              ).toLocaleString(
+              {calculatedPrice.toLocaleString(
                 "fr-FR",
               )}{" "}
               <span className="text-2xl">
@@ -730,10 +906,124 @@ export default async function PartnerDossierPage({
             </p>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Tarif enregistré lors de
-              la création du dossier.
+              Tarif enregistré lors de la création
+              du dossier. Une modification
+              ultérieure des tarifs partenaire
+              n'affectera pas ce montant.
             </p>
           </section>
+
+          {/* Paiement */}
+
+          {insuranceRequest.status ===
+            "waiting_payment" && (
+            <PartnerPaymentForm
+              requestId={
+                insuranceRequest.id
+              }
+              requestCode={
+                insuranceRequest.request_code
+              }
+              amount={
+                calculatedPrice
+              }
+            />
+          )}
+
+          {/* Paiement en vérification */}
+
+          {insuranceRequest.status ===
+            "payment_review" && (
+            <section className="rounded-[1.5rem] border border-orange-200 bg-orange-50 p-5 shadow-sm sm:p-6">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-orange-700">
+                Paiement
+              </p>
+
+              <h2 className="mt-2 text-lg font-black text-orange-950">
+                Vérification en cours
+              </h2>
+
+              <p className="mt-3 text-sm leading-6 text-orange-800">
+                Le justificatif a été reçu.
+                IF Sigorta doit maintenant confirmer
+                le paiement.
+              </p>
+
+              <div className="mt-5 rounded-xl border border-orange-200 bg-white/70 p-4">
+                <p className="text-xs font-semibold text-orange-700">
+                  Montant transmis
+                </p>
+
+                <p className="mt-1 text-2xl font-black text-orange-950">
+                  {calculatedPrice.toLocaleString(
+                    "fr-FR",
+                  )}{" "}
+                  TL
+                </p>
+              </div>
+            </section>
+          )}
+
+          {/* Paiement confirmé */}
+
+          {[
+            "payment_confirmed",
+            "policy_preparation",
+            "policy_available",
+          ].includes(
+            insuranceRequest.status,
+          ) && (
+            <section className="rounded-[1.5rem] border border-green-200 bg-green-50 p-5 shadow-sm sm:p-6">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-green-700">
+                Paiement
+              </p>
+
+              <h2 className="mt-2 text-lg font-black text-green-950">
+                Paiement confirmé
+              </h2>
+
+              <p className="mt-3 text-sm leading-6 text-green-800">
+                Le paiement de ce dossier a été
+                vérifié et validé par IF Sigorta.
+              </p>
+
+              <div className="mt-5 rounded-xl border border-green-200 bg-white/70 p-4">
+                <p className="text-xs font-semibold text-green-700">
+                  Montant
+                </p>
+
+                <p className="mt-1 text-2xl font-black text-green-950">
+                  {calculatedPrice.toLocaleString(
+                    "fr-FR",
+                  )}{" "}
+                  TL
+                </p>
+              </div>
+            </section>
+          )}
+
+          {/* Paiement rejeté : nouvel envoi */}
+
+          {insuranceRequest.status ===
+            "payment_rejected" && (
+            <PartnerPaymentForm
+              requestId={
+                insuranceRequest.id
+              }
+              requestCode={
+                insuranceRequest.request_code
+              }
+              amount={
+                calculatedPrice
+              }
+              isResubmission
+              rejectionReason={
+                rejectionReason
+              }
+            />
+          )}
+
+          {/* État */}
 
           <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-black text-[#102B20]">
@@ -749,11 +1039,13 @@ export default async function PartnerDossierPage({
             </div>
 
             <p className="mt-4 text-sm leading-6 text-slate-500">
-              Les prochaines actions
-              disponibles dépendront de
-              l’avancement du dossier.
+              L'état de cette demande est mis
+              à jour au fur et à mesure de son
+              traitement par IF Sigorta.
             </p>
           </section>
+
+          {/* Référence */}
 
           <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-black text-[#102B20]">

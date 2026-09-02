@@ -813,106 +813,6 @@ export default async function PartnerDossierPage({
             </dl>
           </section>
 
-          {/* Documents */}
-
-          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
-              Documents du client
-            </h2>
-
-            <div className="mt-6 space-y-3">
-              {documentsWithUrls.length ===
-              0 ? (
-                <p className="text-sm text-slate-500">
-                  Aucun document disponible.
-                </p>
-              ) : (
-                documentsWithUrls.map(
-                  (document) => (
-                    <article
-                      key={
-                        document.id
-                      }
-                      className="flex flex-col gap-4 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="min-w-0">
-                        <p className="font-semibold text-slate-900">
-                          {documentLabels[
-                            document.document_type
-                          ] ??
-                            document.document_type}
-                        </p>
-
-                        <p className="mt-1 truncate text-sm text-slate-600">
-                          {
-                            document.original_file_name
-                          }
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {formatFileSize(
-                            document.file_size,
-                          )}
-                        </p>
-                      </div>
-
-                      {document.signedUrl ? (
-                        <a
-                          href={
-                            document.signedUrl
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                          className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
-                        >
-                          Ouvrir
-                        </a>
-                      ) : (
-                        <span className="text-sm text-red-600">
-                          Lien indisponible
-                        </span>
-                      )}
-                    </article>
-                  ),
-                )
-              )}
-            </div>
-
-            <p className="mt-4 text-xs leading-5 text-slate-500">
-              Les liens vers les documents
-              sont temporaires et expirent
-              après dix minutes.
-            </p>
-          </section>
-        </div>
-
-        {/* Colonne droite */}
-
-        <aside className="space-y-5">
-          {/* Tarif */}
-
-          <section className="rounded-[1.5rem] border border-[#DCE9DD] bg-white p-5 shadow-sm sm:p-6">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
-              Tarif partenaire
-            </p>
-
-            <p className="mt-3 text-4xl font-black tracking-tight text-[#0B5D3B]">
-              {calculatedPrice.toLocaleString(
-                "fr-FR",
-              )}{" "}
-              <span className="text-2xl">
-                TL
-              </span>
-            </p>
-
-            <p className="mt-3 text-sm leading-6 text-slate-500">
-              Tarif enregistré lors de la création
-              du dossier. Une modification
-              ultérieure des tarifs partenaire
-              n'affectera pas ce montant.
-            </p>
-          </section>
-
           {/* Paiement */}
 
           {insuranceRequest.status ===
@@ -1022,6 +922,106 @@ export default async function PartnerDossierPage({
               }
             />
           )}
+
+          {/* Documents */}
+
+          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
+              Documents du client
+            </h2>
+
+            <div className="mt-6 space-y-3">
+              {documentsWithUrls.length ===
+              0 ? (
+                <p className="text-sm text-slate-500">
+                  Aucun document disponible.
+                </p>
+              ) : (
+                documentsWithUrls.map(
+                  (document) => (
+                    <article
+                      key={
+                        document.id
+                      }
+                      className="flex flex-col gap-4 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-900">
+                          {documentLabels[
+                            document.document_type
+                          ] ??
+                            document.document_type}
+                        </p>
+
+                        <p className="mt-1 truncate text-sm text-slate-600">
+                          {
+                            document.original_file_name
+                          }
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          {formatFileSize(
+                            document.file_size,
+                          )}
+                        </p>
+                      </div>
+
+                      {document.signedUrl ? (
+                        <a
+                          href={
+                            document.signedUrl
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                        >
+                          Ouvrir
+                        </a>
+                      ) : (
+                        <span className="text-sm text-red-600">
+                          Lien indisponible
+                        </span>
+                      )}
+                    </article>
+                  ),
+                )
+              )}
+            </div>
+
+            <p className="mt-4 text-xs leading-5 text-slate-500">
+              Les liens vers les documents
+              sont temporaires et expirent
+              après dix minutes.
+            </p>
+          </section>
+        </div>
+
+        {/* Colonne droite */}
+
+        <aside className="space-y-5">
+          {/* Tarif */}
+
+          <section className="rounded-[1.5rem] border border-[#DCE9DD] bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              Tarif partenaire
+            </p>
+
+            <p className="mt-3 text-4xl font-black tracking-tight text-[#0B5D3B]">
+              {calculatedPrice.toLocaleString(
+                "fr-FR",
+              )}{" "}
+              <span className="text-2xl">
+                TL
+              </span>
+            </p>
+
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              Tarif enregistré lors de la création
+              du dossier. Une modification
+              ultérieure des tarifs partenaire
+              n'affectera pas ce montant.
+            </p>
+          </section>
 
           {/* État */}
 

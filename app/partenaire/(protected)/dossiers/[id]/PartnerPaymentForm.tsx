@@ -3,6 +3,7 @@
 import {
   ChangeEvent,
   FormEvent,
+  useEffect,
   useState,
 } from "react";
 
@@ -53,6 +54,14 @@ type PaymentResponse = {
   requestCode?: string;
   status?: string;
 
+  error?: string;
+};
+
+type BankSettingsResponse = {
+  success: boolean;
+  beneficiary?: string;
+  bankName?: string;
+  iban?: string;
   error?: string;
 };
 
@@ -154,6 +163,126 @@ export default function PartnerPaymentForm({
       null,
     );
 
+  const [bankSettings, setBankSettings] =
+    useState<{
+      beneficiary: string;
+      bankName: string;
+      iban: string;
+    } | null>(null);
+
+  const [bankError, setBankError] =
+    useState<string | null>(null);
+
+  const [isLoadingBank, setIsLoadingBank] =
+    useState(true);
+
+  const [copiedIban, setCopiedIban] =
+    useState(false);
+
+  const [copiedBeneficiary, setCopiedBeneficiary] =
+    useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadBankSettings() {
+      try {
+        setIsLoadingBank(true);
+        setBankError(null);
+
+        const response = await fetch(
+          "/api/bank-settings",
+          {
+            method: "GET",
+            cache: "no-store",
+          },
+        );
+
+        const data =
+          (await response.json()) as BankSettingsResponse;
+
+        if (
+          !response.ok ||
+          !data.success ||
+          !data.beneficiary ||
+          !data.bankName ||
+          !data.iban
+        ) {
+          throw new Error(
+            data.error ??
+              "Les coordonnées bancaires sont indisponibles.",
+          );
+        }
+
+        if (mounted) {
+          setBankSettings({
+            beneficiary: data.beneficiary,
+            bankName: data.bankName,
+            iban: data.iban,
+          });
+        }
+      } catch (loadError) {
+        if (mounted) {
+          setBankSettings(null);
+          setBankError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Impossible de récupérer les coordonnées bancaires.",
+          );
+        }
+      } finally {
+        if (mounted) {
+          setIsLoadingBank(false);
+        }
+      }
+    }
+
+    void loadBankSettings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function handleCopyBeneficiary() {
+    if (!bankSettings?.beneficiary) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        bankSettings.beneficiary,
+      );
+
+      setCopiedBeneficiary(true);
+
+      window.setTimeout(() => {
+        setCopiedBeneficiary(false);
+      }, 2000);
+    } catch {
+      setCopiedBeneficiary(false);
+    }
+  }
+
+  async function handleCopyIban() {
+    if (!bankSettings?.iban) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        bankSettings.iban,
+      );
+      setCopiedIban(true);
+
+      window.setTimeout(() => {
+        setCopiedIban(false);
+      }, 2000);
+    } catch {
+      setCopiedIban(false);
+    }
+  }
+
   function handleFileChange(
     event:
       ChangeEvent<HTMLInputElement>,
@@ -220,6 +349,20 @@ export default function PartnerPaymentForm({
     setProgressMessage(
       null,
     );
+
+    if (isLoadingBank) {
+      setError(
+        "Patientez pendant le chargement des coordonnées bancaires.",
+      );
+      return;
+    }
+
+    if (!bankSettings) {
+      setError(
+        "Le paiement est temporairement indisponible car les coordonnées bancaires ne sont pas disponibles.",
+      );
+      return;
+    }
 
     if (
       !file
@@ -507,6 +650,109 @@ export default function PartnerPaymentForm({
         </p>
       </div>
 
+      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0B5D3B]">
+          Informations de virement
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Effectuez le virement du montant exact indiqué pour ce dossier, puis envoyez votre dekont ci-dessous.
+        </p>
+
+        {isLoadingBank ? (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-600">
+            Chargement des coordonnées bancaires...
+          </div>
+        ) : bankSettings ? (
+          <dl className="mt-4 space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <dt className="text-xs font-semibold text-slate-500">
+                Titulaire du compte
+              </dt>
+
+              <dd className="mt-2 flex flex-col gap-3">
+                <span className="break-words text-sm font-black text-[#102B20]">
+                  {bankSettings.beneficiary}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleCopyBeneficiary}
+                  className="inline-flex w-fit items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                >
+                  {copiedBeneficiary
+                    ? "Nom copié ✓"
+                    : "Copier le nom"}
+                </button>
+              </dd>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <dt className="text-xs font-semibold text-slate-500">
+                Banque
+              </dt>
+              <dd className="mt-1 break-words text-sm font-black text-[#102B20]">
+                {bankSettings.bankName}
+              </dd>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <dt className="text-xs font-semibold text-slate-500">
+                IBAN
+              </dt>
+              <dd className="mt-2 flex flex-col gap-3">
+                <span className="break-all font-mono text-sm font-black tracking-wide text-[#102B20]">
+                  {bankSettings.iban}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleCopyIban}
+                  className="inline-flex w-fit items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                >
+                  {copiedIban
+                    ? "IBAN copié ✓"
+                    : "Copier l'IBAN"}
+                </button>
+              </dd>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
+                <dt className="text-xs font-semibold text-[#0B5D3B]">
+                  Montant à virer
+                </dt>
+                <dd className="mt-1 text-lg font-black text-[#102B20]">
+                  {amount.toLocaleString(
+                    "fr-FR",
+                  )}{" "}
+                  TL
+                </dd>
+              </div>
+
+              <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
+                <dt className="text-xs font-semibold text-[#0B5D3B]">
+                  Référence du dossier
+                </dt>
+                <dd className="mt-1 break-all text-sm font-black text-[#102B20]">
+                  {requestCode}
+                </dd>
+              </div>
+            </div>
+          </dl>
+        ) : (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-black text-red-900">
+              Paiement temporairement indisponible
+            </p>
+            <p className="mt-1 text-sm leading-6 text-red-700">
+              {bankError ??
+                "Les coordonnées bancaires ne sont pas disponibles. Réessayez plus tard."}
+            </p>
+          </div>
+        )}
+      </div>
+
       <form
         onSubmit={
           handleSubmit
@@ -628,6 +874,8 @@ export default function PartnerPaymentForm({
           type="submit"
           disabled={
             isSubmitting ||
+            isLoadingBank ||
+            !bankSettings ||
             !file ||
             !confirmed
           }

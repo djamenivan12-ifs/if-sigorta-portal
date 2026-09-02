@@ -8,88 +8,97 @@ import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
 type PaymentRow = {
-  expected_amount:
-    | number
-    | string
-    | null;
+  expected_amount: number | string | null;
+  verified_at: string | null;
+};
 
-  verified_at:
-    | string
+type PaymentWithRequestRow = PaymentRow & {
+  request:
+    | {
+        source: string | null;
+        partner_id: string | null;
+      }
+    | {
+        source: string | null;
+        partner_id: string | null;
+      }[]
     | null;
 };
 
 type NationalityRow = {
-  nationality:
-    | string
-    | null;
+  nationality: string | null;
 };
 
-type TrendDirection =
-  | "up"
-  | "down"
-  | "stable";
+type PartnerRow = {
+  id: string;
+  code: string;
+  company_name: string;
+  is_active: boolean;
+};
+
+type PartnerRequestRow = {
+  id: string;
+  partner_id: string | null;
+  status: string;
+};
+
+type TrendDirection = "up" | "down" | "stable";
 
 type TrendResult = {
   value: number;
   direction: TrendDirection;
 };
 
+type PartnerPerformance = {
+  id: string;
+  code: string;
+  companyName: string;
+  isActive: boolean;
+  requests: number;
+  availablePolicies: number;
+  confirmedPayments: number;
+  revenue: number;
+};
+
 function calculateTrend(
   current: number,
   previous: number,
 ): TrendResult {
-  if (
-    previous === 0
-  ) {
-    if (
-      current === 0
-    ) {
+  if (previous === 0) {
+    if (current === 0) {
       return {
         value: 0,
-        direction:
-          "stable",
+        direction: "stable",
       };
     }
 
     return {
       value: 100,
-      direction:
-        "up",
+      direction: "up",
     };
   }
 
   const difference =
-    (
-      (
-        current -
-        previous
-      ) /
-      previous
-    ) *
+    ((current - previous) /
+      previous) *
     100;
 
   if (
-    Math.abs(
-      difference,
-    ) <
+    Math.abs(difference) <
     0.01
   ) {
     return {
       value: 0,
-      direction:
-        "stable",
+      direction: "stable",
     };
   }
 
   return {
     value:
-      Math.abs(
-        difference,
-      ),
+      Math.abs(difference),
 
     direction:
-      difference >
-      0
+      difference > 0
         ? "up"
         : "down",
   };
@@ -160,6 +169,30 @@ function getTrendClassName(
   return "text-slate-500";
 }
 
+function normalizeRelation<T>(
+  relation:
+    | T
+    | T[]
+    | null
+    | undefined,
+): T | null {
+  if (
+    Array.isArray(
+      relation,
+    )
+  ) {
+    return (
+      relation[0] ??
+      null
+    );
+  }
+
+  return (
+    relation ??
+    null
+  );
+}
+
 export default async function StatisticsPage() {
   await requireRole([
     "admin",
@@ -177,11 +210,6 @@ export default async function StatisticsPage() {
   const now =
     new Date();
 
-  /*
-   * On détermine l'année et le mois
-   * courants selon le fuseau horaire
-   * de la Turquie.
-   */
   const istanbulDate =
     new Intl.DateTimeFormat(
       "en-CA",
@@ -218,10 +246,6 @@ export default async function StatisticsPage() {
       ),
     );
 
-  /*
-   * Début du mois courant,
-   * à minuit en Turquie.
-   */
   const monthStart =
     new Date(
       `${currentYear}-${String(
@@ -232,16 +256,15 @@ export default async function StatisticsPage() {
       )}-01T00:00:00+03:00`,
     );
 
-  /*
-   * Début du mois suivant.
-   */
   const nextMonthYear =
-    currentMonth === 12
+    currentMonth ===
+    12
       ? currentYear + 1
       : currentYear;
 
   const nextMonthNumber =
-    currentMonth === 12
+    currentMonth ===
+    12
       ? 1
       : currentMonth + 1;
 
@@ -255,16 +278,15 @@ export default async function StatisticsPage() {
       )}-01T00:00:00+03:00`,
     );
 
-  /*
-   * Début du mois précédent.
-   */
   const previousMonthYear =
-    currentMonth === 1
+    currentMonth ===
+    1
       ? currentYear - 1
       : currentYear;
 
   const previousMonthNumber =
-    currentMonth === 1
+    currentMonth ===
+    1
       ? 12
       : currentMonth - 1;
 
@@ -288,28 +310,29 @@ export default async function StatisticsPage() {
     totalRequestsResult,
     totalPoliciesAvailableResult,
     totalPaymentsConfirmedResult,
-
     currentMonthRequestsResult,
     previousMonthRequestsResult,
-
     oneYearRequestsResult,
     twoYearRequestsResult,
-
     currentMonthRejectedResult,
     currentMonthAvailableResult,
-
     currentMonthPaymentsResult,
     previousMonthPaymentsResult,
-
     nationalityClientsResult,
-
     paymentsToReviewResult,
     policiesToPrepareResult,
+
+    directRequestsResult,
+    partnerRequestsCountResult,
+    directMonthRequestsResult,
+    partnerMonthRequestsResult,
+    directAvailableResult,
+    partnerAvailableResult,
+    confirmedPaymentsBySourceResult,
+    partnersResult,
+    partnerRequestsResult,
   ] =
     await Promise.all([
-      /*
-       * Tous les dossiers.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -324,10 +347,6 @@ export default async function StatisticsPage() {
           },
         ),
 
-      /*
-       * Toutes les assurances
-       * disponibles.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -346,10 +365,6 @@ export default async function StatisticsPage() {
           "policy_available",
         ),
 
-      /*
-       * Tous les paiements
-       * confirmés.
-       */
       serviceClient
         .from(
           "payments",
@@ -365,10 +380,6 @@ export default async function StatisticsPage() {
           "confirmed",
         ),
 
-      /*
-       * Dossiers créés
-       * ce mois.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -391,10 +402,6 @@ export default async function StatisticsPage() {
           nextMonthStart.toISOString(),
         ),
 
-      /*
-       * Dossiers créés
-       * le mois précédent.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -417,10 +424,6 @@ export default async function StatisticsPage() {
           monthStart.toISOString(),
         ),
 
-      /*
-       * Dossiers 1 an
-       * créés ce mois.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -447,10 +450,6 @@ export default async function StatisticsPage() {
           nextMonthStart.toISOString(),
         ),
 
-      /*
-       * Dossiers 2 ans
-       * créés ce mois.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -477,10 +476,6 @@ export default async function StatisticsPage() {
           nextMonthStart.toISOString(),
         ),
 
-      /*
-       * Paiements refusés parmi
-       * les dossiers créés ce mois.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -507,11 +502,6 @@ export default async function StatisticsPage() {
           nextMonthStart.toISOString(),
         ),
 
-      /*
-       * Assurances disponibles
-       * parmi les dossiers créés
-       * ce mois.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -538,10 +528,6 @@ export default async function StatisticsPage() {
           nextMonthStart.toISOString(),
         ),
 
-      /*
-       * Paiements confirmés
-       * ce mois.
-       */
       serviceClient
         .from(
           "payments",
@@ -565,10 +551,6 @@ export default async function StatisticsPage() {
           nextMonthStart.toISOString(),
         ),
 
-      /*
-       * Paiements confirmés
-       * le mois précédent.
-       */
       serviceClient
         .from(
           "payments",
@@ -592,9 +574,6 @@ export default async function StatisticsPage() {
           monthStart.toISOString(),
         ),
 
-      /*
-       * Nationalités.
-       */
       serviceClient
         .from(
           "clients",
@@ -603,9 +582,6 @@ export default async function StatisticsPage() {
           "nationality",
         ),
 
-      /*
-       * Paiements à vérifier.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -624,9 +600,6 @@ export default async function StatisticsPage() {
           "payment_review",
         ),
 
-      /*
-       * Polices à préparer.
-       */
       serviceClient
         .from(
           "insurance_requests",
@@ -643,6 +616,223 @@ export default async function StatisticsPage() {
         .eq(
           "status",
           "policy_preparation",
+        ),
+
+      /*
+       * Total dossiers directs.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          "id",
+          {
+            count:
+              "exact",
+            head:
+              true,
+          },
+        )
+        .eq(
+          "source",
+          "direct",
+        ),
+
+      /*
+       * Total dossiers partenaires.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          "id",
+          {
+            count:
+              "exact",
+            head:
+              true,
+          },
+        )
+        .eq(
+          "source",
+          "partner",
+        ),
+
+      /*
+       * Dossiers directs créés ce mois.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          "id",
+          {
+            count:
+              "exact",
+            head:
+              true,
+          },
+        )
+        .eq(
+          "source",
+          "direct",
+        )
+        .gte(
+          "created_at",
+          monthStart.toISOString(),
+        )
+        .lt(
+          "created_at",
+          nextMonthStart.toISOString(),
+        ),
+
+      /*
+       * Dossiers partenaires créés ce mois.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          "id",
+          {
+            count:
+              "exact",
+            head:
+              true,
+          },
+        )
+        .eq(
+          "source",
+          "partner",
+        )
+        .gte(
+          "created_at",
+          monthStart.toISOString(),
+        )
+        .lt(
+          "created_at",
+          nextMonthStart.toISOString(),
+        ),
+
+      /*
+       * Assurances disponibles directes.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          "id",
+          {
+            count:
+              "exact",
+            head:
+              true,
+          },
+        )
+        .eq(
+          "source",
+          "direct",
+        )
+        .eq(
+          "status",
+          "policy_available",
+        ),
+
+      /*
+       * Assurances disponibles partenaires.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          "id",
+          {
+            count:
+              "exact",
+            head:
+              true,
+          },
+        )
+        .eq(
+          "source",
+          "partner",
+        )
+        .eq(
+          "status",
+          "policy_available",
+        ),
+
+      /*
+       * Paiements confirmés avec source
+       * du dossier et partenaire.
+       */
+      serviceClient
+        .from(
+          "payments",
+        )
+        .select(
+          `
+            expected_amount,
+            verified_at,
+
+            request:insurance_requests!inner (
+              source,
+              partner_id
+            )
+          `,
+        )
+        .eq(
+          "status",
+          "confirmed",
+        ),
+
+      /*
+       * Liste des partenaires.
+       */
+      serviceClient
+        .from(
+          "partners",
+        )
+        .select(
+          `
+            id,
+            code,
+            company_name,
+            is_active
+          `,
+        )
+        .order(
+          "company_name",
+          {
+            ascending:
+              true,
+          },
+        ),
+
+      /*
+       * Tous les dossiers partenaires
+       * pour construire leur performance.
+       */
+      serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .select(
+          `
+            id,
+            partner_id,
+            status
+          `,
+        )
+        .eq(
+          "source",
+          "partner",
         ),
     ]);
 
@@ -667,7 +857,18 @@ export default async function StatisticsPage() {
     nationalityClientsResult.error,
     paymentsToReviewResult.error,
     policiesToPrepareResult.error,
-  ].filter(Boolean);
+    directRequestsResult.error,
+    partnerRequestsCountResult.error,
+    directMonthRequestsResult.error,
+    partnerMonthRequestsResult.error,
+    directAvailableResult.error,
+    partnerAvailableResult.error,
+    confirmedPaymentsBySourceResult.error,
+    partnersResult.error,
+    partnerRequestsResult.error,
+  ].filter(
+    Boolean,
+  );
 
   if (
     errors.length >
@@ -676,9 +877,7 @@ export default async function StatisticsPage() {
     throw new Error(
       errors
         .map(
-          (
-            error,
-          ) =>
+          (error) =>
             error?.message ??
             "Erreur Supabase",
         )
@@ -840,9 +1039,7 @@ export default async function StatisticsPage() {
     >();
 
   nationalityRows.forEach(
-    (
-      row,
-    ) => {
+    (row) => {
       const nationality =
         row.nationality
           ?.trim();
@@ -884,12 +1081,10 @@ export default async function StatisticsPage() {
       nationalityCounts.entries(),
     )
       .map(
-        (
-          [
-            nationality,
-            count,
-          ],
-        ) => ({
+        ([
+          nationality,
+          count,
+        ]) => ({
           nationality,
 
           count,
@@ -914,14 +1109,268 @@ export default async function StatisticsPage() {
           first.count,
       );
 
+  /*
+   * ============================
+   * DIRECT VS PARTENAIRE
+   * ============================
+   */
+
+  const directRequests =
+    directRequestsResult.count ??
+    0;
+
+  const partnerRequests =
+    partnerRequestsCountResult.count ??
+    0;
+
+  const directMonthRequests =
+    directMonthRequestsResult.count ??
+    0;
+
+  const partnerMonthRequests =
+    partnerMonthRequestsResult.count ??
+    0;
+
+  const directAvailable =
+    directAvailableResult.count ??
+    0;
+
+  const partnerAvailable =
+    partnerAvailableResult.count ??
+    0;
+
+  const confirmedPaymentsBySource =
+    (
+      confirmedPaymentsBySourceResult.data ??
+      []
+    ) as PaymentWithRequestRow[];
+
+  let directRevenue =
+    0;
+
+  let partnerRevenue =
+    0;
+
+  const partnerRevenueMap =
+    new Map<
+      string,
+      {
+        revenue: number;
+        confirmedPayments: number;
+      }
+    >();
+
+  confirmedPaymentsBySource.forEach(
+    (payment) => {
+      const requestRelation =
+        normalizeRelation(
+          payment.request,
+        );
+
+      const amount =
+        Number(
+          payment.expected_amount ??
+            0,
+        );
+
+      if (
+        requestRelation?.source ===
+        "partner"
+      ) {
+        partnerRevenue +=
+          amount;
+
+        if (
+          requestRelation.partner_id
+        ) {
+          const previous =
+            partnerRevenueMap.get(
+              requestRelation.partner_id,
+            ) ??
+            {
+              revenue: 0,
+              confirmedPayments: 0,
+            };
+
+          partnerRevenueMap.set(
+            requestRelation.partner_id,
+            {
+              revenue:
+                previous.revenue +
+                amount,
+
+              confirmedPayments:
+                previous.confirmedPayments +
+                1,
+            },
+          );
+        }
+
+        return;
+      }
+
+      if (
+        requestRelation?.source ===
+        "direct"
+      ) {
+        directRevenue +=
+          amount;
+      }
+    },
+  );
+
+  const partnerRequestRows =
+    (
+      partnerRequestsResult.data ??
+      []
+    ) as PartnerRequestRow[];
+
+  const partnerRequestMap =
+    new Map<
+      string,
+      {
+        requests: number;
+        availablePolicies: number;
+      }
+    >();
+
+  partnerRequestRows.forEach(
+    (requestRow) => {
+      if (
+        !requestRow.partner_id
+      ) {
+        return;
+      }
+
+      const previous =
+        partnerRequestMap.get(
+          requestRow.partner_id,
+        ) ??
+        {
+          requests: 0,
+          availablePolicies: 0,
+        };
+
+      partnerRequestMap.set(
+        requestRow.partner_id,
+        {
+          requests:
+            previous.requests +
+            1,
+
+          availablePolicies:
+            previous.availablePolicies +
+            (
+              requestRow.status ===
+              "policy_available"
+                ? 1
+                : 0
+            ),
+        },
+      );
+    },
+  );
+
+  const partners =
+    (
+      partnersResult.data ??
+      []
+    ) as PartnerRow[];
+
+  const partnerPerformance:
+    PartnerPerformance[] =
+      partners
+        .map(
+          (partner) => {
+            const requestStats =
+              partnerRequestMap.get(
+                partner.id,
+              ) ??
+              {
+                requests: 0,
+                availablePolicies: 0,
+              };
+
+            const paymentStats =
+              partnerRevenueMap.get(
+                partner.id,
+              ) ??
+              {
+                revenue: 0,
+                confirmedPayments: 0,
+              };
+
+            return {
+              id:
+                partner.id,
+
+              code:
+                partner.code,
+
+              companyName:
+                partner.company_name,
+
+              isActive:
+                partner.is_active,
+
+              requests:
+                requestStats.requests,
+
+              availablePolicies:
+                requestStats.availablePolicies,
+
+              confirmedPayments:
+                paymentStats.confirmedPayments,
+
+              revenue:
+                paymentStats.revenue,
+            };
+          },
+        )
+        .sort(
+          (
+            first,
+            second,
+          ) => {
+            if (
+              second.revenue !==
+              first.revenue
+            ) {
+              return (
+                second.revenue -
+                first.revenue
+              );
+            }
+
+            return (
+              second.requests -
+              first.requests
+            );
+          },
+        );
+
+  const partnerShare =
+    totalRequests >
+    0
+      ? (
+          partnerRequests /
+          totalRequests
+        ) *
+        100
+      : 0;
+
   const monthLabel =
     new Intl.DateTimeFormat(
       "fr-FR",
       {
         month:
           "long",
+
         year:
           "numeric",
+
+        timeZone:
+          "Europe/Istanbul",
       },
     ).format(
       now,
@@ -944,11 +1393,13 @@ export default async function StatisticsPage() {
               </h1>
 
               <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
-                Analyse globale de l’activité IF Sigorta et des performances du mois.
+                Analyse globale de l’activité IF Sigorta, des clients directs et des partenaires.
               </p>
 
               <p className="mt-3 text-sm font-semibold capitalize text-[#0B5D3B]">
-                {monthLabel}
+                {
+                  monthLabel
+                }
               </p>
             </div>
 
@@ -1042,17 +1493,21 @@ export default async function StatisticsPage() {
             </p>
 
             <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-orange-900">
-              {paymentsToReview.toLocaleString(
-                "fr-FR",
-              )}
+              {
+                paymentsToReview.toLocaleString(
+                  "fr-FR",
+                )
+              }
             </p>
 
             <p className="mt-2 text-sm text-orange-700">
               paiement
-              {paymentsToReview !==
-              1
-                ? "s"
-                : ""}{" "}
+              {
+                paymentsToReview !==
+                1
+                  ? "s"
+                  : ""
+              }{" "}
               à vérifier
             </p>
           </Link>
@@ -1066,20 +1521,313 @@ export default async function StatisticsPage() {
             </p>
 
             <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
-              {policiesToPrepare.toLocaleString(
-                "fr-FR",
-              )}
+              {
+                policiesToPrepare.toLocaleString(
+                  "fr-FR",
+                )
+              }
             </p>
 
             <p className="mt-2 text-sm text-[#31513B]">
               police
-              {policiesToPrepare !==
-              1
-                ? "s"
-                : ""}{" "}
+              {
+                policiesToPrepare !==
+                1
+                  ? "s"
+                  : ""
+              }{" "}
               à préparer
             </p>
           </Link>
+        </section>
+
+        {/* ORIGINE DES DOSSIERS */}
+
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+                Acquisition
+              </p>
+
+              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                Origine des dossiers
+              </h2>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Comparaison de l’activité générée directement et par les partenaires.
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-[#EEF6EC] px-4 py-3">
+              <p className="text-xs font-semibold text-[#31513B]">
+                Part des partenaires
+              </p>
+
+              <p className="mt-1 text-xl font-black text-[#0B5D3B]">
+                {
+                  formatPercentage(
+                    partnerShare,
+                  )
+                }
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-slate-200 text-left">
+                  <th className="px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                    Indicateur
+                  </th>
+
+                  <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                    Direct
+                  </th>
+
+                  <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                    Partenaire
+                  </th>
+
+                  <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <SourceRow
+                  label="Dossiers"
+                  direct={
+                    directRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                  partner={
+                    partnerRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                  total={
+                    totalRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                />
+
+                <SourceRow
+                  label="Dossiers ce mois"
+                  direct={
+                    directMonthRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                  partner={
+                    partnerMonthRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                  total={
+                    currentMonthRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                />
+
+                <SourceRow
+                  label="Assurances disponibles"
+                  direct={
+                    directAvailable.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                  partner={
+                    partnerAvailable.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                  total={
+                    totalPoliciesAvailable.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
+                />
+
+                <SourceRow
+                  label="CA confirmé"
+                  direct={
+                    formatCurrency(
+                      directRevenue,
+                    )
+                  }
+                  partner={
+                    formatCurrency(
+                      partnerRevenue,
+                    )
+                  }
+                  total={
+                    formatCurrency(
+                      totalRevenue,
+                    )
+                  }
+                  last
+                />
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* PERFORMANCE DES PARTENAIRES */}
+
+        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+                Partenaires
+              </p>
+
+              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                Performance des partenaires
+              </h2>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Classement par chiffre d’affaires confirmé puis par nombre de dossiers.
+              </p>
+            </div>
+
+            <Link
+              href="/admin/partenaires"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              Gérer les partenaires →
+            </Link>
+          </div>
+
+          {
+            partnerPerformance.length ===
+            0
+              ? (
+                  <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-[#FAFCFA] p-8 text-center">
+                    <p className="text-sm font-semibold text-[#102B20]">
+                      Aucun partenaire enregistré
+                    </p>
+
+                    <p className="mt-2 text-sm text-slate-500">
+                      Les performances apparaîtront ici après la création des partenaires.
+                    </p>
+                  </div>
+                )
+              : (
+                  <div className="mt-6 overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-left">
+                          <th className="px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                            Partenaire
+                          </th>
+
+                          <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                            Dossiers
+                          </th>
+
+                          <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                            Disponibles
+                          </th>
+
+                          <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                            Paiements confirmés
+                          </th>
+
+                          <th className="px-3 py-3 text-right text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                            CA confirmé
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {
+                          partnerPerformance.map(
+                            (partner) => (
+                              <tr
+                                key={
+                                  partner.id
+                                }
+                                className="border-b border-slate-100 last:border-b-0"
+                              >
+                                <td className="px-3 py-4">
+                                  <Link
+                                    href={`/admin/partenaires/${partner.id}`}
+                                    className="font-semibold text-[#102B20] hover:text-[#0B5D3B]"
+                                  >
+                                    {
+                                      partner.companyName
+                                    }
+                                  </Link>
+
+                                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                                    <span className="text-xs font-medium text-slate-400">
+                                      {
+                                        partner.code
+                                      }
+                                    </span>
+
+                                    <span
+                                      className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                                        partner.isActive
+                                          ? "bg-[#EEF6EC] text-[#0B5D3B]"
+                                          : "bg-slate-100 text-slate-500"
+                                      }`}
+                                    >
+                                      {
+                                        partner.isActive
+                                          ? "Actif"
+                                          : "Inactif"
+                                      }
+                                    </span>
+                                  </div>
+                                </td>
+
+                                <td className="px-3 py-4 text-right font-semibold text-slate-700">
+                                  {
+                                    partner.requests.toLocaleString(
+                                      "fr-FR",
+                                    )
+                                  }
+                                </td>
+
+                                <td className="px-3 py-4 text-right font-semibold text-slate-700">
+                                  {
+                                    partner.availablePolicies.toLocaleString(
+                                      "fr-FR",
+                                    )
+                                  }
+                                </td>
+
+                                <td className="px-3 py-4 text-right font-semibold text-slate-700">
+                                  {
+                                    partner.confirmedPayments.toLocaleString(
+                                      "fr-FR",
+                                    )
+                                  }
+                                </td>
+
+                                <td className="px-3 py-4 text-right font-black text-[#0B5D3B]">
+                                  {
+                                    formatCurrency(
+                                      partner.revenue,
+                                    )
+                                  }
+                                </td>
+                              </tr>
+                            ),
+                          )
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                )
+          }
         </section>
 
         {/* ÉVOLUTION DU MOIS */}
@@ -1106,17 +1854,21 @@ export default async function StatisticsPage() {
               </p>
 
               <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
-                {currentMonthRequests.toLocaleString(
-                  "fr-FR",
-                )}
+                {
+                  currentMonthRequests.toLocaleString(
+                    "fr-FR",
+                  )
+                }
               </p>
 
               <div className="mt-3 flex items-center justify-between gap-4">
                 <span className="text-sm text-slate-500">
                   Mois précédent :{" "}
-                  {previousMonthRequests.toLocaleString(
-                    "fr-FR",
-                  )}
+                  {
+                    previousMonthRequests.toLocaleString(
+                      "fr-FR",
+                    )
+                  }
                 </span>
 
                 <span
@@ -1124,9 +1876,11 @@ export default async function StatisticsPage() {
                     requestsTrend,
                   )}`}
                 >
-                  {getTrendText(
-                    requestsTrend,
-                  )}
+                  {
+                    getTrendText(
+                      requestsTrend,
+                    )
+                  }
                 </span>
               </div>
             </div>
@@ -1137,17 +1891,21 @@ export default async function StatisticsPage() {
               </p>
 
               <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
-                {formatCurrency(
-                  currentMonthRevenue,
-                )}
+                {
+                  formatCurrency(
+                    currentMonthRevenue,
+                  )
+                }
               </p>
 
               <div className="mt-3 flex items-center justify-between gap-4">
                 <span className="text-sm text-slate-500">
                   Mois précédent :{" "}
-                  {formatCurrency(
-                    previousMonthRevenue,
-                  )}
+                  {
+                    formatCurrency(
+                      previousMonthRevenue,
+                    )
+                  }
                 </span>
 
                 <span
@@ -1155,9 +1913,11 @@ export default async function StatisticsPage() {
                     revenueTrend,
                   )}`}
                 >
-                  {getTrendText(
-                    revenueTrend,
-                  )}
+                  {
+                    getTrendText(
+                      revenueTrend,
+                    )
+                  }
                 </span>
               </div>
             </div>
@@ -1273,5 +2033,53 @@ function StatCard({
         }
       </p>
     </div>
+  );
+}
+
+function SourceRow({
+  label,
+  direct,
+  partner,
+  total,
+  last = false,
+}: {
+  label: string;
+  direct: string;
+  partner: string;
+  total: string;
+  last?: boolean;
+}) {
+  return (
+    <tr
+      className={
+        last
+          ? ""
+          : "border-b border-slate-100"
+      }
+    >
+      <td className="px-3 py-4 text-sm font-semibold text-[#102B20]">
+        {
+          label
+        }
+      </td>
+
+      <td className="px-3 py-4 text-right text-sm font-semibold text-slate-600">
+        {
+          direct
+        }
+      </td>
+
+      <td className="px-3 py-4 text-right text-sm font-black text-[#0B5D3B]">
+        {
+          partner
+        }
+      </td>
+
+      <td className="px-3 py-4 text-right text-sm font-semibold text-[#102B20]">
+        {
+          total
+        }
+      </td>
+    </tr>
   );
 }

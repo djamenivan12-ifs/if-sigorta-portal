@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { requirePartner } from "@/lib/auth/requirePartner";
 import { createServiceClient } from "@/lib/supabase/service";
 
+import PartnerPolicyDownload from "./PartnerPolicyDownload";
 import PartnerPaymentForm from "./PartnerPaymentForm";
 
 const BUCKET_NAME =
@@ -629,8 +630,9 @@ export default async function PartnerDossierPage({
           </p>
 
           <p className="mt-1 text-sm leading-6 text-emerald-800">
-            L'assurance est prête. Le téléchargement
-            sera disponible depuis cet espace.
+            L&apos;assurance est prête. Vous pouvez
+            maintenant la télécharger depuis ce dossier
+            et la transmettre directement à votre client.
           </p>
         </div>
       )}
@@ -812,6 +814,18 @@ export default async function PartnerDossierPage({
               />
             </dl>
           </section>
+
+          {/* Assurance disponible */}
+
+          {insuranceRequest.status ===
+            "policy_available" && (
+            <PartnerPolicyDownload
+              requestId={
+                insuranceRequest.id
+              }
+              duration={duration}
+            />
+          )}
 
           {/* Paiement */}
 

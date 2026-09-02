@@ -425,6 +425,8 @@ export default async function DossierPage({
         `
           id,
           request_code,
+          source,
+          partner_id,
           status,
           has_kimlik,
           kimlik_number,
@@ -440,6 +442,13 @@ export default async function DossierPage({
           assigned_at,
           created_at,
           updated_at,
+
+          partner:partners (
+            id,
+            code,
+            company_name,
+            manager_name
+          ),
 
           client:clients (
             id,
@@ -492,6 +501,18 @@ export default async function DossierPage({
   if (!insuranceRequest) {
     notFound();
   }
+
+  const partnerData =
+    Array.isArray(
+      insuranceRequest.partner,
+    )
+      ? insuranceRequest
+          .partner[0]
+      : insuranceRequest.partner;
+
+  const isPartnerRequest =
+    insuranceRequest.source ===
+    "partner";
 
   /*
    * Liste des agents disponibles
@@ -839,8 +860,14 @@ export default async function DossierPage({
               activity.action ===
                 "payment_uploaded" ||
               activity.action ===
+                "payment_resubmitted" ||
+              activity.action ===
                 "policy_downloaded"
-            ? "Client"
+            ? isPartnerRequest
+              ? partnerData?.company_name
+                ? `Partenaire — ${partnerData.company_name}`
+                : "Partenaire"
+              : "Client"
             : "Système",
     }),
   );
@@ -1020,6 +1047,39 @@ export default async function DossierPage({
 
         <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-5">
+            <section className={`rounded-[1.5rem] border p-5 sm:p-6 ${
+              isPartnerRequest
+                ? "border-[#CFE3CF] bg-[#F3F8F2]"
+                : "border-slate-200/80 bg-white"
+            }`}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                    Source du dossier
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                    {isPartnerRequest ? "Partenaire" : "Client direct"}
+                  </h2>
+                </div>
+
+                <span className={`inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  isPartnerRequest
+                    ? "bg-[#0B5D3B] text-white"
+                    : "bg-slate-100 text-slate-700"
+                }`}>
+                  {isPartnerRequest ? "Dossier partenaire" : "Dossier direct"}
+                </span>
+              </div>
+
+              {isPartnerRequest && (
+                <dl className="mt-6 grid gap-5 border-t border-[#CFE3CF] pt-5 sm:grid-cols-3">
+                  <Information label="Partenaire" value={partnerData?.company_name ?? "Partenaire non disponible"} />
+                  <Information label="Code partenaire" value={partnerData?.code ?? "—"} />
+                  <Information label="Responsable" value={partnerData?.manager_name ?? "—"} />
+                </dl>
+              )}
+            </section>
+
             <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
               <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Informations du client

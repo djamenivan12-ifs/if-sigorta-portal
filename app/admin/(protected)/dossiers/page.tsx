@@ -25,6 +25,7 @@ type SearchParams = Promise<{
   dateFrom?: string;
   dateTo?: string;
   agent?: string;
+  source?: string;
   page?: string;
 }>;
 
@@ -32,6 +33,13 @@ type RequestRow = {
   id: string;
   request_code: string;
   status: string;
+  source: "direct" | "partner";
+  partner_id: string | null;
+
+  partner:
+    | { code: string; company_name: string }
+    | Array<{ code: string; company_name: string }>
+    | null;
 
   assigned_agent_id:
     | string
@@ -250,6 +258,14 @@ function unwrapClient(
   }
 
   return relation;
+}
+
+function unwrapPartner(
+  relation: RequestRow["partner"],
+) {
+  return Array.isArray(relation)
+    ? relation[0] ?? null
+    : relation;
 }
 
 function formatDate(
@@ -473,6 +489,7 @@ async function getRequests({
   dateFrom,
   dateTo,
   agent,
+  source,
   currentUserId,
   role,
 }: {
@@ -483,6 +500,7 @@ async function getRequests({
   dateFrom: string;
   dateTo: string;
   agent: string;
+  source: string;
   currentUserId: string;
 
   role:
@@ -502,12 +520,19 @@ async function getRequests({
           id,
           request_code,
           status,
+          source,
+          partner_id,
           assigned_agent_id,
           passport_number,
           kimlik_number,
           calculated_price,
           insurance_duration_years,
           created_at,
+
+          partner:partners (
+            code,
+            company_name
+          ),
 
           client:clients (
             first_name,
@@ -532,6 +557,10 @@ async function getRequests({
         "status",
         status,
       );
+  }
+
+  if (source === "direct" || source === "partner") {
+    query = query.eq("source", source);
   }
 
   if (
@@ -803,6 +832,7 @@ function buildPageUrl({
   dateFrom,
   dateTo,
   agent,
+  source,
 }: {
   page: number;
   search: string;
@@ -812,6 +842,7 @@ function buildPageUrl({
   dateFrom: string;
   dateTo: string;
   agent: string;
+  source: string;
 }) {
   const params =
     new URLSearchParams();
@@ -863,6 +894,10 @@ function buildPageUrl({
       "agent",
       agent,
     );
+  }
+
+  if (source) {
+    params.set("source", source);
   }
 
   if (
@@ -936,6 +971,11 @@ export default async function DossiersPage({
       ?.trim() ??
     "";
 
+  const source =
+    params.source
+      ?.trim() ??
+    "";
+
   const requestedPage =
     Number(
       params.page ??
@@ -989,6 +1029,7 @@ export default async function DossiersPage({
           dateFrom,
           dateTo,
           agent,
+          source,
 
           currentUserId:
             user.id,
@@ -1199,12 +1240,12 @@ export default async function DossiersPage({
                 defaultValue={
                   search
                 }
-                placeholder="Matricule, nom, prénom, WhatsApp, passeport ou Kimlik"
+                placeholder="Matricule, nom, prénom, WhatsApp, passeport, Kimlik, partenaire ou code partenaire"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
               <div>
                 <label
                   htmlFor="status"
@@ -1371,6 +1412,22 @@ export default async function DossiersPage({
               </div>
 
               <div>
+                <label htmlFor="source" className="mb-2 block text-sm font-medium text-slate-700">
+                  Source
+                </label>
+                <select
+                  id="source"
+                  name="source"
+                  defaultValue={source}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                >
+                  <option value="">Toutes les sources</option>
+                  <option value="direct">Client direct</option>
+                  <option value="partner">Partenaire</option>
+                </select>
+              </div>
+
+              <div>
                 <label
                   htmlFor="dateFrom"
                   className="mb-2 block text-sm font-medium text-slate-700"
@@ -1483,7 +1540,7 @@ export default async function DossiersPage({
             </div>
           ) : (
             <TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1700px]">
+              <Table className="min-w-[1880px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>
@@ -1492,6 +1549,10 @@ export default async function DossiersPage({
 
                     <TableHead>
                       Client
+                    </TableHead>
+
+                    <TableHead>
+                      Source
                     </TableHead>
 
                     <TableHead>
@@ -1745,6 +1806,7 @@ export default async function DossiersPage({
                       dateFrom,
                       dateTo,
                       agent,
+                      source,
                     })}
                     className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
                   >
@@ -1771,6 +1833,7 @@ export default async function DossiersPage({
                         dateFrom,
                         dateTo,
                         agent,
+                        source,
                       })}
                       className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${
                         pageNumber ===
@@ -1801,6 +1864,7 @@ export default async function DossiersPage({
                       dateFrom,
                       dateTo,
                       agent,
+                      source,
                     })}
                     className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
                   >

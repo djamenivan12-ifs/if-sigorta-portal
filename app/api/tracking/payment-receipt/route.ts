@@ -2,6 +2,8 @@ import {
   NextResponse,
 } from "next/server";
 
+import { Resend } from "resend";
+
 import {
   logActivity,
 } from "@/lib/activity/logActivity";
@@ -111,6 +113,165 @@ function rateLimitedResponse(
   );
 }
 
+function escapeEmailHtml(
+  value: string,
+) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function sendPaymentAdminEmail({
+  requestCode,
+  whatsappCountryCode,
+  whatsappNumber,
+  calculatedPrice,
+  isResubmission,
+}: {
+  requestCode: string;
+  whatsappCountryCode: string;
+  whatsappNumber: string;
+  calculatedPrice?: number | null;
+  isResubmission: boolean;
+}) {
+  const apiKey =
+    process.env.RESEND_API_KEY;
+
+  const adminEmail =
+    process.env.ADMIN_NOTIFICATION_EMAIL;
+
+  if (
+    !apiKey ||
+    !adminEmail
+  ) {
+    console.error(
+      "Notification e-mail paiement non envoyée : configuration Resend absente.",
+    );
+
+    return;
+  }
+
+  try {
+    const resend =
+      new Resend(apiKey);
+
+    const subject =
+      isResubmission
+        ? `Nouveau dekont à vérifier — ${requestCode}`
+        : `Nouveau paiement à vérifier — ${requestCode}`;
+
+    const title =
+      isResubmission
+        ? "Nouveau dekont à vérifier"
+        : "Nouveau paiement à vérifier";
+
+    const message =
+      isResubmission
+        ? "Le client a transmis un nouveau justificatif après le refus de son paiement."
+        : "Le client a déclaré son paiement et transmis son justificatif de virement.";
+
+    const priceRow =
+      typeof calculatedPrice === "number"
+        ? `
+          <tr>
+            <td style="padding:10px 0;font-weight:700">
+              Montant attendu
+            </td>
+
+            <td style="padding:10px 0;text-align:right">
+              ${calculatedPrice.toLocaleString("fr-FR")} TL
+            </td>
+          </tr>
+        `
+        : "";
+
+    const {
+      error,
+    } =
+      await resend.emails.send({
+        from:
+          "IF Sigorta <onboarding@resend.dev>",
+
+        to:
+          adminEmail,
+
+        subject,
+
+        html: `
+          <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:32px;color:#102B20;background:#F6F8F5">
+            <div style="background:#ffffff;border:1px solid #E2EAE0;border-radius:18px;padding:32px">
+              <div style="font-size:24px;font-weight:700;color:#0B5D3B;margin-bottom:8px">
+                IF Sigorta
+              </div>
+
+              <div style="font-size:18px;font-weight:700;margin-bottom:24px">
+                ${title}
+              </div>
+
+              <p style="margin:0 0 24px;line-height:1.6">
+                ${message}
+              </p>
+
+              <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+                <tr>
+                  <td style="padding:10px 0;font-weight:700">
+                    Matricule
+                  </td>
+
+                  <td style="padding:10px 0;text-align:right">
+                    ${escapeEmailHtml(requestCode)}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:10px 0;font-weight:700">
+                    WhatsApp
+                  </td>
+
+                  <td style="padding:10px 0;text-align:right">
+                    ${escapeEmailHtml(whatsappCountryCode)}
+                    ${escapeEmailHtml(whatsappNumber)}
+                  </td>
+                </tr>
+
+                ${priceRow}
+              </table>
+
+              <div style="padding:16px;border-radius:12px;background:#EEF6EC;line-height:1.6">
+                Le paiement est maintenant en attente de vérification.
+                Connectez-vous à l’espace administrateur IF Sigorta
+                pour contrôler le dekont.
+              </div>
+            </div>
+          </div>
+        `,
+      });
+
+    if (
+      error
+    ) {
+      console.error(
+        "Erreur notification e-mail paiement :",
+        error,
+      );
+    }
+  } catch (
+    emailError
+  ) {
+    /*
+     * Une erreur Resend ne doit jamais
+     * annuler le paiement ou le dekont.
+     */
+    console.error(
+      "Envoi de la notification e-mail paiement impossible :",
+      emailError,
+    );
+  }
+}
+
 export async function POST(
   request: Request,
 ) {
@@ -202,6 +363,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Les informations de suivi sont incomplètes.",
         },
@@ -220,6 +382,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Le nouveau dekont est obligatoire.",
         },
@@ -266,8 +429,17 @@ export async function POST(
     }
 
     /*
-     * Recherche du dossier avec
-     * vérification du WhatsApp.
+     * ============================================
+     * 3. RECHERCHE DU DOSSIER
+     * ============================================
+     *
+     * Cette route appartient au parcours public.
+     *
+     * Un dossier partenaire ne doit jamais pouvoir
+     * être retrouvé ou modifié depuis cette API.
+     *
+     * Le filtre source = direct est donc appliqué
+     * directement dans la requête Supabase.
      */
     const {
       data:
@@ -284,6 +456,7 @@ export async function POST(
             id,
             request_code,
             status,
+            calculated_price,
 
             client:clients (
               whatsapp_country_code,
@@ -294,6 +467,10 @@ export async function POST(
         .eq(
           "request_code",
           requestCode,
+        )
+        .eq(
+          "source",
+          "direct",
         )
         .maybeSingle();
 
@@ -311,6 +488,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Dossier introuvable.",
         },
@@ -320,6 +498,11 @@ export async function POST(
       );
     }
 
+    /*
+     * ============================================
+     * 4. VÉRIFICATION WHATSAPP
+     * ============================================
+     */
     const clientRelation =
       insuranceRequest.client;
 
@@ -357,6 +540,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Les informations de suivi ne correspondent pas au dossier.",
         },
@@ -373,6 +557,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Un nouveau justificatif ne peut être envoyé que pour un paiement refusé.",
         },
@@ -383,7 +568,9 @@ export async function POST(
     }
 
     /*
-     * Recherche du paiement.
+     * ============================================
+     * 5. RECHERCHE DU PAIEMENT
+     * ============================================
      */
     const {
       data:
@@ -421,6 +608,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Aucun paiement n’est associé à ce dossier.",
         },
@@ -431,7 +619,9 @@ export async function POST(
     }
 
     /*
-     * Upload du nouveau dekont.
+     * ============================================
+     * 6. UPLOAD DU NOUVEAU DEKONT
+     * ============================================
      */
     const safeName =
       sanitizeFileName(
@@ -480,7 +670,9 @@ export async function POST(
       new Date().toISOString();
 
     /*
-     * Ancien document actif.
+     * ============================================
+     * 7. ANCIEN DOCUMENT
+     * ============================================
      */
     const {
       data:
@@ -527,63 +719,66 @@ export async function POST(
     }
 
     /*
- * Mise à jour du justificatif de paiement.
- *
- * La table uploaded_documents possède une
- * contrainte unique sur :
- *
- * request_id + document_type
- *
- * On remplace donc la ligne existante au lieu
- * d'en créer une deuxième.
- */
-const {
-  error:
-    documentUpdateError,
-} =
-  await serviceClient
-    .from(
-      "uploaded_documents",
-    )
-    .upsert(
-      {
-        request_id:
-          insuranceRequest.id,
+     * ============================================
+     * 8. MISE À JOUR DU JUSTIFICATIF
+     * ============================================
+     *
+     * uploaded_documents possède une contrainte
+     * unique :
+     *
+     * request_id + document_type
+     *
+     * On remplace donc la ligne existante.
+     */
+    const {
+      error:
+        documentUpdateError,
+    } =
+      await serviceClient
+        .from(
+          "uploaded_documents",
+        )
+        .upsert(
+          {
+            request_id:
+              insuranceRequest.id,
 
-        document_type:
-          "payment_receipt",
+            document_type:
+              "payment_receipt",
 
-        storage_path:
-          uploadedStoragePath,
+            storage_path:
+              uploadedStoragePath,
 
-        original_file_name:
-          paymentReceiptFile.name,
+            original_file_name:
+              paymentReceiptFile.name,
 
-        mime_type:
-          paymentReceiptFile.type,
+            mime_type:
+              paymentReceiptFile.type,
 
-        file_size:
-          paymentReceiptFile.size,
+            file_size:
+              paymentReceiptFile.size,
 
-        uploaded_at:
-          now,
-      },
-      {
-        onConflict:
-          "request_id,document_type",
-      },
-    );
+            uploaded_at:
+              now,
+          },
+          {
+            onConflict:
+              "request_id,document_type",
+          },
+        );
 
-if (
-  documentUpdateError
-) {
-  throw new Error(
-    documentUpdateError.message,
-  );
-}
+    if (
+      documentUpdateError
+    ) {
+      throw new Error(
+        documentUpdateError.message,
+      );
+    }
 
     /*
-     * Remise du paiement en attente de vérification.
+     * ============================================
+     * 9. REMISE DU PAIEMENT EN VÉRIFICATION
+     * ============================================
      */
     const {
       error:
@@ -623,7 +818,9 @@ if (
     }
 
     /*
-     * Retour du dossier en payment_review.
+     * ============================================
+     * 10. RETOUR DU DOSSIER EN PAYMENT_REVIEW
+     * ============================================
      */
     const {
       data:
@@ -669,6 +866,7 @@ if (
       return NextResponse.json(
         {
           success: false,
+
           error:
             "Le statut du dossier a changé entre-temps.",
         },
@@ -679,7 +877,9 @@ if (
     }
 
     /*
-     * Historique.
+     * ============================================
+     * 11. HISTORIQUE
+     * ============================================
      */
     await logActivity({
       requestId:
@@ -696,14 +896,43 @@ if (
     });
 
     /*
-     * On conserve l'ancien fichier pour l'historique.
-     * Il n'est donc pas supprimé du Storage.
+     * ============================================
+     * 12. NOTIFICATION E-MAIL ADMIN
+     * ============================================
      *
-     * Si plus tard tu veux ne garder qu'un seul dekont,
-     * on pourra supprimer existingDocument.storage_path.
+     * Une erreur Resend ne doit jamais
+     * annuler le renvoi du dekont.
+     */
+    await sendPaymentAdminEmail({
+      requestCode:
+        insuranceRequest.request_code,
+
+      whatsappCountryCode,
+
+      whatsappNumber,
+
+      calculatedPrice:
+        insuranceRequest.calculated_price,
+
+      isResubmission:
+        true,
+    });
+
+    /*
+     * On conserve l'ancien fichier pour l'historique.
+     *
+     * Si plus tard tu veux ne garder qu'un seul
+     * dekont, on pourra supprimer
+     * existingDocument.storage_path.
      */
     void existingDocument;
 
+    /*
+     * La procédure est terminée avec succès.
+     *
+     * On remet cette variable à null afin que le
+     * bloc catch ne supprime pas le fichier.
+     */
     uploadedStoragePath =
       null;
 
@@ -735,8 +964,9 @@ if (
     error
   ) {
     /*
-     * Nettoyage du nouveau fichier
-     * uniquement si la procédure échoue.
+     * ============================================
+     * NETTOYAGE EN CAS D'ÉCHEC
+     * ============================================
      */
     if (
       uploadedStoragePath

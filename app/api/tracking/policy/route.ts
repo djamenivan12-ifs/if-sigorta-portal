@@ -228,6 +228,16 @@ export async function POST(
      * ============================================
      * 4. RECHERCHE DU DOSSIER
      * ============================================
+     *
+     * Cette API appartient exclusivement au
+     * parcours public des clients directs.
+     *
+     * Les dossiers créés par un partenaire ne
+     * doivent jamais pouvoir obtenir leur police
+     * depuis /api/tracking/policy.
+     *
+     * Le téléchargement partenaire sera géré
+     * exclusivement depuis l'espace partenaire.
      */
     const {
       data:
@@ -251,6 +261,10 @@ export async function POST(
         .eq(
           "request_code",
           requestCode,
+        )
+        .eq(
+          "source",
+          "direct",
         )
         .maybeSingle();
 

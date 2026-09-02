@@ -26,7 +26,8 @@ type PolicyRow = {
 
 const IP_RATE_LIMIT = 30;
 const IDENTITY_RATE_LIMIT = 10;
-const RATE_LIMIT_WINDOW_SECONDS = 10 * 60;
+const RATE_LIMIT_WINDOW_SECONDS =
+  10 * 60;
 
 function cleanPhoneNumber(
   value: string,
@@ -49,13 +50,12 @@ function rateLimitedResponse(
       status: 429,
 
       headers: {
-        "Retry-After":
-          String(
-            Math.max(
-              1,
-              retryAfterSeconds,
-            ),
+        "Retry-After": String(
+          Math.max(
+            1,
+            retryAfterSeconds,
           ),
+        ),
 
         "Cache-Control":
           "no-store",
@@ -186,6 +186,15 @@ export async function POST(
      * ============================================
      * 4. RECHERCHE DU DOSSIER
      * ============================================
+     *
+     * IMPORTANT :
+     *
+     * Le suivi public est réservé exclusivement
+     * aux dossiers créés directement par les
+     * clients.
+     *
+     * Les dossiers partenaires ne doivent jamais
+     * être accessibles via /suivi.
      */
     const {
       data:
@@ -212,6 +221,10 @@ export async function POST(
         .eq(
           "request_code",
           requestCode,
+        )
+        .eq(
+          "source",
+          "direct",
         )
         .maybeSingle();
 

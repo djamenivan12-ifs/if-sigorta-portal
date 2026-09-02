@@ -244,6 +244,12 @@ export async function POST(
      * ============================
      * RECHERCHE DU DOSSIER
      * ============================
+     *
+     * Cette route appartient uniquement
+     * au parcours public des clients directs.
+     *
+     * Un dossier créé par un partenaire ne
+     * doit jamais pouvoir être annulé ici.
      */
 
     const {
@@ -275,6 +281,10 @@ export async function POST(
         .eq(
           "request_code",
           requestCode,
+        )
+        .eq(
+          "source",
+          "direct",
         )
         .maybeSingle();
 
@@ -461,6 +471,11 @@ export async function POST(
      * ============================
      * ANNULATION
      * ============================
+     *
+     * Protection en profondeur :
+     * même si la logique précédente était
+     * contournée, l'UPDATE lui-même refuse
+     * tout dossier partenaire.
      */
 
     const now =
@@ -486,6 +501,10 @@ export async function POST(
         .eq(
           "id",
           id,
+        )
+        .eq(
+          "source",
+          "direct",
         )
         .eq(
           "status",

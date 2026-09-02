@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -25,6 +26,15 @@ type PhoneInputProps = {
   onPhoneNumberChange: (
     value: string,
   ) => void;
+
+  /*
+   * Facultatif.
+   *
+   * Si cette propriété n'est pas
+   * fournie, tous les indicatifs
+   * restent disponibles.
+   */
+  allowedCountryCodes?: string[];
 };
 
 const translations = {
@@ -58,6 +68,7 @@ export default function PhoneInput({
   phoneNumber,
   onCountryCodeChange,
   onPhoneNumberChange,
+  allowedCountryCodes,
 }: PhoneInputProps) {
   const [
     language,
@@ -124,6 +135,40 @@ export default function PhoneInput({
       language
     ];
 
+  /*
+   * Le parcours public ne fournit
+   * pas allowedCountryCodes :
+   * il conserve donc tous les pays.
+   *
+   * Le parcours partenaire pourra
+   * fournir uniquement les codes
+   * autorisés.
+   */
+  const availableCountryCodes =
+    useMemo(() => {
+      if (
+        !allowedCountryCodes ||
+        allowedCountryCodes.length ===
+          0
+      ) {
+        return countryCodes;
+      }
+
+      const allowed =
+        new Set(
+          allowedCountryCodes,
+        );
+
+      return countryCodes.filter(
+        (item) =>
+          allowed.has(
+            item.code,
+          ),
+      );
+    }, [
+      allowedCountryCodes,
+    ]);
+
   function handlePhoneChange(
     value: string,
   ) {
@@ -166,7 +211,7 @@ export default function PhoneInput({
           }
           className="max-w-[180px] border-r border-slate-300 bg-slate-50 px-3 py-3 text-slate-900 outline-none"
         >
-          {countryCodes.map(
+          {availableCountryCodes.map(
             (
               item,
             ) => (

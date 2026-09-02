@@ -569,6 +569,10 @@ export async function POST(
           "request_code",
           requestCode,
         )
+        .eq(
+          "source",
+          "direct",
+        )
         .maybeSingle();
 
     if (
@@ -805,6 +809,10 @@ export async function POST(
         .eq(
           "request_code",
           requestCode,
+        )
+        .eq(
+          "source",
+          "direct",
         )
         .eq(
           "status",

@@ -10,6 +10,10 @@ import {
 import {
   useRouter,
 } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+
+const BUCKET_NAME =
+  "insurance-documents";
 
 type PolicyUploaderProps = {
   requestId: string;
@@ -557,291 +561,569 @@ export default function PolicyUploader({
   }
 
   async function uploadPolicies() {
-    clearMessages();
+  clearMessages();
 
-    /*
-     * ============================
-     * VALIDATION DES DATES
-     * ============================
-     */
+  /*
+   * ============================
+   * VALIDATION DES DATES
+   * ============================
+   */
 
-    const dateError =
-      validateDates();
+  const dateError =
+    validateDates();
 
-    if (
-      dateError
-    ) {
-      setErrorMessage(
-        dateError,
-      );
-
-      return;
-    }
-
-    /*
-     * ============================
-     * VALIDATION DES POLICES
-     * ============================
-     */
-
-    const year1IsAvailable =
-      Boolean(
-        year1File,
-      ) ||
-      year1AlreadyExists;
-
-    const year2IsAvailable =
-      Boolean(
-        year2File,
-      ) ||
-      year2AlreadyExists;
-
-    if (
-      !year1IsAvailable
-    ) {
-      setErrorMessage(
-        "La police de l’année 1 est obligatoire.",
-      );
-
-      return;
-    }
-
-    if (
-      requiresTwoPolicies &&
-      !year2IsAvailable
-    ) {
-      setErrorMessage(
-        "La police de l’année 2 est obligatoire pour une assurance de deux ans.",
-      );
-
-      return;
-    }
-
-    /*
-     * On autorise aussi la sauvegarde
-     * uniquement des dates,
-     * même sans nouveau PDF.
-     */
-
-    const datesChanged =
-      startDate !==
-        (
-          policyStartDate ??
-          ""
-        ) ||
-      endDate !==
-        (
-          policyEndDate ??
-          ""
-        );
-
-    const hasNewFile =
-      Boolean(
-        year1File ||
-        year2File,
-      );
-
-    if (
-      !hasNewFile &&
-      !datesChanged
-    ) {
-      setErrorMessage(
-        "Aucune modification à enregistrer.",
-      );
-
-      return;
-    }
-
-    setLoading(
-      true,
+  if (dateError) {
+    setErrorMessage(
+      dateError,
     );
 
-    try {
-      const formData =
-        new FormData();
+    return;
+  }
 
-      /*
-       * Durée.
-       */
+  /*
+   * ============================
+   * VALIDATION DES POLICES
+   * ============================
+   */
 
-      formData.append(
-        "insuranceDurationYears",
-        String(
-          insuranceDurationYears,
-        ),
+  const year1IsAvailable =
+    Boolean(
+      year1File,
+    ) ||
+    year1AlreadyExists;
+
+  const year2IsAvailable =
+    Boolean(
+      year2File,
+    ) ||
+    year2AlreadyExists;
+
+  if (
+    !year1IsAvailable
+  ) {
+    setErrorMessage(
+      "La police de l’année 1 est obligatoire.",
+    );
+
+    return;
+  }
+
+  if (
+    requiresTwoPolicies &&
+    !year2IsAvailable
+  ) {
+    setErrorMessage(
+      "La police de l’année 2 est obligatoire pour une assurance de deux ans.",
+    );
+
+    return;
+  }
+
+  /*
+   * La sauvegarde des dates seules
+   * reste possible.
+   */
+
+  const datesChanged =
+    startDate !==
+      (
+        policyStartDate ??
+        ""
+      ) ||
+    endDate !==
+      (
+        policyEndDate ??
+        ""
       );
 
+  const hasNewFile =
+    Boolean(
+      year1File ||
+      year2File,
+    );
+
+  if (
+    !hasNewFile &&
+    !datesChanged
+  ) {
+    setErrorMessage(
+      "Aucune modification à enregistrer.",
+    );
+
+    return;
+  }
+
+  setLoading(
+    true,
+  );
+
+  /*
+   * Chemins temporaires déjà envoyés
+   * dans Supabase.
+   *
+   * Ils seront adoptés par /policy
+   * lors de la finalisation.
+   */
+  const pendingPaths:
+    string[] = [];
+
+  try {
+    const supabase =
+      createClient();
+
+    type PreparedPolicy = {
+      policyYear:
+        PolicyYear;
+
+      path:
+        string;
+
+      originalFileName:
+        string;
+
+      mimeType:
+        string;
+
+      fileSize:
+        number;
+    };
+
+    const preparedPolicies:
+      PreparedPolicy[] =
+      [];
+
+    /*
+     * ============================
+     * HELPER D'UPLOAD
+     * ============================
+     */
+
+    async function prepareAndUploadPolicy(
+      policyYear:
+        PolicyYear,
+
+      file:
+        File,
+    ): Promise<PreparedPolicy> {
       /*
-       * Dates réelles de la police.
+       * Revalidation locale.
        */
 
-      formData.append(
-        "policyStartDate",
-        startDate,
-      );
-
-      formData.append(
-        "policyEndDate",
-        endDate,
-      );
-
-      /*
-       * PDF.
-       */
+      const validationError =
+        validatePdf(
+          file,
+        );
 
       if (
-        year1File
+        validationError
       ) {
-        formData.append(
-          "policyYear1File",
-          year1File,
+        throw new Error(
+          `Police année ${policyYear} : ${validationError}`,
         );
       }
 
-      if (
-        requiresTwoPolicies &&
-        year2File
-      ) {
-        formData.append(
-          "policyYear2File",
-          year2File,
-        );
-      }
+      /*
+       * 1. Demande d'un token signé.
+       */
 
-      const response =
+      const uploadUrlResponse =
         await fetch(
-          `/api/admin/requests/${requestId}/policy`,
+          `/api/admin/requests/${requestId}/policy-upload-url`,
           {
             method:
               "POST",
 
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
             body:
-              formData,
+              JSON.stringify({
+                policyYear,
+
+                originalFileName:
+                  file.name,
+
+                mimeType:
+                  file.type ||
+                  "application/pdf",
+
+                fileSize:
+                  file.size,
+              }),
           },
         );
 
-      const contentType =
-        response.headers.get(
-          "content-type",
-        ) ??
-        "";
-
-      if (
-        !contentType.includes(
-          "application/json",
-        )
-      ) {
-        const responseText =
-          await response.text();
-
-        console.error(
-          "Réponse non JSON reçue :",
-          response.status,
-          responseText,
-        );
-
-        throw new Error(
-          `La route de téléversement a renvoyé une erreur (${response.status}).`,
-        );
-      }
-
-      const result =
-        (await response.json()) as {
+      const uploadUrlData =
+        (await uploadUrlResponse.json()) as {
           success?:
             boolean;
 
-          completed?:
-            boolean;
-
-          status?:
-            string;
-
-          uploadedYears?:
-            number[];
-
-          existingYears?:
-            number[];
-
-          policyStartDate?:
-            string;
-
-          policyEndDate?:
-            string;
-
           error?:
+            string;
+
+          requestId?:
+            string;
+
+          policyYear?:
+            number;
+
+          uploadSessionId?:
+            string;
+
+          path?:
+            string;
+
+          token?:
             string;
         };
 
       if (
-        !response.ok ||
-        !result.success
+        !uploadUrlResponse.ok ||
+        !uploadUrlData.success ||
+        !uploadUrlData.path ||
+        !uploadUrlData.token
       ) {
         throw new Error(
-          result.error ||
-            "Impossible d’enregistrer les informations de la police.",
+          uploadUrlData.error ||
+            `Impossible de préparer le téléversement de la police année ${policyYear}.`,
         );
       }
 
-      /*
-       * Nettoyage des inputs.
-       */
-
-      setYear1File(
-        null,
+      pendingPaths.push(
+        uploadUrlData.path,
       );
 
-      setYear2File(
-        null,
-      );
-
-      if (
-        year1InputRef.current
-      ) {
-        year1InputRef.current.value =
-          "";
-      }
-
-      if (
-        year2InputRef.current
-      ) {
-        year2InputRef.current.value =
-          "";
-      }
-
       /*
-       * Message succès.
+       * 2. Upload direct navigateur → Supabase.
+       *
+       * Aucun PDF ne passe par Next.js/Vercel.
        */
 
+      const {
+        error:
+          uploadError,
+      } =
+        await supabase.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .uploadToSignedUrl(
+            uploadUrlData.path,
+            uploadUrlData.token,
+            file,
+            {
+              contentType:
+                "application/pdf",
+
+              cacheControl:
+                "3600",
+            },
+          );
+
       if (
-        result.completed
+        uploadError
       ) {
-        setSuccessMessage(
-          requiresTwoPolicies
-            ? "Les polices et leurs dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client."
-            : "La police et ses dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client.",
+        console.error(
+          `Erreur upload direct Supabase police année ${policyYear} :`,
+          uploadError,
         );
-      } else {
-        setSuccessMessage(
-          "Les informations ont été enregistrées avec succès.",
+
+        throw new Error(
+          `Téléversement de la police année ${policyYear} impossible : ${uploadError.message}`,
         );
       }
 
-      router.refresh();
-    } catch (
-      error
+      return {
+        policyYear,
+
+        path:
+          uploadUrlData.path,
+
+        originalFileName:
+          file.name,
+
+        mimeType:
+          "application/pdf",
+
+        fileSize:
+          file.size,
+      };
+    }
+
+    /*
+     * ============================
+     * POLICE ANNÉE 1
+     * ============================
+     */
+
+    if (
+      year1File
     ) {
-      setErrorMessage(
-        error instanceof
-        Error
-          ? error.message
-          : "Une erreur inattendue est survenue.",
-      );
-    } finally {
-      setLoading(
-        false,
+      const preparedYear1 =
+        await prepareAndUploadPolicy(
+          1,
+          year1File,
+        );
+
+      preparedPolicies.push(
+        preparedYear1,
       );
     }
+
+    /*
+     * ============================
+     * POLICE ANNÉE 2
+     * ============================
+     */
+
+    if (
+      requiresTwoPolicies &&
+      year2File
+    ) {
+      const preparedYear2 =
+        await prepareAndUploadPolicy(
+          2,
+          year2File,
+        );
+
+      preparedPolicies.push(
+        preparedYear2,
+      );
+    }
+
+    /*
+     * ============================
+     * FINALISATION JSON
+     * ============================
+     *
+     * Aucun fichier n'est présent dans cette requête.
+     */
+
+    const year1Prepared =
+      preparedPolicies.find(
+        (policy) =>
+          policy.policyYear ===
+          1,
+      ) ??
+      null;
+
+    const year2Prepared =
+      preparedPolicies.find(
+        (policy) =>
+          policy.policyYear ===
+          2,
+      ) ??
+      null;
+
+    const response =
+      await fetch(
+        `/api/admin/requests/${requestId}/policy`,
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body:
+            JSON.stringify({
+              policyStartDate:
+                startDate,
+
+              policyEndDate:
+                endDate,
+
+              policyYear1:
+                year1Prepared
+                  ? {
+                      path:
+                        year1Prepared.path,
+
+                      originalFileName:
+                        year1Prepared.originalFileName,
+
+                      mimeType:
+                        year1Prepared.mimeType,
+
+                      fileSize:
+                        year1Prepared.fileSize,
+                    }
+                  : null,
+
+              policyYear2:
+                year2Prepared
+                  ? {
+                      path:
+                        year2Prepared.path,
+
+                      originalFileName:
+                        year2Prepared.originalFileName,
+
+                      mimeType:
+                        year2Prepared.mimeType,
+
+                      fileSize:
+                        year2Prepared.fileSize,
+                    }
+                  : null,
+            }),
+        },
+      );
+
+    const contentType =
+      response.headers.get(
+        "content-type",
+      ) ??
+      "";
+
+    if (
+      !contentType.includes(
+        "application/json",
+      )
+    ) {
+      const responseText =
+        await response.text();
+
+      console.error(
+        "Réponse non JSON reçue :",
+        response.status,
+        responseText,
+      );
+
+      throw new Error(
+        `La route de téléversement a renvoyé une erreur (${response.status}).`,
+      );
+    }
+
+    const result =
+      (await response.json()) as {
+        success?:
+          boolean;
+
+        completed?:
+          boolean;
+
+        status?:
+          string;
+
+        uploadedYears?:
+          number[];
+
+        existingYears?:
+          number[];
+
+        policyStartDate?:
+          string;
+
+        policyEndDate?:
+          string;
+
+        error?:
+          string;
+      };
+
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+      throw new Error(
+        result.error ||
+          "Impossible d’enregistrer les informations de la police.",
+      );
+    }
+
+    /*
+     * Les chemins ne sont plus temporaires :
+     * le serveur les a adoptés.
+     */
+
+    pendingPaths.length =
+      0;
+
+    /*
+     * ============================
+     * NETTOYAGE DES INPUTS
+     * ============================
+     */
+
+    setYear1File(
+      null,
+    );
+
+    setYear2File(
+      null,
+    );
+
+    if (
+      year1InputRef.current
+    ) {
+      year1InputRef.current.value =
+        "";
+    }
+
+    if (
+      year2InputRef.current
+    ) {
+      year2InputRef.current.value =
+        "";
+    }
+
+    /*
+     * ============================
+     * MESSAGE DE SUCCÈS
+     * ============================
+     */
+
+    if (
+      result.completed
+    ) {
+      setSuccessMessage(
+        requiresTwoPolicies
+          ? "Les polices et leurs dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client."
+          : "La police et ses dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client.",
+      );
+    } else {
+      setSuccessMessage(
+        "Les informations ont été enregistrées avec succès.",
+      );
+    }
+
+    router.refresh();
+  } catch (error) {
+    /*
+     * À ce stade les fichiers éventuels sont dans
+     * pending/admin/policy/...
+     *
+     * La route serveur de finalisation que nous
+     * allons installer ensuite assurera également
+     * son propre nettoyage/rollback.
+     */
+
+    if (
+      pendingPaths.length >
+      0
+    ) {
+      console.error(
+        "Police(s) téléversée(s) mais non finalisée(s) :",
+        pendingPaths,
+      );
+    }
+
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Une erreur inattendue est survenue.",
+    );
+  } finally {
+    setLoading(
+      false,
+    );
   }
+}
 
   return (
     <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">

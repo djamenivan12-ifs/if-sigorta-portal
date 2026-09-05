@@ -2,7 +2,9 @@ import {
   NextResponse,
 } from "next/server";
 
-import { Resend } from "resend";
+import {
+  Resend,
+} from "resend";
 
 import {
   logActivity,
@@ -44,50 +46,31 @@ type RouteContext = {
   }>;
 };
 
-function sanitizeFileName(
-  fileName: string,
+type PaymentPayload = {
+  requestCode?: string;
+  whatsappCountryCode?: string;
+  whatsappNumber?: string;
+  path?: string;
+  originalFileName?: string;
+  mimeType?: string;
+  fileSize?: number;
+};
+
+function jsonResponse(
+  body: Record<string, unknown>,
+  status = 200,
 ) {
-  return fileName
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      "",
-    )
-    .replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_",
-    );
-}
+  return NextResponse.json(
+    body,
+    {
+      status,
 
-function validateFile(
-  file: File,
-) {
-  if (
-    !ALLOWED_FILE_TYPES.includes(
-      file.type,
-    )
-  ) {
-    throw new Error(
-      "Format non accepté. Utilisez PDF, JPG, JPEG ou PNG.",
-    );
-  }
-
-  if (
-    file.size === 0
-  ) {
-    throw new Error(
-      "Le fichier est vide.",
-    );
-  }
-
-  if (
-    file.size >
-    MAX_FILE_SIZE
-  ) {
-    throw new Error(
-      "Le fichier ne doit pas dépasser 10 Mo.",
-    );
-  }
+      headers: {
+        "Cache-Control":
+          "no-store",
+      },
+    },
+  );
 }
 
 function rateLimitedResponse(
@@ -119,6 +102,20 @@ function rateLimitedResponse(
   );
 }
 
+function sanitizeFileName(
+  fileName: string,
+) {
+  return fileName
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      "",
+    )
+    .replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_",
+    );
+}
 
 function escapeEmailHtml(
   value: string,
@@ -139,7 +136,6 @@ async function sendPaymentAdminEmail({
   firstName,
   lastName,
   durationYears,
-  isResubmission,
 }: {
   requestCode: string;
   whatsappCountryCode: string;
@@ -148,7 +144,6 @@ async function sendPaymentAdminEmail({
   firstName: string;
   lastName: string;
   durationYears?: number | null;
-  isResubmission: boolean;
 }) {
   const apiKey =
     process.env.RESEND_API_KEY;
@@ -169,21 +164,20 @@ async function sendPaymentAdminEmail({
 
   try {
     const resend =
-      new Resend(apiKey);
-
-    const subject =
-      isResubmission
-        ? `Nouveau dekont reçu — ${requestCode}`
-        : `Nouveau paiement reçu — ${requestCode}`;
+      new Resend(
+        apiKey,
+      );
 
     const safeFirstName =
       escapeEmailHtml(
-        firstName.trim() || "—",
+        firstName.trim() ||
+          "—",
       );
 
     const safeLastName =
       escapeEmailHtml(
-        lastName.trim() || "—",
+        lastName.trim() ||
+          "—",
       );
 
     const safeRequestCode =
@@ -197,17 +191,24 @@ async function sendPaymentAdminEmail({
       );
 
     const amountLabel =
-      typeof calculatedPrice === "number"
-        ? `${calculatedPrice.toLocaleString("fr-FR")} TL`
+      typeof calculatedPrice ===
+      "number"
+        ? `${calculatedPrice.toLocaleString(
+            "fr-FR",
+          )} TL`
         : "—";
 
     const durationLabel =
-      typeof durationYears === "number"
-        ? `${durationYears} ${durationYears === 1 ? "an" : "ans"}`
+      typeof durationYears ===
+      "number"
+        ? `${durationYears} ${
+            durationYears === 1
+              ? "an"
+              : "ans"
+          }`
         : "—";
 
     const {
-      data,
       error,
     } =
       await resend.emails.send({
@@ -217,11 +218,13 @@ async function sendPaymentAdminEmail({
         to:
           adminEmail,
 
-        subject,
+        subject:
+          `Nouveau paiement reçu — ${requestCode}`,
 
         html: `
           <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:32px;color:#102B20;background:#F6F8F5">
             <div style="background:#ffffff;border:1px solid #E2EAE0;border-radius:18px;padding:32px">
+
               <div style="font-size:24px;font-weight:700;color:#0B5D3B;margin-bottom:24px">
                 IF Sigorta
               </div>
@@ -231,6 +234,12 @@ async function sendPaymentAdminEmail({
               </div>
 
               <table style="width:100%;border-collapse:collapse;margin-bottom:28px;font-size:15px">
+
+                <tr>
+                  <td style="padding:8px 0;font-weight:700">Source :</td>
+                  <td style="padding:8px 0">Client direct</td>
+                </tr>
+
                 <tr>
                   <td style="padding:8px 0;font-weight:700">Client :</td>
                   <td style="padding:8px 0">${safeFirstName} ${safeLastName}</td>
@@ -255,27 +264,20 @@ async function sendPaymentAdminEmail({
                   <td style="padding:8px 0;font-weight:700">Durée :</td>
                   <td style="padding:8px 0">${durationLabel}</td>
                 </tr>
+
               </table>
 
-              <p style="margin:0 0 20px;line-height:1.7">
-                ${
-                  isResubmission
-                    ? "Le client vient de transmettre un nouveau justificatif de paiement après le refus du précédent."
-                    : "Le client vient de transmettre son justificatif de paiement."
-                }
-              </p>
-
               <p style="margin:0;line-height:1.7">
+                Le client vient de transmettre son justificatif de paiement.
                 Connectez-vous à l'espace administrateur pour vérifier le paiement.
               </p>
+
             </div>
           </div>
         `,
       });
 
-    if (
-      error
-    ) {
+    if (error) {
       console.error(
         "Erreur notification e-mail paiement :",
         error,
@@ -286,7 +288,7 @@ async function sendPaymentAdminEmail({
   ) {
     /*
      * Une erreur Resend ne doit jamais
-     * annuler le paiement ou le dekont.
+     * annuler un paiement enregistré.
      */
     console.error(
       "Envoi de la notification e-mail paiement impossible :",
@@ -294,7 +296,6 @@ async function sendPaymentAdminEmail({
     );
   }
 }
-
 
 export async function POST(
   request: Request,
@@ -305,19 +306,65 @@ export async function POST(
   } =
     await context.params;
 
+  if (!id) {
+    return jsonResponse(
+      {
+        success: false,
+
+        error:
+          "Identifiant du dossier absent.",
+      },
+      400,
+    );
+  }
+
+  /*
+   * ============================================
+   * 1. RATE LIMIT PAR IP
+   * ============================================
+   */
+
+  const clientIp =
+    getClientIp(
+      request,
+    );
+
+  const ipLimit =
+    await consumeRateLimit({
+      namespace:
+        "request-first-payment-ip",
+
+      identifier:
+        clientIp,
+
+      limit:
+        IP_RATE_LIMIT,
+
+      windowSeconds:
+        RATE_LIMIT_WINDOW_SECONDS,
+    });
+
+  if (
+    !ipLimit.allowed
+  ) {
+    return rateLimitedResponse(
+      ipLimit.retryAfterSeconds,
+    );
+  }
+
   const serviceClient =
     createServiceClient();
 
-  /*
-   * Ressources créées par CETTE requête.
-   *
-   * Elles permettent un nettoyage précis
-   * si une erreur intervient.
-   */
-
-  let uploadedStoragePath:
+  let pendingStoragePath:
     | string
     | null = null;
+
+  let finalStoragePath:
+    | string
+    | null = null;
+
+  let storageMoved =
+    false;
 
   let documentId:
     | string
@@ -327,19 +374,8 @@ export async function POST(
     | string
     | null = null;
 
-  /*
-   * Indique si cette requête a obtenu
-   * le verrou waiting_payment →
-   * payment_review.
-   */
-
   let requestLocked =
     false;
-
-  /*
-   * Permet d'éviter de remettre le dossier
-   * en waiting_payment après un succès.
-   */
 
   let operationCompleted =
     false;
@@ -347,106 +383,66 @@ export async function POST(
   try {
     /*
      * ============================================
-     * 1. IDENTIFIANT
+     * 2. BODY JSON
      * ============================================
      */
 
-    if (!id) {
-      return NextResponse.json(
+    let body:
+      PaymentPayload;
+
+    try {
+      body =
+        await request.json() as
+          PaymentPayload;
+    } catch {
+      return jsonResponse(
         {
           success: false,
 
           error:
-            "Identifiant du dossier absent.",
+            "Les données envoyées sont invalides.",
         },
-        {
-          status: 400,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        400,
       );
     }
-
-    /*
-     * ============================================
-     * 2. RATE LIMIT PAR IP
-     * ============================================
-     */
-
-    const clientIp =
-      getClientIp(
-        request,
-      );
-
-    const ipLimit =
-      await consumeRateLimit({
-        namespace:
-          "request-first-payment-ip",
-
-        identifier:
-          clientIp,
-
-        limit:
-          IP_RATE_LIMIT,
-
-        windowSeconds:
-          RATE_LIMIT_WINDOW_SECONDS,
-      });
-
-    if (
-      !ipLimit.allowed
-    ) {
-      return rateLimitedResponse(
-        ipLimit.retryAfterSeconds,
-      );
-    }
-
-    /*
-     * ============================================
-     * 3. FORM DATA
-     * ============================================
-     */
-
-    const formData =
-      await request.formData();
 
     const requestCode =
-      formData
-        .get(
-          "requestCode",
-        )
-        ?.toString()
-        .trim()
+      body.requestCode
+        ?.trim()
         .toUpperCase() ??
       "";
 
     const whatsappCountryCode =
-      formData
-        .get(
-          "whatsappCountryCode",
-        )
-        ?.toString()
-        .trim() ??
+      body.whatsappCountryCode
+        ?.trim() ??
       "";
 
     const whatsappNumber =
-      formData
-        .get(
-          "whatsappNumber",
-        )
-        ?.toString()
-        .replace(
+      body.whatsappNumber
+        ?.replace(
           /\D/g,
           "",
         ) ??
       "";
 
-    const paymentReceiptFile =
-      formData.get(
-        "paymentReceiptFile",
+    pendingStoragePath =
+      body.path
+        ?.trim() ??
+      "";
+
+    const originalFileName =
+      body.originalFileName
+        ?.trim() ??
+      "";
+
+    const mimeType =
+      body.mimeType
+        ?.trim() ??
+      "";
+
+    const fileSize =
+      Number(
+        body.fileSize,
       );
 
     if (
@@ -454,55 +450,83 @@ export async function POST(
       !whatsappCountryCode ||
       !whatsappNumber
     ) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
           error:
             "Les informations du dossier sont incomplètes.",
         },
-        {
-          status: 400,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        400,
       );
     }
 
     if (
-      !(
-        paymentReceiptFile instanceof
-        File
-      )
+      !pendingStoragePath ||
+      !originalFileName
     ) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
           error:
             "Le justificatif de paiement est obligatoire.",
         },
-        {
-          status: 400,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        400,
       );
     }
 
-    validateFile(
-      paymentReceiptFile,
-    );
+    if (
+      !ALLOWED_FILE_TYPES.includes(
+        mimeType,
+      )
+    ) {
+      return jsonResponse(
+        {
+          success: false,
+
+          error:
+            "Format non accepté. Utilisez PDF, JPG, JPEG ou PNG.",
+        },
+        400,
+      );
+    }
+
+    if (
+      !Number.isFinite(
+        fileSize,
+      ) ||
+      fileSize <= 0
+    ) {
+      return jsonResponse(
+        {
+          success: false,
+
+          error:
+            "Le fichier est vide ou invalide.",
+        },
+        400,
+      );
+    }
+
+    if (
+      fileSize >
+      MAX_FILE_SIZE
+    ) {
+      return jsonResponse(
+        {
+          success: false,
+
+          error:
+            "Le fichier ne doit pas dépasser 10 Mo.",
+        },
+        400,
+      );
+    }
 
     /*
      * ============================================
-     * 4. RATE LIMIT PAR IDENTITÉ
+     * 3. RATE LIMIT PAR IDENTITÉ
      * ============================================
      */
 
@@ -531,7 +555,32 @@ export async function POST(
 
     /*
      * ============================================
-     * 5. RECHERCHE DU DOSSIER
+     * 4. CHEMIN TEMPORAIRE
+     * ============================================
+     */
+
+    const expectedPendingPrefix =
+      `pending/direct/payment/${id}/`;
+
+    if (
+      !pendingStoragePath.startsWith(
+        expectedPendingPrefix,
+      )
+    ) {
+      return jsonResponse(
+        {
+          success: false,
+
+          error:
+            "Le justificatif envoyé n'est pas valide pour ce dossier.",
+        },
+        403,
+      );
+    }
+
+    /*
+     * ============================================
+     * 5. DOSSIER DIRECT
      * ============================================
      */
 
@@ -586,27 +635,20 @@ export async function POST(
     if (
       !insuranceRequest
     ) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
           error:
             "Dossier introuvable.",
         },
-        {
-          status: 404,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        404,
       );
     }
 
     /*
      * ============================================
-     * 6. VÉRIFICATION WHATSAPP
+     * 6. WHATSAPP
      * ============================================
      */
 
@@ -656,27 +698,20 @@ export async function POST(
       storedWhatsappNumber !==
         whatsappNumber
     ) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
           error:
             "Les informations ne correspondent pas au dossier.",
         },
-        {
-          status: 403,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        403,
       );
     }
 
     /*
      * ============================================
-     * 7. VÉRIFICATION DU STATUT
+     * 7. STATUT
      * ============================================
      */
 
@@ -684,7 +719,7 @@ export async function POST(
       insuranceRequest.status !==
       "waiting_payment"
     ) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
@@ -694,26 +729,14 @@ export async function POST(
               ? "Le justificatif de paiement a déjà été envoyé."
               : "Ce dossier n'est plus en attente de paiement.",
         },
-        {
-          status: 409,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        409,
       );
     }
 
     /*
      * ============================================
-     * 8. VÉRIFICATION PAIEMENT EXISTANT
+     * 8. PAIEMENT EXISTANT
      * ============================================
-     *
-     * Cela protège aussi contre un état
-     * incohérent dans lequel le dossier serait
-     * waiting_payment alors qu'un paiement
-     * existe déjà.
      */
 
     const {
@@ -749,21 +772,14 @@ export async function POST(
     if (
       existingPayment
     ) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
           error:
             "Un paiement est déjà associé à ce dossier.",
         },
-        {
-          status: 409,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        409,
       );
     }
 
@@ -771,15 +787,6 @@ export async function POST(
      * ============================================
      * 9. VERROU ATOMIQUE
      * ============================================
-     *
-     * C'est ici que l'on bloque les doubles
-     * soumissions concurrentes.
-     *
-     * Deux requêtes peuvent avoir lu
-     * waiting_payment plus haut.
-     *
-     * Mais une seule pourra modifier une ligne
-     * qui EST ENCORE waiting_payment.
      */
 
     const lockTime =
@@ -834,26 +841,14 @@ export async function POST(
     if (
       !lockedRequest
     ) {
-      /*
-       * Une autre requête a probablement
-       * pris le verrou juste avant celle-ci.
-       */
-
-      return NextResponse.json(
+      return jsonResponse(
         {
           success: false,
 
           error:
             "Le justificatif de paiement est déjà en cours d'enregistrement ou a déjà été envoyé.",
         },
-        {
-          status: 409,
-
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
+        409,
       );
     }
 
@@ -862,61 +857,51 @@ export async function POST(
 
     /*
      * ============================================
-     * 10. UPLOAD STORAGE
+     * 10. DÉPLACEMENT STORAGE
      * ============================================
      */
 
-    const safeName =
+    const safeFileName =
       sanitizeFileName(
-        paymentReceiptFile.name,
+        originalFileName,
       );
 
-    uploadedStoragePath =
+    finalStoragePath =
       `${id}/payment_receipt/` +
-      `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-
-    const fileBuffer =
-      await paymentReceiptFile.arrayBuffer();
+      `${Date.now()}-${crypto.randomUUID()}-${safeFileName}`;
 
     const {
       error:
-        uploadError,
+        moveError,
     } =
       await serviceClient.storage
         .from(
           BUCKET_NAME,
         )
-        .upload(
-          uploadedStoragePath,
-          fileBuffer,
-          {
-            contentType:
-              paymentReceiptFile.type,
-
-            cacheControl:
-              "3600",
-
-            upsert:
-              false,
-          },
+        .move(
+          pendingStoragePath,
+          finalStoragePath,
         );
 
     if (
-      uploadError
+      moveError
     ) {
       throw new Error(
-        `Téléversement impossible : ${uploadError.message}`,
+        `Déplacement du justificatif impossible : ${moveError.message}`,
       );
     }
 
-    /*
-     * ============================================
-     * 11. ENREGISTREMENT DU DOCUMENT
-     * ============================================
-     */
+    storageMoved =
+      true;
 
     const now =
       new Date().toISOString();
+
+    /*
+     * ============================================
+     * 11. DOCUMENT
+     * ============================================
+     */
 
     const {
       data:
@@ -936,16 +921,16 @@ export async function POST(
             "payment_receipt",
 
           storage_path:
-            uploadedStoragePath,
+            finalStoragePath,
 
           original_file_name:
-            paymentReceiptFile.name,
+            originalFileName,
 
           mime_type:
-            paymentReceiptFile.type,
+            mimeType,
 
           file_size:
-            paymentReceiptFile.size,
+            fileSize,
 
           uploaded_at:
             now,
@@ -967,17 +952,12 @@ export async function POST(
       );
     }
 
-    /*
-     * On mémorise précisément l'UUID de
-     * la ligne créée par CETTE requête.
-     */
-
     documentId =
       savedDocument.id;
 
     /*
      * ============================================
-     * 12. CRÉATION DU PAIEMENT
+     * 12. PAIEMENT
      * ============================================
      */
 
@@ -1042,45 +1022,64 @@ export async function POST(
      * ============================================
      */
 
-    await logActivity({
-      requestId:
-        id,
+    try {
+      await logActivity({
+        requestId:
+          id,
 
-      userId:
-        null,
+        userId:
+          null,
 
-      action:
-        "payment_uploaded",
+        action:
+          "payment_uploaded",
 
-      description:
-        "Le justificatif de paiement (dekont) a été envoyé par le client.",
-    });
+        description:
+          "Le justificatif de paiement (dekont) a été envoyé par le client.",
+      });
+    } catch (
+      logError
+    ) {
+      /*
+       * Une erreur d'historique ne doit pas
+       * annuler un paiement valide.
+       */
+      console.error(
+        "Impossible d'enregistrer l'activité du paiement client :",
+        logError,
+      );
+    }
 
     /*
-     * Notification e-mail admin après réception du paiement.
-     * Une erreur Resend ne doit jamais annuler le paiement.
+     * ============================================
+     * 14. EMAIL ADMIN
+     * ============================================
      */
+
     await sendPaymentAdminEmail({
-      requestCode,
-      whatsappCountryCode,
-      whatsappNumber,
+      requestCode:
+        insuranceRequest.request_code,
+
+      whatsappCountryCode:
+        storedCountryCode,
+
+      whatsappNumber:
+        storedWhatsappNumber,
+
       calculatedPrice:
         insuranceRequest.calculated_price,
+
       firstName,
+
       lastName,
+
       durationYears:
         insuranceRequest.insurance_duration_years,
-      isResubmission:
-        false,
     });
 
     /*
      * ============================================
-     * 14. SUCCÈS
+     * 15. SUCCÈS
      * ============================================
-     *
-     * Le dossier est déjà en payment_review
-     * depuis le verrou atomique.
      */
 
     operationCompleted =
@@ -1089,14 +1088,14 @@ export async function POST(
     requestLocked =
       false;
 
-    /*
-     * Ces valeurs sont remises à null pour
-     * empêcher le catch de toucher aux
-     * ressources après un succès.
-     */
-
-    uploadedStoragePath =
+    pendingStoragePath =
       null;
+
+    finalStoragePath =
+      null;
+
+    storageMoved =
+      false;
 
     documentId =
       null;
@@ -1104,36 +1103,20 @@ export async function POST(
     paymentId =
       null;
 
-    return NextResponse.json(
+    return jsonResponse(
       {
-        success:
-          true,
+        success: true,
 
         requestId:
-          id,
+          insuranceRequest.id,
 
-        requestCode,
+        requestCode:
+          insuranceRequest.request_code,
 
         status:
           "payment_review",
       },
-      {
-        status:
-          201,
-
-        headers: {
-          "Cache-Control":
-            "no-store",
-
-          "X-RateLimit-Remaining":
-            String(
-              Math.min(
-                ipLimit.remaining,
-                identityLimit.remaining,
-              ),
-            ),
-        },
-      },
+      201,
     );
   } catch (
     error
@@ -1142,16 +1125,6 @@ export async function POST(
      * ============================================
      * ROLLBACK
      * ============================================
-     *
-     * Ordre :
-     * 1. paiement
-     * 2. ligne uploaded_documents
-     * 3. fichier Storage
-     * 4. statut du dossier
-     */
-
-    /*
-     * 1. Paiement créé par cette requête.
      */
 
     if (
@@ -1179,14 +1152,7 @@ export async function POST(
           paymentCleanupError.message,
         );
       }
-
-      paymentId =
-        null;
     }
-
-    /*
-     * 2. Document précis créé par cette requête.
-     */
 
     if (
       documentId
@@ -1213,50 +1179,49 @@ export async function POST(
           documentCleanupError.message,
         );
       }
-
-      documentId =
-        null;
     }
 
     /*
-     * 3. Fichier Storage précis créé
-     * par cette requête.
+     * Le fichier a été déplacé vers sa destination
+     * définitive : on tente de le remettre dans
+     * pending pour permettre une nouvelle tentative.
      */
 
     if (
-      uploadedStoragePath
+      storageMoved &&
+      finalStoragePath &&
+      pendingStoragePath
     ) {
       const {
         error:
-          storageCleanupError,
+          rollbackMoveError,
       } =
         await serviceClient.storage
           .from(
             BUCKET_NAME,
           )
-          .remove([
-            uploadedStoragePath,
-          ]);
+          .move(
+            finalStoragePath,
+            pendingStoragePath,
+          );
 
       if (
-        storageCleanupError
+        rollbackMoveError
       ) {
         console.error(
-          "Nettoyage du dekont impossible :",
-          storageCleanupError.message,
+          "Restauration du dekont vers pending impossible :",
+          rollbackMoveError.message,
         );
+      } else {
+        storageMoved =
+          false;
       }
-
-      uploadedStoragePath =
-        null;
     }
 
     /*
-     * 4. Libération du verrou.
-     *
-     * On ne remet en waiting_payment que si
-     * CETTE requête avait réellement obtenu
-     * le verrou et n'avait pas terminé.
+     * Le dossier revient à waiting_payment
+     * uniquement si cette requête avait obtenu
+     * le verrou.
      */
 
     if (
@@ -1283,6 +1248,10 @@ export async function POST(
             id,
           )
           .eq(
+            "source",
+            "direct",
+          )
+          .eq(
             "status",
             "payment_review",
           );
@@ -1298,14 +1267,13 @@ export async function POST(
     }
 
     console.error(
-      "Erreur premier dépôt dekont :",
+      "Erreur dépôt paiement client :",
       error,
     );
 
-    return NextResponse.json(
+    return jsonResponse(
       {
-        success:
-          false,
+        success: false,
 
         error:
           error instanceof
@@ -1313,15 +1281,7 @@ export async function POST(
             ? error.message
             : "Une erreur inattendue est survenue.",
       },
-      {
-        status:
-          500,
-
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
-      },
+      500,
     );
   }
 }

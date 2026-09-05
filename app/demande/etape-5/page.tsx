@@ -10,10 +10,16 @@ import { useRouter } from "next/navigation";
 
 import DocumentUploader from "@/components/DocumentUploader";
 import { useInsuranceRequest } from "@/context/InsuranceRequestContext";
+import {
+  createClient,
+} from "@/lib/supabase/client";
 
 import BankCard from "./BankCard";
 import PaymentSummary from "./PaymentSummary";
 import RequestCodeCard from "./RequestCodeCard";
+
+const BUCKET_NAME =
+  "insurance-documents";
 
 type Language =
   | "fr"
@@ -352,18 +358,9 @@ export default function Etape5Page() {
    * VÉRIFICATION DU DOSSIER
    * ============================
    *
-   * Important :
-   *
    * Les fichiers passeport / Kimlik
-   * ont déjà été envoyés au serveur
-   * lors de l'étape 4.
-   *
-   * Après F5, les objets File ne
-   * peuvent pas être restaurés depuis
-   * sessionStorage.
-   *
-   * Ils ne doivent donc PAS être
-   * exigés à cette étape.
+   * ont déjà été envoyés lors de
+   * l'étape 4.
    */
 
   const commonInformationIsPresent =
@@ -398,28 +395,13 @@ export default function Etape5Page() {
     kimlikInformationIsPresent &&
     insuranceStartDateIsPresent;
 
-  /*
-   * Le dossier doit déjà avoir été
-   * créé par l'étape 4.
-   */
-
   const serverRequestIsPresent =
     requestData.requestId.trim() !== "" &&
     requestData.requestCode.trim() !== "";
 
-  /*
-   * Le prix calculé doit toujours
-   * être disponible.
-   */
-
   const priceIsAvailable =
     requestData.calculatedAge !== null &&
     requestData.calculatedPrice !== null;
-
-  /*
-   * À l'étape 5, le seul fichier
-   * réellement nécessaire est le dekont.
-   */
 
   const paymentReceiptIsPresent =
     requestData.paymentReceiptFile !==
@@ -452,11 +434,6 @@ export default function Etape5Page() {
     event.preventDefault();
 
     setSubmitError("");
-
-    /*
-     * Le dossier doit déjà exister
-     * côté serveur.
-     */
 
     if (
       !requestData.requestId ||
@@ -492,8 +469,11 @@ export default function Etape5Page() {
       return;
     }
 
+    const paymentReceiptFile =
+      requestData.paymentReceiptFile;
+
     if (
-      !requestData.paymentReceiptFile
+      !paymentReceiptFile
     ) {
       setSubmitError(
         t.receiptRequired,
@@ -506,35 +486,160 @@ export default function Etape5Page() {
       true,
     );
 
+    let uploadedPendingPath:
+      string | null = null;
+
     try {
       /*
-       * On envoie uniquement les
-       * informations nécessaires
-       * pour déclarer le paiement.
+       * ============================================
+       * 1. PRÉPARER L'UPLOAD
+       * ============================================
        */
 
-      const formData =
-        new FormData();
+      const uploadUrlResponse =
+        await fetch(
+          `/api/requests/${encodeURIComponent(
+            requestData.requestId,
+          )}/payment-upload-url`,
+          {
+            method:
+              "POST",
 
-      formData.append(
-        "requestCode",
-        requestData.requestCode,
-      );
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-      formData.append(
-        "whatsappCountryCode",
-        requestData.whatsappCountryCode,
-      );
+            body:
+              JSON.stringify({
+                requestCode:
+                  requestData.requestCode,
 
-      formData.append(
-        "whatsappNumber",
-        requestData.whatsappNumber,
-      );
+                whatsappCountryCode:
+                  requestData.whatsappCountryCode,
 
-      formData.append(
-        "paymentReceiptFile",
-        requestData.paymentReceiptFile,
-      );
+                whatsappNumber:
+                  requestData.whatsappNumber,
+
+                fileName:
+                  paymentReceiptFile.name,
+
+                mimeType:
+                  paymentReceiptFile.type,
+
+                fileSize:
+                  paymentReceiptFile.size,
+              }),
+          },
+        );
+
+      const uploadUrlContentType =
+        uploadUrlResponse.headers.get(
+          "content-type",
+        ) ?? "";
+
+      if (
+        !uploadUrlContentType.includes(
+          "application/json",
+        )
+      ) {
+        const responseText =
+          await uploadUrlResponse.text();
+
+        console.error(
+          "Réponse non JSON reçue lors de la préparation du dekont :",
+          uploadUrlResponse.status,
+          responseText,
+        );
+
+        throw new Error(
+          `${t.paymentRouteError} (${uploadUrlResponse.status}).`,
+        );
+      }
+
+      const uploadUrlResult =
+        (await uploadUrlResponse.json()) as {
+          success?: boolean;
+          requestId?: string;
+          requestCode?: string;
+          uploadSessionId?: string;
+          path?: string;
+          token?: string;
+          error?: string;
+        };
+
+      if (
+        !uploadUrlResponse.ok ||
+        !uploadUrlResult.success ||
+        !uploadUrlResult.path ||
+        !uploadUrlResult.token
+      ) {
+        throw new Error(
+          uploadUrlResult.error ||
+            t.paymentSaveError,
+        );
+      }
+
+      uploadedPendingPath =
+        uploadUrlResult.path;
+
+      /*
+       * ============================================
+       * 2. UPLOAD DIRECT SUPABASE
+       * ============================================
+       *
+       * Le fichier va directement du navigateur
+       * vers Supabase Storage.
+       *
+       * Il ne traverse pas Next.js/Vercel.
+       */
+
+      const supabase =
+        createClient();
+
+      const {
+        error:
+          uploadError,
+      } =
+        await supabase.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .uploadToSignedUrl(
+            uploadUrlResult.path,
+            uploadUrlResult.token,
+            paymentReceiptFile,
+            {
+              contentType:
+                paymentReceiptFile.type,
+
+              cacheControl:
+                "3600",
+            },
+          );
+
+      if (
+        uploadError
+      ) {
+        console.error(
+          "Erreur upload direct Supabase du dekont :",
+          uploadError,
+        );
+
+        throw new Error(
+          uploadError.message ||
+            t.paymentSaveError,
+        );
+      }
+
+      /*
+       * ============================================
+       * 3. FINALISER LE PAIEMENT
+       * ============================================
+       *
+       * Aucun fichier n'est envoyé à cette API.
+       * Il ne reste que du JSON léger.
+       */
 
       const response =
         await fetch(
@@ -545,8 +650,34 @@ export default function Etape5Page() {
             method:
               "POST",
 
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
             body:
-              formData,
+              JSON.stringify({
+                requestCode:
+                  requestData.requestCode,
+
+                whatsappCountryCode:
+                  requestData.whatsappCountryCode,
+
+                whatsappNumber:
+                  requestData.whatsappNumber,
+
+                path:
+                  uploadUrlResult.path,
+
+                originalFileName:
+                  paymentReceiptFile.name,
+
+                mimeType:
+                  paymentReceiptFile.type,
+
+                fileSize:
+                  paymentReceiptFile.size,
+              }),
           },
         );
 
@@ -554,11 +685,6 @@ export default function Etape5Page() {
         response.headers.get(
           "content-type",
         ) ?? "";
-
-      /*
-       * Protection contre une réponse
-       * HTML ou autre réponse inattendue.
-       */
 
       if (
         !contentType.includes(
@@ -582,13 +708,9 @@ export default function Etape5Page() {
       const result =
         (await response.json()) as {
           success?: boolean;
-
           requestId?: string;
-
           requestCode?: string;
-
           status?: string;
-
           error?: string;
         };
 
@@ -603,32 +725,40 @@ export default function Etape5Page() {
       }
 
       /*
-       * On conserve le code avant
-       * de vider le contexte.
+       * ============================================
+       * 4. SUCCÈS
+       * ============================================
        */
 
       const confirmedCode =
         result.requestCode ||
         requestData.requestCode;
 
-      /*
-       * resetRequestData supprime aussi
-       * les données sauvegardées dans
-       * sessionStorage.
-       */
-
       resetRequestData();
-
-      /*
-       * Redirection vers la confirmation.
-       */
 
       router.push(
         `/demande/confirmation?code=${encodeURIComponent(
           confirmedCode,
         )}`,
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
+      /*
+       * Si l'upload a atteint Storage mais que
+       * la finalisation échoue, ce chemin permet
+       * de retrouver le fichier temporaire.
+       */
+
+      if (
+        uploadedPendingPath
+      ) {
+        console.error(
+          "Échec de finalisation après préparation du dekont :",
+          uploadedPendingPath,
+        );
+      }
+
       setSubmitError(
         error instanceof Error
           ? error.message
@@ -680,7 +810,11 @@ export default function Etape5Page() {
     <main className="min-h-screen bg-[#F6F8F5]">
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
-          <a href="/" className="flex items-center" aria-label="IF Sigorta">
+          <a
+            href="/"
+            className="flex items-center"
+            aria-label="IF Sigorta"
+          >
             <img
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
@@ -690,7 +824,11 @@ export default function Etape5Page() {
 
           <button
             type="button"
-            onClick={() => router.push("/demande/etape-4")}
+            onClick={() =>
+              router.push(
+                "/demande/etape-4",
+              )
+            }
             className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
           >
             {t.backSummary}
@@ -730,13 +868,23 @@ export default function Etape5Page() {
 
                 <div className="mt-10 space-y-4 lg:mt-auto">
                   <div className="flex gap-3 border-t border-white/10 pt-5">
-                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">✓</div>
-                    <p className="text-sm leading-6 text-white/70">{transferInfo}</p>
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {transferInfo}
+                    </p>
                   </div>
 
                   <div className="flex gap-3">
-                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white">✓</div>
-                    <p className="text-sm leading-6 text-white/70">{verificationInfo}</p>
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white">
+                      ✓
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/70">
+                      {verificationInfo}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -768,38 +916,82 @@ export default function Etape5Page() {
               </div>
             )}
 
-            {!requestData.hasKimlik && requestData.insuranceStartDate && (
-              <div className="mt-6 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] px-4 py-3.5 text-sm leading-6 text-[#31513B]">
-                {t.desiredStartDate}:{" "}
-                <span className="font-semibold">
-                  {new Intl.DateTimeFormat(dateLocale).format(
-                    new Date(`${requestData.insuranceStartDate}T00:00:00`),
-                  )}
-                </span>
-              </div>
-            )}
+            {!requestData.hasKimlik &&
+              requestData.insuranceStartDate && (
+                <div className="mt-6 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] px-4 py-3.5 text-sm leading-6 text-[#31513B]">
+                  {t.desiredStartDate}:{" "}
+                  <span className="font-semibold">
+                    {new Intl.DateTimeFormat(
+                      dateLocale,
+                    ).format(
+                      new Date(
+                        `${requestData.insuranceStartDate}T00:00:00`,
+                      ),
+                    )}
+                  </span>
+                </div>
+              )}
 
-            <form onSubmit={handleSubmit} className="mt-9 space-y-6">
-              <RequestCodeCard requestCode={requestData.requestCode} />
+            <form
+              onSubmit={
+                handleSubmit
+              }
+              className="mt-9 space-y-6"
+            >
+              <RequestCodeCard
+                requestCode={
+                  requestData.requestCode
+                }
+              />
 
-              <PaymentSummary amount={requestData.calculatedPrice} />
+              <PaymentSummary
+                amount={
+                  requestData.calculatedPrice
+                }
+              />
 
-              <BankCard requestCode={requestData.requestCode} />
+              <BankCard
+                requestCode={
+                  requestData.requestCode
+                }
+              />
 
               <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
                 <div className="mb-5">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">04</p>
-                  <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.transferProof}</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{t.transferProofDescription}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                    04
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                    {t.transferProof}
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {
+                      t.transferProofDescription
+                    }
+                  </p>
                 </div>
 
                 <DocumentUploader
-                  label={t.receiptLabel}
-                  description={t.receiptDescription}
-                  file={requestData.paymentReceiptFile}
-                  language={language}
-                  onChange={(paymentReceiptFile) =>
-                    updateRequestData({ paymentReceiptFile })
+                  label={
+                    t.receiptLabel
+                  }
+                  description={
+                    t.receiptDescription
+                  }
+                  file={
+                    requestData.paymentReceiptFile
+                  }
+                  language={
+                    language
+                  }
+                  onChange={(
+                    paymentReceiptFile,
+                  ) =>
+                    updateRequestData({
+                      paymentReceiptFile,
+                    })
                   }
                 />
 
@@ -810,7 +1002,9 @@ export default function Etape5Page() {
                       : "border-amber-200 bg-amber-50 text-amber-800"
                   }`}
                 >
-                  {paymentReceiptIsPresent ? t.receiptAdded : t.receiptMissing}
+                  {paymentReceiptIsPresent
+                    ? t.receiptAdded
+                    : t.receiptMissing}
                 </div>
               </section>
 
@@ -827,8 +1021,14 @@ export default function Etape5Page() {
               <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
-                  disabled={isSubmitting}
-                  onClick={() => router.push("/demande/etape-4")}
+                  disabled={
+                    isSubmitting
+                  }
+                  onClick={() =>
+                    router.push(
+                      "/demande/etape-4",
+                    )
+                  }
                   className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {t.previous}
@@ -836,10 +1036,14 @@ export default function Etape5Page() {
 
                 <button
                   type="submit"
-                  disabled={!canConfirmPayment}
+                  disabled={
+                    !canConfirmPayment
+                  }
                   className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                 >
-                  {isSubmitting ? t.submitting : t.confirmPayment}
+                  {isSubmitting
+                    ? t.submitting
+                    : t.confirmPayment}
                 </button>
               </div>
             </form>

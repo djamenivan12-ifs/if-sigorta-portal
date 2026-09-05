@@ -38,50 +38,43 @@ const IDENTITY_RATE_LIMIT =
 const RATE_LIMIT_WINDOW_SECONDS =
   10 * 60;
 
+type PaymentReceiptPayload = {
+  requestCode?: string;
+  whatsappCountryCode?: string;
+  whatsappNumber?: string;
+
+  path?: string;
+  originalFileName?: string;
+  mimeType?: string;
+  fileSize?: number;
+};
+
 function sanitizeFileName(
   fileName: string,
 ) {
-  return fileName
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      "",
-    )
-    .replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_",
-    );
-}
+  const sanitized =
+    fileName
+      .normalize("NFD")
+      .replace(
+        /[\u0300-\u036f]/g,
+        "",
+      )
+      .replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_",
+      )
+      .replace(
+        /_+/g,
+        "_",
+      )
+      .replace(
+        /^_+|_+$/g,
+        "");
 
-function validateFile(
-  file: File,
-) {
-  if (
-    !ALLOWED_FILE_TYPES.includes(
-      file.type,
-    )
-  ) {
-    throw new Error(
-      "Format non accepté. Utilisez PDF, JPG, JPEG ou PNG.",
-    );
-  }
-
-  if (
-    file.size === 0
-  ) {
-    throw new Error(
-      "Le fichier est vide.",
-    );
-  }
-
-  if (
-    file.size >
-    MAX_FILE_SIZE
-  ) {
-    throw new Error(
-      "Le fichier ne doit pas dépasser 10 Mo.",
-    );
-  }
+  return (
+    sanitized ||
+    "payment-receipt"
+  );
 }
 
 function rateLimitedResponse(
@@ -129,13 +122,11 @@ async function sendPaymentAdminEmail({
   whatsappCountryCode,
   whatsappNumber,
   calculatedPrice,
-  isResubmission,
 }: {
   requestCode: string;
   whatsappCountryCode: string;
   whatsappNumber: string;
   calculatedPrice?: number | null;
-  isResubmission: boolean;
 }) {
   const apiKey =
     process.env.RESEND_API_KEY;
@@ -156,25 +147,13 @@ async function sendPaymentAdminEmail({
 
   try {
     const resend =
-      new Resend(apiKey);
-
-    const subject =
-      isResubmission
-        ? `Nouveau dekont à vérifier — ${requestCode}`
-        : `Nouveau paiement à vérifier — ${requestCode}`;
-
-    const title =
-      isResubmission
-        ? "Nouveau dekont à vérifier"
-        : "Nouveau paiement à vérifier";
-
-    const message =
-      isResubmission
-        ? "Le client a transmis un nouveau justificatif après le refus de son paiement."
-        : "Le client a déclaré son paiement et transmis son justificatif de virement.";
+      new Resend(
+        apiKey,
+      );
 
     const priceRow =
-      typeof calculatedPrice === "number"
+      typeof calculatedPrice ===
+      "number"
         ? `
           <tr>
             <td style="padding:10px 0;font-weight:700">
@@ -198,24 +177,37 @@ async function sendPaymentAdminEmail({
         to:
           adminEmail,
 
-        subject,
+        subject:
+          `Nouveau dekont à vérifier — ${requestCode}`,
 
         html: `
           <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:32px;color:#102B20;background:#F6F8F5">
             <div style="background:#ffffff;border:1px solid #E2EAE0;border-radius:18px;padding:32px">
+
               <div style="font-size:24px;font-weight:700;color:#0B5D3B;margin-bottom:8px">
                 IF Sigorta
               </div>
 
               <div style="font-size:18px;font-weight:700;margin-bottom:24px">
-                ${title}
+                Nouveau dekont à vérifier
               </div>
 
               <p style="margin:0 0 24px;line-height:1.6">
-                ${message}
+                Le client a transmis un nouveau justificatif après le refus de son paiement.
               </p>
 
               <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+
+                <tr>
+                  <td style="padding:10px 0;font-weight:700">
+                    Source
+                  </td>
+
+                  <td style="padding:10px 0;text-align:right">
+                    Client direct
+                  </td>
+                </tr>
+
                 <tr>
                   <td style="padding:10px 0;font-weight:700">
                     Matricule
@@ -238,13 +230,15 @@ async function sendPaymentAdminEmail({
                 </tr>
 
                 ${priceRow}
+
               </table>
 
               <div style="padding:16px;border-radius:12px;background:#EEF6EC;line-height:1.6">
                 Le paiement est maintenant en attente de vérification.
                 Connectez-vous à l’espace administrateur IF Sigorta
-                pour contrôler le dekont.
+                pour contrôler le nouveau dekont.
               </div>
+
             </div>
           </div>
         `,
@@ -254,7 +248,7 @@ async function sendPaymentAdminEmail({
       error
     ) {
       console.error(
-        "Erreur notification e-mail paiement :",
+        "Erreur notification e-mail nouveau dekont :",
         error,
       );
     }
@@ -263,10 +257,11 @@ async function sendPaymentAdminEmail({
   ) {
     /*
      * Une erreur Resend ne doit jamais
-     * annuler le paiement ou le dekont.
+     * annuler le renvoi du dekont.
      */
+
     console.error(
-      "Envoi de la notification e-mail paiement impossible :",
+      "Envoi de la notification e-mail nouveau dekont impossible :",
       emailError,
     );
   }
@@ -278,9 +273,79 @@ export async function POST(
   const serviceClient =
     createServiceClient();
 
-  let uploadedStoragePath:
+  /*
+   * Ces variables permettent d'effectuer
+   * un rollback propre si une étape échoue.
+   */
+
+  let pendingStoragePath:
     | string
     | null = null;
+
+  let finalStoragePath:
+    | string
+    | null = null;
+
+  let previousDocument:
+    | {
+        id: string;
+        storage_path:
+          | string
+          | null;
+        original_file_name:
+          | string
+          | null;
+        mime_type:
+          | string
+          | null;
+        file_size:
+          | number
+          | null;
+        uploaded_at:
+          | string
+          | null;
+      }
+    | null = null;
+
+  let paymentId:
+    | string
+    | null = null;
+
+  let previousPayment:
+    | {
+        status:
+          | string
+          | null;
+        submitted_at:
+          | string
+          | null;
+        verified_at:
+          | string
+          | null;
+        verified_by:
+          | string
+          | null;
+        rejection_reason:
+          | string
+          | null;
+      }
+    | null = null;
+
+  let requestId:
+    | string
+    | null = null;
+
+  let requestLocked =
+    false;
+
+  let documentUpdated =
+    false;
+
+  let paymentUpdated =
+    false;
+
+  let fileMoved =
+    false;
 
   try {
     /*
@@ -288,6 +353,7 @@ export async function POST(
      * 1. RATE LIMIT PAR ADRESSE IP
      * ============================================
      */
+
     const clientIp =
       getClientIp(
         request,
@@ -316,44 +382,83 @@ export async function POST(
       );
     }
 
-    const formData =
-      await request.formData();
+    /*
+     * ============================================
+     * 2. LECTURE DU JSON
+     * ============================================
+     */
+
+    let body:
+      PaymentReceiptPayload;
+
+    try {
+      body =
+        (await request.json()) as
+          PaymentReceiptPayload;
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Requête invalide.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
 
     const requestCode =
-      formData
-        .get(
-          "requestCode",
-        )
-        ?.toString()
-        .trim()
+      body.requestCode
+        ?.trim()
         .toUpperCase() ??
       "";
 
     const whatsappCountryCode =
-      formData
-        .get(
-          "whatsappCountryCode",
-        )
-        ?.toString()
-        .trim() ??
+      body.whatsappCountryCode
+        ?.trim() ??
       "";
 
     const whatsappNumber =
-      formData
-        .get(
-          "whatsappNumber",
-        )
-        ?.toString()
-        .replace(
+      body.whatsappNumber
+        ?.replace(
           /\D/g,
           "",
         ) ??
       "";
 
-    const paymentReceiptFile =
-      formData.get(
-        "paymentReceiptFile",
+    const suppliedPath =
+      body.path
+        ?.trim() ??
+      "";
+
+    const originalFileName =
+      body.originalFileName
+        ?.trim() ??
+      "";
+
+    const mimeType =
+      body.mimeType
+        ?.trim()
+        .toLowerCase() ??
+      "";
+
+    const fileSize =
+      Number(
+        body.fileSize,
       );
+
+    /*
+     * ============================================
+     * 3. VALIDATION
+     * ============================================
+     */
 
     if (
       !requestCode ||
@@ -369,15 +474,18 @@ export async function POST(
         },
         {
           status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     if (
-      !(
-        paymentReceiptFile instanceof
-        File
-      )
+      !suppliedPath ||
+      !originalFileName
     ) {
       return NextResponse.json(
         {
@@ -388,23 +496,90 @@ export async function POST(
         },
         {
           status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
-    validateFile(
-      paymentReceiptFile,
-    );
+    if (
+      !ALLOWED_FILE_TYPES.includes(
+        mimeType,
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Format non accepté. Utilisez PDF, JPG, JPEG ou PNG.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
+    if (
+      !Number.isFinite(
+        fileSize,
+      ) ||
+      fileSize <= 0
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Le fichier est vide ou invalide.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
+    if (
+      fileSize >
+      MAX_FILE_SIZE
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Le fichier ne doit pas dépasser 10 Mo.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
 
     /*
      * ============================================
-     * 2. RATE LIMIT PAR IDENTITÉ DE SUIVI
+     * 4. RATE LIMIT PAR IDENTITÉ
      * ============================================
-     *
-     * Plus strict que le simple suivi, car cette
-     * route permet de téléverser un nouveau fichier
-     * et de remettre le dossier en vérification.
      */
+
     const identityLimit =
       await consumeRateLimit({
         namespace:
@@ -430,17 +605,10 @@ export async function POST(
 
     /*
      * ============================================
-     * 3. RECHERCHE DU DOSSIER
+     * 5. RECHERCHE DU DOSSIER DIRECT
      * ============================================
-     *
-     * Cette route appartient au parcours public.
-     *
-     * Un dossier partenaire ne doit jamais pouvoir
-     * être retrouvé ou modifié depuis cette API.
-     *
-     * Le filtre source = direct est donc appliqué
-     * directement dans la requête Supabase.
      */
+
     const {
       data:
         insuranceRequest,
@@ -494,15 +662,24 @@ export async function POST(
         },
         {
           status: 404,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
+    requestId =
+      insuranceRequest.id;
+
     /*
      * ============================================
-     * 4. VÉRIFICATION WHATSAPP
+     * 6. VÉRIFICATION WHATSAPP
      * ============================================
      */
+
     const clientRelation =
       insuranceRequest.client;
 
@@ -546,9 +723,20 @@ export async function POST(
         },
         {
           status: 403,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
+
+    /*
+     * ============================================
+     * 7. VÉRIFICATION DU STATUT
+     * ============================================
+     */
 
     if (
       insuranceRequest.status !==
@@ -563,15 +751,166 @@ export async function POST(
         },
         {
           status: 409,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
      * ============================================
-     * 5. RECHERCHE DU PAIEMENT
+     * 8. VÉRIFICATION DU CHEMIN TEMPORAIRE
+     * ============================================
+     *
+     * Le client ne peut finaliser qu'un fichier
+     * préparé pour CE dossier et pour CE workflow.
+     */
+
+    const expectedPrefix =
+      `pending/direct/payment-reupload/${insuranceRequest.id}/`;
+
+    if (
+      !suppliedPath.startsWith(
+        expectedPrefix,
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Le chemin du justificatif est invalide.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
+    pendingStoragePath =
+      suppliedPath;
+
+    /*
+     * ============================================
+     * 9. VÉRIFICATION DU FICHIER DANS SUPABASE
+     * ============================================
+     *
+     * On ne fait pas confiance uniquement aux
+     * métadonnées envoyées par le navigateur.
+     */
+
+    const pendingDirectory =
+      suppliedPath
+        .split("/")
+        .slice(
+          0,
+          -1,
+        )
+        .join("/");
+
+    const pendingFileName =
+      suppliedPath
+        .split("/")
+        .at(
+          -1,
+        ) ??
+      "";
+
+    const {
+      data:
+        pendingFiles,
+      error:
+        pendingFilesError,
+    } =
+      await serviceClient.storage
+        .from(
+          BUCKET_NAME,
+        )
+        .list(
+          pendingDirectory,
+          {
+            limit: 100,
+
+            search:
+              pendingFileName,
+          },
+        );
+
+    if (
+      pendingFilesError
+    ) {
+      throw new Error(
+        pendingFilesError.message,
+      );
+    }
+
+    const pendingFile =
+      pendingFiles?.find(
+        (file) =>
+          file.name ===
+          pendingFileName,
+      );
+
+    if (
+      !pendingFile
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Le fichier téléversé est introuvable.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
+    if (
+      typeof pendingFile.metadata
+        ?.size ===
+        "number" &&
+      pendingFile.metadata.size >
+        MAX_FILE_SIZE
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Le fichier ne doit pas dépasser 10 Mo.",
+        },
+        {
+          status: 400,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
+    /*
+     * ============================================
+     * 10. PAIEMENT EXISTANT
      * ============================================
      */
+
     const {
       data:
         payment,
@@ -585,7 +924,11 @@ export async function POST(
         .select(
           `
             id,
-            status
+            status,
+            submitted_at,
+            verified_at,
+            verified_by,
+            rejection_reason
           `,
         )
         .eq(
@@ -614,66 +957,41 @@ export async function POST(
         },
         {
           status: 404,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
-    /*
-     * ============================================
-     * 6. UPLOAD DU NOUVEAU DEKONT
-     * ============================================
-     */
-    const safeName =
-      sanitizeFileName(
-        paymentReceiptFile.name,
-      );
+    paymentId =
+      payment.id;
 
-    uploadedStoragePath =
-      `${insuranceRequest.id}/payment_receipt/` +
-      `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+    previousPayment = {
+      status:
+        payment.status,
 
-    const fileBuffer =
-      await paymentReceiptFile.arrayBuffer();
+      submitted_at:
+        payment.submitted_at,
 
-    const {
-      error:
-        uploadError,
-    } =
-      await serviceClient.storage
-        .from(
-          BUCKET_NAME,
-        )
-        .upload(
-          uploadedStoragePath,
-          fileBuffer,
-          {
-            contentType:
-              paymentReceiptFile.type,
+      verified_at:
+        payment.verified_at,
 
-            cacheControl:
-              "3600",
+      verified_by:
+        payment.verified_by,
 
-            upsert:
-              false,
-          },
-        );
-
-    if (
-      uploadError
-    ) {
-      throw new Error(
-        `Téléversement impossible : ${uploadError.message}`,
-      );
-    }
-
-    const now =
-      new Date().toISOString();
+      rejection_reason:
+        payment.rejection_reason,
+    };
 
     /*
      * ============================================
-     * 7. ANCIEN DOCUMENT
+     * 11. ANCIEN DOCUMENT
      * ============================================
      */
+
     const {
       data:
         existingDocument,
@@ -687,7 +1005,11 @@ export async function POST(
         .select(
           `
             id,
-            storage_path
+            storage_path,
+            original_file_name,
+            mime_type,
+            file_size,
+            uploaded_at
           `,
         )
         .eq(
@@ -697,16 +1019,6 @@ export async function POST(
         .eq(
           "document_type",
           "payment_receipt",
-        )
-        .order(
-          "uploaded_at",
-          {
-            ascending:
-              false,
-          },
-        )
-        .limit(
-          1,
         )
         .maybeSingle();
 
@@ -718,18 +1030,133 @@ export async function POST(
       );
     }
 
+    previousDocument =
+      existingDocument ??
+      null;
+
     /*
      * ============================================
-     * 8. MISE À JOUR DU JUSTIFICATIF
+     * 12. VERROUILLAGE ATOMIQUE DU DOSSIER
      * ============================================
      *
-     * uploaded_documents possède une contrainte
-     * unique :
-     *
-     * request_id + document_type
-     *
-     * On remplace donc la ligne existante.
+     * Cela empêche deux renvois simultanés de
+     * finaliser le même paiement.
      */
+
+    const now =
+      new Date().toISOString();
+
+    const {
+      data:
+        lockedRequest,
+      error:
+        lockError,
+    } =
+      await serviceClient
+        .from(
+          "insurance_requests",
+        )
+        .update({
+          status:
+            "payment_review",
+
+          updated_at:
+            now,
+        })
+        .eq(
+          "id",
+          insuranceRequest.id,
+        )
+        .eq(
+          "source",
+          "direct",
+        )
+        .eq(
+          "status",
+          "payment_rejected",
+        )
+        .select(
+          "id",
+        )
+        .maybeSingle();
+
+    if (
+      lockError
+    ) {
+      throw new Error(
+        lockError.message,
+      );
+    }
+
+    if (
+      !lockedRequest
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
+          error:
+            "Le statut du dossier a changé entre-temps.",
+        },
+        {
+          status: 409,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
+      );
+    }
+
+    requestLocked =
+      true;
+
+    /*
+     * ============================================
+     * 13. DÉPLACEMENT DU FICHIER
+     * ============================================
+     */
+
+    const safeName =
+      sanitizeFileName(
+        originalFileName,
+      );
+
+    finalStoragePath =
+      `${insuranceRequest.id}/payment_receipt/` +
+      `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+
+    const {
+      error:
+        moveError,
+    } =
+      await serviceClient.storage
+        .from(
+          BUCKET_NAME,
+        )
+        .move(
+          pendingStoragePath,
+          finalStoragePath,
+        );
+
+    if (
+      moveError
+    ) {
+      throw new Error(
+        `Déplacement du dekont impossible : ${moveError.message}`,
+      );
+    }
+
+    fileMoved =
+      true;
+
+    /*
+     * ============================================
+     * 14. MISE À JOUR DU DOCUMENT
+     * ============================================
+     */
+
     const {
       error:
         documentUpdateError,
@@ -747,16 +1174,16 @@ export async function POST(
               "payment_receipt",
 
             storage_path:
-              uploadedStoragePath,
+              finalStoragePath,
 
             original_file_name:
-              paymentReceiptFile.name,
+              originalFileName,
 
             mime_type:
-              paymentReceiptFile.type,
+              mimeType,
 
             file_size:
-              paymentReceiptFile.size,
+              fileSize,
 
             uploaded_at:
               now,
@@ -775,11 +1202,15 @@ export async function POST(
       );
     }
 
+    documentUpdated =
+      true;
+
     /*
      * ============================================
-     * 9. REMISE DU PAIEMENT EN VÉRIFICATION
+     * 15. REMISE DU PAIEMENT EN VÉRIFICATION
      * ============================================
      */
+
     const {
       error:
         paymentUpdateError,
@@ -817,70 +1248,15 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================================
-     * 10. RETOUR DU DOSSIER EN PAYMENT_REVIEW
-     * ============================================
-     */
-    const {
-      data:
-        updatedRequest,
-      error:
-        requestUpdateError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .update({
-          status:
-            "payment_review",
-
-          updated_at:
-            now,
-        })
-        .eq(
-          "id",
-          insuranceRequest.id,
-        )
-        .eq(
-          "status",
-          "payment_rejected",
-        )
-        .select(
-          "id",
-        )
-        .maybeSingle();
-
-    if (
-      requestUpdateError
-    ) {
-      throw new Error(
-        requestUpdateError.message,
-      );
-    }
-
-    if (
-      !updatedRequest
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-
-          error:
-            "Le statut du dossier a changé entre-temps.",
-        },
-        {
-          status: 409,
-        },
-      );
-    }
+    paymentUpdated =
+      true;
 
     /*
      * ============================================
-     * 11. HISTORIQUE
+     * 16. HISTORIQUE
      * ============================================
      */
+
     await logActivity({
       requestId:
         insuranceRequest.id,
@@ -897,12 +1273,10 @@ export async function POST(
 
     /*
      * ============================================
-     * 12. NOTIFICATION E-MAIL ADMIN
+     * 17. EMAIL ADMIN
      * ============================================
-     *
-     * Une erreur Resend ne doit jamais
-     * annuler le renvoi du dekont.
      */
+
     await sendPaymentAdminEmail({
       requestCode:
         insuranceRequest.request_code,
@@ -913,28 +1287,77 @@ export async function POST(
 
       calculatedPrice:
         insuranceRequest.calculated_price,
-
-      isResubmission:
-        true,
     });
 
     /*
-     * On conserve l'ancien fichier pour l'historique.
+     * ============================================
+     * 18. SUPPRESSION DE L'ANCIEN FICHIER
+     * ============================================
      *
-     * Si plus tard tu veux ne garder qu'un seul
-     * dekont, on pourra supprimer
-     * existingDocument.storage_path.
+     * La ligne uploaded_documents pointe maintenant
+     * vers le nouveau fichier.
+     *
+     * On supprime donc l'ancien objet Storage pour
+     * éviter l'accumulation de données sensibles.
+     *
+     * Une erreur de nettoyage ne doit pas annuler
+     * le renvoi qui vient de réussir.
      */
-    void existingDocument;
+
+    if (
+      previousDocument
+        ?.storage_path &&
+      previousDocument
+        .storage_path !==
+        finalStoragePath
+    ) {
+      const {
+        error:
+          oldFileDeleteError,
+      } =
+        await serviceClient.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .remove([
+            previousDocument
+              .storage_path,
+          ]);
+
+      if (
+        oldFileDeleteError
+      ) {
+        console.error(
+          "Suppression de l'ancien dekont impossible :",
+          oldFileDeleteError.message,
+        );
+      }
+    }
 
     /*
-     * La procédure est terminée avec succès.
+     * Tout est finalisé.
      *
-     * On remet cette variable à null afin que le
-     * bloc catch ne supprime pas le fichier.
+     * On désactive les marqueurs utilisés
+     * par le rollback.
      */
-    uploadedStoragePath =
+
+    pendingStoragePath =
       null;
+
+    finalStoragePath =
+      null;
+
+    fileMoved =
+      false;
+
+    documentUpdated =
+      false;
+
+    paymentUpdated =
+      false;
+
+    requestLocked =
+      false;
 
     return NextResponse.json(
       {
@@ -965,46 +1388,231 @@ export async function POST(
   ) {
     /*
      * ============================================
-     * NETTOYAGE EN CAS D'ÉCHEC
+     * ROLLBACK
      * ============================================
+     *
+     * On essaie de remettre le dossier dans
+     * l'état qui précédait cette tentative.
      */
-    if (
-      uploadedStoragePath
-    ) {
-      const {
-        error:
-          cleanupError,
-      } =
-        await serviceClient.storage
-          .from(
-            BUCKET_NAME,
-          )
-          .remove([
-            uploadedStoragePath,
-          ]);
-
-      if (
-        cleanupError
-      ) {
-        console.error(
-          "Nettoyage du nouveau dekont impossible :",
-          cleanupError.message,
-        );
-      }
-    }
 
     console.error(
       "Erreur renvoi dekont :",
       error,
     );
 
+    /*
+     * 1. Restaurer le paiement.
+     */
+
+    if (
+      paymentUpdated &&
+      paymentId &&
+      previousPayment
+    ) {
+      const {
+        error:
+          paymentRollbackError,
+      } =
+        await serviceClient
+          .from(
+            "payments",
+          )
+          .update({
+            status:
+              previousPayment.status,
+
+            submitted_at:
+              previousPayment.submitted_at,
+
+            verified_at:
+              previousPayment.verified_at,
+
+            verified_by:
+              previousPayment.verified_by,
+
+            rejection_reason:
+              previousPayment.rejection_reason,
+          })
+          .eq(
+            "id",
+            paymentId,
+          );
+
+      if (
+        paymentRollbackError
+      ) {
+        console.error(
+          "Rollback du paiement impossible :",
+          paymentRollbackError.message,
+        );
+      }
+    }
+
+    /*
+     * 2. Restaurer uploaded_documents.
+     */
+
+    if (
+      documentUpdated &&
+      requestId
+    ) {
+      if (
+        previousDocument
+      ) {
+        const {
+          error:
+            documentRollbackError,
+        } =
+          await serviceClient
+            .from(
+              "uploaded_documents",
+            )
+            .update({
+              storage_path:
+                previousDocument.storage_path,
+
+              original_file_name:
+                previousDocument.original_file_name,
+
+              mime_type:
+                previousDocument.mime_type,
+
+              file_size:
+                previousDocument.file_size,
+
+              uploaded_at:
+                previousDocument.uploaded_at,
+            })
+            .eq(
+              "id",
+              previousDocument.id,
+            );
+
+        if (
+          documentRollbackError
+        ) {
+          console.error(
+            "Rollback du document impossible :",
+            documentRollbackError.message,
+          );
+        }
+      } else {
+        const {
+          error:
+            documentDeleteError,
+        } =
+          await serviceClient
+            .from(
+              "uploaded_documents",
+            )
+            .delete()
+            .eq(
+              "request_id",
+              requestId,
+            )
+            .eq(
+              "document_type",
+              "payment_receipt",
+            );
+
+        if (
+          documentDeleteError
+        ) {
+          console.error(
+            "Suppression du document créé pendant le rollback impossible :",
+            documentDeleteError.message,
+          );
+        }
+      }
+    }
+
+    /*
+     * 3. Remettre le fichier final dans pending.
+     *
+     * Cela permet au client de retenter la
+     * finalisation sans devoir réuploader le fichier.
+     */
+
+    if (
+      fileMoved &&
+      finalStoragePath &&
+      pendingStoragePath
+    ) {
+      const {
+        error:
+          moveRollbackError,
+      } =
+        await serviceClient.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .move(
+            finalStoragePath,
+            pendingStoragePath,
+          );
+
+      if (
+        moveRollbackError
+      ) {
+        console.error(
+          "Rollback du fichier impossible :",
+          moveRollbackError.message,
+        );
+      }
+    }
+
+    /*
+     * 4. Restaurer le statut du dossier.
+     */
+
+    if (
+      requestLocked &&
+      requestId
+    ) {
+      const {
+        error:
+          requestRollbackError,
+      } =
+        await serviceClient
+          .from(
+            "insurance_requests",
+          )
+          .update({
+            status:
+              "payment_rejected",
+
+            updated_at:
+              new Date().toISOString(),
+          })
+          .eq(
+            "id",
+            requestId,
+          )
+          .eq(
+            "source",
+            "direct",
+          )
+          .eq(
+            "status",
+            "payment_review",
+          );
+
+      if (
+        requestRollbackError
+      ) {
+        console.error(
+          "Rollback du statut du dossier impossible :",
+          requestRollbackError.message,
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         success: false,
 
         error:
-          error instanceof
-          Error
+          error instanceof Error
             ? error.message
             : "Une erreur inattendue est survenue.",
       },

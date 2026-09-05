@@ -15,36 +15,68 @@ const MAX_FILE_SIZE =
 
 type PolicyYear = 1 | 2;
 
-type PolicyFileToUpload = {
-  policyYear: PolicyYear;
-  file: File;
-};
-
-type UploadedPolicyFile = {
-  policyYear: PolicyYear;
-  file: File;
-  storagePath: string;
-};
-
 type RouteContext = {
   params: Promise<{
     id: string;
   }>;
 };
 
+type PendingPolicyPayload = {
+  path?: string;
+  originalFileName?: string;
+  mimeType?: string;
+  fileSize?: number;
+};
+
+type PolicyPayload = {
+  policyStartDate?: string;
+  policyEndDate?: string;
+
+  policyYear1?:
+    | PendingPolicyPayload
+    | null;
+
+  policyYear2?:
+    | PendingPolicyPayload
+    | null;
+};
+
+type PreparedPolicy = {
+  policyYear: PolicyYear;
+  pendingPath: string;
+  finalPath: string;
+  originalFileName: string;
+  mimeType: string;
+  fileSize: number;
+};
+
 function sanitizeFileName(
   fileName: string,
 ): string {
-  return fileName
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      "",
-    )
-    .replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_",
-    );
+  const sanitized =
+    fileName
+      .normalize("NFD")
+      .replace(
+        /[\u0300-\u036f]/g,
+        "",
+      )
+      .replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_",
+      )
+      .replace(
+        /_+/g,
+        "_",
+      )
+      .replace(
+        /^_+|_+$/g,
+        "",
+      );
+
+  return (
+    sanitized ||
+    "insurance-policy.pdf"
+  );
 }
 
 function getDocumentType(
@@ -53,39 +85,6 @@ function getDocumentType(
   return policyYear === 1
     ? "insurance_policy_year_1"
     : "insurance_policy_year_2";
-}
-
-function validatePdf(
-  file: File,
-  policyYear: PolicyYear,
-) {
-  const isPdf =
-    file.type ===
-      "application/pdf" ||
-    file.name
-      .toLowerCase()
-      .endsWith(".pdf");
-
-  if (!isPdf) {
-    throw new Error(
-      `Police année ${policyYear} : seuls les fichiers PDF sont acceptés.`,
-    );
-  }
-
-  if (file.size === 0) {
-    throw new Error(
-      `Police année ${policyYear} : le fichier PDF est vide.`,
-    );
-  }
-
-  if (
-    file.size >
-    MAX_FILE_SIZE
-  ) {
-    throw new Error(
-      `Police année ${policyYear} : le fichier ne doit pas dépasser 10 Mo.`,
-    );
-  }
 }
 
 async function removeStoragePaths(
@@ -155,108 +154,183 @@ async function safeLogActivity({
   }
 }
 
-async function uploadPolicyFile({
-  serviceClient,
+function validatePendingPolicy({
   requestId,
   policyYear,
-  file,
+  payload,
+  insuranceDurationYears,
 }: {
-  serviceClient: ReturnType<
-    typeof createServiceClient
-  >;
   requestId: string;
   policyYear: PolicyYear;
-  file: File;
-}): Promise<UploadedPolicyFile> {
-  validatePdf(
-    file,
-    policyYear,
-  );
-
-  const safeFileName =
-    sanitizeFileName(
-      file.name,
-    );
-
-  const uniqueFileName =
-    `${Date.now()}-${crypto.randomUUID()}-${safeFileName}`;
-
-  const storagePath =
-    `${requestId}/insurance_policy/year_${policyYear}/${uniqueFileName}`;
-
-  const arrayBuffer =
-    await file.arrayBuffer();
-
-  const fileBytes =
-    new Uint8Array(
-      arrayBuffer,
-    );
-
-  const {
-    data: uploadData,
-    error: uploadError,
-  } =
-    await serviceClient.storage
-      .from(BUCKET_NAME)
-      .upload(
-        storagePath,
-        fileBytes,
-        {
-          contentType:
-            "application/pdf",
-
-          cacheControl:
-            "3600",
-
-          upsert:
-            false,
-        },
-      );
-
-  if (uploadError) {
-    console.error(
-      `Erreur Storage année ${policyYear} :`,
-      {
-        message:
-          uploadError.message,
-
-        name:
-          uploadError.name,
-
-        requestId,
-
-        policyYear,
-
-        storagePath,
-
-        fileName:
-          file.name,
-
-        fileType:
-          file.type,
-
-        fileSize:
-          file.size,
-      },
-    );
-
+  payload: PendingPolicyPayload;
+  insuranceDurationYears: 1 | 2;
+}): {
+  pendingPath: string;
+  originalFileName: string;
+  mimeType: string;
+  fileSize: number;
+} {
+  if (
+    policyYear === 2 &&
+    insuranceDurationYears !== 2
+  ) {
     throw new Error(
-      `Téléversement de la police année ${policyYear} impossible : ${uploadError.message}`,
+      "Ce dossier couvre seulement un an. La police de l’année 2 n’est pas autorisée.",
     );
   }
 
-  if (!uploadData?.path) {
+  const pendingPath =
+    payload.path?.trim() ??
+    "";
+
+  const originalFileName =
+    payload.originalFileName
+      ?.trim() ??
+    "";
+
+  const mimeType =
+    payload.mimeType
+      ?.trim()
+      .toLowerCase() ??
+    "";
+
+  const fileSize =
+    Number(
+      payload.fileSize,
+    );
+
+  if (!pendingPath) {
     throw new Error(
-      `Téléversement de la police année ${policyYear} impossible : aucun chemin Storage n’a été retourné.`,
+      `Police année ${policyYear} : chemin du fichier absent.`,
+    );
+  }
+
+  const expectedPrefix =
+    `pending/admin/policy/${requestId}/year_${policyYear}/`;
+
+  if (
+    !pendingPath.startsWith(
+      expectedPrefix,
+    )
+  ) {
+    throw new Error(
+      `Police année ${policyYear} : chemin Storage invalide.`,
+    );
+  }
+
+  if (!originalFileName) {
+    throw new Error(
+      `Police année ${policyYear} : nom du fichier absent.`,
+    );
+  }
+
+  const isPdf =
+    mimeType ===
+      "application/pdf" ||
+    originalFileName
+      .toLowerCase()
+      .endsWith(".pdf");
+
+  if (!isPdf) {
+    throw new Error(
+      `Police année ${policyYear} : seuls les fichiers PDF sont acceptés.`,
+    );
+  }
+
+  if (
+    !Number.isFinite(
+      fileSize,
+    ) ||
+    fileSize <= 0
+  ) {
+    throw new Error(
+      `Police année ${policyYear} : le fichier PDF est vide ou invalide.`,
+    );
+  }
+
+  if (
+    fileSize >
+    MAX_FILE_SIZE
+  ) {
+    throw new Error(
+      `Police année ${policyYear} : le fichier ne doit pas dépasser 10 Mo.`,
     );
   }
 
   return {
-    policyYear,
-    file,
-    storagePath:
-      uploadData.path,
+    pendingPath,
+    originalFileName,
+    mimeType:
+      "application/pdf",
+    fileSize,
   };
+}
+
+async function verifyStorageObject(
+  serviceClient: ReturnType<
+    typeof createServiceClient
+  >,
+  storagePath: string,
+) {
+  const lastSlashIndex =
+    storagePath.lastIndexOf(
+      "/",
+    );
+
+  if (
+    lastSlashIndex <= 0 ||
+    lastSlashIndex ===
+      storagePath.length - 1
+  ) {
+    throw new Error(
+      "Chemin Storage invalide.",
+    );
+  }
+
+  const folder =
+    storagePath.slice(
+      0,
+      lastSlashIndex,
+    );
+
+  const fileName =
+    storagePath.slice(
+      lastSlashIndex + 1,
+    );
+
+  const {
+    data,
+    error,
+  } =
+    await serviceClient.storage
+      .from(BUCKET_NAME)
+      .list(
+        folder,
+        {
+          search:
+            fileName,
+          limit: 10,
+        },
+      );
+
+  if (error) {
+    throw new Error(
+      `Vérification du fichier impossible : ${error.message}`,
+    );
+  }
+
+  const exists =
+    (data ?? []).some(
+      (item) =>
+        item.name ===
+        fileName,
+    );
+
+  if (!exists) {
+    throw new Error(
+      "Le fichier téléversé est introuvable dans le stockage.",
+    );
+  }
 }
 
 export async function POST(
@@ -267,12 +341,16 @@ export async function POST(
     createServiceClient();
 
   /*
-   * Fichiers nouvellement téléversés
-   * qui doivent être supprimés si une
-   * erreur survient avant leur adoption
-   * définitive dans la base.
+   * Fichiers déplacés vers leur emplacement
+   * définitif mais pas encore adoptés.
    */
-  const cleanupPaths =
+  const cleanupFinalPaths =
+    new Set<string>();
+
+  /*
+   * Fichiers pending encore présents.
+   */
+  const cleanupPendingPaths =
     new Set<string>();
 
   try {
@@ -301,13 +379,11 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Vous devez être connecté.",
         },
         {
           status: 401,
-
           headers: {
             "Cache-Control":
               "no-store",
@@ -332,13 +408,11 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Vous n’avez pas l’autorisation de déposer une police.",
         },
         {
           status: 403,
-
           headers: {
             "Cache-Control":
               "no-store",
@@ -360,13 +434,11 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Identifiant du dossier absent.",
         },
         {
           status: 400,
-
           headers: {
             "Cache-Control":
               "no-store",
@@ -428,13 +500,11 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Dossier introuvable.",
         },
         {
           status: 404,
-
           headers: {
             "Cache-Control":
               "no-store",
@@ -451,7 +521,8 @@ export async function POST(
 
     if (
       role === "agent" &&
-      insuranceRequest.assigned_agent_id !==
+      insuranceRequest
+        .assigned_agent_id !==
         user.id
     ) {
       return NextResponse.json(
@@ -459,7 +530,8 @@ export async function POST(
           success: false,
 
           error:
-            insuranceRequest.assigned_agent_id
+            insuranceRequest
+              .assigned_agent_id
               ? "Ce dossier est attribué à un autre agent."
               : "Vous devez d’abord prendre en charge ce dossier.",
         },
@@ -476,7 +548,7 @@ export async function POST(
 
     /*
      * ============================================
-     * 6. STATUT AUTORISÉ
+     * 6. STATUT
      * ============================================
      */
 
@@ -507,55 +579,56 @@ export async function POST(
     const insuranceDurationYears:
       | 1
       | 2 =
-        insuranceRequest
-          .insurance_duration_years ===
-        2
-          ? 2
-          : 1;
+      insuranceRequest
+        .insurance_duration_years ===
+      2
+        ? 2
+        : 1;
 
-    /*
-     * Les notifications destinées directement
-     * au client ainsi que les renouvellements
-     * appartiennent exclusivement au parcours
-     * client direct.
-     *
-     * Pour un dossier partenaire, le partenaire
-     * gère lui-même la relation avec son client.
-     */
     const isDirectRequest =
       insuranceRequest.source ===
       "direct";
 
     /*
      * ============================================
-     * 7. FORM DATA
+     * 7. JSON
      * ============================================
      */
 
-    const formData =
-      await request.formData();
+    let body:
+      PolicyPayload;
 
-    const policyStartDateValue =
-      formData.get(
-        "policyStartDate",
-      );
+    try {
+      body =
+        (await request.json()) as
+          PolicyPayload;
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Requête invalide.",
+        },
+        {
+          status: 400,
 
-    const policyEndDateValue =
-      formData.get(
-        "policyEndDate",
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        },
       );
+    }
 
     const policyStartDate =
-      typeof policyStartDateValue ===
-      "string"
-        ? policyStartDateValue.trim()
-        : "";
+      body.policyStartDate
+        ?.trim() ??
+      "";
 
     const policyEndDate =
-      typeof policyEndDateValue ===
-      "string"
-        ? policyEndDateValue.trim()
-        : "";
+      body.policyEndDate
+        ?.trim() ??
+      "";
 
     /*
      * ============================================
@@ -645,35 +718,36 @@ export async function POST(
 
     /*
      * ============================================
-     * 9. FICHIERS
+     * 9. FICHIERS PENDING
      * ============================================
      */
 
-    const year1Value =
-      formData.get(
-        "policyYear1File",
-      );
+    const preparedPolicies:
+      PreparedPolicy[] =
+      [];
 
-    const year2Value =
-      formData.get(
-        "policyYear2File",
-      );
+    const pendingInputs: Array<{
+      policyYear: PolicyYear;
+      payload:
+        PendingPolicyPayload;
+    }> =
+      [];
 
-    const year1File =
-      year1Value instanceof
-          File &&
-        year1Value.size >
-          0
-        ? year1Value
-        : null;
+    if (body.policyYear1) {
+      pendingInputs.push({
+        policyYear: 1,
+        payload:
+          body.policyYear1,
+      });
+    }
 
-    const year2File =
-      year2Value instanceof
-          File &&
-        year2Value.size >
-          0
-        ? year2Value
-        : null;
+    if (body.policyYear2) {
+      pendingInputs.push({
+        policyYear: 2,
+        payload:
+          body.policyYear2,
+      });
+    }
 
     const datesChanged =
       insuranceRequest
@@ -684,8 +758,8 @@ export async function POST(
         policyEndDate;
 
     if (
-      !year1File &&
-      !year2File &&
+      pendingInputs.length ===
+        0 &&
       !datesChanged
     ) {
       return NextResponse.json(
@@ -706,89 +780,102 @@ export async function POST(
       );
     }
 
-    if (
-      insuranceDurationYears ===
-        1 &&
-      year2File
+    /*
+     * Validation et existence réelle de tous
+     * les fichiers avant le premier déplacement.
+     */
+
+    for (
+      const input of
+      pendingInputs
     ) {
-      return NextResponse.json(
-        {
-          success: false,
+      const validated =
+        validatePendingPolicy({
+          requestId:
+            id,
 
-          error:
-            "Ce dossier couvre seulement un an. La police de l’année 2 n’est pas autorisée.",
-        },
-        {
-          status: 400,
+          policyYear:
+            input.policyYear,
 
-          headers: {
-            "Cache-Control":
-              "no-store",
-          },
-        },
-      );
-    }
+          payload:
+            input.payload,
 
-    const filesToUpload:
-      PolicyFileToUpload[] = [];
+          insuranceDurationYears,
+        });
 
-    if (year1File) {
-      validatePdf(
-        year1File,
-        1,
+      cleanupPendingPaths.add(
+        validated.pendingPath,
       );
 
-      filesToUpload.push({
-        policyYear: 1,
-        file: year1File,
-      });
-    }
-
-    if (year2File) {
-      validatePdf(
-        year2File,
-        2,
+      await verifyStorageObject(
+        serviceClient,
+        validated.pendingPath,
       );
 
-      filesToUpload.push({
-        policyYear: 2,
-        file: year2File,
+      const safeFileName =
+        sanitizeFileName(
+          validated.originalFileName,
+        );
+
+      const finalPath =
+        `${id}/insurance_policy/year_${input.policyYear}/` +
+        `${Date.now()}-${crypto.randomUUID()}-${safeFileName}`;
+
+      preparedPolicies.push({
+        policyYear:
+          input.policyYear,
+
+        pendingPath:
+          validated.pendingPath,
+
+        finalPath,
+
+        originalFileName:
+          validated.originalFileName,
+
+        mimeType:
+          validated.mimeType,
+
+        fileSize:
+          validated.fileSize,
       });
     }
 
     /*
      * ============================================
-     * 10. UPLOAD STORAGE
+     * 10. DÉPLACEMENT STORAGE
      * ============================================
      */
 
-    const uploadedFiles:
-      UploadedPolicyFile[] = [];
-
     for (
-      const item of
-      filesToUpload
+      const policy of
+      preparedPolicies
     ) {
-      const uploadedFile =
-        await uploadPolicyFile({
-          serviceClient,
+      const {
+        error:
+          moveError,
+      } =
+        await serviceClient.storage
+          .from(
+            BUCKET_NAME,
+          )
+          .move(
+            policy.pendingPath,
+            policy.finalPath,
+          );
 
-          requestId:
-            id,
+      if (moveError) {
+        throw new Error(
+          `Déplacement de la police année ${policy.policyYear} impossible : ${moveError.message}`,
+        );
+      }
 
-          policyYear:
-            item.policyYear,
-
-          file:
-            item.file,
-        });
-
-      uploadedFiles.push(
-        uploadedFile,
+      cleanupPendingPaths.delete(
+        policy.pendingPath,
       );
 
-      cleanupPaths.add(
-        uploadedFile.storagePath,
+      cleanupFinalPaths.add(
+        policy.finalPath,
       );
     }
 
@@ -797,17 +884,17 @@ export async function POST(
 
     /*
      * ============================================
-     * 11. UPSERT DES POLICES
+     * 11. ENREGISTREMENT DES POLICES
      * ============================================
      */
 
     for (
-      const uploadedFile of
-      uploadedFiles
+      const policy of
+      preparedPolicies
     ) {
       const documentType =
         getDocumentType(
-          uploadedFile.policyYear,
+          policy.policyYear,
         );
 
       const {
@@ -833,7 +920,7 @@ export async function POST(
           )
           .eq(
             "policy_year",
-            uploadedFile.policyYear,
+            policy.policyYear,
           )
           .maybeSingle();
 
@@ -841,7 +928,7 @@ export async function POST(
         previousPolicyError
       ) {
         throw new Error(
-          `Recherche de la police année ${uploadedFile.policyYear} impossible : ${previousPolicyError.message}`,
+          `Recherche de la police année ${policy.policyYear} impossible : ${previousPolicyError.message}`,
         );
       }
 
@@ -876,7 +963,7 @@ export async function POST(
         previousDocumentError
       ) {
         throw new Error(
-          `Recherche du document année ${uploadedFile.policyYear} impossible : ${previousDocumentError.message}`,
+          `Recherche du document année ${policy.policyYear} impossible : ${previousDocumentError.message}`,
         );
       }
 
@@ -896,10 +983,10 @@ export async function POST(
                 id,
 
               policy_year:
-                uploadedFile.policyYear,
+                policy.policyYear,
 
               storage_path:
-                uploadedFile.storagePath,
+                policy.finalPath,
 
               uploaded_at:
                 now,
@@ -923,16 +1010,12 @@ export async function POST(
         !savedPolicy
       ) {
         throw new Error(
-          `Enregistrement de la police année ${uploadedFile.policyYear} impossible : ${
+          `Enregistrement de la police année ${policy.policyYear} impossible : ${
             savePolicyError?.message ??
             "erreur inconnue"
           }`,
         );
       }
-
-      cleanupPaths.delete(
-        uploadedFile.storagePath,
-      );
 
       const {
         error:
@@ -951,16 +1034,16 @@ export async function POST(
                 documentType,
 
               storage_path:
-                uploadedFile.storagePath,
+                policy.finalPath,
 
               original_file_name:
-                uploadedFile.file.name,
+                policy.originalFileName,
 
               mime_type:
                 "application/pdf",
 
               file_size:
-                uploadedFile.file.size,
+                policy.fileSize,
 
               uploaded_at:
                 now,
@@ -974,10 +1057,85 @@ export async function POST(
       if (
         saveDocumentError
       ) {
+        /*
+         * insurance_policies a déjà été modifié.
+         * On restaure immédiatement l'ancienne
+         * valeur avant de remonter l'erreur.
+         */
+
+        if (previousPolicy) {
+          const {
+            error:
+              restorePolicyError,
+          } =
+            await serviceClient
+              .from(
+                "insurance_policies",
+              )
+              .update({
+                storage_path:
+                  previousPolicy.storage_path,
+              })
+              .eq(
+                "id",
+                previousPolicy.id,
+              );
+
+          if (
+            restorePolicyError
+          ) {
+            console.error(
+              `Restauration police année ${policy.policyYear} impossible :`,
+              restorePolicyError,
+            );
+          }
+        } else {
+          const {
+            error:
+              deletePolicyError,
+          } =
+            await serviceClient
+              .from(
+                "insurance_policies",
+              )
+              .delete()
+              .eq(
+                "request_id",
+                id,
+              )
+              .eq(
+                "policy_year",
+                policy.policyYear,
+              );
+
+          if (
+            deletePolicyError
+          ) {
+            console.error(
+              `Rollback police année ${policy.policyYear} impossible :`,
+              deletePolicyError,
+            );
+          }
+        }
+
         throw new Error(
-          `Enregistrement du document année ${uploadedFile.policyYear} impossible : ${saveDocumentError.message}`,
+          `Enregistrement du document année ${policy.policyYear} impossible : ${saveDocumentError.message}`,
         );
       }
+
+      /*
+       * Les deux écritures DB ont réussi.
+       * Le nouveau fichier est maintenant adopté.
+       */
+
+      cleanupFinalPaths.delete(
+        policy.finalPath,
+      );
+
+      /*
+       * Suppression des anciennes versions
+       * uniquement après réussite DB.
+       */
 
       const oldStoragePaths =
         [
@@ -995,7 +1153,7 @@ export async function POST(
             storagePath !==
               "" &&
             storagePath !==
-              uploadedFile.storagePath,
+              policy.finalPath,
         );
 
       await removeStoragePaths(
@@ -1012,13 +1170,13 @@ export async function POST(
 
         action:
           previousPolicy
-            ? `policy_replaced_year_${uploadedFile.policyYear}`
-            : `policy_uploaded_year_${uploadedFile.policyYear}`,
+            ? `policy_replaced_year_${policy.policyYear}`
+            : `policy_uploaded_year_${policy.policyYear}`,
 
         description:
           previousPolicy
-            ? `Police d’assurance année ${uploadedFile.policyYear} remplacée.`
-            : `Police d’assurance année ${uploadedFile.policyYear} déposée.`,
+            ? `Police d’assurance année ${policy.policyYear} remplacée.`
+            : `Police d’assurance année ${policy.policyYear} déposée.`,
       });
     }
 
@@ -1115,7 +1273,7 @@ export async function POST(
 
     /*
      * ============================================
-     * 13. STATUT FINAL
+     * 13. STATUT FINAL + DATES
      * ============================================
      */
 
@@ -1252,9 +1410,6 @@ export async function POST(
           );
         }
 
-        becamePolicyAvailable =
-          false;
-
         finalStatus =
           "policy_available";
       }
@@ -1373,11 +1528,7 @@ export async function POST(
      * 14. RENOUVELLEMENT
      * ============================================
      *
-     * Les renouvellements restent réservés
-     * au parcours client direct.
-     *
-     * Un dossier partenaire n'entre pas dans
-     * le système de renouvellement.
+     * Exclusivement pour les dossiers directs.
      */
 
     if (
@@ -1415,12 +1566,6 @@ export async function POST(
       if (
         renewalError
       ) {
-        /*
-         * Une erreur de renouvellement ne doit
-         * pas annuler la mise à disposition
-         * de la police.
-         */
-
         console.error(
           "Création du renouvellement impossible :",
           renewalError.message,
@@ -1430,17 +1575,12 @@ export async function POST(
 
     /*
      * ============================================
-     * 15. NOTIFICATION WHATSAPP
+     * 15. WHATSAPP
      * ============================================
      *
-     * UNIQUEMENT pour un dossier direct lors de :
-     *
-     * policy_preparation
-     *       ↓
-     * policy_available
-     *
-     * Les clients des partenaires ne reçoivent
-     * jamais cette notification directement.
+     * Uniquement :
+     * direct + transition réelle vers
+     * policy_available.
      */
 
     if (
@@ -1530,13 +1670,6 @@ export async function POST(
       } catch (
         whatsappError
       ) {
-        /*
-         * La police est déjà disponible.
-         *
-         * Une panne WhatsApp ne doit jamais
-         * faire échouer l'upload.
-         */
-
         console.error(
           "Notification WhatsApp impossible :",
           whatsappError,
@@ -1554,7 +1687,7 @@ export async function POST(
 
           description:
             whatsappError instanceof
-            Error
+              Error
               ? `Échec de la notification WhatsApp : ${whatsappError.message}`
               : "Échec de la notification WhatsApp.",
         });
@@ -1567,7 +1700,8 @@ export async function POST(
      * ============================================
      */
 
-    cleanupPaths.clear();
+    cleanupFinalPaths.clear();
+    cleanupPendingPaths.clear();
 
     return NextResponse.json(
       {
@@ -1581,9 +1715,9 @@ export async function POST(
           finalStatus,
 
         uploadedYears:
-          uploadedFiles.map(
-            (uploadedFile) =>
-              uploadedFile.policyYear,
+          preparedPolicies.map(
+            (policy) =>
+              policy.policyYear,
           ),
 
         existingYears:
@@ -1593,11 +1727,6 @@ export async function POST(
 
         policyEndDate,
 
-        /*
-         * true uniquement lorsqu'un message
-         * WhatsApp a effectivement été déclenché
-         * pour un dossier direct.
-         */
         whatsappNotificationTriggered:
           becamePolicyAvailable &&
           isDirectRequest,
@@ -1618,19 +1747,35 @@ export async function POST(
     );
 
     /*
-     * Suppression uniquement des fichiers
-     * qui n'ont pas encore été adoptés
-     * dans insurance_policies.
+     * Les fichiers finaux non adoptés sont
+     * supprimés.
      */
 
     if (
-      cleanupPaths.size >
+      cleanupFinalPaths.size >
       0
     ) {
       await removeStoragePaths(
         serviceClient,
         Array.from(
-          cleanupPaths,
+          cleanupFinalPaths,
+        ),
+      );
+    }
+
+    /*
+     * Les fichiers temporaires encore présents
+     * sont également supprimés.
+     */
+
+    if (
+      cleanupPendingPaths.size >
+      0
+    ) {
+      await removeStoragePaths(
+        serviceClient,
+        Array.from(
+          cleanupPendingPaths,
         ),
       );
     }
@@ -1642,12 +1787,13 @@ export async function POST(
 
         error:
           error instanceof
-          Error
+            Error
             ? error.message
             : "Une erreur inattendue est survenue.",
       },
       {
-        status: 500,
+        status:
+          500,
 
         headers: {
           "Cache-Control":

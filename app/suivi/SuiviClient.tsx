@@ -10,7 +10,10 @@ import {
 import PolicyDownloadButton from "./PolicyDownloadButton";
 
 import { countryCodes } from "@/lib/countryCodes";
+import { createClient } from "@/lib/supabase/client";
 
+const BUCKET_NAME =
+  "insurance-documents";
 type Language =
   | "fr"
   | "en"
@@ -1212,147 +1215,304 @@ export default function SuiviClient({
   }
 
   async function handleReceiptUpload(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
+  event:
+    FormEvent<HTMLFormElement>,
+) {
+  event.preventDefault();
 
-    setReceiptMessage("");
-    setReceiptError("");
+  setReceiptMessage("");
+  setReceiptError("");
 
-    if (!newReceiptFile) {
-      setReceiptError(
-        t.receiptRequired,
-      );
-
-      return;
-    }
-
-    const allowedTypes = [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-    ];
-
-    if (
-      !allowedTypes.includes(
-        newReceiptFile.type,
-      )
-    ) {
-      setReceiptError(
-        t.receiptInvalidType,
-      );
-
-      return;
-    }
-
-    if (
-      newReceiptFile.size >
-      10 *
-        1024 *
-        1024
-    ) {
-      setReceiptError(
-        t.receiptTooLarge,
-      );
-
-      return;
-    }
-
-    if (!result) {
-      setReceiptError(
-        t.genericError,
-      );
-
-      return;
-    }
-
-    setUploadingReceipt(
-      true,
+  if (!newReceiptFile) {
+    setReceiptError(
+      t.receiptRequired,
     );
 
-    try {
-      const formData =
-        new FormData();
+    return;
+  }
 
-      formData.append(
-        "requestCode",
-        result.request
-          .requestCode,
+  const allowedTypes = [
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+  ];
+
+  if (
+    !allowedTypes.includes(
+      newReceiptFile.type,
+    )
+  ) {
+    setReceiptError(
+      t.receiptInvalidType,
+    );
+
+    return;
+  }
+
+  if (
+    newReceiptFile.size >
+    10 *
+      1024 *
+      1024
+  ) {
+    setReceiptError(
+      t.receiptTooLarge,
+    );
+
+    return;
+  }
+
+  if (!result) {
+    setReceiptError(
+      t.genericError,
+    );
+
+    return;
+  }
+
+  setUploadingReceipt(
+    true,
+  );
+
+  let pendingPath:
+    | string
+    | null = null;
+
+  try {
+    /*
+     * ============================================
+     * 1. PRÉPARER L'UPLOAD SIGNÉ
+     * ============================================
+     */
+
+    const uploadUrlResponse =
+      await fetch(
+        "/api/tracking/payment-receipt-upload-url",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body:
+            JSON.stringify({
+              requestCode:
+                result.request
+                  .requestCode,
+
+              whatsappCountryCode,
+
+              whatsappNumber:
+                whatsappNumber.replace(
+                  /\D/g,
+                  "",
+                ),
+
+              fileName:
+                newReceiptFile.name,
+
+              mimeType:
+                newReceiptFile.type,
+
+              fileSize:
+                newReceiptFile.size,
+            }),
+        },
       );
 
-      formData.append(
-        "whatsappCountryCode",
-        whatsappCountryCode,
-      );
+    const uploadUrlResult =
+      (await uploadUrlResponse.json()) as {
+        success?: boolean;
+        error?: string;
+        requestId?: string;
+        requestCode?: string;
+        uploadSessionId?: string;
+        path?: string;
+        token?: string;
+      };
 
-      formData.append(
-        "whatsappNumber",
-        whatsappNumber.replace(
-          /\D/g,
-          "",
-        ),
+    if (
+      !uploadUrlResponse.ok ||
+      !uploadUrlResult.success ||
+      !uploadUrlResult.path ||
+      !uploadUrlResult.token
+    ) {
+      throw new Error(
+        uploadUrlResult.error ||
+          t.genericError,
       );
+    }
 
-      formData.append(
-        "paymentReceiptFile",
-        newReceiptFile,
-      );
+    pendingPath =
+      uploadUrlResult.path;
 
-      const response =
-        await fetch(
-          "/api/tracking/payment-receipt",
+    /*
+     * ============================================
+     * 2. UPLOAD DIRECT NAVIGATEUR → SUPABASE
+     * ============================================
+     *
+     * Le fichier ne passe pas par Next.js/Vercel.
+     */
+
+    const supabase =
+      createClient();
+
+    const {
+      error:
+        uploadError,
+    } =
+      await supabase.storage
+        .from(
+          BUCKET_NAME,
+        )
+        .uploadToSignedUrl(
+          uploadUrlResult.path,
+          uploadUrlResult.token,
+          newReceiptFile,
           {
-            method:
-              "POST",
+            contentType:
+              newReceiptFile.type,
 
-            body:
-              formData,
+            cacheControl:
+              "3600",
           },
         );
 
-      const data =
-        (await response.json()) as {
-          success?: boolean;
-          error?: string;
-        };
-
-      if (
-        !response.ok ||
-        !data.success
-      ) {
-        throw new Error(
-          data.error ||
-            t.genericError,
-        );
-      }
-
-      setNewReceiptFile(
-        null,
+    if (
+      uploadError
+    ) {
+      console.error(
+        "Erreur upload direct Supabase du nouveau dekont :",
+        uploadError,
       );
 
-      setReceiptMessage(
-        t.receiptSent,
-      );
-
-      await searchTracking(
-        result.request
-          .requestCode,
-        whatsappCountryCode,
-        whatsappNumber,
-      );
-    } catch (error) {
-      setReceiptError(
-        error instanceof Error
-          ? error.message
-          : t.genericError,
-      );
-    } finally {
-      setUploadingReceipt(
-        false,
+      throw new Error(
+        uploadError.message ||
+          t.genericError,
       );
     }
+
+    /*
+     * ============================================
+     * 3. FINALISATION
+     * ============================================
+     *
+     * Cette requête contient seulement du JSON.
+     * Aucun fichier n'est envoyé à Vercel.
+     */
+
+    const response =
+      await fetch(
+        "/api/tracking/payment-receipt",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body:
+            JSON.stringify({
+              requestCode:
+                result.request
+                  .requestCode,
+
+              whatsappCountryCode,
+
+              whatsappNumber:
+                whatsappNumber.replace(
+                  /\D/g,
+                  "",
+                ),
+
+              path:
+                uploadUrlResult.path,
+
+              originalFileName:
+                newReceiptFile.name,
+
+              mimeType:
+                newReceiptFile.type,
+
+              fileSize:
+                newReceiptFile.size,
+            }),
+        },
+      );
+
+    const data =
+      (await response.json()) as {
+        success?: boolean;
+        error?: string;
+        status?: string;
+      };
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+      console.error(
+        "Échec de finalisation après préparation du nouveau dekont :",
+        pendingPath,
+      );
+
+      throw new Error(
+        data.error ||
+          t.genericError,
+      );
+    }
+
+    /*
+     * ============================================
+     * 4. SUCCÈS
+     * ============================================
+     */
+
+    pendingPath =
+      null;
+
+    setNewReceiptFile(
+      null,
+    );
+
+    setReceiptMessage(
+      t.receiptSent,
+    );
+
+    await searchTracking(
+      result.request
+        .requestCode,
+      whatsappCountryCode,
+      whatsappNumber,
+    );
+  } catch (
+    error
+  ) {
+    if (
+      pendingPath
+    ) {
+      console.error(
+        "Nouveau dekont préparé mais non finalisé :",
+        pendingPath,
+      );
+    }
+
+    setReceiptError(
+      error instanceof Error
+        ? error.message
+        : t.genericError,
+    );
+  } finally {
+    setUploadingReceipt(
+      false,
+    );
   }
+}
 
   const currentStatus =
     result?.request

@@ -1,12 +1,84 @@
 import Link from "next/link";
 
 import { requireRole } from "@/lib/auth/requireRole";
+import { createServiceClient } from "@/lib/supabase/service";
+
+const ACTION_STATUSES = [
+  "draft",
+  "waiting_payment",
+  "payment_review",
+  "payment_confirmed",
+  "policy_preparation",
+];
 
 export default async function NotificationsPage() {
   const { user, role } = await requireRole([
     "agent",
     "admin",
   ]);
+
+  const serviceClient =
+    createServiceClient();
+
+  const {
+    data: internalUsersData,
+    error: internalUsersError,
+  } =
+    await serviceClient.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+  if (internalUsersError) {
+    throw new Error(
+      internalUsersError.message,
+    );
+  }
+
+  let requestQuery =
+    serviceClient
+      .from("insurance_requests")
+      .select(`
+        id,
+        request_code,
+        status,
+        created_at,
+        assigned_agent_id,
+
+        client:clients (
+          id,
+          first_name,
+          last_name
+        )
+      `)
+      .in(
+        "status",
+        ACTION_STATUSES,
+      );
+
+  if (role === "agent") {
+    requestQuery =
+      requestQuery.or(
+        `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
+      );
+  }
+
+  const {
+    data: requestsData,
+    error: requestsError,
+  } =
+    await requestQuery.order(
+      "created_at",
+      {
+        ascending: false,
+      },
+    );
+
+  if (requestsError) {
+    throw new Error(
+      requestsError.message,
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
@@ -21,15 +93,17 @@ export default async function NotificationsPage() {
 
         <div className="mt-6 rounded-xl bg-[#F3F8F2] p-4 text-[#0B5D3B]">
           <p className="font-semibold">
-            ✓ Authentification réussie
+            ✓ Requête dossiers réussie
           </p>
 
           <p className="mt-2 text-sm">
-            Rôle : {role}
+            Utilisateurs internes :{" "}
+            {internalUsersData.users.length}
           </p>
 
           <p className="mt-1 text-sm">
-            Utilisateur : {user.id}
+            Dossiers chargés :{" "}
+            {requestsData?.length ?? 0}
           </p>
         </div>
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 
 import { logActivity } from "@/lib/activity/logActivity";
 import { calculateInsurancePriceServer } from "@/lib/insurance/calculatePriceServer";
@@ -237,6 +238,207 @@ function generateRequestCode(): string {
       .toUpperCase();
 
   return `IF-${year}-${randomPart}`;
+}
+
+function escapeEmailHtml(
+  value: string,
+): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function sendNewRequestAdminEmail({
+  requestCode,
+  firstName,
+  lastName,
+  whatsappCountryCode,
+  whatsappNumber,
+  nationality,
+  duration,
+  calculatedAge,
+  calculatedPrice,
+  hasKimlik,
+  insuranceStartDate,
+}: {
+  requestCode: string;
+  firstName: string;
+  lastName: string;
+  whatsappCountryCode: string;
+  whatsappNumber: string;
+  nationality: string;
+  duration: number;
+  calculatedAge: number;
+  calculatedPrice: number;
+  hasKimlik: boolean;
+  insuranceStartDate: string | null;
+}) {
+  const resendApiKey =
+    process.env.RESEND_API_KEY;
+
+  const adminEmail =
+    process.env.ADMIN_NOTIFICATION_EMAIL;
+
+  if (
+    !resendApiKey ||
+    !adminEmail
+  ) {
+    console.warn(
+      "Notification e-mail nouvelle demande non envoyée : configuration Resend absente.",
+    );
+
+    return;
+  }
+
+  try {
+    const resend =
+      new Resend(
+        resendApiKey,
+      );
+
+    const safeRequestCode =
+      escapeEmailHtml(
+        requestCode,
+      );
+
+    const safeFirstName =
+      escapeEmailHtml(
+        firstName,
+      );
+
+    const safeLastName =
+      escapeEmailHtml(
+        lastName,
+      );
+
+    const safeWhatsapp =
+      escapeEmailHtml(
+        `${whatsappCountryCode} ${whatsappNumber}`,
+      );
+
+    const safeNationality =
+      escapeEmailHtml(
+        nationality,
+      );
+
+    const safeStartDate =
+      insuranceStartDate
+        ? escapeEmailHtml(
+            insuranceStartDate,
+          )
+        : "—";
+
+    const { error } =
+      await resend.emails.send({
+        from:
+          process.env.RESEND_FROM_EMAIL ??
+          "IF Sigorta <onboarding@resend.dev>",
+
+        to:
+          adminEmail,
+
+        subject:
+          `Nouvelle demande — ${requestCode}`,
+
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;color:#17221b;">
+            <div style="background:#0B5D3B;padding:24px;border-radius:16px 16px 0 0;">
+              <h1 style="margin:0;color:white;font-size:22px;">
+                Nouvelle demande IF Sigorta
+              </h1>
+            </div>
+
+            <div style="border:1px solid #e5e7eb;border-top:0;padding:24px;border-radius:0 0 16px 16px;">
+              <p style="margin-top:0;">
+                Une nouvelle demande d’assurance vient d’être créée.
+              </p>
+
+              <table style="width:100%;border-collapse:collapse;">
+                <tbody>
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Matricule</td>
+                    <td style="padding:8px 0;">${safeRequestCode}</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Client</td>
+                    <td style="padding:8px 0;">${safeFirstName} ${safeLastName}</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">WhatsApp</td>
+                    <td style="padding:8px 0;">${safeWhatsapp}</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Nationalité</td>
+                    <td style="padding:8px 0;">${safeNationality}</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Âge</td>
+                    <td style="padding:8px 0;">${calculatedAge} ans</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Durée</td>
+                    <td style="padding:8px 0;">${duration} an${duration > 1 ? "s" : ""}</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Prix</td>
+                    <td style="padding:8px 0;">${calculatedPrice} TL</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:8px 0;font-weight:bold;">Kimlik</td>
+                    <td style="padding:8px 0;">${hasKimlik ? "Oui" : "Non"}</td>
+                  </tr>
+
+                  ${
+                    !hasKimlik
+                      ? `
+                        <tr>
+                          <td style="padding:8px 0;font-weight:bold;">
+                            Début souhaité
+                          </td>
+                          <td style="padding:8px 0;">
+                            ${safeStartDate}
+                          </td>
+                        </tr>
+                      `
+                      : ""
+                  }
+                </tbody>
+              </table>
+
+              <p style="margin-bottom:0;margin-top:24px;color:#64748b;font-size:13px;">
+                IF Sigorta — notification automatique
+              </p>
+            </div>
+          </div>
+        `,
+      });
+
+    if (error) {
+      console.error(
+        "Erreur notification e-mail nouvelle demande :",
+        error,
+      );
+    }
+  } catch (emailError) {
+    /*
+     * Une erreur Resend ne doit jamais
+     * annuler la création du dossier.
+     */
+    console.error(
+      "Envoi notification e-mail nouvelle demande impossible :",
+      emailError,
+    );
+  }
 }
 
 function buildFinalStoragePath(
@@ -1264,6 +1466,41 @@ export async function POST(
 
       description:
         "Le dossier d’assurance a été créé par le client.",
+    });
+
+    /*
+     * ============================
+     * EMAIL ADMIN — NOUVELLE DEMANDE
+     * ============================
+     */
+    await sendNewRequestAdminEmail({
+      requestCode:
+        insuranceRequest.request_code,
+
+      firstName,
+
+      lastName,
+
+      whatsappCountryCode,
+
+      whatsappNumber,
+
+      nationality,
+
+      duration:
+        payload.duration,
+
+      calculatedAge,
+
+      calculatedPrice,
+
+      hasKimlik:
+        payload.hasKimlik,
+
+      insuranceStartDate:
+        payload.hasKimlik
+          ? null
+          : payload.insuranceStartDate,
     });
 
     /*

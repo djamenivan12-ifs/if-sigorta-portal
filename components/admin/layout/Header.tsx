@@ -162,8 +162,13 @@ export default function Header({
 
           {/* NOTIFICATIONS */}
 
-          <Link
-            href="/admin/notifications"
+          <button
+            type="button"
+            onClick={() => {
+              router.push(
+                "/admin/notifications",
+              );
+            }}
             aria-label={
               notificationCount > 0
                 ? `${notificationCount} notification${notificationCount > 1 ? "s" : ""}`
@@ -174,10 +179,10 @@ export default function Header({
                 ? `${notificationCount} dossier${notificationCount > 1 ? "s" : ""} nécessite${notificationCount > 1 ? "nt" : ""} votre attention`
                 : "Aucune notification"
             }
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-50"
+            className="relative z-10 flex h-11 w-11 touch-manipulation items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-50 active:bg-slate-100"
           >
             <Bell
-              className={`h-5 w-5 ${
+              className={`pointer-events-none h-5 w-5 ${
                 notificationLevel ===
                 "critical"
                   ? "text-red-600"
@@ -194,7 +199,7 @@ export default function Header({
             {notificationCount >
               0 && (
               <span
-                className={`absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] font-bold shadow-sm ring-2 ring-white ${notificationBadgeClassName}`}
+                className={`pointer-events-none absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] font-bold shadow-sm ring-2 ring-white ${notificationBadgeClassName}`}
               >
                 {notificationCount >
                 99
@@ -202,7 +207,7 @@ export default function Header({
                   : notificationCount}
               </span>
             )}
-          </Link>
+          </button>
 
           {/* USER */}
 

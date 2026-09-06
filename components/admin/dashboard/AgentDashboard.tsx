@@ -1,5 +1,4 @@
 import Link from "next/link";
-import QueueRealtimeSync from "@/components/admin/dashboard/QueueRealtimeSync";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -726,7 +725,6 @@ export default async function AgentDashboard({
 
   return (
     <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <QueueRealtimeSync />
       <div className="mx-auto max-w-[1500px]">
         {/* BIENVENUE */}
 

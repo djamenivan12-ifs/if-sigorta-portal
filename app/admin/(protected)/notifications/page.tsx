@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import ClaimRequestButton from "@/components/admin/requests/ClaimRequestButton";
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -165,13 +166,19 @@ export default async function NotificationsPage() {
                       )}
                     </p>
 
-                    <div className="mt-5">
+                    <div className="mt-5 flex flex-wrap gap-3">
                       <Link
                         href={`/admin/dossiers/${request.id}`}
                         className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-semibold text-white"
                       >
                         Voir le dossier
                       </Link>
+
+                      {request.assigned_agent_id === null && (
+                        <ClaimRequestButton
+                          requestId={request.id}
+                        />
+                      )}
                     </div>
                   </article>
                 );

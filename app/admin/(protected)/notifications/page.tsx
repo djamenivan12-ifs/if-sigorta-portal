@@ -11,11 +11,19 @@ const ACTION_STATUSES = [
   "policy_preparation",
 ];
 
-const ACTIVE_RENEWAL_STATUSES = [
-  "pending",
-  "contacted",
-  "interested",
-];
+function formatDateTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date inconnue";
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
+}
 
 export default async function NotificationsPage() {
   const { user, role } = await requireRole([
@@ -32,7 +40,13 @@ export default async function NotificationsPage() {
       request_code,
       status,
       created_at,
-      assigned_agent_id
+      assigned_agent_id,
+
+      client:clients (
+        id,
+        first_name,
+        last_name
+      )
     `)
     .in("status", ACTION_STATUSES);
 
@@ -45,108 +59,94 @@ export default async function NotificationsPage() {
   const {
     data: requestsData,
     error: requestsError,
-  } = await requestQuery;
+  } = await requestQuery.order(
+    "created_at",
+    {
+      ascending: false,
+    },
+  );
 
   if (requestsError) {
     throw new Error(requestsError.message);
   }
 
-  const {
-    data: renewalsData,
-    error: renewalsError,
-  } = await serviceClient
-    .from("insurance_renewals")
-    .select(`
-      id,
-      status
-    `)
-    .in("status", ACTIVE_RENEWAL_STATUSES);
+  const firstRequest =
+    requestsData?.[0] ?? null;
 
-  if (renewalsError) {
-    throw new Error(renewalsError.message);
+  let clientName =
+    "Client inconnu";
+
+  if (firstRequest?.client) {
+    const client = Array.isArray(
+      firstRequest.client,
+    )
+      ? firstRequest.client[0] ?? null
+      : firstRequest.client;
+
+    if (client) {
+      clientName =
+        `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() ||
+        "Client inconnu";
+    }
   }
-
-  const requestsCount =
-    requestsData?.length ?? 0;
-
-  const renewalsCount =
-    renewalsData?.length ?? 0;
-
-  const totalCount =
-    requestsCount + renewalsCount;
-
-  const urgentCount =
-    (requestsData ?? []).filter(
-      (request) =>
-        request.status === "payment_review" ||
-        request.status === "payment_confirmed",
-    ).length;
 
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
-            IF Sigorta
-          </p>
+      <div className="mx-auto max-w-4xl">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+          IF Sigorta
+        </p>
 
-          <h1 className="mt-2 text-3xl font-semibold text-[#102B20]">
-            Notifications
-          </h1>
-        </div>
+        <h1 className="mt-2 text-3xl font-semibold text-[#102B20]">
+          Notifications
+        </h1>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">
-              Total
-            </p>
+        <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white">
+          {!firstRequest ? (
+            <div className="p-6 text-sm text-slate-500">
+              Aucune notification dossier.
+            </div>
+          ) : (
+            <div className="p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#102B20]">
+                    {clientName}
+                  </p>
 
-            <p className="mt-3 text-3xl font-bold text-[#102B20]">
-              {totalCount}
-            </p>
-          </div>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Dossier{" "}
+                    {firstRequest.request_code}
+                  </p>
+                </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">
-              Dossiers
-            </p>
+                <span className="shrink-0 rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                  {firstRequest.status}
+                </span>
+              </div>
 
-            <p className="mt-3 text-3xl font-bold text-[#102B20]">
-              {requestsCount}
-            </p>
-          </div>
+              <p className="mt-4 text-sm text-slate-600">
+                Ce dossier nécessite une
+                action dans l’espace
+                administrateur.
+              </p>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">
-              Renouvellements
-            </p>
+              <p className="mt-3 text-xs text-slate-400">
+                {formatDateTime(
+                  firstRequest.created_at,
+                )}
+              </p>
 
-            <p className="mt-3 text-3xl font-bold text-[#102B20]">
-              {renewalsCount}
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">
-              Prioritaires
-            </p>
-
-            <p className="mt-3 text-3xl font-bold text-[#102B20]">
-              {urgentCount}
-            </p>
-          </div>
-        </section>
-
-        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6">
-          <p className="font-semibold text-[#0B5D3B]">
-            ✓ Test des cartes réussi
-          </p>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Cette étape teste le rendu de la zone
-            récapitulative sans afficher encore la liste
-            complète des notifications.
-          </p>
+              <div className="mt-5">
+                <Link
+                  href={`/admin/dossiers/${firstRequest.id}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-semibold text-white"
+                >
+                  Voir le dossier
+                </Link>
+              </div>
+            </div>
+          )}
         </section>
 
         <Link

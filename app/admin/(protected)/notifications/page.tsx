@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import ClaimRequestButton from "@/components/admin/requests/ClaimRequestButton";
+import NotificationsRealtimeSync from "@/components/admin/notifications/NotificationsRealtimeSync";
 import RenewalWhatsappButton from "../renouvellements/RenewalWhatsappButton";
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -172,12 +173,6 @@ export default async function NotificationsPage() {
   const serviceClient =
     createServiceClient();
 
-  /*
-   * =========================
-   * DOSSIERS
-   * =========================
-   */
-
   let requestQuery = serviceClient
     .from("insurance_requests")
     .select(`
@@ -223,12 +218,6 @@ export default async function NotificationsPage() {
 
   const requests =
     requestsData ?? [];
-
-  /*
-   * =========================
-   * RENOUVELLEMENTS
-   * =========================
-   */
 
   const {
     data: renewalsData,
@@ -332,6 +321,8 @@ export default async function NotificationsPage() {
 
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
+      <NotificationsRealtimeSync />
+
       <div className="mx-auto max-w-4xl">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
           IF Sigorta
@@ -348,8 +339,6 @@ export default async function NotificationsPage() {
           {renewals.length} renouvellement
           {renewals.length > 1 ? "s" : ""}
         </p>
-
-        {/* DOSSIERS */}
 
         <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white">
           <div className="border-b border-slate-100 p-5">
@@ -436,8 +425,6 @@ export default async function NotificationsPage() {
             </div>
           )}
         </section>
-
-        {/* RENOUVELLEMENTS */}
 
         <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white">
           <div className="border-b border-slate-100 p-5">

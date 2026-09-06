@@ -25,6 +25,34 @@ function formatDateTime(value: string) {
   }).format(date);
 }
 
+function getClientName(clientValue: unknown) {
+  if (!clientValue) {
+    return "Client inconnu";
+  }
+
+  const client = Array.isArray(clientValue)
+    ? clientValue[0] ?? null
+    : clientValue;
+
+  if (
+    !client ||
+    typeof client !== "object"
+  ) {
+    return "Client inconnu";
+  }
+
+  const typedClient = client as {
+    first_name?: string | null;
+    last_name?: string | null;
+  };
+
+  return (
+    `${typedClient.first_name ?? ""} ${
+      typedClient.last_name ?? ""
+    }`.trim() || "Client inconnu"
+  );
+}
+
 export default async function NotificationsPage() {
   const { user, role } = await requireRole([
     "agent",
@@ -70,25 +98,7 @@ export default async function NotificationsPage() {
     throw new Error(requestsError.message);
   }
 
-  const firstRequest =
-    requestsData?.[0] ?? null;
-
-  let clientName =
-    "Client inconnu";
-
-  if (firstRequest?.client) {
-    const client = Array.isArray(
-      firstRequest.client,
-    )
-      ? firstRequest.client[0] ?? null
-      : firstRequest.client;
-
-    if (client) {
-      clientName =
-        `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() ||
-        "Client inconnu";
-    }
-  }
+  const requests = requestsData ?? [];
 
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
@@ -97,54 +107,75 @@ export default async function NotificationsPage() {
           IF Sigorta
         </p>
 
-        <h1 className="mt-2 text-3xl font-semibold text-[#102B20]">
-          Notifications
-        </h1>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold text-[#102B20]">
+              Notifications
+            </h1>
+
+            <p className="mt-2 text-sm text-slate-500">
+              {requests.length} notification
+              {requests.length > 1 ? "s" : ""} dossier
+            </p>
+          </div>
+        </div>
 
         <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white">
-          {!firstRequest ? (
+          {requests.length === 0 ? (
             <div className="p-6 text-sm text-slate-500">
               Aucune notification dossier.
             </div>
           ) : (
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#102B20]">
-                    {clientName}
-                  </p>
+            <div className="divide-y divide-slate-100">
+              {requests.map((request) => {
+                const clientName =
+                  getClientName(request.client);
 
-                  <p className="mt-1 text-sm text-slate-500">
-                    Dossier{" "}
-                    {firstRequest.request_code}
-                  </p>
-                </div>
+                return (
+                  <article
+                    key={request.id}
+                    className="p-5"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#102B20]">
+                          {clientName}
+                        </p>
 
-                <span className="shrink-0 rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
-                  {firstRequest.status}
-                </span>
-              </div>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Dossier{" "}
+                          {request.request_code}
+                        </p>
+                      </div>
 
-              <p className="mt-4 text-sm text-slate-600">
-                Ce dossier nécessite une
-                action dans l’espace
-                administrateur.
-              </p>
+                      <span className="shrink-0 rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                        {request.status}
+                      </span>
+                    </div>
 
-              <p className="mt-3 text-xs text-slate-400">
-                {formatDateTime(
-                  firstRequest.created_at,
-                )}
-              </p>
+                    <p className="mt-4 text-sm text-slate-600">
+                      Ce dossier nécessite une
+                      action dans l’espace
+                      administrateur.
+                    </p>
 
-              <div className="mt-5">
-                <Link
-                  href={`/admin/dossiers/${firstRequest.id}`}
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-semibold text-white"
-                >
-                  Voir le dossier
-                </Link>
-              </div>
+                    <p className="mt-3 text-xs text-slate-400">
+                      {formatDateTime(
+                        request.created_at,
+                      )}
+                    </p>
+
+                    <div className="mt-5">
+                      <Link
+                        href={`/admin/dossiers/${request.id}`}
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-semibold text-white"
+                      >
+                        Voir le dossier
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>

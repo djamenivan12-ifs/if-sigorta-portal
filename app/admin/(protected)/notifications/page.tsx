@@ -11,6 +11,19 @@ const ACTION_STATUSES = [
   "policy_preparation",
 ];
 
+const PROGRESS_ACTIONS = [
+  "request_created",
+  "payment_uploaded",
+  "payment_confirmed",
+  "policy_preparation_started",
+  "policy_uploaded_year_1",
+  "policy_uploaded_year_2",
+  "policy_replaced_year_1",
+  "policy_replaced_year_2",
+  "whatsapp_sent",
+  "request_claimed",
+];
+
 export default async function NotificationsPage() {
   const { user, role } = await requireRole([
     "agent",
@@ -19,21 +32,6 @@ export default async function NotificationsPage() {
 
   const serviceClient =
     createServiceClient();
-
-  const {
-    data: internalUsersData,
-    error: internalUsersError,
-  } =
-    await serviceClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
-
-  if (internalUsersError) {
-    throw new Error(
-      internalUsersError.message,
-    );
-  }
 
   let requestQuery =
     serviceClient
@@ -80,6 +78,51 @@ export default async function NotificationsPage() {
     );
   }
 
+  const requestIds =
+    (requestsData ?? []).map(
+      (request) =>
+        request.id,
+    );
+
+  let activitiesCount = 0;
+
+  if (requestIds.length > 0) {
+    const {
+      data: activitiesData,
+      error: activitiesError,
+    } =
+      await serviceClient
+        .from("activity_logs")
+        .select(`
+          request_id,
+          action,
+          created_at
+        `)
+        .in(
+          "request_id",
+          requestIds,
+        )
+        .in(
+          "action",
+          PROGRESS_ACTIONS,
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          },
+        );
+
+    if (activitiesError) {
+      throw new Error(
+        activitiesError.message,
+      );
+    }
+
+    activitiesCount =
+      activitiesData?.length ?? 0;
+  }
+
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
       <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6">
@@ -93,17 +136,15 @@ export default async function NotificationsPage() {
 
         <div className="mt-6 rounded-xl bg-[#F3F8F2] p-4 text-[#0B5D3B]">
           <p className="font-semibold">
-            ✓ Requête dossiers réussie
+            ✓ Activités chargées
           </p>
 
           <p className="mt-2 text-sm">
-            Utilisateurs internes :{" "}
-            {internalUsersData.users.length}
+            Dossiers : {requestsData?.length ?? 0}
           </p>
 
           <p className="mt-1 text-sm">
-            Dossiers chargés :{" "}
-            {requestsData?.length ?? 0}
+            Activités : {activitiesCount}
           </p>
         </div>
 

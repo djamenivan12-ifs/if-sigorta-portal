@@ -1,4 +1,13 @@
-export default function NotificationsPage() {
+import Link from "next/link";
+
+import { requireRole } from "@/lib/auth/requireRole";
+
+export default async function NotificationsPage() {
+  const { user, role } = await requireRole([
+    "agent",
+    "admin",
+  ]);
+
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
       <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6">
@@ -10,13 +19,26 @@ export default function NotificationsPage() {
           Notifications
         </h1>
 
-        <p className="mt-4 text-slate-600">
-          Test de la page Notifications sur iPhone.
-        </p>
+        <div className="mt-6 rounded-xl bg-[#F3F8F2] p-4 text-[#0B5D3B]">
+          <p className="font-semibold">
+            ✓ Authentification réussie
+          </p>
 
-        <div className="mt-6 rounded-xl bg-[#F3F8F2] p-4 font-semibold text-[#0B5D3B]">
-          ✓ La page fonctionne.
+          <p className="mt-2 text-sm">
+            Rôle : {role}
+          </p>
+
+          <p className="mt-1 text-sm">
+            Utilisateur : {user.id}
+          </p>
         </div>
+
+        <Link
+          href="/admin/tableau-de-bord"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-5 text-sm font-semibold"
+        >
+          Retour au tableau de bord
+        </Link>
       </div>
     </main>
   );

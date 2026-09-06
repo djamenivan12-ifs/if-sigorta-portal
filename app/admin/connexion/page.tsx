@@ -78,7 +78,7 @@ export default function ConnexionAgentPage() {
       }
 
       router.push(
-        "/admin/tableau-de-bord",
+        "/admin/dashboard",
       );
 
       router.refresh();

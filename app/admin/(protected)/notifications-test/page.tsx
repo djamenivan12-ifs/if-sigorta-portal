@@ -13,7 +13,7 @@ export default function NotificationsTestPage() {
         </p>
 
         <Link
-          href="/admin/tableau-de-bord"
+          href="/admin/dashboard"
           className="mt-6 inline-flex rounded-xl bg-green-700 px-4 py-3 font-semibold text-white"
         >
           Retour au tableau de bord

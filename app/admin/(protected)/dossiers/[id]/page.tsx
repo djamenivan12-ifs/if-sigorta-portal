@@ -1007,7 +1007,7 @@ export default async function DossierPage({
           </Link>
 
           <Link
-            href="/admin/tableau-de-bord"
+            href="/admin/dashboard"
             className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
           >
             Tableau de bord

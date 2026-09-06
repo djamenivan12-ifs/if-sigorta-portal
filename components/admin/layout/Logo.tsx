@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Logo() {
   return (
     <Link
-      href="/admin/tableau-de-bord"
+      href="/admin/dashboard"
       className="group flex items-center"
       aria-label="IF Sigorta - Tableau de bord"
     >

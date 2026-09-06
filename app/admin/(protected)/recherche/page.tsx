@@ -734,7 +734,7 @@ export default async function RecherchePage({
             </div>
 
             <Link
-              href="/admin/tableau-de-bord"
+              href="/admin/dashboard"
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               ← Tableau de bord

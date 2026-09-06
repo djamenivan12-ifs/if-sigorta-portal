@@ -53,7 +53,7 @@ export default function Navigation({
 
   const links: NavigationLink[] = [
     {
-      href: "/admin/tableau-de-bord",
+      href: "/admin/dashboard",
       label: "Tableau de bord",
       icon: LayoutDashboard,
     },

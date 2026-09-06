@@ -213,7 +213,8 @@ async function sendPaymentAdminEmail({
     } =
       await resend.emails.send({
         from:
-          "IF Sigorta <onboarding@resend.dev>",
+        process.env.RESEND_FROM_EMAIL ??
+        "IF Sigorta <onboarding@resend.dev>",
 
         to:
           adminEmail,

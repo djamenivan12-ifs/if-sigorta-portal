@@ -3,194 +3,137 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
-const ACTION_STATUSES = [
-  "draft",
-  "waiting_payment",
-  "payment_review",
-  "payment_confirmed",
-  "policy_preparation",
+const ACTIVE_RENEWAL_STATUSES = [
+  "pending",
+  "contacted",
+  "interested",
 ];
 
-const PROGRESS_ACTIONS = [
-  "request_created",
-  "payment_uploaded",
-  "payment_confirmed",
-  "policy_preparation_started",
-  "policy_uploaded_year_1",
-  "policy_uploaded_year_2",
-  "policy_replaced_year_1",
-  "policy_replaced_year_2",
-  "whatsapp_sent",
-  "request_claimed",
-];
-
-function getMinutesBetween(
-  startValue: string,
-  endValue: string,
+function getDaysRemaining(
+  policyEndDate: string,
 ) {
-  const start = new Date(startValue);
-  const end = new Date(endValue);
+  const now = new Date();
 
-  if (
-    Number.isNaN(start.getTime()) ||
-    Number.isNaN(end.getTime())
-  ) {
-    return 0;
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+
+  const end = new Date(
+    `${policyEndDate}T00:00:00`,
+  );
+
+  if (Number.isNaN(end.getTime())) {
+    return Number.POSITIVE_INFINITY;
   }
 
-  const difference =
-    end.getTime() - start.getTime();
-
-  if (difference <= 0) {
-    return 0;
-  }
-
-  return Math.floor(
-    difference / 60_000,
+  return Math.ceil(
+    (end.getTime() - today.getTime()) /
+      86_400_000,
   );
 }
 
 export default async function NotificationsPage() {
-  const { user, role } = await requireRole([
-    "agent",
-    "admin",
-  ]);
+  const { user, role } =
+    await requireRole([
+      "agent",
+      "admin",
+    ]);
 
   const serviceClient =
     createServiceClient();
 
-  let requestQuery =
-    serviceClient
-      .from("insurance_requests")
+  const {
+    data: renewalsData,
+    error: renewalsError,
+  } =
+    await serviceClient
+      .from("insurance_renewals")
       .select(`
         id,
-        request_code,
         status,
-        created_at,
-        assigned_agent_id,
 
-        client:clients (
+        request:insurance_requests!insurance_renewals_request_id_fkey (
           id,
-          first_name,
-          last_name
+          request_code,
+          assigned_agent_id,
+          policy_end_date,
+
+          client:clients (
+            id,
+            first_name,
+            last_name,
+            whatsapp_country_code,
+            whatsapp_number
+          )
         )
       `)
       .in(
         "status",
-        ACTION_STATUSES,
+        ACTIVE_RENEWAL_STATUSES,
       );
 
-  if (role === "agent") {
-    requestQuery =
-      requestQuery.or(
-        `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
-      );
-  }
-
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await requestQuery.order(
-      "created_at",
-      {
-        ascending: false,
-      },
-    );
-
-  if (requestsError) {
+  if (renewalsError) {
     throw new Error(
-      requestsError.message,
+      renewalsError.message,
     );
   }
 
-  const requestIds =
-    (requestsData ?? []).map(
-      (request) => request.id,
-    );
+  const processedRenewals =
+    (renewalsData ?? [])
+      .map((renewal) => {
+        const request =
+          Array.isArray(renewal.request)
+            ? renewal.request[0] ?? null
+            : renewal.request;
 
-  const lastProgressByRequest =
-    new Map<string, string>();
+        if (!request?.policy_end_date) {
+          return null;
+        }
 
-  if (requestIds.length > 0) {
-    const {
-      data: activitiesData,
-      error: activitiesError,
-    } =
-      await serviceClient
-        .from("activity_logs")
-        .select(`
-          request_id,
-          action,
-          created_at
-        `)
-        .in(
-          "request_id",
-          requestIds,
-        )
-        .in(
-          "action",
-          PROGRESS_ACTIONS,
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          },
-        );
+        if (
+          role === "agent" &&
+          request.assigned_agent_id !==
+            user.id &&
+          request.assigned_agent_id !==
+            null
+        ) {
+          return null;
+        }
 
-    if (activitiesError) {
-      throw new Error(
-        activitiesError.message,
-      );
-    }
-
-    for (
-      const activity of
-      activitiesData ?? []
-    ) {
-      if (
-        !lastProgressByRequest.has(
-          activity.request_id,
-        )
-      ) {
-        lastProgressByRequest.set(
-          activity.request_id,
-          activity.created_at,
-        );
-      }
-    }
-  }
-
-  const now =
-    new Date().toISOString();
-
-  const processedRequests =
-    (requestsData ?? []).map(
-      (request) => {
-        const lastProgressAt =
-          lastProgressByRequest.get(
-            request.id,
-          ) ??
-          request.created_at;
+        const client =
+          Array.isArray(request.client)
+            ? request.client[0] ?? null
+            : request.client;
 
         return {
-          id: request.id,
+          id: renewal.id,
 
           requestCode:
             request.request_code,
 
-          status:
-            request.status,
+          clientName:
+            client
+              ? `${client.first_name} ${client.last_name}`.trim()
+              : "Client inconnu",
 
-          minutesWithoutProgress:
-            getMinutesBetween(
-              lastProgressAt,
-              now,
+          policyEndDate:
+            request.policy_end_date,
+
+          daysRemaining:
+            getDaysRemaining(
+              request.policy_end_date,
             ),
         };
-      },
-    );
+      })
+      .filter(
+        (
+          renewal,
+        ): renewal is NonNullable<
+          typeof renewal
+        > => renewal !== null,
+      );
 
   return (
     <main className="min-h-screen bg-[#F6F8F5] px-4 py-7">
@@ -205,24 +148,29 @@ export default async function NotificationsPage() {
 
         <div className="mt-6 rounded-xl bg-[#F3F8F2] p-4 text-[#0B5D3B]">
           <p className="font-semibold">
-            ✓ Traitement des dossiers réussi
+            ✓ Traitement des renouvellements réussi
           </p>
 
           <p className="mt-2 text-sm">
-            Dossiers traités :{" "}
-            {processedRequests.length}
+            Renouvellements traités :{" "}
+            {processedRenewals.length}
           </p>
 
-          {processedRequests[0] && (
+          {processedRenewals[0] && (
             <div className="mt-4 rounded-xl bg-white p-3 text-sm">
               <p>
-                Premier dossier :{" "}
-                {processedRequests[0].requestCode}
+                Dossier :{" "}
+                {processedRenewals[0].requestCode}
               </p>
 
               <p className="mt-1">
-                Sans progression :{" "}
-                {processedRequests[0].minutesWithoutProgress} min
+                Client :{" "}
+                {processedRenewals[0].clientName}
+              </p>
+
+              <p className="mt-1">
+                Jours restants :{" "}
+                {processedRenewals[0].daysRemaining}
               </p>
             </div>
           )}

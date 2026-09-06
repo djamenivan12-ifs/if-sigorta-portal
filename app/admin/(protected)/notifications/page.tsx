@@ -3,29 +3,14 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
-const ACTION_STATUSES = [
-  "draft",
-  "waiting_payment",
-  "payment_review",
-  "payment_confirmed",
-  "policy_preparation",
-];
-
-const PROGRESS_ACTIONS = [
-  "request_created",
-  "payment_uploaded",
-  "payment_confirmed",
-  "policy_preparation_started",
-  "policy_uploaded_year_1",
-  "policy_uploaded_year_2",
-  "policy_replaced_year_1",
-  "policy_replaced_year_2",
-  "whatsapp_sent",
-  "request_claimed",
+const ACTIVE_RENEWAL_STATUSES = [
+  "pending",
+  "contacted",
+  "interested",
 ];
 
 export default async function NotificationsPage() {
-  const { user, role } = await requireRole([
+  const { role } = await requireRole([
     "agent",
     "admin",
   ]);
@@ -33,94 +18,40 @@ export default async function NotificationsPage() {
   const serviceClient =
     createServiceClient();
 
-  let requestQuery =
-    serviceClient
-      .from("insurance_requests")
+  const {
+    data: renewalsData,
+    error: renewalsError,
+  } =
+    await serviceClient
+      .from("insurance_renewals")
       .select(`
         id,
-        request_code,
         status,
-        created_at,
-        assigned_agent_id,
 
-        client:clients (
+        request:insurance_requests!insurance_renewals_request_id_fkey (
           id,
-          first_name,
-          last_name
+          request_code,
+          assigned_agent_id,
+          policy_end_date,
+
+          client:clients (
+            id,
+            first_name,
+            last_name,
+            whatsapp_country_code,
+            whatsapp_number
+          )
         )
       `)
       .in(
         "status",
-        ACTION_STATUSES,
+        ACTIVE_RENEWAL_STATUSES,
       );
 
-  if (role === "agent") {
-    requestQuery =
-      requestQuery.or(
-        `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
-      );
-  }
-
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await requestQuery.order(
-      "created_at",
-      {
-        ascending: false,
-      },
-    );
-
-  if (requestsError) {
+  if (renewalsError) {
     throw new Error(
-      requestsError.message,
+      renewalsError.message,
     );
-  }
-
-  const requestIds =
-    (requestsData ?? []).map(
-      (request) =>
-        request.id,
-    );
-
-  let activitiesCount = 0;
-
-  if (requestIds.length > 0) {
-    const {
-      data: activitiesData,
-      error: activitiesError,
-    } =
-      await serviceClient
-        .from("activity_logs")
-        .select(`
-          request_id,
-          action,
-          created_at
-        `)
-        .in(
-          "request_id",
-          requestIds,
-        )
-        .in(
-          "action",
-          PROGRESS_ACTIONS,
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          },
-        );
-
-    if (activitiesError) {
-      throw new Error(
-        activitiesError.message,
-      );
-    }
-
-    activitiesCount =
-      activitiesData?.length ?? 0;
   }
 
   return (
@@ -136,15 +67,15 @@ export default async function NotificationsPage() {
 
         <div className="mt-6 rounded-xl bg-[#F3F8F2] p-4 text-[#0B5D3B]">
           <p className="font-semibold">
-            ✓ Activités chargées
+            ✓ Renouvellements chargés
           </p>
 
           <p className="mt-2 text-sm">
-            Dossiers : {requestsData?.length ?? 0}
+            Rôle : {role}
           </p>
 
           <p className="mt-1 text-sm">
-            Activités : {activitiesCount}
+            Renouvellements : {renewalsData?.length ?? 0}
           </p>
         </div>
 

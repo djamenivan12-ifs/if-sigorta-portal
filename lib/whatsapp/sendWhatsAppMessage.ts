@@ -37,6 +37,20 @@ function normalizeLanguage(
   return "fr";
 }
 
+function getTemplateName(
+  language: PreferredLanguage,
+): string {
+  if (language === "en") {
+    return "insurance_available_en";
+  }
+
+  if (language === "tr") {
+    return "insurance_available_tr";
+  }
+
+  return "insurance_available_fr";
+}
+
 export async function sendWhatsAppMessage({
   phoneNumber,
   matricule,
@@ -91,18 +105,10 @@ export async function sendWhatsAppMessage({
       preferredLanguage,
     );
 
-  /*
-   * Le même nom de template est utilisé
-   * avec trois traductions Meta :
-   *
-   * Français : fr
-   * English  : en
-   * Türkçe   : tr
-   *
-   * Variables :
-   * {{1}} = prénom
-   * {{2}} = matricule
-   */
+  const templateName =
+    getTemplateName(
+      language,
+    );
 
   const response =
     await fetch(
@@ -135,7 +141,7 @@ export async function sendWhatsAppMessage({
 
             template: {
               name:
-                "insurance_available",
+                templateName,
 
               language: {
                 code:
@@ -210,7 +216,7 @@ export async function sendWhatsAppMessage({
         language,
 
         template:
-          "insurance_available",
+          templateName,
 
         result,
       },
@@ -238,7 +244,7 @@ export async function sendWhatsAppMessage({
       language,
 
       template:
-        "insurance_available",
+        templateName,
 
       messageId,
     },

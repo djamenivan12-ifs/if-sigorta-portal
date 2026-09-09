@@ -1097,6 +1097,9 @@ export async function POST(
 
           status:
             "waiting_payment",
+
+          source:
+            "direct",
         })
         .select(
           `

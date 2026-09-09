@@ -256,32 +256,69 @@ export default function HomeHeader() {
 
           {/* MENU MOBILE / TABLETTE */}
 
-          <button
-            type="button"
-            aria-label={
-              menuOpen
-                ? "Fermer le menu"
-                : "Ouvrir le menu"
-            }
-            aria-expanded={
-              menuOpen
-            }
-            onClick={() =>
-              setMenuOpen(
-                (
-                  current,
-                ) =>
-                  !current,
-              )
-            }
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-black/10 text-white backdrop-blur-md transition hover:bg-white/10 xl:hidden"
-          >
-            {menuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
+          <div className="flex items-center gap-2 xl:hidden">
+            <select
+              value={
+                language
+              }
+              onChange={(event) =>
+                changeLanguage(
+                  event.target
+                    .value as Language,
+                )
+              }
+              aria-label="Changer de langue"
+              className="h-11 rounded-xl border border-white/20 bg-black/10 px-2 text-[11px] font-black uppercase text-white outline-none backdrop-blur-md"
+            >
+              <option
+                value="fr"
+                className="text-slate-900"
+              >
+                FR
+              </option>
+
+              <option
+                value="en"
+                className="text-slate-900"
+              >
+                EN
+              </option>
+
+              <option
+                value="tr"
+                className="text-slate-900"
+              >
+                TR
+              </option>
+            </select>
+
+            <button
+              type="button"
+              aria-label={
+                menuOpen
+                  ? "Fermer le menu"
+                  : "Ouvrir le menu"
+              }
+              aria-expanded={
+                menuOpen
+              }
+              onClick={() =>
+                setMenuOpen(
+                  (
+                    current,
+                  ) =>
+                    !current,
+                )
+              }
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-black/10 text-white backdrop-blur-md transition hover:bg-white/10"
+            >
+              {menuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -353,61 +390,19 @@ export default function HomeHeader() {
             </nav>
 
             <div className="mt-4 border-t border-white/10 pt-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center rounded-xl border border-white/15 bg-white/10 p-1">
-                  {(
-                    [
-                      "fr",
-                      "en",
-                      "tr",
-                    ] as Language[]
-                  ).map(
-                    (
-                      item,
-                    ) => (
-                      <button
-                        key={
-                          item
-                        }
-                        type="button"
-                        onClick={() =>
-                          changeLanguage(
-                            item,
-                          )
-                        }
-                        className={[
-                          "rounded-lg px-3 py-1.5 text-xs font-black uppercase transition",
-
-                          language ===
-                          item
-                            ? "bg-white text-[#0B5D3B]"
-                            : "text-white/60",
-                        ].join(
-                          " ",
-                        )}
-                      >
-                        {
-                          item
-                        }
-                      </button>
-                    ),
-                  )}
-                </div>
-
-                <Link
-                  href="/demande/etape-1"
-                  onClick={() =>
-                    setMenuOpen(
-                      false,
-                    )
-                  }
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-xs font-black text-[#14361F]"
-                >
-                  {
-                    t.cta
-                  }
-                </Link>
-              </div>
+              <Link
+                href="/demande/etape-1"
+                onClick={() =>
+                  setMenuOpen(
+                    false,
+                  )
+                }
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-xs font-black text-[#14361F]"
+              >
+                {
+                  t.cta
+                }
+              </Link>
             </div>
           </div>
         </div>

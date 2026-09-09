@@ -694,22 +694,22 @@ export default async function AgentPerformancePage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* EN-TÊTE */}
 
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                 Administration
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Performance des agents
               </h1>
 
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-600 sm:text-sm">
                 Suivez la charge de travail, les délais
                 de traitement et la progression des
                 dossiers attribués.
@@ -718,7 +718,7 @@ export default async function AgentPerformancePage() {
 
             <Link
               href="/admin/agents"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               ← Gestion des agents
             </Link>
@@ -727,7 +727,7 @@ export default async function AgentPerformancePage() {
 
         {/* KPI */}
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
           <SummaryCard
             label="Attribués"
             value={
@@ -771,8 +771,8 @@ export default async function AgentPerformancePage() {
 
         {/* TABLEAU */}
 
-        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-          <div className="border-b border-slate-200 px-6 py-5">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
+          <div className="border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
             <h2 className="text-lg font-semibold text-[#102B20]">
               Agents
             </h2>
@@ -796,7 +796,7 @@ export default async function AgentPerformancePage() {
 
           {performances.length ===
           0 ? (
-            <div className="px-6 py-16 text-center">
+            <div className="px-4 py-10 text-center sm:px-6 sm:py-16">
               <p className="font-semibold text-slate-700">
                 Aucun agent
               </p>
@@ -806,6 +806,121 @@ export default async function AgentPerformancePage() {
               </p>
             </div>
           ) : (
+            <>
+              <div className="divide-y divide-slate-100 lg:hidden">
+                {performances.map(
+                  (
+                    agent,
+                  ) => (
+                    <article
+                      key={agent.id}
+                      className="min-w-0 p-4 sm:p-5"
+                    >
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                            {agent.name}
+                          </p>
+
+                          <p className="mt-1 break-all text-[11px] leading-5 text-slate-500 sm:text-xs">
+                            {agent.email}
+                          </p>
+                        </div>
+
+                        <PriorityBadge
+                          priority={agent.priority}
+                        />
+                      </div>
+
+                      <div className="mt-4 grid min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+                        <PerformanceMetric
+                          label="Attribués"
+                          value={agent.total}
+                        />
+
+                        <PerformanceMetric
+                          label="Actifs"
+                          value={agent.active}
+                        />
+
+                        <PerformanceMetric
+                          label="Terminés"
+                          value={agent.completed}
+                        />
+
+                        <PerformanceMetric
+                          label="À surveiller"
+                          value={agent.watch}
+                        />
+
+                        <PerformanceMetric
+                          label="En retard"
+                          value={agent.late}
+                        />
+
+                        <PerformanceMetric
+                          label="Critiques"
+                          value={agent.critical}
+                        />
+
+                        <PerformanceMetric
+                          label="Prise en charge moy."
+                          value={formatAverageTime(
+                            agent.averageClaimMinutes,
+                          )}
+                        />
+
+                        <PerformanceMetric
+                          label="Finalisation"
+                          value={`${agent.completionRate.toLocaleString(
+                            "fr-FR",
+                            {
+                              maximumFractionDigits:
+                                1,
+                            },
+                          )}%`}
+                        />
+                      </div>
+
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[11px] font-medium text-slate-500 sm:text-xs">
+                            Progression
+                          </span>
+
+                          <span className="text-[11px] font-semibold text-slate-600 sm:text-xs">
+                            {agent.completed}/{agent.total}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className="h-full rounded-full bg-[#0B5D3B]"
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                Math.max(
+                                  0,
+                                  agent.completionRate,
+                                ),
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/admin/agents/${agent.id}`}
+                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
+                      >
+                        Voir l’agent
+                      </Link>
+                    </article>
+                  ),
+                )}
+              </div>
+
+              <div className="hidden lg:block">
             <TableContainer className="rounded-none border-0 shadow-none">
               <Table className="min-w-[1500px]">
                 <TableHeader>
@@ -1000,18 +1115,20 @@ export default async function AgentPerformancePage() {
                 </TableBody>
               </Table>
             </TableContainer>
+              </div>
+            </>
           )}
         </section>
 
         {/* LÉGENDE */}
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <h2 className="font-semibold text-[#102B20]">
             Niveaux de surveillance
           </h2>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="min-w-0 rounded-xl border border-amber-200 bg-amber-50 p-3 sm:rounded-2xl sm:p-4">
               <p className="font-semibold text-amber-800">
                 À surveiller
               </p>
@@ -1022,7 +1139,7 @@ export default async function AgentPerformancePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+            <div className="min-w-0 rounded-xl border border-orange-200 bg-orange-50 p-3 sm:rounded-2xl sm:p-4">
               <p className="font-semibold text-orange-800">
                 En retard
               </p>
@@ -1033,7 +1150,7 @@ export default async function AgentPerformancePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+            <div className="min-w-0 rounded-xl border border-red-200 bg-red-50 p-3 sm:rounded-2xl sm:p-4">
               <p className="font-semibold text-red-800">
                 Priorité élevée
               </p>
@@ -1106,6 +1223,28 @@ function PriorityBadge({
   );
 }
 
+type PerformanceMetricProps = {
+  label: string;
+  value: string | number;
+};
+
+function PerformanceMetric({
+  label,
+  value,
+}: PerformanceMetricProps) {
+  return (
+    <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3">
+      <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 sm:text-[10px]">
+        {label}
+      </p>
+
+      <p className="mt-1 break-words text-[13px] font-bold leading-5 text-[#102B20] sm:text-sm">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 type SummaryCardProps = {
   label: string;
   value: number;
@@ -1118,7 +1257,7 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
@@ -1127,7 +1266,7 @@ function SummaryCard({
         }
       </span>
 
-      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
         {value.toLocaleString(
           "fr-FR",
         )}

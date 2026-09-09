@@ -714,20 +714,20 @@ export default async function RecherchePage({
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                 Recherche globale
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Rechercher dans les dossiers
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Retrouvez un dossier avec son matricule, le nom du client,
                 WhatsApp, le numéro de passeport, le Kimlik ou la nationalité.
               </p>
@@ -735,17 +735,17 @@ export default async function RecherchePage({
 
             <Link
               href="/admin/dashboard"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               ← Tableau de bord
             </Link>
           </div>
         </header>
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <form
             method="GET"
-            className="flex flex-col gap-3 lg:flex-row"
+            className="flex min-w-0 flex-col gap-3 lg:flex-row"
           >
             <div className="min-w-0 flex-1">
               <label
@@ -764,14 +764,14 @@ export default async function RecherchePage({
                 }
                 autoFocus
                 placeholder="Ex. IFS-260824-AB12, WANDJI, +90..., passeport, Kimlik..."
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                className="h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-12 sm:px-4 sm:text-sm"
               />
             </div>
 
-            <div className="flex items-end gap-3">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
               <button
                 type="submit"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 Rechercher
               </button>
@@ -779,7 +779,7 @@ export default async function RecherchePage({
               {search && (
                 <Link
                   href="/admin/recherche"
-                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 sm:h-12 sm:w-auto sm:px-5 sm:text-sm"
                 >
                   Effacer
                 </Link>
@@ -787,14 +787,14 @@ export default async function RecherchePage({
             </div>
           </form>
 
-          <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-xs leading-5 text-[#31513B]">
+          <div className="mt-4 min-w-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[11px] leading-5 text-[#31513B] sm:px-4 sm:text-xs">
             La recherche accepte également une partie du nom, du matricule,
             du passeport, du Kimlik ou du numéro WhatsApp.
           </div>
         </section>
 
         {errorMessage && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-4 min-w-0 break-words rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-[13px] text-red-700 sm:mt-6 sm:px-4 sm:text-sm">
             {
               errorMessage
             }
@@ -802,7 +802,7 @@ export default async function RecherchePage({
         )}
 
         {!search ? (
-          <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white px-6 py-14 text-center">
+          <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white px-4 py-10 text-center sm:mt-6 sm:rounded-[1.5rem] sm:px-6 sm:py-14">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3F8F2] text-xl text-[#0B5D3B]">
               ⌕
             </div>
@@ -817,14 +817,14 @@ export default async function RecherchePage({
             </p>
           </section>
         ) : (
-          <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-            <div className="flex flex-col gap-3 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
+            <div className="flex min-w-0 flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
                   Résultats
                 </p>
 
-                <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                   Résultats pour « {search} »
                 </h2>
 
@@ -847,7 +847,7 @@ export default async function RecherchePage({
 
               {totalRequests >
                 0 && (
-                <span className="rounded-full border border-slate-200 bg-[#FAFCFA] px-3 py-1 text-sm font-semibold text-slate-600">
+                <span className="w-fit rounded-full border border-slate-200 bg-[#FAFCFA] px-3 py-1 text-[12px] font-semibold text-slate-600 sm:text-sm">
                   {
                     firstVisibleItem
                   }
@@ -865,7 +865,7 @@ export default async function RecherchePage({
 
             {paginatedRequests.length ===
             0 ? (
-              <div className="px-6 py-14 text-center">
+              <div className="px-4 py-10 text-center sm:px-6 sm:py-14">
                 <p className="font-semibold text-[#102B20]">
                   Aucun résultat
                 </p>
@@ -875,6 +875,167 @@ export default async function RecherchePage({
                 </p>
               </div>
             ) : (
+              <>
+                <div className="divide-y divide-slate-100 lg:hidden">
+                  {paginatedRequests.map((request) => {
+                    const client = unwrapClient(request.client);
+
+                    const clientName = client
+                      ? `${client.first_name} ${client.last_name}`.trim()
+                      : "Client inconnu";
+
+                    const whatsapp = client
+                      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
+                      : "";
+
+                    const statusInformation =
+                      statusLabels[request.status] ?? {
+                        label: request.status,
+                        className:
+                          "border border-slate-200 bg-slate-100 text-slate-600",
+                      };
+
+                    const assignedAgentName = request.assigned_agent_id
+                      ? agentNames.get(request.assigned_agent_id) ?? "Agent"
+                      : null;
+
+                    const isMine =
+                      request.assigned_agent_id === user.id;
+
+                    return (
+                      <article
+                        key={request.id}
+                        className="min-w-0 p-4 sm:p-5"
+                      >
+                        <div className="flex min-w-0 items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <Link
+                              href={`/admin/dossiers/${request.id}`}
+                              className="break-all font-mono text-[11px] font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:text-xs"
+                            >
+                              {request.request_code}
+                            </Link>
+
+                            <p className="mt-1.5 break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                              {clientName}
+                            </p>
+                          </div>
+
+                          <span
+                            className={`inline-flex max-w-[48%] shrink-0 rounded-full px-2.5 py-1 text-center text-[10px] font-semibold sm:px-3 sm:text-xs ${statusInformation.className}`}
+                          >
+                            {statusInformation.label}
+                          </span>
+                        </div>
+
+                        <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:gap-4">
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Nationalité
+                            </dt>
+                            <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700 sm:text-sm">
+                              {client?.nationality ?? "—"}
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              WhatsApp
+                            </dt>
+                            <dd className="mt-1 break-all text-[12px] font-semibold text-slate-700 sm:text-sm">
+                              {whatsapp || "—"}
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Passeport
+                            </dt>
+                            <dd className="mt-1 break-all text-[12px] font-semibold text-slate-700 sm:text-sm">
+                              {request.passport_number ?? "—"}
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Kimlik
+                            </dt>
+                            <dd className="mt-1 break-all text-[12px] font-semibold text-slate-700 sm:text-sm">
+                              {request.kimlik_number ?? "—"}
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Durée
+                            </dt>
+                            <dd className="mt-1 text-[12px] font-semibold text-slate-700 sm:text-sm">
+                              {request.insurance_duration_years} an
+                              {request.insurance_duration_years === 2
+                                ? "s"
+                                : ""}
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Montant
+                            </dt>
+                            <dd className="mt-1 text-[12px] font-bold text-[#102B20] sm:text-sm">
+                              {Number(
+                                request.calculated_price ?? 0,
+                              ).toLocaleString("fr-FR")}{" "}
+                              TL
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Responsable
+                            </dt>
+                            <dd className="mt-1">
+                              {!request.assigned_agent_id ? (
+                                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700 sm:text-xs">
+                                  Non attribué
+                                </span>
+                              ) : role === "admin" ? (
+                                <span className="inline-flex max-w-full break-words rounded-full border border-[#DDE7D8] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#31513B] sm:text-xs">
+                                  {assignedAgentName}
+                                </span>
+                              ) : isMine ? (
+                                <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:text-xs">
+                                  Vous
+                                </span>
+                              ) : (
+                                <span className="inline-flex rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 sm:text-xs">
+                                  Déjà attribué
+                                </span>
+                              )}
+                            </dd>
+                          </div>
+
+                          <div className="min-w-0">
+                            <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              Date
+                            </dt>
+                            <dd className="mt-1 break-words text-[12px] font-semibold text-slate-500 sm:text-sm">
+                              {formatDate(request.created_at)}
+                            </dd>
+                          </div>
+                        </dl>
+
+                        <Link
+                          href={`/admin/dossiers/${request.id}`}
+                          className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:text-sm"
+                        >
+                          Ouvrir
+                        </Link>
+                      </article>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden lg:block">
               <TableContainer className="rounded-none border-0 shadow-none">
                 <Table className="min-w-[1550px]">
                   <TableHeader>
@@ -1088,11 +1249,13 @@ export default async function RecherchePage({
                   </TableBody>
                 </Table>
               </TableContainer>
+                </div>
+              </>
             )}
 
             {totalPages >
               1 && (
-              <div className="flex flex-col gap-4 border-t border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-col gap-4 border-t border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
                 <p className="text-sm text-slate-500">
                   Page{" "}
                   <strong className="text-[#102B20]">
@@ -1108,7 +1271,7 @@ export default async function RecherchePage({
                   </strong>
                 </p>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                   {currentPage >
                     1 && (
                     <Link

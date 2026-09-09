@@ -562,7 +562,7 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-white text-slate-950">
       <HomeHeader />
 
       <HomeHero />
@@ -573,24 +573,24 @@ export default function HomePage() {
 
       <section
         id="fonctionnement"
-        className="bg-white py-20 sm:py-24 lg:py-28"
+        className="bg-white py-14 sm:py-20 lg:py-28"
       >
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
-            <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid min-w-0 gap-10 sm:gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
+            <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
                 {
                   t.processBadge
                 }
               </p>
 
-              <h2 className="mt-5 max-w-xl text-3xl font-semibold leading-[1.05] tracking-[-0.04em] text-[#102B20] sm:text-4xl lg:text-[3.25rem]">
+              <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#102B20] sm:mt-5 sm:text-4xl lg:text-[3.25rem]">
                 {
                   t.processTitle
                 }
               </h2>
 
-              <p className="mt-5 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+              <p className="mt-4 max-w-lg text-[15px] leading-7 text-slate-500 sm:mt-5 sm:text-lg">
                 {
                   t.processText
                 }
@@ -598,7 +598,7 @@ export default function HomePage() {
 
               <Link
                 href="/demande/etape-1"
-                className="mt-7 inline-flex items-center gap-2 text-sm font-black text-[#0B5D3B] transition-all hover:gap-3"
+                className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-black text-[#0B5D3B] transition-all hover:gap-3 sm:mt-7"
               >
                 {
                   t.request
@@ -622,18 +622,18 @@ export default function HomePage() {
                       key={
                         step.title
                       }
-                      className="group border-t border-slate-200 py-7 first:border-t-0 first:pt-0 sm:py-9 lg:py-10"
+                      className="group min-w-0 border-t border-slate-200 py-6 first:border-t-0 first:pt-0 sm:py-9 lg:py-10"
                     >
-                      <div className="grid gap-5 sm:grid-cols-[72px_1fr] sm:gap-7">
+                      <div className="grid min-w-0 gap-4 sm:grid-cols-[72px_1fr] sm:gap-7">
                         <div>
                           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B] transition duration-300 group-hover:bg-[#0B5D3B] group-hover:text-white">
                             <Icon className="h-5 w-5" />
                           </div>
                         </div>
 
-                        <div className="flex gap-5">
+                        <div className="flex min-w-0 gap-3 sm:gap-5">
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-baseline gap-4">
+                            <div className="flex min-w-0 items-baseline gap-3 sm:gap-4">
                               <span className="text-xs font-black tracking-[0.16em] text-[#90AD97]">
                                 0
                                 {
@@ -642,7 +642,7 @@ export default function HomePage() {
                                 }
                               </span>
 
-                              <h3 className="text-xl font-semibold tracking-[-0.02em] text-slate-900 sm:text-2xl">
+                              <h3 className="min-w-0 text-xl font-semibold tracking-[-0.02em] text-slate-900 sm:text-2xl">
                                 {
                                   step.title
                                 }
@@ -676,10 +676,10 @@ export default function HomePage() {
 
       <section
         id="suivi"
-        className="bg-[#F7F8F6] py-20 sm:py-24 lg:py-28"
+        className="bg-[#F7F8F6] py-14 sm:py-20 lg:py-28"
       >
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-20">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid min-w-0 gap-10 sm:gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-20">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
                 {
@@ -687,26 +687,26 @@ export default function HomePage() {
                 }
               </p>
 
-              <h2 className="mt-5 max-w-xl text-3xl font-semibold leading-[1.05] tracking-[-0.04em] text-[#102B20] sm:text-4xl lg:text-[3.2rem]">
+              <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#102B20] sm:mt-5 sm:text-4xl lg:text-[3.2rem]">
                 {
                   t.trackingTitle
                 }
               </h2>
 
-              <p className="mt-5 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+              <p className="mt-4 max-w-lg text-[15px] leading-7 text-slate-500 sm:mt-5 sm:text-lg">
                 {
                   t.trackingText
                 }
               </p>
 
-              <div className="mt-8 max-w-xl rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="mt-7 min-w-0 max-w-xl rounded-[1.25rem] border border-slate-200 bg-white p-3 shadow-sm sm:mt-8 sm:rounded-[1.5rem] sm:p-5">
                 <TrackRequestForm />
               </div>
             </div>
 
             <div
               id="assistance"
-              className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 sm:py-10 lg:px-10 lg:py-12"
+              className="relative min-w-0 overflow-hidden rounded-[1.5rem] bg-[#123F2C] px-5 py-7 text-white sm:rounded-[2rem] sm:px-8 sm:py-10 lg:px-10 lg:py-12"
             >
               <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#B8E83D]/10" />
 
@@ -717,13 +717,13 @@ export default function HomePage() {
                   }
                 </p>
 
-                <h2 className="mt-5 max-w-xl text-3xl font-semibold leading-[1.05] tracking-[-0.04em] text-white sm:text-4xl lg:text-[3.2rem]">
+                <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-white sm:mt-5 sm:text-4xl lg:text-[3.2rem]">
                   {
                     t.supportTitle
                   }
                 </h2>
 
-                <p className="mt-5 max-w-lg text-base leading-7 text-white/70 sm:text-lg">
+                <p className="mt-4 max-w-lg text-[15px] leading-7 text-white/70 sm:mt-5 sm:text-lg">
                   {
                     t.supportText
                   }
@@ -736,7 +736,7 @@ export default function HomePage() {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#15311F] transition hover:-translate-y-0.5 hover:bg-[#C8F24D]"
+                    className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#B8E83D] px-5 text-center text-sm font-black text-[#15311F] transition hover:-translate-y-0.5 hover:bg-[#C8F24D] sm:mt-8 sm:w-auto sm:px-6"
                   >
                     <MessageCircle className="h-5 w-5" />
 
@@ -757,9 +757,9 @@ export default function HomePage() {
           AVANTAGES
       ============================================ */}
 
-      <section className="bg-white py-14 sm:py-16 lg:py-20">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="bg-white py-12 sm:py-16 lg:py-20">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid min-w-0 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map(
               (
                 benefit,
@@ -772,7 +772,7 @@ export default function HomePage() {
                     key={
                       benefit.title
                     }
-                    className="group"
+                    className="group min-w-0"
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B] transition duration-300 group-hover:bg-[#0B5D3B] group-hover:text-white">
                       <Icon className="h-5 w-5" />
@@ -802,8 +802,8 @@ export default function HomePage() {
       ============================================ */}
 
       <footer className="bg-[#0F2F23] text-white">
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:px-8 lg:py-14">
-          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.75fr]">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
+          <div className="grid min-w-0 gap-9 sm:gap-10 md:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.75fr]">
             <div className="max-w-sm">
               <div className="flex items-center gap-3">
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden">
@@ -918,7 +918,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-10 flex min-w-0 flex-col gap-4 border-t border-white/10 pt-6 text-xs text-white/40 sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
             <p>
               ©{" "}
               {

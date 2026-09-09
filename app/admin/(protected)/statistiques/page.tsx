@@ -1377,22 +1377,22 @@ export default async function StatisticsPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl lg:text-4xl">
                 Statistiques
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Analyse globale de l’activité IF Sigorta, des clients directs et des partenaires.
               </p>
 
@@ -1403,17 +1403,17 @@ export default async function StatisticsPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
               <Link
                 href="/admin/agents/performance"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
               >
                 Performance agents
               </Link>
 
               <Link
                 href="/admin/dashboard"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
               >
                 ← Tableau de bord
               </Link>
@@ -1423,9 +1423,9 @@ export default async function StatisticsPage() {
 
         {/* KPI GLOBAUX */}
 
-        <section className="mt-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+        <section className="mt-4 sm:mt-6">
+          <div className="mb-3 min-w-0 sm:mb-4">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               Vue globale
             </h2>
 
@@ -1434,7 +1434,7 @@ export default async function StatisticsPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
             <StatCard
               label="Dossiers"
               value={
@@ -1483,10 +1483,10 @@ export default async function StatisticsPage() {
 
         {/* ACTIONS EN ATTENTE */}
 
-        <section className="mt-6 grid gap-4 md:grid-cols-2">
+        <section className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:mt-6 md:grid-cols-2 sm:gap-4">
           <Link
             href="/admin/paiements?status=review"
-            className="rounded-[1.5rem] border border-orange-200 bg-orange-50 p-6 transition hover:-translate-y-0.5"
+            className="min-w-0 rounded-2xl border border-orange-200 bg-orange-50 p-4 transition hover:-translate-y-0.5 sm:rounded-[1.5rem] sm:p-6"
           >
             <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-700">
               Paiements
@@ -1514,7 +1514,7 @@ export default async function StatisticsPage() {
 
           <Link
             href="/admin/polices?status=preparation"
-            className="rounded-[1.5rem] border border-[#CFE3CF] bg-[#F3F8F2] p-6 transition hover:-translate-y-0.5"
+            className="min-w-0 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-4 transition hover:-translate-y-0.5 sm:rounded-[1.5rem] sm:p-6"
           >
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Polices
@@ -1543,14 +1543,14 @@ export default async function StatisticsPage() {
 
         {/* ORIGINE DES DOSSIERS */}
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
+          <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Acquisition
               </p>
 
-              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Origine des dossiers
               </h2>
 
@@ -1559,7 +1559,7 @@ export default async function StatisticsPage() {
               </p>
             </div>
 
-            <div className="rounded-xl bg-[#EEF6EC] px-4 py-3">
+            <div className="w-full min-w-0 rounded-xl bg-[#EEF6EC] px-3 py-3 sm:w-auto sm:px-4">
               <p className="text-xs font-semibold text-[#31513B]">
                 Part des partenaires
               </p>
@@ -1574,7 +1574,7 @@ export default async function StatisticsPage() {
             </div>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
+          <div className="mt-4 min-w-0 overflow-x-auto sm:mt-6">
             <table className="min-w-full">
               <thead>
                 <tr className="border-b border-slate-200 text-left">
@@ -1680,14 +1680,14 @@ export default async function StatisticsPage() {
 
         {/* PERFORMANCE DES PARTENAIRES */}
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Partenaires
               </p>
 
-              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Performance des partenaires
               </h2>
 
@@ -1698,7 +1698,7 @@ export default async function StatisticsPage() {
 
             <Link
               href="/admin/partenaires"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               Gérer les partenaires →
             </Link>
@@ -1708,7 +1708,7 @@ export default async function StatisticsPage() {
             partnerPerformance.length ===
             0
               ? (
-                  <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-[#FAFCFA] p-8 text-center">
+                  <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-[#FAFCFA] p-5 text-center sm:mt-6 sm:p-8">
                     <p className="text-sm font-semibold text-[#102B20]">
                       Aucun partenaire enregistré
                     </p>
@@ -1719,7 +1719,94 @@ export default async function StatisticsPage() {
                   </div>
                 )
               : (
-                  <div className="mt-6 overflow-x-auto">
+                  <>
+                    <div className="mt-4 space-y-3 lg:hidden sm:mt-6">
+                      {partnerPerformance.map(
+                        (partner) => (
+                          <article
+                            key={partner.id}
+                            className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4"
+                          >
+                            <div className="flex min-w-0 items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <Link
+                                  href={`/admin/partenaires/${partner.id}`}
+                                  className="break-words text-[14px] font-semibold text-[#102B20] hover:text-[#0B5D3B]"
+                                >
+                                  {partner.companyName}
+                                </Link>
+
+                                <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-2">
+                                  <span className="break-all text-[11px] font-medium text-slate-400">
+                                    {partner.code}
+                                  </span>
+
+                                  <span
+                                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                      partner.isActive
+                                        ? "bg-[#EEF6EC] text-[#0B5D3B]"
+                                        : "bg-slate-100 text-slate-500"
+                                    }`}
+                                  >
+                                    {partner.isActive
+                                      ? "Actif"
+                                      : "Inactif"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <dl className="mt-4 grid grid-cols-2 gap-3">
+                              <div className="min-w-0">
+                                <dt className="text-[10px] uppercase tracking-wide text-slate-400">
+                                  Dossiers
+                                </dt>
+                                <dd className="mt-1 text-sm font-semibold text-slate-700">
+                                  {partner.requests.toLocaleString("fr-FR")}
+                                </dd>
+                              </div>
+
+                              <div className="min-w-0">
+                                <dt className="text-[10px] uppercase tracking-wide text-slate-400">
+                                  Disponibles
+                                </dt>
+                                <dd className="mt-1 text-sm font-semibold text-slate-700">
+                                  {partner.availablePolicies.toLocaleString("fr-FR")}
+                                </dd>
+                              </div>
+
+                              <div className="min-w-0">
+                                <dt className="text-[10px] uppercase tracking-wide text-slate-400">
+                                  Paiements confirmés
+                                </dt>
+                                <dd className="mt-1 text-sm font-semibold text-slate-700">
+                                  {partner.confirmedPayments.toLocaleString("fr-FR")}
+                                </dd>
+                              </div>
+
+                              <div className="min-w-0">
+                                <dt className="text-[10px] uppercase tracking-wide text-slate-400">
+                                  CA confirmé
+                                </dt>
+                                <dd className="mt-1 break-words text-sm font-black text-[#0B5D3B]">
+                                  {formatCurrency(partner.revenue)}
+                                </dd>
+                              </div>
+                            </dl>
+
+                            <Link
+                              href={`/admin/partenaires/${partner.id}`}
+                              className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                            >
+                              Voir le partenaire
+                            </Link>
+                          </article>
+                        ),
+                      )}
+                    </div>
+
+                    <div className="hidden lg:block">
+<div className="mt-4 min-w-0 overflow-x-auto sm:mt-6">
                     <table className="min-w-full">
                       <thead>
                         <tr className="border-b border-slate-200 text-left">
@@ -1826,19 +1913,21 @@ export default async function StatisticsPage() {
                       </tbody>
                     </table>
                   </div>
+                    </div>
+                  </>
                 )
           }
         </section>
 
         {/* ÉVOLUTION DU MOIS */}
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Évolution
             </p>
 
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               Comparaison mensuelle
             </h2>
 
@@ -1847,13 +1936,13 @@ export default async function StatisticsPage() {
             </p>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
+          <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:mt-6 md:grid-cols-2 sm:gap-4">
+            <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4 sm:rounded-2xl sm:p-5">
               <p className="text-sm font-medium text-slate-500">
                 Nouvelles demandes
               </p>
 
-              <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+              <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl lg:text-4xl">
                 {
                   currentMonthRequests.toLocaleString(
                     "fr-FR",
@@ -1861,7 +1950,7 @@ export default async function StatisticsPage() {
                 }
               </p>
 
-              <div className="mt-3 flex items-center justify-between gap-4">
+              <div className="mt-3 flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <span className="text-sm text-slate-500">
                   Mois précédent :{" "}
                   {
@@ -1885,12 +1974,12 @@ export default async function StatisticsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
+            <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4 sm:rounded-2xl sm:p-5">
               <p className="text-sm font-medium text-slate-500">
                 Chiffre d’affaires du mois
               </p>
 
-              <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+              <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl lg:text-4xl">
                 {
                   formatCurrency(
                     currentMonthRevenue,
@@ -1898,7 +1987,7 @@ export default async function StatisticsPage() {
                 }
               </p>
 
-              <div className="mt-3 flex items-center justify-between gap-4">
+              <div className="mt-3 flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <span className="text-sm text-slate-500">
                   Mois précédent :{" "}
                   {
@@ -1926,7 +2015,7 @@ export default async function StatisticsPage() {
 
         {/* PERFORMANCE DU MOIS */}
 
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           <MonthlyPerformance
             totalRequests={
               currentMonthRequests
@@ -1954,7 +2043,7 @@ export default async function StatisticsPage() {
 
         {/* NATIONALITÉS + RAPPORT */}
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-2">
+        <div className="mt-4 grid min-w-0 gap-4 sm:mt-6 sm:gap-5 xl:grid-cols-2">
           <NationalityStats
             data={
               nationalityData
@@ -1969,14 +2058,14 @@ export default async function StatisticsPage() {
 
         {/* ÉQUIPE */}
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Équipe
               </p>
 
-              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Performance des agents
               </h2>
 
@@ -1987,7 +2076,7 @@ export default async function StatisticsPage() {
 
             <Link
               href="/admin/agents/performance"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               Voir les performances →
             </Link>
@@ -2012,22 +2101,22 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
         {
           value
         }
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-slate-500">
+      <p className="mt-2 text-[10px] leading-4 text-slate-500 sm:text-xs sm:leading-5">
         {
           description
         }

@@ -306,14 +306,14 @@ export default function NouveauPartenairePage() {
   }
 
   const inputClassName =
-    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-12 sm:px-4 sm:text-sm";
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-4xl">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-4xl">
         <Link
           href="/admin/partenaires"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+          className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
         >
           <span aria-hidden="true">
             ←
@@ -322,23 +322,23 @@ export default function NouveauPartenairePage() {
           Retour aux partenaires
         </Link>
 
-        <div className="mt-6 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white">
-          <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F3F8F2] text-xl font-black text-[#0B5D3B]">
+        <div className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.75rem]">
+          <div className="border-b border-slate-100 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+            <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F3F8F2] text-lg font-black text-[#0B5D3B] sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
                 +
               </div>
 
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                   Administration
                 </p>
 
-                <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+                <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl">
                   Ajouter un partenaire
                 </h1>
 
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
                   Enregistrez un nouvel apporteur
                   d’affaires IF Sigorta et créez
                   son accès sécurisé à l’espace
@@ -350,20 +350,20 @@ export default function NouveauPartenairePage() {
 
           <form
             onSubmit={handleSubmit}
-            className="p-6 sm:p-8"
+            className="min-w-0 p-4 sm:p-6 lg:p-8"
           >
             <div>
-              <div className="mb-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              <div className="mb-4 min-w-0 sm:mb-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
                   Partenaire
                 </p>
 
-                <h2 className="mt-2 text-lg font-semibold text-[#102B20]">
+                <h2 className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg">
                   Informations générales
                 </h2>
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                 <div>
                   <label
                     htmlFor="companyName"
@@ -416,17 +416,17 @@ export default function NouveauPartenairePage() {
               </div>
             </div>
 
-            <div className="mt-8 border-t border-slate-100 pt-8">
-              <div className="mb-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+            <div className="mt-6 min-w-0 border-t border-slate-100 pt-6 sm:mt-8 sm:pt-8">
+              <div className="mb-4 min-w-0 sm:mb-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
                   Connexion
                 </p>
 
-                <h2 className="mt-2 text-lg font-semibold text-[#102B20]">
+                <h2 className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg">
                   Accès à l’espace partenaire
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <p className="mt-2 text-[13px] leading-6 text-slate-500 sm:text-sm">
                   L’adresse e-mail et le mot de
                   passe ci-dessous permettront au
                   partenaire de se connecter à son
@@ -434,7 +434,7 @@ export default function NouveauPartenairePage() {
                 </p>
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                 <div>
                   <label
                     htmlFor="email"
@@ -496,13 +496,13 @@ export default function NouveauPartenairePage() {
               </div>
             </div>
 
-            <div className="mt-8 border-t border-slate-100 pt-8">
-              <div className="mb-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+            <div className="mt-6 min-w-0 border-t border-slate-100 pt-6 sm:mt-8 sm:pt-8">
+              <div className="mb-4 min-w-0 sm:mb-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
                   Contact
                 </p>
 
-                <h2 className="mt-2 text-lg font-semibold text-[#102B20]">
+                <h2 className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg">
                   Coordonnées du partenaire
                 </h2>
               </div>
@@ -515,7 +515,7 @@ export default function NouveauPartenairePage() {
                   Numéro WhatsApp
                 </label>
 
-                <div className="grid gap-3 sm:grid-cols-[260px_1fr]">
+                <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[260px_minmax(0,1fr)]">
                   <select
                     id="whatsappCountryCode"
                     value={whatsappCountryCode}
@@ -574,7 +574,7 @@ export default function NouveauPartenairePage() {
               </div>
             </div>
 
-            <div className="mt-8 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-5">
+            <div className="mt-6 min-w-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4 sm:mt-8 sm:rounded-2xl sm:p-5">
               <p className="font-semibold text-[#102B20]">
                 Code partenaire
               </p>
@@ -587,21 +587,21 @@ export default function NouveauPartenairePage() {
             </div>
 
             {errorMessage && (
-              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+              <div className="mt-5 min-w-0 break-words rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-[13px] leading-6 text-red-700 sm:mt-6 sm:px-4 sm:text-sm">
                 {errorMessage}
               </div>
             )}
 
             {successMessage && (
-              <div className="mt-6 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]">
+              <div className="mt-5 min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[13px] font-semibold text-[#0B5D3B] sm:mt-6 sm:px-4 sm:text-sm">
                 {successMessage}
               </div>
             )}
 
-            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+            <div className="mt-6 flex min-w-0 flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:mt-8 sm:flex-row sm:justify-end sm:pt-6">
               <Link
                 href="/admin/partenaires"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 Annuler
               </Link>
@@ -609,7 +609,7 @@ export default function NouveauPartenairePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 {loading
                   ? "Création..."

@@ -1210,14 +1210,14 @@ export default async function ClientDetailsPage({
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* Navigation */}
 
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
           <Link
             href="/admin/clients"
-            className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+            className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-sm"
           >
             ← Retour aux clients
           </Link>
@@ -1225,7 +1225,7 @@ export default async function ClientDetailsPage({
           {latestRequest && (
             <Link
               href={`/admin/dossiers/${latestRequest.id}`}
-              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+              className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-sm"
             >
               Dernier dossier →
             </Link>
@@ -1234,11 +1234,11 @@ export default async function ClientDetailsPage({
 
         {/* En-tête client */}
 
-        <header className="overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-          <div className="p-6 sm:p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#0B5D3B] text-xl font-black text-white">
+        <header className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:rounded-[1.5rem]">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="flex min-w-0 flex-col gap-4 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] text-base font-black text-white sm:h-16 sm:w-16 sm:rounded-2xl sm:text-xl">
                   {getInitials({
                     firstName:
                       client.first_name,
@@ -1252,11 +1252,11 @@ export default async function ClientDetailsPage({
                     Fiche client
                   </p>
 
-                  <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                  <h1 className="mt-1.5 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-2 sm:text-3xl lg:text-4xl">
                     {clientName}
                   </h1>
 
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
+                  <div className="mt-2 flex min-w-0 flex-col gap-1 text-[12px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:text-sm">
                     <span>
                       {client.nationality ??
                         "Nationalité non renseignée"}
@@ -1274,13 +1274,13 @@ export default async function ClientDetailsPage({
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
                 {whatsapp && (
                   <a
                     href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-5 text-sm font-bold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-[13px] font-bold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto sm:px-5 sm:text-sm"
                   >
                     Ouvrir WhatsApp
                   </a>
@@ -1288,7 +1288,7 @@ export default async function ClientDetailsPage({
 
                 <Link
                   href="/demande/etape-1"
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:w-auto sm:px-5 sm:text-sm"
                 >
                   Nouvelle demande
                 </Link>
@@ -1299,7 +1299,7 @@ export default async function ClientDetailsPage({
 
         {/* KPI */}
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-5">
           <StatCard
             label="Dossiers"
             value={
@@ -1356,18 +1356,18 @@ export default async function ClientDetailsPage({
           />
         </section>
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="mt-4 grid min-w-0 gap-4 sm:mt-6 sm:gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
           {/* Colonne gauche */}
 
-          <aside className="space-y-5">
+          <aside className="min-w-0 space-y-4 sm:space-y-5">
             {/* Identité */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2 className="text-lg font-semibold text-[#102B20]">
                 Identité
               </h2>
 
-              <div className="mt-5 space-y-4">
+              <div className="mt-4 space-y-3 sm:mt-5 sm:space-y-4">
                 <InfoRow
                   label="Nom"
                   value={
@@ -1425,12 +1425,12 @@ export default async function ClientDetailsPage({
 
             {/* Contact */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2 className="text-lg font-semibold text-[#102B20]">
                 Contact & adresse
               </h2>
 
-              <div className="mt-5 space-y-4">
+              <div className="mt-4 space-y-3 sm:mt-5 sm:space-y-4">
                 <InfoRow
                   label="WhatsApp"
                   value={
@@ -1450,7 +1450,7 @@ export default async function ClientDetailsPage({
 
             {/* Responsables */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2 className="text-lg font-semibold text-[#102B20]">
                 Agents associés
               </h2>
@@ -1468,7 +1468,7 @@ export default async function ClientDetailsPage({
                         key={
                           agent.id
                         }
-                        className="rounded-xl border border-slate-100 bg-[#FAFCFA] px-4 py-3"
+                        className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] px-3 py-3 sm:px-4"
                       >
                         <p className="font-semibold text-slate-800">
                           {agent.name}
@@ -1483,17 +1483,17 @@ export default async function ClientDetailsPage({
 
           {/* Colonne principale */}
 
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-4 sm:space-y-5">
             {/* Dossiers */}
 
-            <section className="overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-              <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:rounded-[1.5rem]">
+              <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
-                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                  <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                     Dossiers du client
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                     Historique des demandes accessibles avec votre rôle.
                   </p>
                 </div>
@@ -1509,11 +1509,149 @@ export default async function ClientDetailsPage({
 
               {requests.length ===
               0 ? (
-                <div className="p-10 text-center text-sm text-slate-500">
+                <div className="p-6 text-center text-[13px] text-slate-500 sm:p-10 sm:text-sm">
                   Aucun dossier visible.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <>
+                  <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
+                    {requests.map((request) => {
+                      const status =
+                        statusLabels[request.status] ?? {
+                          label: request.status,
+                          className:
+                            "bg-slate-100 text-slate-700",
+                        };
+
+                      const payment =
+                        unwrapPayment(request.payment);
+
+                      const paymentInfo =
+                        payment?.status
+                          ? paymentStatusLabels[
+                              payment.status
+                            ] ?? {
+                              label: payment.status,
+                              className:
+                                "bg-slate-100 text-slate-700",
+                            }
+                          : null;
+
+                      const requestPolicies =
+                        policies.filter(
+                          (policy) =>
+                            policy.request_id ===
+                            request.id,
+                        );
+
+                      return (
+                        <article
+                          key={request.id}
+                          className="min-w-0 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+                        >
+                          <div className="flex min-w-0 items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <Link
+                                href={`/admin/dossiers/${request.id}`}
+                                className="break-all text-[13px] font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                              >
+                                {request.request_code}
+                              </Link>
+
+                              <p className="mt-1 text-[11px] text-slate-400">
+                                {request.insurance_duration_years ??
+                                  1}{" "}
+                                an
+                                {(request.insurance_duration_years ??
+                                  1) > 1
+                                  ? "s"
+                                  : ""}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`inline-flex max-w-[55%] shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold leading-4 ${status.className}`}
+                            >
+                              {status.label}
+                            </span>
+                          </div>
+
+                          <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3">
+                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                              <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                Responsable
+                              </dt>
+                              <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700">
+                                {request.assigned_agent_id
+                                  ? userNames.get(
+                                      request.assigned_agent_id,
+                                    ) ?? "Agent"
+                                  : "Non attribué"}
+                              </dd>
+                            </div>
+
+                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                              <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                Montant
+                              </dt>
+                              <dd className="mt-1 break-words text-[12px] font-bold text-slate-800">
+                                {formatMoney(
+                                  request.calculated_price,
+                                )}
+                              </dd>
+                            </div>
+
+                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                              <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                Paiement
+                              </dt>
+                              <dd className="mt-1">
+                                {paymentInfo ? (
+                                  <span
+                                    className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold ${paymentInfo.className}`}
+                                  >
+                                    {paymentInfo.label}
+                                  </span>
+                                ) : (
+                                  <span className="text-[12px] text-slate-500">
+                                    —
+                                  </span>
+                                )}
+                              </dd>
+                            </div>
+
+                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                              <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                Polices
+                              </dt>
+                              <dd className="mt-1 text-[12px] font-bold text-slate-800">
+                                {requestPolicies.length}
+                              </dd>
+                            </div>
+                          </dl>
+
+                          <div className="mt-3 rounded-xl border border-slate-100 p-3">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                              Créé
+                            </p>
+                            <p className="mt-1 text-[11px] leading-5 text-slate-600">
+                              {formatDate(request.created_at)}
+                            </p>
+                          </div>
+
+                          <Link
+                            href={`/admin/dossiers/${request.id}`}
+                            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                          >
+                            Ouvrir le dossier
+                          </Link>
+                        </article>
+                      );
+                    })}
+                  </div>
+
+                  <div className="hidden overflow-x-auto lg:block">
+
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
@@ -1680,7 +1818,7 @@ export default async function ClientDetailsPage({
                               <TableCell>
                                 <Link
                                   href={`/admin/dossiers/${request.id}`}
-                                  className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                  className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-sm"
                                 >
                                   Ouvrir
                                 </Link>
@@ -1691,18 +1829,20 @@ export default async function ClientDetailsPage({
                       )}
                     </tbody>
                   </table>
-                </div>
+                
+                  </div>
+                </>
               )}
             </section>
 
             {/* Paiements */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Paiements
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                 Situation des paiements associés aux dossiers visibles.
               </p>
 
@@ -1742,7 +1882,7 @@ export default async function ClientDetailsPage({
                         key={
                           request.id
                         }
-                        className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
                           <Link
@@ -1754,7 +1894,7 @@ export default async function ClientDetailsPage({
                             }
                           </Link>
 
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                             Montant attendu :{" "}
                             <strong className="text-slate-700">
                               {formatMoney(
@@ -1764,7 +1904,7 @@ export default async function ClientDetailsPage({
                           </p>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
                           <span
                             className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentInfo.className}`}
                           >
@@ -1789,14 +1929,14 @@ export default async function ClientDetailsPage({
 
             {/* Documents */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <div className="flex items-center justify-between gap-4">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                  <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                     Documents
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                     Vue globale des documents liés aux dossiers accessibles.
                   </p>
                 </div>
@@ -1808,7 +1948,7 @@ export default async function ClientDetailsPage({
                 </span>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-5 xl:grid-cols-3">
                 <DocumentCounter
                   label="Passeports"
                   value={
@@ -1876,12 +2016,12 @@ export default async function ClientDetailsPage({
 
             {/* Notes internes agrégées */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Notes internes
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                 Dernières notes enregistrées dans les dossiers de ce client.
               </p>
 
@@ -1910,7 +2050,7 @@ export default async function ClientDetailsPage({
                           key={
                             note.id
                           }
-                          className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4"
+                          className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="text-xs font-black text-[#0B5D3B]">
@@ -1925,13 +2065,13 @@ export default async function ClientDetailsPage({
                             </p>
                           </div>
 
-                          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                          <p className="mt-2 whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-700 sm:text-sm">
                             {
                               note.content
                             }
                           </p>
 
-                          <p className="mt-2 text-xs text-slate-400">
+                          <p className="mt-2 break-words text-[10px] leading-5 text-slate-400 sm:text-xs">
                             Par{" "}
                             {note.user_id
                               ? userNames.get(
@@ -1950,12 +2090,12 @@ export default async function ClientDetailsPage({
 
             {/* Historique global */}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Historique récent
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                 Dernières actions enregistrées sur les dossiers du client.
               </p>
 
@@ -1985,7 +2125,7 @@ export default async function ClientDetailsPage({
                           key={
                             activity.id
                           }
-                          className="relative flex gap-4 pb-6"
+                          className="relative flex min-w-0 gap-3 pb-5 sm:gap-4 sm:pb-6"
                         >
                           {index <
                             recentActivities.length -
@@ -2000,7 +2140,7 @@ export default async function ClientDetailsPage({
                           />
 
                           <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
                               <p className="font-semibold text-slate-800">
                                 {getActivityLabel(
                                   activity.action,
@@ -2020,14 +2160,14 @@ export default async function ClientDetailsPage({
                             </div>
 
                             {activity.description && (
-                              <p className="mt-1 text-sm leading-6 text-slate-500">
+                              <p className="mt-1 break-words text-[13px] leading-6 text-slate-500 sm:text-sm">
                                 {
                                   activity.description
                                 }
                               </p>
                             )}
 
-                            <p className="mt-2 text-xs text-slate-400">
+                            <p className="mt-2 break-words text-[10px] leading-5 text-slate-400 sm:text-xs">
                               {activity.user_id
                                 ? userNames.get(
                                     activity.user_id,
@@ -2068,22 +2208,22 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
         {
           value
         }
       </p>
 
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">
         {
           description
         }
@@ -2124,14 +2264,14 @@ function DocumentCounter({
   value: number;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-[#FAFCFA] p-4">
-      <p className="text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
+    <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3 sm:p-4">
+      <p className="text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:text-2xl">
         {value.toLocaleString(
           "fr-FR",
         )}
       </p>
 
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
         {
           label
         }

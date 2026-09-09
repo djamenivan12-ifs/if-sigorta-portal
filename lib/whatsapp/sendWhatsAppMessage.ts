@@ -10,6 +10,13 @@ type SendWhatsAppMessageParams = {
   preferredLanguage?: string | null;
 };
 
+type SendPartnerWhatsAppMessageParams = {
+  phoneNumber: string;
+  partnerName: string;
+  clientName: string;
+  matricule: string;
+};
+
 function normalizeLanguage(
   language?: string | null,
 ): PreferredLanguage {
@@ -245,6 +252,215 @@ export async function sendWhatsAppMessage({
 
       template:
         templateName,
+
+      messageId,
+    },
+  );
+
+  return result;
+}
+
+const PARTNER_TEMPLATE_NAME =
+  "partner_insurance_available_fr";
+
+export async function sendPartnerWhatsAppMessage({
+  phoneNumber,
+  partnerName,
+  clientName,
+  matricule,
+}: SendPartnerWhatsAppMessageParams) {
+  const accessToken =
+    process.env.WHATSAPP_ACCESS_TOKEN;
+
+  const phoneNumberId =
+    process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!accessToken) {
+    throw new Error(
+      "WHATSAPP_ACCESS_TOKEN est absent dans .env.local",
+    );
+  }
+
+  if (!phoneNumberId) {
+    throw new Error(
+      "WHATSAPP_PHONE_NUMBER_ID est absent dans .env.local",
+    );
+  }
+
+  const cleanPhoneNumber =
+    phoneNumber.replace(
+      /\D/g,
+      "",
+    );
+
+  if (!cleanPhoneNumber) {
+    throw new Error(
+      "Le numéro WhatsApp du partenaire est invalide.",
+    );
+  }
+
+  const cleanPartnerName =
+    partnerName.trim() ||
+    "Partenaire";
+
+  const cleanClientName =
+    clientName.trim() ||
+    "Client";
+
+  const cleanMatricule =
+    matricule.trim();
+
+  if (!cleanMatricule) {
+    throw new Error(
+      "Le matricule du dossier est absent.",
+    );
+  }
+
+  const response =
+    await fetch(
+      `https://graph.facebook.com/v23.0/${phoneNumberId}/messages`,
+      {
+        method:
+          "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
+
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify({
+            messaging_product:
+              "whatsapp",
+
+            recipient_type:
+              "individual",
+
+            to:
+              cleanPhoneNumber,
+
+            type:
+              "template",
+
+            template: {
+              name:
+                PARTNER_TEMPLATE_NAME,
+
+              language: {
+                code:
+                  "fr",
+              },
+
+              components: [
+                {
+                  type:
+                    "body",
+
+                  parameters: [
+                    {
+                      type:
+                        "text",
+
+                      text:
+                        cleanPartnerName,
+                    },
+
+                    {
+                      type:
+                        "text",
+
+                      text:
+                        cleanClientName,
+                    },
+
+                    {
+                      type:
+                        "text",
+
+                      text:
+                        cleanMatricule,
+                    },
+                  ],
+                },
+              ],
+            },
+          }),
+      },
+    );
+
+  let result: {
+    messages?: Array<{
+      id?: string;
+    }>;
+
+    error?: {
+      message?: string;
+      type?: string;
+      code?: number;
+      error_subcode?: number;
+      fbtrace_id?: string;
+    };
+
+    [key: string]:
+      unknown;
+  };
+
+  try {
+    result =
+      (await response.json()) as typeof result;
+  } catch {
+    throw new Error(
+      `Meta a retourné une réponse invalide (${response.status}).`,
+    );
+  }
+
+  if (!response.ok) {
+    console.error(
+      "Erreur WhatsApp partenaire :",
+      {
+        status:
+          response.status,
+
+        phoneNumber:
+          cleanPhoneNumber,
+
+        template:
+          PARTNER_TEMPLATE_NAME,
+
+        result,
+      },
+    );
+
+    throw new Error(
+      result?.error?.message ??
+        "Impossible d’envoyer le message WhatsApp au partenaire.",
+    );
+  }
+
+  const messageId =
+    result?.messages?.[0]?.id ??
+    null;
+
+  console.log(
+    "Notification WhatsApp partenaire acceptée par Meta :",
+    {
+      phoneNumber:
+        cleanPhoneNumber,
+
+      partnerName:
+        cleanPartnerName,
+
+      clientName:
+        cleanClientName,
+
+      matricule:
+        cleanMatricule,
+
+      template:
+        PARTNER_TEMPLATE_NAME,
 
       messageId,
     },

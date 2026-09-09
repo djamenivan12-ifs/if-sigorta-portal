@@ -277,7 +277,7 @@ export default function PartnerInsuranceStep({
     "mb-2 block text-sm font-semibold text-slate-700";
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-6 sm:space-y-8">
       <div>
         <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
           Étape 2 sur 4
@@ -300,7 +300,7 @@ export default function PartnerInsuranceStep({
           un Kimlik ?
         </p>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={() =>
@@ -346,7 +346,7 @@ export default function PartnerInsuranceStep({
       </section>
 
       <section className="border-t border-slate-100 pt-7">
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-5 sm:grid-cols-2">
           {data.hasKimlik ? (
             <>
               <div>
@@ -491,7 +491,7 @@ export default function PartnerInsuranceStep({
           Durée de l’assurance
         </h3>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
           {([1, 2] as const).map(
             (duration) => (
               <button
@@ -529,7 +529,7 @@ export default function PartnerInsuranceStep({
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6]">
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6]">
         {priceLoading ? (
           <div className="p-5 text-sm font-semibold text-[#31513B]">
             Calcul du tarif partenaire...
@@ -543,7 +543,7 @@ export default function PartnerInsuranceStep({
           data.calculatedAge !==
             null ? (
           <>
-            <div className="grid gap-5 p-5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-5 p-4 sm:grid-cols-2 sm:p-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Âge retenu
@@ -571,12 +571,12 @@ export default function PartnerInsuranceStep({
               </div>
             </div>
 
-            <div className="border-t border-[#DCE9DD] bg-white p-5">
+            <div className="min-w-0 border-t border-[#DCE9DD] bg-white p-4 sm:p-5">
               <p className="text-sm font-medium text-slate-500">
                 Tarif partenaire
               </p>
 
-              <p className="mt-1 text-4xl font-black tracking-tight text-[#0B5D3B]">
+              <p className="mt-1 break-words text-3xl font-black tracking-tight text-[#0B5D3B] sm:text-4xl">
                 {data.calculatedPrice.toLocaleString(
                   "fr-FR",
                 )}{" "}
@@ -589,11 +589,11 @@ export default function PartnerInsuranceStep({
         ) : null}
       </section>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between">
+      <div className="flex min-w-0 flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between">
         <button
           type="button"
           onClick={onPrevious}
-          className="min-h-12 rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
         >
           ← Précédent
         </button>
@@ -606,7 +606,7 @@ export default function PartnerInsuranceStep({
               null
           }
           onClick={handleNext}
-          className="min-h-12 rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="min-h-12 w-full rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
           Continuer →
         </button>

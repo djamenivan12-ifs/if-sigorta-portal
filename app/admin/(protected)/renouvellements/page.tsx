@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-
 import RenewalInterestButton from "./RenewalInterestButton";
 import RenewalWhatsappButton from "./RenewalWhatsappButton";
 import { requireRole } from "@/lib/auth/requireRole";
@@ -555,34 +554,34 @@ export default async function RenewalsPage() {
     ).length;
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                 Suivi client
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Renouvellements
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Assurances arrivant à expiration dans les 30 prochains jours ou déjà expirées.
               </p>
             </div>
 
             <Link
               href="/admin/notifications"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               ← Notifications
             </Link>
           </div>
         </header>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
           <SummaryCard
             label="À contacter"
             value={
@@ -620,16 +619,16 @@ export default async function RenewalsPage() {
           />
         </section>
 
-        <section className="mt-6">
+        <section className="mt-4 min-w-0 sm:mt-6">
           {renewals.length ===
           0 ? (
-            <div className="rounded-[1.5rem] border border-slate-200/80 bg-white px-6 py-16 text-center">
-              <p className="text-sm text-slate-500">
+            <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white px-4 py-10 text-center sm:rounded-[1.5rem] sm:px-6 sm:py-16">
+              <p className="text-[13px] text-slate-500 sm:text-sm">
                 Aucun client à contacter pour un renouvellement.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-3 sm:space-y-4">
               {renewals.map(
                 (
                   renewal,
@@ -651,13 +650,13 @@ export default async function RenewalsPage() {
                       key={
                         renewal.id
                       }
-                      className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6"
+                      className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5 lg:p-6"
                     >
-                      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex min-w-0 flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
                             <span
-                              className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${renewal.priorityClassName}`}
+                              className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-xs ${renewal.priorityClassName}`}
                             >
                               {
                                 renewal.priorityLabel
@@ -665,7 +664,7 @@ export default async function RenewalsPage() {
                             </span>
 
                             <span
-                              className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                              className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-xs ${
                                 getStatusInfo(
                                   renewal.status,
                                 ).className
@@ -678,94 +677,102 @@ export default async function RenewalsPage() {
                               }
                             </span>
 
-                            <span className="text-xs font-semibold text-slate-400">
+                            <span className="break-all font-mono text-[10px] font-semibold text-slate-400 sm:text-xs">
                               {
                                 renewal.requestCode
                               }
                             </span>
                           </div>
 
-                          <h2 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                          <h2 className="mt-3 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                             {
                               renewal.clientName
                             }
                           </h2>
 
-                          <p className="mt-1 text-sm font-medium text-slate-700">
+                          <p className="mt-1 break-words text-[13px] font-medium text-slate-700 sm:text-sm">
                             {
                               renewal.title
                             }
                           </p>
 
-                          <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-                            <div>
+                          <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 text-[12px] text-slate-600 sm:grid-cols-2 sm:text-sm">
+                            <div className="min-w-0 rounded-xl bg-slate-50 p-3 sm:bg-transparent sm:p-0">
                               <span className="font-semibold text-slate-800">
                                 Expiration :
                               </span>{" "}
-                              {
-                                formatDate(
-                                  renewal.policyEndDate,
-                                )
-                              }
+                              <span className="break-words">
+                                {
+                                  formatDate(
+                                    renewal.policyEndDate,
+                                  )
+                                }
+                              </span>
                             </div>
 
-                            <div>
+                            <div className="min-w-0 rounded-xl bg-slate-50 p-3 sm:bg-transparent sm:p-0">
                               <span className="font-semibold text-slate-800">
                                 Délai :
                               </span>{" "}
-                              {
-                                getDaysText(
-                                  renewal.daysRemaining,
-                                )
-                              }
+                              <span className="break-words">
+                                {
+                                  getDaysText(
+                                    renewal.daysRemaining,
+                                  )
+                                }
+                              </span>
                             </div>
 
-                            <div>
+                            <div className="min-w-0 rounded-xl bg-slate-50 p-3 sm:bg-transparent sm:p-0">
                               <span className="font-semibold text-slate-800">
                                 WhatsApp :
                               </span>{" "}
-                              {renewal.whatsapp ||
-                                "Non renseigné"}
+                              <span className="break-all">
+                                {renewal.whatsapp ||
+                                  "Non renseigné"}
+                              </span>
                             </div>
 
-                            <div>
+                            <div className="min-w-0 rounded-xl bg-slate-50 p-3 sm:bg-transparent sm:p-0">
                               <span className="font-semibold text-slate-800">
                                 Matricule :
                               </span>{" "}
-                              {
-                                renewal.requestCode
-                              }
+                              <span className="break-all font-mono text-[11px] sm:text-sm">
+                                {
+                                  renewal.requestCode
+                                }
+                              </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex w-full shrink-0 flex-col gap-2 lg:w-60">
+                        <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-60">
                           {renewal.whatsapp && (
-  <RenewalWhatsappButton
-    renewalId={
-      renewal.id
-    }
-    whatsapp={
-      renewal.whatsapp
-    }
-    message={
-      whatsappMessage
-    }
-  />
-)}
+                            <RenewalWhatsappButton
+                              renewalId={
+                                renewal.id
+                              }
+                              whatsapp={
+                                renewal.whatsapp
+                              }
+                              message={
+                                whatsappMessage
+                              }
+                            />
+                          )}
 
-{renewal.status !== "interested" && (
-  <RenewalInterestButton
-    renewalId={
-      renewal.id
-    }
-  />
-)}
+                          {renewal.status !== "interested" && (
+                            <RenewalInterestButton
+                              renewalId={
+                                renewal.id
+                              }
+                            />
+                          )}
 
                           {renewal.clientId && (
                             <Link
                               href={`/admin/clients/${renewal.clientId}`}
-                              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:min-h-11 sm:px-5 sm:text-sm"
                             >
                               Voir le client
                             </Link>
@@ -773,7 +780,7 @@ export default async function RenewalsPage() {
 
                           <Link
                             href={`/admin/dossiers/${renewal.requestId}`}
-                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:px-5 sm:text-sm"
                           >
                             Ouvrir le dossier →
                           </Link>
@@ -803,16 +810,16 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <div
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
         {
           label
         }
       </div>
 
-      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
         {
           value.toLocaleString(
             "fr-FR",

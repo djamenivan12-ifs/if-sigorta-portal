@@ -1262,36 +1262,36 @@ export default async function NotificationsPage() {
     ).length;
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
       <NotificationsRealtimeSync />
 
-      <div className="mx-auto max-w-[1500px]">
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                 IF Sigorta
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Notifications
               </h1>
 
-              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Dossiers à traiter et renouvellements arrivant à échéance.
               </p>
             </div>
 
             <Link
               href="/admin/dashboard"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               ← Tableau de bord
             </Link>
           </div>
         </header>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
           <SummaryCard
             label="Total"
             value={
@@ -1334,9 +1334,9 @@ export default async function NotificationsPage() {
           />
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-          <div className="border-b border-slate-200 p-6">
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
+          <div className="border-b border-slate-200 p-4 sm:p-6">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               À traiter
             </h2>
 
@@ -1347,7 +1347,7 @@ export default async function NotificationsPage() {
 
           {notifications.length ===
           0 ? (
-            <div className="p-12 text-center">
+            <div className="px-4 py-10 text-center sm:p-12">
               <div className="text-4xl">
                 ✅
               </div>
@@ -1370,13 +1370,13 @@ export default async function NotificationsPage() {
                     key={
                       notification.key
                     }
-                    className="p-5 transition hover:bg-[#FAFCFA] sm:p-6"
+                    className="min-w-0 p-4 transition hover:bg-[#FAFCFA] sm:p-6"
                   >
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${notification.priorityClassName}`}
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${notification.priorityClassName}`}
                           >
                             {
                               notification.priorityLabel
@@ -1387,8 +1387,8 @@ export default async function NotificationsPage() {
                             className={
                               notification.kind ===
                               "renewal"
-                                ? "rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]"
-                                : "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
+                                ? "rounded-full bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs"
+                                : "rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700 sm:px-3 sm:text-xs"
                             }
                           >
                             {notification.kind ===
@@ -1400,7 +1400,7 @@ export default async function NotificationsPage() {
                           {notification.kind ===
                             "request" &&
                             notification.isUnassigned && (
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 sm:px-3 sm:text-xs">
                                 Non attribué
                               </span>
                             )}
@@ -1411,7 +1411,7 @@ export default async function NotificationsPage() {
                               "admin" &&
                             !notification.isUnassigned &&
                             notification.assignedAgentName && (
-                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
                                 Pris en charge par{" "}
                                 {
                                   notification.assignedAgentName
@@ -1425,31 +1425,31 @@ export default async function NotificationsPage() {
                               "agent" &&
                             notification.assignedAgentId ===
                               user.id && (
-                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
                                 Pris en charge par vous
                               </span>
                             )}
 
-                          <span className="text-sm font-black text-[#0B5D3B]">
+                          <span className="break-all text-[12px] font-black text-[#0B5D3B] sm:text-sm">
                             {
                               notification.requestCode
                             }
                           </span>
                         </div>
 
-                        <h3 className="mt-3 text-base font-semibold text-[#102B20]">
+                        <h3 className="mt-3 text-[15px] font-semibold leading-5 text-[#102B20] sm:text-base">
                           {
                             notification.title
                           }
                         </h3>
 
-                        <p className="mt-1 text-sm font-medium text-slate-700">
+                        <p className="mt-1 break-words text-[13px] font-medium text-slate-700 sm:text-sm">
                           {
                             notification.clientName
                           }
                         </p>
 
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                        <p className="mt-2 max-w-2xl break-words text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
                           {
                             notification.description
                           }
@@ -1457,7 +1457,7 @@ export default async function NotificationsPage() {
 
                         {notification.kind ===
                         "request" ? (
-                          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
+                          <div className="mt-3 flex min-w-0 flex-col gap-1.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-xs">
                             <span>
                               Sans progression :{" "}
                               <strong className="text-slate-700">
@@ -1477,7 +1477,7 @@ export default async function NotificationsPage() {
                             </span>
                           </div>
                         ) : (
-                          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
+                          <div className="mt-3 flex min-w-0 flex-col gap-1.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-xs">
                             <span>
                               Fin de police :{" "}
                               <strong className="text-slate-700">
@@ -1490,7 +1490,7 @@ export default async function NotificationsPage() {
                         )}
                       </div>
 
-                      <div className="flex w-full shrink-0 flex-col gap-2 lg:w-56">
+                      <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-56">
                         {notification.kind ===
                           "request" &&
                           notification.isUnassigned && (
@@ -1578,7 +1578,7 @@ IF Sigorta`}
                           notification.clientId && (
                             <Link
                               href={`/admin/clients/${notification.clientId}`}
-                              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:min-h-11 sm:px-5 sm:text-sm"
                             >
                               Voir le client
                             </Link>
@@ -1586,7 +1586,7 @@ IF Sigorta`}
 
                         <Link
                           href={`/admin/dossiers/${notification.requestId}`}
-                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:px-5 sm:text-sm"
                         >
                           Ouvrir le dossier →
                         </Link>
@@ -1595,7 +1595,7 @@ IF Sigorta`}
                           "renewal" && (
                             <Link
                               href="/admin/renouvellements"
-                              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:px-5 sm:text-sm"
                             >
                               Renouvellements
                             </Link>
@@ -1625,16 +1625,16 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <div
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold leading-4 sm:px-3 sm:text-xs ${className}`}
       >
         {
           label
         }
       </div>
 
-      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
         {value.toLocaleString(
           "fr-FR",
         )}

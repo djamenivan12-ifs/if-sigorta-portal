@@ -66,15 +66,17 @@ export default function PartnerPolicyDownload({
   const isDownloading = downloadingYear !== null;
 
   return (
-    <section className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 shadow-sm sm:p-6">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-2xl">
+    <section className="min-w-0 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-6">
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+        <div className="min-w-0 max-w-2xl">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
             Assurance
           </p>
+
           <h2 className="mt-2 text-xl font-black tracking-[-0.02em] text-emerald-950">
             Assurance disponible
           </h2>
+
           <p className="mt-3 text-sm leading-6 text-emerald-800">
             L&apos;assurance de votre client est prête.
             Téléchargez le document puis transmettez-le directement à
@@ -88,12 +90,13 @@ export default function PartnerPolicyDownload({
       </div>
 
       {duration === 1 ? (
-        <div className="mt-6 rounded-2xl border border-emerald-200 bg-white p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+        <div className="mt-6 min-w-0 rounded-2xl border border-emerald-200 bg-white p-4 sm:p-5">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <p className="font-black text-[#102B20]">
                 Police d&apos;assurance
               </p>
+
               <p className="mt-1 text-sm leading-6 text-slate-500">
                 Assurance valable pour une durée d&apos;un an.
               </p>
@@ -103,7 +106,7 @@ export default function PartnerPolicyDownload({
               type="button"
               onClick={() => void handleDownload(1)}
               disabled={isDownloading}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 py-3 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 py-3 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {downloadingYear === 1
                 ? "Préparation..."
@@ -112,7 +115,7 @@ export default function PartnerPolicyDownload({
           </div>
         </div>
       ) : (
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid min-w-0 gap-4 md:grid-cols-2">
           <PolicyCard
             year={1}
             title="Assurance — Année 1"
@@ -121,6 +124,7 @@ export default function PartnerPolicyDownload({
             disabled={isDownloading}
             onDownload={handleDownload}
           />
+
           <PolicyCard
             year={2}
             title="Assurance — Année 2"
@@ -140,6 +144,7 @@ export default function PartnerPolicyDownload({
           <p className="font-semibold text-red-800">
             Téléchargement impossible
           </p>
+
           <p className="mt-1 text-sm leading-6 text-red-700">
             {error}
           </p>
@@ -177,14 +182,19 @@ function PolicyCard({
   const isCurrentDownload = downloadingYear === year;
 
   return (
-    <article className="rounded-2xl border border-emerald-200 bg-white p-5">
+    <article className="min-w-0 rounded-2xl border border-emerald-200 bg-white p-4 sm:p-5">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F8F2] text-sm font-black text-[#0B5D3B]">
         {year}
       </div>
-      <h3 className="mt-4 font-black text-[#102B20]">{title}</h3>
+
+      <h3 className="mt-4 font-black text-[#102B20]">
+        {title}
+      </h3>
+
       <p className="mt-1 min-h-12 text-sm leading-6 text-slate-500">
         {description}
       </p>
+
       <button
         type="button"
         onClick={() => void onDownload(year)}

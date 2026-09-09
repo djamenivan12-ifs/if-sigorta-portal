@@ -71,10 +71,10 @@ export default function PartnerRequestForm() {
   }
 
   return (
-    <div>
-      <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
-          <div>
+    <div className="min-w-0">
+      <div className="mb-5 min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:mb-6 sm:px-5">
+        <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
             <p className="text-sm font-black text-[#102B20]">
               Nouvelle demande
             </p>
@@ -84,7 +84,7 @@ export default function PartnerRequestForm() {
             </p>
           </div>
 
-          <span className="rounded-full bg-[#EEF6EC] px-3 py-1.5 text-xs font-black text-[#0B5D3B]">
+          <span className="shrink-0 rounded-full bg-[#EEF6EC] px-3 py-1.5 text-xs font-black text-[#0B5D3B]">
             {Math.round(
               (step / 4) * 100,
             )}
@@ -102,7 +102,7 @@ export default function PartnerRequestForm() {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7 lg:p-9">
+      <div className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 lg:p-9">
         {step === 1 && (
           <PartnerClientStep
             data={data}

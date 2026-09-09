@@ -94,8 +94,8 @@ export default function ConnexionAgentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5]">
-      <div className="grid min-h-screen lg:grid-cols-[0.9fr_1.1fr]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
+      <div className="grid min-h-screen min-w-0 lg:grid-cols-[0.9fr_1.1fr]">
         {/* PANNEAU GAUCHE */}
 
         <section className="relative hidden overflow-hidden bg-[#123F2C] px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-16">
@@ -160,11 +160,11 @@ export default function ConnexionAgentPage() {
 
         {/* PARTIE CONNEXION */}
 
-        <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12 xl:px-16">
-          <div className="w-full max-w-md">
+        <section className="flex min-h-screen min-w-0 items-center justify-center px-3 py-5 sm:px-6 sm:py-8 lg:px-12 lg:py-10 xl:px-16">
+          <div className="w-full min-w-0 max-w-md">
             {/* LOGO MOBILE */}
 
-            <div className="mb-8 flex justify-center lg:hidden">
+            <div className="mb-4 flex justify-center sm:mb-6 lg:hidden">
               <Link
                 href="/"
                 aria-label="IF Sigorta"
@@ -172,24 +172,24 @@ export default function ConnexionAgentPage() {
                 <img
                   src="/if-sigorta-logo.png"
                   alt="IF Sigorta"
-                  className="h-[105px] w-auto object-contain"
+                  className="h-[78px] max-w-full object-contain sm:h-[95px]"
                 />
               </Link>
             </div>
 
             {/* CARTE CONNEXION */}
 
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.3)] sm:p-8 lg:p-10">
+            <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.3)] sm:rounded-[2rem] sm:p-8 lg:p-10">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.18em]">
                   Espace sécurisé
                 </p>
 
-                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                <h2 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-4xl">
                   Connexion agent
                 </h2>
 
-                <p className="mt-3 text-sm leading-7 text-slate-500">
+                <p className="mt-2 text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
                   Connectez-vous pour accéder à
                   l’espace d’administration IF Sigorta.
                 </p>
@@ -197,20 +197,20 @@ export default function ConnexionAgentPage() {
 
               <form
                 onSubmit={handleSubmit}
-                className="mt-8 space-y-5"
+                className="mt-6 min-w-0 space-y-4 sm:mt-8 sm:space-y-5"
               >
                 {/* EMAIL */}
 
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-1.5 block text-[13px] font-semibold text-slate-700 sm:mb-2 sm:text-sm"
                   >
                     Adresse e-mail
                   </label>
 
-                  <div className="relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <div className="relative min-w-0">
+                    <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400 sm:left-4 sm:h-5 sm:w-5" />
 
                     <input
                       id="email"
@@ -226,7 +226,7 @@ export default function ConnexionAgentPage() {
                       autoComplete="email"
                       placeholder="agent@if-sigorta.com"
                       required
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                      className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-3 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:rounded-2xl sm:py-3.5 sm:pl-12 sm:pr-4 sm:text-[15px]"
                     />
                   </div>
                 </div>
@@ -236,13 +236,13 @@ export default function ConnexionAgentPage() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-1.5 block text-[13px] font-semibold text-slate-700 sm:mb-2 sm:text-sm"
                   >
                     Mot de passe
                   </label>
 
-                  <div className="relative">
-                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <div className="relative min-w-0">
+                    <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400 sm:left-4 sm:h-5 sm:w-5" />
 
                     <input
                       id="password"
@@ -261,7 +261,7 @@ export default function ConnexionAgentPage() {
                       }}
                       autoComplete="current-password"
                       required
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-12 text-[15px] text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                      className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-11 text-[14px] text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:rounded-2xl sm:py-3.5 sm:pl-12 sm:pr-12 sm:text-[15px]"
                     />
 
                     <button
@@ -277,7 +277,7 @@ export default function ConnexionAgentPage() {
                           ? "Masquer le mot de passe"
                           : "Afficher le mot de passe"
                       }
-                      className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-700"
+                      className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 sm:right-3"
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -291,7 +291,7 @@ export default function ConnexionAgentPage() {
                 {/* ERREUR */}
 
                 {errorMessage && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm leading-6 text-red-700">
+                  <div className="min-w-0 break-words rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-[12px] leading-5 text-red-700 sm:rounded-2xl sm:px-4 sm:py-3.5 sm:text-sm sm:leading-6">
                     {errorMessage}
                   </div>
                 )}
@@ -301,7 +301,7 @@ export default function ConnexionAgentPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:min-h-12 sm:px-5 sm:text-sm"
                 >
                   {loading
                     ? "Connexion en cours..."
@@ -311,17 +311,17 @@ export default function ConnexionAgentPage() {
 
               {/* RETOUR */}
 
-              <div className="mt-6 border-t border-slate-100 pt-6 text-center">
+              <div className="mt-5 border-t border-slate-100 pt-5 text-center sm:mt-6 sm:pt-6">
                 <Link
                   href="/"
-                  className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
+                  className="text-[13px] font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:text-sm"
                 >
                   ← Retour à l’accueil
                 </Link>
               </div>
             </div>
 
-            <p className="mt-5 text-center text-xs leading-5 text-slate-400">
+            <p className="mt-4 px-2 text-center text-[10px] leading-4 text-slate-400 sm:mt-5 sm:text-xs sm:leading-5">
               L’accès est réservé aux agents et
               administrateurs autorisés.
             </p>

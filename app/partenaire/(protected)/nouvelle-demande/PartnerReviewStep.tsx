@@ -365,7 +365,7 @@ export default function PartnerReviewStep({
   }
 
   return (
-    <div className="space-y-7">
+    <div className="min-w-0 space-y-6 sm:space-y-7">
       <div>
         <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
           Étape 4 sur 4
@@ -480,13 +480,13 @@ export default function PartnerReviewStep({
         />
       </ReviewSection>
 
-      <section className="overflow-hidden rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6]">
-        <div className="p-5">
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6]">
+        <div className="p-4 sm:p-5">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
             Tarif partenaire
           </p>
 
-          <p className="mt-2 text-4xl font-black tracking-tight text-[#0B5D3B]">
+          <p className="mt-2 break-words text-3xl font-black tracking-tight text-[#0B5D3B] sm:text-4xl">
             {Number(
               data.calculatedPrice ??
                 0,
@@ -534,7 +534,7 @@ export default function PartnerReviewStep({
         )}
       </ReviewSection>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] p-5">
+      <label className="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] p-4 sm:p-5">
         <input
           type="checkbox"
           checked={confirmed}
@@ -555,12 +555,12 @@ export default function PartnerReviewStep({
         </span>
       </label>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between">
+      <div className="flex min-w-0 flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between">
         <button
           type="button"
           disabled={submitting}
           onClick={onPrevious}
-          className="min-h-12 rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           ← Précédent
         </button>
@@ -574,7 +574,7 @@ export default function PartnerReviewStep({
           onClick={() =>
             void handleCreate()
           }
-          className="min-h-12 rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="min-h-12 w-full rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
           {submitting
             ? "Création du dossier..."
@@ -596,8 +596,8 @@ function ReviewSection({
     React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-[#FCFDFC]">
-      <div className="border-b border-slate-100 px-5 py-4">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-[#FCFDFC]">
+      <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
           {number}
         </p>
@@ -607,7 +607,7 @@ function ReviewSection({
         </h3>
       </div>
 
-      <div className="grid gap-5 p-5 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-5 p-4 sm:grid-cols-2 sm:p-5">
         {children}
       </div>
     </section>

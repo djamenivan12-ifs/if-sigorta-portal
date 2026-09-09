@@ -499,10 +499,10 @@ export default async function PartnerDossierPage({
     );
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-5 lg:px-8 lg:py-8">
+    <div className="mx-auto w-full min-w-0 max-w-[1200px] overflow-x-hidden px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
       {/* Navigation */}
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <Link
           href="/partenaire/dossiers"
           className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
@@ -520,14 +520,14 @@ export default async function PartnerDossierPage({
 
       {/* En-tête */}
 
-      <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
+      <header className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:rounded-[1.75rem] sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Dossier partenaire
             </p>
 
-            <h1 className="mt-3 break-all text-3xl font-black tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+            <h1 className="mt-3 break-all text-2xl font-black tracking-[-0.04em] text-[#102B20] sm:text-4xl">
               {
                 insuranceRequest.request_code
               }
@@ -667,11 +667,11 @@ export default async function PartnerDossierPage({
 
       {/* Contenu */}
 
-      <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="space-y-5">
+      <div className="mt-5 grid min-w-0 gap-5 sm:mt-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-5">
           {/* Informations client */}
 
-          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
               Informations du client
             </h2>
@@ -749,7 +749,7 @@ export default async function PartnerDossierPage({
 
           {/* Identité */}
 
-          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
               Identité et assurance
             </h2>
@@ -848,7 +848,7 @@ export default async function PartnerDossierPage({
 
           {insuranceRequest.status ===
             "payment_review" && (
-            <section className="rounded-[1.5rem] border border-orange-200 bg-orange-50 p-5 shadow-sm sm:p-6">
+            <section className="min-w-0 rounded-[1.5rem] border border-orange-200 bg-orange-50 p-4 shadow-sm sm:p-6">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-orange-700">
                 Paiement
               </p>
@@ -887,7 +887,7 @@ export default async function PartnerDossierPage({
           ].includes(
             insuranceRequest.status,
           ) && (
-            <section className="rounded-[1.5rem] border border-green-200 bg-green-50 p-5 shadow-sm sm:p-6">
+            <section className="min-w-0 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 shadow-sm sm:p-6">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-green-700">
                 Paiement
               </p>
@@ -939,7 +939,7 @@ export default async function PartnerDossierPage({
 
           {/* Documents */}
 
-          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
               Documents du client
             </h2>
@@ -957,7 +957,7 @@ export default async function PartnerDossierPage({
                       key={
                         document.id
                       }
-                      className="flex flex-col gap-4 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex min-w-0 flex-col gap-4 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
                         <p className="font-semibold text-slate-900">
@@ -987,7 +987,7 @@ export default async function PartnerDossierPage({
                           }
                           target="_blank"
                           rel="noreferrer"
-                          className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                          className="w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2.5 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto"
                         >
                           Ouvrir
                         </a>
@@ -1012,15 +1012,15 @@ export default async function PartnerDossierPage({
 
         {/* Colonne droite */}
 
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           {/* Tarif */}
 
-          <section className="rounded-[1.5rem] border border-[#DCE9DD] bg-white p-5 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-[1.5rem] border border-[#DCE9DD] bg-white p-4 shadow-sm sm:p-6">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
               Tarif partenaire
             </p>
 
-            <p className="mt-3 text-4xl font-black tracking-tight text-[#0B5D3B]">
+            <p className="mt-3 break-words text-3xl font-black tracking-tight text-[#0B5D3B] sm:text-4xl">
               {calculatedPrice.toLocaleString(
                 "fr-FR",
               )}{" "}
@@ -1039,7 +1039,7 @@ export default async function PartnerDossierPage({
 
           {/* État */}
 
-          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-lg font-black text-[#102B20]">
               État du dossier
             </h2>
@@ -1061,7 +1061,7 @@ export default async function PartnerDossierPage({
 
           {/* Référence */}
 
-          <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-lg font-black text-[#102B20]">
               Référence
             </h2>

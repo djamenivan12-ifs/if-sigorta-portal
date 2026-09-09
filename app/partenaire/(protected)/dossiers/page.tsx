@@ -197,8 +197,8 @@ export default async function PartnerDossiersPage() {
       []) as RequestRow[];
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-5 lg:px-8 lg:py-8">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mx-auto w-full min-w-0 max-w-[1500px] overflow-x-hidden px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
             Espace partenaire
@@ -217,7 +217,7 @@ export default async function PartnerDossiersPage() {
 
         <Link
           href="/partenaire/nouvelle-demande"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0B5D3B] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#084A2F]"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0B5D3B] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#084A2F] sm:w-auto"
         >
           <FilePlus2 className="h-4 w-4" />
 
@@ -225,8 +225,8 @@ export default async function PartnerDossiersPage() {
         </Link>
       </div>
 
-      <div className="mt-7 rounded-3xl border border-slate-200/80 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="mt-6 min-w-0 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-sm sm:mt-7 sm:rounded-3xl">
+        <div className="flex min-w-0 flex-col gap-4 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <h2 className="font-black text-[#102B20]">
               Dossiers enregistrés
@@ -432,7 +432,7 @@ export default async function PartnerDossiersPage() {
             </div>
 
             {/* Version mobile / tablette */}
-            <div className="divide-y divide-slate-100 lg:hidden">
+            <div className="min-w-0 divide-y divide-slate-100 lg:hidden">
               {requests.map(
                 (
                   request,
@@ -465,7 +465,7 @@ export default async function PartnerDossiersPage() {
                         request.id
                       }
                       href={`/partenaire/dossiers/${request.id}`}
-                      className="block p-5 transition hover:bg-[#FAFCF9]"
+                      className="block min-w-0 p-4 transition hover:bg-[#FAFCF9] sm:p-5"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex min-w-0 gap-3">
@@ -509,8 +509,8 @@ export default async function PartnerDossiersPage() {
                         </span>
                       </div>
 
-                      <div className="mt-4 flex items-end justify-between gap-4">
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="mt-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                        <div className="flex min-w-0 items-center gap-2 text-xs text-slate-500">
                           <CalendarDays className="h-4 w-4" />
 
                           {formatDate(
@@ -518,7 +518,7 @@ export default async function PartnerDossiersPage() {
                           )}
                         </div>
 
-                        <p className="text-sm font-black text-[#0B5D3B]">
+                        <p className="break-words text-sm font-black text-[#0B5D3B] sm:text-right">
                           {Number(
                             request.calculated_price,
                           ).toLocaleString(

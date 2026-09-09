@@ -249,7 +249,7 @@ export default function PartnerClientStep({
       onSubmit={
         handleSubmit
       }
-      className="space-y-6"
+      className="min-w-0 space-y-6"
     >
       <div>
         <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
@@ -273,7 +273,7 @@ export default function PartnerClientStep({
         </div>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid min-w-0 gap-5 md:grid-cols-2">
         <div>
           <label
             htmlFor="firstName"
@@ -486,7 +486,7 @@ export default function PartnerClientStep({
         </div>
       </div>
 
-      <div className="border-t border-slate-200 pt-6">
+      <div className="min-w-0 border-t border-slate-200 pt-6">
         <h3 className="text-lg font-black text-[#102B20]">
           Contact WhatsApp
         </h3>
@@ -525,7 +525,7 @@ export default function PartnerClientStep({
         />
       </div>
 
-      <div className="border-t border-slate-200 pt-6">
+      <div className="min-w-0 border-t border-slate-200 pt-6">
         <h3 className="text-lg font-black text-[#102B20]">
           Adresse en Turquie
         </h3>
@@ -551,10 +551,10 @@ export default function PartnerClientStep({
         />
       </div>
 
-      <div className="flex justify-end border-t border-slate-200 pt-6">
+      <div className="flex min-w-0 justify-end border-t border-slate-200 pt-6">
         <button
           type="submit"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 py-3 font-black text-white transition hover:bg-[#084A2F] focus:outline-none focus:ring-4 focus:ring-[#0B5D3B]/20"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-6 py-3 font-black text-white transition hover:bg-[#084A2F] focus:outline-none focus:ring-4 focus:ring-[#0B5D3B]/20 sm:w-auto"
         >
           Continuer
           <span

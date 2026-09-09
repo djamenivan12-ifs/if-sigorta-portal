@@ -8,31 +8,34 @@ type SuiviPageProps = {
   }>;
 };
 
+function getValue(
+  value: string | string[] | undefined,
+) {
+  if (Array.isArray(value)) {
+    return value[0] ?? "";
+  }
+
+  return value ?? "";
+}
+
 export default async function SuiviPage({
   searchParams,
 }: SuiviPageProps) {
-  const params = await searchParams;
-
-  const rawCode = Array.isArray(params.code)
-    ? params.code[0]
-    : params.code;
-
-  const rawCountry = Array.isArray(params.country)
-    ? params.country[0]
-    : params.country;
-
-  const rawPhone = Array.isArray(params.phone)
-    ? params.phone[0]
-    : params.phone;
+  const params =
+    await searchParams;
 
   const initialCode =
-    rawCode?.trim().toUpperCase() ?? "";
+    getValue(params.code)
+      .trim()
+      .toUpperCase();
 
   const initialCountry =
-    rawCountry?.trim() || "+90";
+    getValue(params.country)
+      .trim() || "+90";
 
   const initialPhone =
-    rawPhone?.replace(/\D/g, "") ?? "";
+    getValue(params.phone)
+      .replace(/\D/g, "");
 
   return (
     <SuiviClient

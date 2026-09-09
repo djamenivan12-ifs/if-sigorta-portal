@@ -594,8 +594,8 @@ export default function PartnerPaymentForm({
   }
 
   return (
-    <section className="rounded-[1.5rem] border border-[#DCE9DD] bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start justify-between gap-4">
+    <section className="min-w-0 rounded-[1.5rem] border border-[#DCE9DD] bg-white p-4 shadow-sm sm:p-6">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
             Paiement
@@ -608,7 +608,7 @@ export default function PartnerPaymentForm({
           </h2>
         </div>
 
-        <span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800">
+        <span className="w-fit rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800">
           {isResubmission
             ? "À corriger"
             : "En attente"}
@@ -633,7 +633,7 @@ export default function PartnerPaymentForm({
           Montant à payer
         </p>
 
-        <p className="mt-1 text-3xl font-black tracking-tight text-[#102B20]">
+        <p className="mt-1 break-words text-2xl font-black tracking-tight text-[#102B20] sm:text-3xl">
           {amount.toLocaleString(
             "fr-FR",
           )}{" "}
@@ -678,7 +678,7 @@ export default function PartnerPaymentForm({
                 <button
                   type="button"
                   onClick={handleCopyBeneficiary}
-                  className="inline-flex w-fit items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2.5 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-fit"
                 >
                   {copiedBeneficiary
                     ? "Nom copié ✓"
@@ -708,7 +708,7 @@ export default function PartnerPaymentForm({
                 <button
                   type="button"
                   onClick={handleCopyIban}
-                  className="inline-flex w-fit items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2.5 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-fit"
                 >
                   {copiedIban
                     ? "IBAN copié ✓"
@@ -774,7 +774,7 @@ export default function PartnerPaymentForm({
 
           <label
             htmlFor="partner-payment-receipt"
-            className={`mt-3 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-7 text-center transition ${
+            className={`mt-3 flex min-w-0 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-6 text-center transition sm:px-5 sm:py-7 ${
               isSubmitting
                 ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-70"
                 : "border-[#CFE3CF] bg-[#F8FBF7] hover:border-[#0B5D3B] hover:bg-[#F3F8F2]"
@@ -821,7 +821,7 @@ export default function PartnerPaymentForm({
           )}
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4">
+        <label className="flex min-w-0 cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4">
           <input
             type="checkbox"
             checked={

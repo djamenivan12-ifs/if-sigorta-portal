@@ -216,22 +216,22 @@ export default async function SettingsPage() {
       | null;
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                 Administration
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Paramètres
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Gérez les tarifs, les coordonnées bancaires,
                 le numéro WhatsApp et les réglages généraux
                 du portail IF Sigorta.
@@ -240,7 +240,7 @@ export default async function SettingsPage() {
 
             <Link
               href="/admin/dashboard"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               ← Tableau de bord
             </Link>
@@ -249,91 +249,97 @@ export default async function SettingsPage() {
 
         {/* TARIFS */}
 
-        <section className="mt-8">
-          <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <section className="mt-6 min-w-0 sm:mt-8">
+          <div className="mb-4 min-w-0 sm:mb-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
               Tarification
             </p>
 
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               Tarifs d’assurance
             </h2>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
               Modifiez les tarifs selon l’âge du client et
               la durée de l’assurance.
             </p>
           </div>
 
-          <PriceSettingsForm
-            initialRanges={
-              ranges
-            }
-          />
+          <div className="min-w-0">
+            <PriceSettingsForm
+              initialRanges={
+                ranges
+              }
+            />
+          </div>
         </section>
 
         {/* COORDONNÉES BANCAIRES */}
 
-        <section className="mt-12">
-          <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <section className="mt-8 min-w-0 sm:mt-10 lg:mt-12">
+          <div className="mb-4 min-w-0 sm:mb-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
               Paiement
             </p>
 
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               Coordonnées bancaires
             </h2>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
               Ces informations sont utilisées pour les
               virements bancaires effectués par les clients.
             </p>
           </div>
 
-          <BankSettingsForm
-            initialBeneficiary={
-              bankSetting?.beneficiary ??
-              ""
-            }
-            initialBankName={
-              bankSetting?.bank_name ??
-              ""
-            }
-            initialIban={
-              bankSetting?.iban ??
-              ""
-            }
-          />
+          <div className="min-w-0">
+            <BankSettingsForm
+              initialBeneficiary={
+                bankSetting?.beneficiary ??
+                ""
+              }
+              initialBankName={
+                bankSetting?.bank_name ??
+                ""
+              }
+              initialIban={
+                bankSetting?.iban ??
+                ""
+              }
+            />
+          </div>
         </section>
 
         {/* WHATSAPP */}
 
-        <section className="mt-12">
-          <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <section className="mt-8 min-w-0 sm:mt-10 lg:mt-12">
+          <div className="mb-4 min-w-0 sm:mb-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
               Contact
             </p>
 
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               WhatsApp IF Sigorta
             </h2>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
               Numéro public utilisé par les clients pour
               contacter directement IF Sigorta.
             </p>
           </div>
 
-          <ContactSettingsForm
-            initialCountryCode={
-              contactSetting?.whatsapp_country_code ??
-              "+90"
-            }
-            initialWhatsappNumber={
-              contactSetting?.whatsapp_number ??
-              ""
-            }
-          />
+          <div className="min-w-0">
+            <ContactSettingsForm
+              initialCountryCode={
+                contactSetting?.whatsapp_country_code ??
+                "+90"
+              }
+              initialWhatsappNumber={
+                contactSetting?.whatsapp_number ??
+                ""
+              }
+            />
+          </div>
         </section>
       </div>
     </main>

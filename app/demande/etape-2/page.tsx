@@ -271,6 +271,28 @@ export default function Etape2Page() {
 
   const t = translations[language];
 
+  function changeLanguage(
+    nextLanguage: Language,
+  ) {
+    setLanguage(nextLanguage);
+
+    window.localStorage.setItem(
+      "if-sigorta-language",
+      nextLanguage,
+    );
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "if-sigorta-language-change",
+        {
+          detail: {
+            language: nextLanguage,
+          },
+        },
+      ),
+    );
+  }
+
   const today = new Date()
     .toISOString()
     .split("T")[0];
@@ -676,45 +698,73 @@ export default function Etape2Page() {
         : "Gösterilen fiyat seçilen sigorta süresine karşılık gelir.";
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
       {/* TOP BAR */}
 
       <div className="border-b border-slate-200/80 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           <a
             href="/"
-            className="flex items-center"
+            className="flex shrink-0 items-center"
             aria-label="IF Sigorta"
           >
             <img
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
-              className="h-[72px] w-auto object-contain object-left sm:h-[82px]"
+              className="h-[58px] w-auto max-w-[170px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
             />
           </a>
 
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                "/demande/etape-1",
-              )
-            }
-            className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
-          >
-            {t.backStep1}
-          </button>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+            <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
+              {(
+                [
+                  "fr",
+                  "en",
+                  "tr",
+                ] as Language[]
+              ).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() =>
+                    changeLanguage(item)
+                  }
+                  className={[
+                    "rounded-lg px-2 py-1.5 text-[10px] font-black uppercase transition sm:px-3 sm:text-[11px]",
+                    language === item
+                      ? "bg-white text-[#0B5D3B] shadow-sm"
+                      : "text-slate-400 hover:text-slate-700",
+                  ].join(" ")}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/demande/etape-1",
+                )
+              }
+              className="hidden text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:block"
+            >
+              {t.backStep1}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* PAGE */}
 
-      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-14">
+        <div className="grid min-w-0 gap-5 sm:gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
           {/* LEFT PANEL */}
 
-          <aside className="lg:sticky lg:top-8 lg:self-start">
-            <div className="relative overflow-hidden rounded-[2rem] bg-[#123F2C] px-6 py-8 text-white sm:px-8 lg:min-h-[620px] lg:px-8 lg:py-10">
+          <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start">
+            <div className="relative min-w-0 overflow-hidden rounded-[1.5rem] bg-[#123F2C] px-5 py-6 text-white sm:rounded-[2rem] sm:px-8 sm:py-8 lg:min-h-[620px] lg:px-8 lg:py-10">
               <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
               <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
 
@@ -732,7 +782,7 @@ export default function Etape2Page() {
                     <div className="h-full w-2/5 rounded-full bg-[#B8E83D]" />
                   </div>
 
-                  <h2 className="mt-8 max-w-sm text-3xl font-semibold leading-[1.05] tracking-[-0.04em] sm:text-4xl">
+                  <h2 className="mt-6 max-w-sm text-[1.75rem] font-semibold leading-[1.08] tracking-[-0.04em] sm:mt-8 sm:text-4xl">
                     {sideTitle}
                   </h2>
 
@@ -741,7 +791,7 @@ export default function Etape2Page() {
                   </p>
                 </div>
 
-                <div className="mt-10 space-y-4 lg:mt-auto">
+                <div className="mt-7 space-y-4 sm:mt-10 lg:mt-auto">
                   <div className="flex gap-3 border-t border-white/10 pt-5">
                     <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">
                       ✓
@@ -768,13 +818,13 @@ export default function Etape2Page() {
 
           {/* FORM */}
 
-          <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:p-8 lg:p-10">
+          <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:rounded-[2rem] sm:p-8 lg:p-10">
             <div className="max-w-2xl">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
                 {t.step}
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-3 text-[1.75rem] font-semibold leading-tight tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                 {t.title}
               </h1>
 
@@ -791,7 +841,7 @@ export default function Etape2Page() {
 
             <form
               onSubmit={handleSubmit}
-              className="mt-9 space-y-10"
+              className="mt-7 space-y-8 sm:mt-9 sm:space-y-10"
             >
               {/* KIMLIK STATUS */}
 
@@ -800,7 +850,7 @@ export default function Etape2Page() {
                   {t.hasKimlik}
                 </p>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid min-w-0 gap-3 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() =>
@@ -850,7 +900,7 @@ export default function Etape2Page() {
               {/* IDENTITY FIELDS */}
 
               <section className="border-t border-slate-100 pt-8">
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid min-w-0 gap-5 sm:grid-cols-2">
                   {requestData.hasKimlik ? (
                     <>
                       <div>
@@ -1000,7 +1050,7 @@ export default function Etape2Page() {
                   </p>
                 </div>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() =>
@@ -1055,7 +1105,7 @@ export default function Etape2Page() {
                 )}
 
                 {!priceLoading && priceResult && (
-                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[#DCE9DD] bg-[#F7FAF6]">
+                  <div className="mt-5 min-w-0 overflow-hidden rounded-[1.5rem] border border-[#DCE9DD] bg-[#F7FAF6]">
                     <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -1122,7 +1172,7 @@ export default function Etape2Page() {
 
               {/* ACTIONS */}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
                   onClick={() =>

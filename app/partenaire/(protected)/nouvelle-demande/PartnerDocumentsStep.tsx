@@ -73,8 +73,8 @@ export default function PartnerDocumentsStep({
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="min-w-0 space-y-6 sm:space-y-8">
+      <div className="min-w-0">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
           Étape 3 sur 4
         </p>
@@ -94,7 +94,7 @@ export default function PartnerDocumentsStep({
         </div>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-[#FCFDFC] p-5">
+      <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
         <div className="mb-4">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
             01
@@ -124,7 +124,7 @@ export default function PartnerDocumentsStep({
 
       {data.hasKimlik && (
         <>
-          <section className="rounded-2xl border border-slate-200 bg-[#FCFDFC] p-5">
+          <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
             <div className="mb-4">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
                 02
@@ -152,7 +152,7 @@ export default function PartnerDocumentsStep({
             />
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-[#FCFDFC] p-5">
+          <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
             <div className="mb-4">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
                 03
@@ -198,11 +198,11 @@ export default function PartnerDocumentsStep({
             : "Ajoutez le passeport."}
       </div>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between">
+      <div className="flex min-w-0 flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between">
         <button
           type="button"
           onClick={onPrevious}
-          className="min-h-12 rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
         >
           ← Précédent
         </button>
@@ -211,7 +211,7 @@ export default function PartnerDocumentsStep({
           type="button"
           disabled={!complete}
           onClick={handleNext}
-          className="min-h-12 rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="min-h-12 w-full rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
           Continuer →
         </button>

@@ -629,41 +629,41 @@ const agentIsDisabled =
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
+        <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Link
             href="/admin/agents/performance"
-            className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-base"
           >
             ← Performance des agents
           </Link>
 
           <Link
             href="/admin/agents"
-            className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-base"
           >
             Gestion des agents
           </Link>
         </div>
 
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Agent IF Sigorta
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 {agentName}
               </h1>
 
-              <p className="mt-3 text-sm leading-7 text-slate-500">
+              <p className="mt-2 break-all text-[12px] leading-5 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
                 {agent.email}
               </p>
             </div>
 
-            <span className="inline-flex w-fit rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-sm font-semibold text-[#0B5D3B]">
+            <span className="inline-flex w-fit max-w-full rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1.5 text-[11px] font-semibold text-[#0B5D3B] sm:px-4 sm:py-2 sm:text-sm">
               {role ===
               "admin"
                 ? "Administrateur"
@@ -672,17 +672,17 @@ const agentIsDisabled =
           </div>
         </header>
 
-<section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-  <div className="mb-6">
+<section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
+  <div className="mb-4 sm:mb-6">
     <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
       Gestion du compte
     </p>
 
-    <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+    <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
       Informations de l’utilisateur
     </h2>
 
-    <p className="mt-2 text-sm leading-6 text-slate-500">
+    <p className="mt-2 text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
       Modifiez les informations, le rôle, le mot de passe ou l’état du compte.
     </p>
   </div>
@@ -702,7 +702,7 @@ const agentIsDisabled =
 </section>
 
         {/* Statistiques générales */}
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
           <SummaryCard
             label="Dossiers attribués"
             value={total}
@@ -737,13 +737,13 @@ const agentIsDisabled =
         </section>
 
         {/* Retards */}
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
               Priorités
             </p>
 
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               Retards de l’agent
             </h2>
 
@@ -752,7 +752,7 @@ const agentIsDisabled =
             </p>
           </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4">
             <DelayCard
               label="À surveiller"
               value={watchCount}
@@ -787,7 +787,7 @@ const agentIsDisabled =
         </section>
 
         {/* Performance */}
-        <section className="mt-6 grid gap-4 lg:grid-cols-3">
+        <section className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-3">
           <MetricCard
             label="Prise en charge moyenne"
             value={formatDuration(
@@ -822,21 +822,21 @@ const agentIsDisabled =
         </section>
 
         {/* Dossiers */}
-        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-          <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
+          <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Dossiers de l’agent
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-[12px] text-slate-500 sm:text-sm">
                 Les 25 dossiers les plus récents sont affichés.
               </p>
             </div>
 
             <Link
               href={`/admin/dossiers?responsable=${agent.id}`}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:min-h-10 sm:w-auto sm:text-sm"
             >
               Voir tous les dossiers
             </Link>
@@ -844,7 +844,7 @@ const agentIsDisabled =
 
           {recentRequests.length ===
           0 ? (
-            <div className="p-12 text-center">
+            <div className="px-4 py-10 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun dossier attribué
               </p>
@@ -854,7 +854,140 @@ const agentIsDisabled =
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              <div className="divide-y divide-slate-100 lg:hidden">
+                {recentRequests.map((request) => {
+                  const client = getClient(request.client);
+
+                  const clientName = client
+                    ? `${client.first_name} ${client.last_name}`.trim()
+                    : "Client inconnu";
+
+                  const statusInformation =
+                    statusLabels[request.status] ?? {
+                      label: request.status,
+                      className: "bg-slate-100 text-slate-700",
+                    };
+
+                  const lastProgressAt =
+                    lastProgressByRequest.get(request.id) ??
+                    request.assigned_at ??
+                    request.created_at;
+
+                  const minutesWithoutProgress =
+                    getMinutesBetween(lastProgressAt, now);
+
+                  const completedRequest =
+                    whatsappSentRequests.has(request.id);
+
+                  let delayLabel = "Normal";
+                  let delayClassName =
+                    "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]";
+
+                  if (completedRequest) {
+                    delayLabel = "Terminé";
+                    delayClassName =
+                      "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]";
+                  } else if (request.status === "payment_rejected") {
+                    delayLabel = "Priorité élevée";
+                    delayClassName = "bg-red-50 text-red-700";
+                  } else if (minutesWithoutProgress >= 30) {
+                    delayLabel = "Priorité élevée";
+                    delayClassName = "bg-red-50 text-red-700";
+                  } else if (minutesWithoutProgress >= 15) {
+                    delayLabel = "En retard";
+                    delayClassName = "bg-orange-50 text-orange-700";
+                  } else if (minutesWithoutProgress >= 5) {
+                    delayLabel = "À surveiller";
+                    delayClassName = "bg-amber-50 text-amber-700";
+                  }
+
+                  return (
+                    <article
+                      key={request.id}
+                      className="min-w-0 p-4 sm:p-5"
+                    >
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <Link
+                            href={`/admin/dossiers/${request.id}`}
+                            className="break-all text-[13px] font-black text-[#0B5D3B] hover:underline sm:text-sm"
+                          >
+                            {request.request_code}
+                          </Link>
+
+                          <p className="mt-1 break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                            {clientName}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`inline-flex max-w-[50%] shrink-0 rounded-full px-2.5 py-1 text-center text-[10px] font-semibold leading-4 sm:text-xs ${statusInformation.className}`}
+                        >
+                          {statusInformation.label}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold sm:text-xs ${delayClassName}`}
+                        >
+                          {delayLabel}
+                        </span>
+
+                        {!completedRequest && (
+                          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 sm:text-xs">
+                            {formatDuration(minutesWithoutProgress)}
+                          </span>
+                        )}
+                      </div>
+
+                      <dl className="mt-4 grid min-w-0 grid-cols-2 gap-x-4 gap-y-3">
+                        <div className="min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            Montant
+                          </dt>
+                          <dd className="mt-1 text-[12px] font-black text-[#102B20] sm:text-sm">
+                            {Number(
+                              request.calculated_price ?? 0,
+                            ).toLocaleString("fr-FR")}{" "}
+                            TL
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            Attribution
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
+                            {request.assigned_at
+                              ? formatDate(request.assigned_at)
+                              : "—"}
+                          </dd>
+                        </div>
+
+                        <div className="col-span-2 min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            Dernière progression
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
+                            {formatDate(lastProgressAt)}
+                          </dd>
+                        </div>
+                      </dl>
+
+                      <Link
+                        href={`/admin/dossiers/${request.id}`}
+                        className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:text-sm"
+                      >
+                        Ouvrir le dossier
+                      </Link>
+                    </article>
+                  );
+                })}
+              </div>
+
+            <div className="hidden overflow-x-auto lg:block">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-[#FAFCFA]">
                   <tr>
@@ -1064,7 +1197,7 @@ const agentIsDisabled =
                           <TableCell>
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                              className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-base"
                             >
                               Ouvrir
                             </Link>
@@ -1076,6 +1209,7 @@ const agentIsDisabled =
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </section>
       </div>
@@ -1095,14 +1229,14 @@ function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5">
       <span
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
         {label}
       </span>
 
-      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
         {value.toLocaleString(
           "fr-FR",
         )}
@@ -1128,21 +1262,21 @@ function DelayCard({
 }: DelayCardProps) {
   return (
     <div
-      className={`rounded-xl border p-5 ${className}`}
+      className={`min-w-0 rounded-xl border p-4 sm:p-5 ${className}`}
     >
       <p
-        className={`text-3xl font-bold ${valueClassName}`}
+        className={`text-2xl font-bold sm:text-3xl ${valueClassName}`}
       >
         {value.toLocaleString(
           "fr-FR",
         )}
       </p>
 
-      <p className="mt-3 font-semibold text-[#102B20]">
+      <p className="mt-2 text-[13px] font-semibold text-[#102B20] sm:mt-3 sm:text-base">
         {label}
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-slate-600">
+      <p className="mt-2 text-[11px] leading-5 text-slate-600 sm:text-xs">
         {description}
       </p>
     </div>
@@ -1161,16 +1295,16 @@ function MetricCard({
   description,
 }: MetricCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
-      <p className="text-sm font-medium text-slate-500">
+    <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5">
+      <p className="text-[12px] font-medium text-slate-500 sm:text-sm">
         {label}
       </p>
 
-      <p className="mt-2 text-2xl font-bold text-slate-900">
+      <p className="mt-2 break-words text-xl font-bold text-slate-900 sm:text-2xl">
         {value}
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-slate-500">
+      <p className="mt-2 text-[11px] leading-5 text-slate-500 sm:text-xs">
         {description}
       </p>
     </div>

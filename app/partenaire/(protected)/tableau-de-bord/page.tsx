@@ -470,10 +470,10 @@ export default async function PartnerDashboardPage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-5 lg:px-8 lg:py-8">
+    <div className="mx-auto w-full min-w-0 max-w-[1500px] overflow-x-hidden px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
       {/* EN-TÊTE */}
 
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
         <div>
           <p className="text-sm font-semibold text-[#0B5D3B]">
             Bonjour{" "}
@@ -495,7 +495,7 @@ export default async function PartnerDashboardPage() {
 
         <Link
           href="/partenaire/nouvelle-demande"
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-bold text-white transition hover:bg-[#084A2F]"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-bold text-white transition hover:bg-[#084A2F] sm:w-auto"
         >
           Nouvelle demande
         </Link>
@@ -519,7 +519,7 @@ export default async function PartnerDashboardPage() {
 
       {/* COMPTEURS */}
 
-      <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mt-6 grid min-w-0 grid-cols-2 gap-3 sm:mt-7 sm:gap-4 xl:grid-cols-5">
         {
           cards.map(
             (card) => {
@@ -534,22 +534,22 @@ export default async function PartnerDashboardPage() {
                   href={
                     card.href
                   }
-                  className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#CFE3CF] hover:shadow-md"
+                  className="group min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#CFE3CF] hover:shadow-md sm:p-5"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F8F2] text-[#0B5D3B] transition group-hover:bg-[#EEF6EC]">
                       <Icon className="h-5 w-5" />
                     </div>
 
-                    <span className="text-2xl font-black text-[#102B20]">
+                    <span className="shrink-0 text-xl font-black text-[#102B20] sm:text-2xl">
                       {
                         card.value
                       }
                     </span>
                   </div>
 
-                  <div className="mt-5 flex items-end justify-between gap-3">
-                    <p className="text-sm font-bold leading-5 text-slate-600">
+                  <div className="mt-4 flex min-w-0 items-end justify-between gap-2 sm:mt-5 sm:gap-3">
+                    <p className="min-w-0 text-xs font-bold leading-5 text-slate-600 sm:text-sm">
                       {
                         card.label
                       }
@@ -566,8 +566,8 @@ export default async function PartnerDashboardPage() {
 
       {/* ACTIVITÉ RÉCENTE */}
 
-      <div className="mt-6 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mt-6 min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-lg font-black text-[#102B20]">
               Activité récente
@@ -590,7 +590,7 @@ export default async function PartnerDashboardPage() {
               0 && (
               <Link
                 href="/partenaire/dossiers"
-                className="inline-flex items-center gap-2 text-sm font-bold text-[#0B5D3B] transition hover:text-[#084A2F]"
+                className="inline-flex min-h-10 w-fit items-center gap-2 text-sm font-bold text-[#0B5D3B] transition hover:text-[#084A2F]"
               >
                 Voir tous les dossiers
 
@@ -624,7 +624,7 @@ export default async function PartnerDashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+            <div className="mt-6 min-w-0 overflow-hidden rounded-2xl border border-slate-200">
               {/* DESKTOP */}
 
               <div className="hidden overflow-x-auto md:block">
@@ -744,7 +744,7 @@ export default async function PartnerDashboardPage() {
 
               {/* MOBILE */}
 
-              <div className="divide-y divide-slate-100 md:hidden">
+              <div className="min-w-0 divide-y divide-slate-100 md:hidden">
                 {
                   recentRequests.map(
                     (
@@ -774,9 +774,9 @@ export default async function PartnerDashboardPage() {
                             request.id
                           }
                           href={`/partenaire/dossiers/${request.id}`}
-                          className="block p-4 transition hover:bg-[#FAFCF9]"
+                          className="block min-w-0 p-4 transition hover:bg-[#FAFCF9]"
                         >
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex min-w-0 items-start justify-between gap-4">
                             <div className="min-w-0">
                               <p className="truncate text-sm font-black text-[#102B20]">
                                 {
@@ -794,7 +794,7 @@ export default async function PartnerDashboardPage() {
                             <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#0B5D3B]" />
                           </div>
 
-                          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                          <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-3">
                             <span
                               className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${getStatusClassName(
                                 request.status,

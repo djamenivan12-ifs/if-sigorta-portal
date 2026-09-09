@@ -518,29 +518,29 @@ export default async function PaymentsPage({
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
                 Finance
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Paiements
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Consultez et traitez les paiements associés aux demandes d’assurance.
               </p>
             </div>
 
             <Link
               href="/admin/dashboard"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               ← Tableau de bord
             </Link>
@@ -549,7 +549,7 @@ export default async function PaymentsPage({
 
         {/* KPI */}
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
           <StatCard
             label="À vérifier"
             value={
@@ -597,10 +597,10 @@ export default async function PaymentsPage({
 
         {/* FILTRES */}
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-5">
           <form
             method="GET"
-            className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]"
+            className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]"
           >
             <input
               type="search"
@@ -609,7 +609,7 @@ export default async function PaymentsPage({
                 search
               }
               placeholder="Client, code dossier ou WhatsApp..."
-              className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+              className="min-h-10 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
             />
 
             <select
@@ -617,7 +617,7 @@ export default async function PaymentsPage({
               defaultValue={
                 statusFilter
               }
-              className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+              className="min-h-10 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
             >
               <option value="">
                 Tous les paiements
@@ -638,14 +638,14 @@ export default async function PaymentsPage({
 
             <button
               type="submit"
-              className="min-h-11 rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
+              className="min-h-10 w-full rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-11 sm:px-5 sm:text-sm"
             >
               Filtrer
             </button>
 
             <Link
               href="/admin/paiements"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               Réinitialiser
             </Link>
@@ -654,9 +654,9 @@ export default async function PaymentsPage({
 
         {/* TABLE */}
 
-        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-          <div className="border-b border-slate-200 p-6">
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
+          <div className="border-b border-slate-200 p-4 sm:p-6">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
               Liste des paiements
             </h2>
 
@@ -674,12 +674,125 @@ export default async function PaymentsPage({
 
           {payments.length ===
           0 ? (
-            <div className="p-12 text-center">
+            <div className="px-4 py-10 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun paiement trouvé
               </p>
             </div>
           ) : (
+            <>
+              <div className="divide-y divide-slate-100 lg:hidden">
+                {payments.map((payment) => {
+                  const paymentStatus =
+                    paymentStatusConfiguration[payment.paymentStatus] ??
+                    paymentStatusConfiguration[
+                      payment.requestStatus === "payment_confirmed"
+                        ? "confirmed"
+                        : payment.requestStatus === "payment_rejected"
+                          ? "rejected"
+                          : "review"
+                    ];
+
+                  return (
+                    <article
+                      key={payment.requestId}
+                      className="min-w-0 p-4 sm:p-5"
+                    >
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                            {payment.clientName}
+                          </p>
+
+                          <Link
+                            href={`/admin/dossiers/${payment.requestId}`}
+                            className="mt-1 inline-block break-all text-[12px] font-bold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
+                          >
+                            {payment.requestCode}
+                          </Link>
+                        </div>
+
+                        <span
+                          className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${paymentStatus.className}`}
+                        >
+                          {paymentStatus.label}
+                        </span>
+                      </div>
+
+                      <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:gap-4">
+                        <div className="min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            Montant
+                          </dt>
+                          <dd className="mt-1 break-words text-[13px] font-bold text-slate-800 sm:text-sm">
+                            {formatAmount(payment.amount)}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            WhatsApp
+                          </dt>
+                          <dd className="mt-1 min-w-0 text-[12px] font-semibold sm:text-sm">
+                            {payment.whatsapp ? (
+                              <a
+                                href={`https://wa.me/${payment.whatsapp.replace(/\D/g, "")}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="break-all text-[#0B5D3B] transition hover:text-[#084A2F]"
+                              >
+                                {payment.whatsapp}
+                              </a>
+                            ) : (
+                              <span className="text-slate-500">—</span>
+                            )}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            Soumis le
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
+                            {formatDate(payment.submittedAt)}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0">
+                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            Vérifié le
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
+                            {formatDate(payment.verifiedAt)}
+                          </dd>
+                        </div>
+                      </dl>
+
+                      {payment.rejectionReason && (
+                        <div className="mt-4 min-w-0 rounded-xl bg-red-50 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-red-500">
+                            Motif du refus
+                          </p>
+                          <p className="mt-1 break-words text-[12px] leading-5 text-red-700 sm:text-sm">
+                            {payment.rejectionReason}
+                          </p>
+                        </div>
+                      )}
+
+                      <Link
+                        href={`/admin/dossiers/${payment.requestId}`}
+                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[12px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-11 sm:text-sm"
+                      >
+                        {payment.requestStatus === "payment_review"
+                          ? "Vérifier"
+                          : "Ouvrir"}
+                      </Link>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="hidden lg:block">
             <TableContainer className="rounded-none border-0 shadow-none">
               <Table className="min-w-[1300px]">
                 <TableHeader>
@@ -838,6 +951,8 @@ export default async function PaymentsPage({
                 </TableBody>
               </Table>
             </TableContainer>
+              </div>
+            </>
           )}
         </section>
       </div>
@@ -859,16 +974,16 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+    <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
+        className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
         {
           label
         }
       </span>
 
-      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
         {
           value
         }

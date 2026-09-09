@@ -384,7 +384,7 @@ export default function BankCard({
 
   if (loading) {
     return (
-      <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+      <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
         <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
         <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
@@ -396,7 +396,7 @@ export default function BankCard({
 
   if (!bankInformation) {
     return (
-      <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+      <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
         <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
         <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
         <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
@@ -407,7 +407,7 @@ export default function BankCard({
   }
 
   return (
-    <section className="rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-5 sm:p-6">
+    <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
       <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
       <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
 
@@ -421,7 +421,7 @@ export default function BankCard({
             <button
               type="button"
               onClick={() => copyText(bankInformation.beneficiary, t.beneficiaryCopied)}
-              className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="w-full shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto"
             >
               {t.copyBeneficiary}
             </button>
@@ -444,7 +444,7 @@ export default function BankCard({
               onClick={() =>
                 copyText(bankInformation.iban.replace(/\s/g, ""), t.ibanCopied)
               }
-              className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="w-full shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto"
             >
               {t.copyIban}
             </button>
@@ -461,7 +461,7 @@ export default function BankCard({
               type="button"
               disabled={!requestCode}
               onClick={() => copyText(requestCode, t.referenceCopied)}
-              className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF3E9] disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF3E9] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {t.copyReference}
             </button>

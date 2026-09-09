@@ -49,7 +49,7 @@ export default function ConnexionPartenairePage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#F6F8F5]">
+        <main className="flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-[#F6F8F5] px-4">
           <p className="text-sm font-semibold text-slate-500">
             Chargement...
           </p>
@@ -180,8 +180,8 @@ function ConnexionPartenaireContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5]">
-      <div className="grid min-h-screen lg:grid-cols-[0.9fr_1.1fr]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
+      <div className="grid min-h-screen min-w-0 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="relative hidden overflow-hidden bg-[#123F2C] px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-16">
           <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#B8E83D]/10" />
 
@@ -236,9 +236,9 @@ function ConnexionPartenaireContent() {
           </div>
         </section>
 
-        <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12 xl:px-16">
-          <div className="w-full max-w-md">
-            <div className="mb-8 flex justify-center lg:hidden">
+        <section className="flex min-h-screen min-w-0 items-center justify-center px-4 py-6 sm:px-8 sm:py-10 lg:px-12 xl:px-16">
+          <div className="w-full min-w-0 max-w-md">
+            <div className="mb-5 flex justify-center sm:mb-8 lg:hidden">
               <Link
                 href="/"
                 aria-label="IF Sigorta"
@@ -246,12 +246,12 @@ function ConnexionPartenaireContent() {
                 <img
                   src="/if-sigorta-logo.png"
                   alt="IF Sigorta"
-                  className="h-[105px] w-auto object-contain"
+                  className="h-[82px] w-auto object-contain sm:h-[105px]"
                 />
               </Link>
             </div>
 
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.3)] sm:p-8 lg:p-10">
+            <div className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.3)] sm:rounded-[2rem] sm:p-8 lg:p-10">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full bg-[#F3F8F2] px-3 py-1.5 text-xs font-bold text-[#0B5D3B]">
                   <ShieldCheck className="h-4 w-4" />
@@ -259,7 +259,7 @@ function ConnexionPartenaireContent() {
                   Espace sécurisé
                 </div>
 
-                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
                   Connexion partenaire
                 </h2>
 
@@ -271,7 +271,7 @@ function ConnexionPartenaireContent() {
 
               <form
                 onSubmit={handleSubmit}
-                className="mt-8 space-y-5"
+                className="mt-6 min-w-0 space-y-5 sm:mt-8"
               >
                 <div>
                   <label
@@ -281,7 +281,7 @@ function ConnexionPartenaireContent() {
                     Adresse e-mail
                   </label>
 
-                  <div className="relative">
+                  <div className="relative min-w-0">
                     <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                     <input
@@ -311,7 +311,7 @@ function ConnexionPartenaireContent() {
                     Mot de passe
                   </label>
 
-                  <div className="relative">
+                  <div className="relative min-w-0">
                     <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                     <input
@@ -375,7 +375,7 @@ function ConnexionPartenaireContent() {
                 </button>
               </form>
 
-              <div className="mt-6 border-t border-slate-100 pt-6 text-center">
+              <div className="mt-5 border-t border-slate-100 pt-5 text-center sm:mt-6 sm:pt-6">
                 <Link
                   href="/"
                   className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"

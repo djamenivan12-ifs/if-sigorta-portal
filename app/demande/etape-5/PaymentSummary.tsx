@@ -65,19 +65,31 @@ export default function PaymentSummary({ amount }: PaymentSummaryProps) {
         : "fr-FR";
 
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-[#DCE9DD] bg-[#F3F8F2]">
-      <div className="px-5 py-5 sm:px-6">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">02</p>
-        <h2 className="mt-1 text-lg font-semibold text-[#102B20]">{t.title}</h2>
+    <section className="min-w-0 overflow-hidden rounded-[1.5rem] border border-[#DCE9DD] bg-[#F3F8F2]">
+      <div className="px-4 py-5 sm:px-6">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          02
+        </p>
 
-        <p className="mt-3 text-4xl font-semibold tracking-[-0.04em] text-[#0B5D3B] sm:text-5xl">
+        <h2 className="mt-1 text-lg font-semibold text-[#102B20]">
+          {t.title}
+        </h2>
+
+        <p className="mt-3 break-words text-3xl font-semibold tracking-[-0.04em] text-[#0B5D3B] sm:text-5xl">
           {amount !== null ? amount.toLocaleString(locale) : t.unavailable}
-          {amount !== null && <span className="ml-2 text-2xl">TL</span>}
+
+          {amount !== null && (
+            <span className="ml-2 text-xl sm:text-2xl">
+              TL
+            </span>
+          )}
         </p>
       </div>
 
-      <div className="border-t border-[#DCE9DD] bg-white/70 px-5 py-4 sm:px-6">
-        <p className="text-sm leading-6 text-slate-600">{t.description}</p>
+      <div className="border-t border-[#DCE9DD] bg-white/70 px-4 py-4 sm:px-6">
+        <p className="text-sm leading-6 text-slate-600">
+          {t.description}
+        </p>
       </div>
     </section>
   );

@@ -81,12 +81,17 @@ export default function RequestCodeCard({ requestCode }: RequestCodeCardProps) {
   }
 
   return (
-    <section className="rounded-[1.5rem] border border-[#DCE9DD] bg-white p-5 sm:p-6">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">01</p>
-      <h2 className="mt-1 text-lg font-semibold text-slate-900">{t.title}</h2>
+    <section className="min-w-0 rounded-[1.5rem] border border-[#DCE9DD] bg-white p-4 sm:p-6">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+        01
+      </p>
 
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="break-all rounded-xl bg-[#F3F8F2] px-4 py-3 font-mono text-lg font-black tracking-wide text-[#0B5D3B] sm:text-xl">
+      <h2 className="mt-1 text-lg font-semibold text-slate-900">
+        {t.title}
+      </h2>
+
+      <div className="mt-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="min-w-0 break-all rounded-xl bg-[#F3F8F2] px-3 py-3 font-mono text-base font-black tracking-wide text-[#0B5D3B] sm:px-4 sm:text-xl">
           {requestCode || t.generating}
         </p>
 
@@ -94,13 +99,15 @@ export default function RequestCodeCard({ requestCode }: RequestCodeCardProps) {
           type="button"
           disabled={!requestCode}
           onClick={copyRequestCode}
-          className="shrink-0 rounded-xl border border-[#CFE3CF] bg-white px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-white px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           {t.copy}
         </button>
       </div>
 
-      <p className="mt-4 text-sm leading-6 text-slate-500">{t.description}</p>
+      <p className="mt-4 text-sm leading-6 text-slate-500">
+        {t.description}
+      </p>
     </section>
   );
 }

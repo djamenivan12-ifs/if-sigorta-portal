@@ -270,9 +270,9 @@ function ConfirmationContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
       <div className="border-b border-slate-200/80 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           <Link
             href="/"
             className="flex items-center"
@@ -281,23 +281,23 @@ function ConfirmationContent() {
             <img
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
-              className="h-[72px] w-auto object-contain object-left sm:h-[82px]"
+              className="h-[58px] w-auto max-w-[180px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
             />
           </Link>
 
           <Link
             href="/suivi"
-            className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
+            className="shrink-0 text-right text-xs font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:text-sm"
           >
             {t.trackRequest}
           </Link>
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-        <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)]">
-          <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-            <section className="relative overflow-hidden bg-[#123F2C] px-6 py-10 text-white sm:px-10 lg:px-12 lg:py-14">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
+        <div className="min-w-0 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:rounded-[2rem]">
+          <div className="grid min-w-0 lg:grid-cols-[0.9fr_1.1fr]">
+            <section className="relative min-w-0 overflow-hidden bg-[#123F2C] px-5 py-8 text-white sm:px-8 sm:py-10 lg:px-12 lg:py-14">
               <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
               <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
 
@@ -306,7 +306,7 @@ function ConfirmationContent() {
                   ✓
                 </div>
 
-                <h1 className="mt-6 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+                <h1 className="mt-5 text-[1.75rem] font-semibold leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl">
                   {t.title}
                 </h1>
 
@@ -314,7 +314,7 @@ function ConfirmationContent() {
                   {t.description}
                 </p>
 
-                <div className="mt-8 rounded-2xl border border-white/10 bg-white/8 p-5 backdrop-blur-sm">
+                <div className="mt-6 rounded-2xl border border-white/10 bg-white/8 p-4 backdrop-blur-sm sm:mt-8 sm:p-5">
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-[#B8E83D]">
                     {t.status}
                   </p>
@@ -326,14 +326,14 @@ function ConfirmationContent() {
               </div>
             </section>
 
-            <section className="p-6 sm:p-8 lg:p-10">
-              <div className="rounded-[1.5rem] border border-[#DCE9DD] bg-[#F3F8F2] p-5 sm:p-6">
+            <section className="min-w-0 p-4 sm:p-8 lg:p-10">
+              <div className="min-w-0 rounded-[1.25rem] border border-[#DCE9DD] bg-[#F3F8F2] p-4 sm:rounded-[1.5rem] sm:p-6">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
                   {t.requestCode}
                 </p>
 
-                <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="break-all rounded-xl bg-white px-4 py-3 font-mono text-xl font-black tracking-wide text-[#0B5D3B] sm:text-2xl">
+                <div className="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                  <p className="min-w-0 break-all rounded-xl bg-white px-3 py-3 font-mono text-lg font-black tracking-wide text-[#0B5D3B] sm:px-4 sm:text-2xl">
                     {requestCode}
                   </p>
 
@@ -342,7 +342,7 @@ function ConfirmationContent() {
                     onClick={
                       copyCode
                     }
-                    className="shrink-0 rounded-xl border border-[#CFE3CF] bg-white px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF3E9]"
+                    className="min-h-11 w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-white px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF3E9] sm:w-auto"
                   >
                     {t.copyCode}
                   </button>
@@ -376,7 +376,7 @@ function ConfirmationContent() {
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex min-w-0 flex-col gap-3 sm:mt-8 sm:flex-row">
                 <Link
                   href="/"
                   className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
@@ -409,12 +409,12 @@ function StepItem({
   text: string;
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EEF6EC] text-sm font-black text-[#0B5D3B]">
         {number}
       </div>
 
-      <p className="text-sm leading-6 text-slate-600">
+      <p className="min-w-0 text-sm leading-6 text-slate-600">
         {text}
       </p>
     </div>
@@ -453,8 +453,8 @@ function ConfirmationFallback() {
     ];
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F6F8F5] px-5">
-      <div className="w-full max-w-md rounded-[1.5rem] border border-slate-200 bg-white p-8 text-center shadow-sm">
+    <main className="flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-[#F6F8F5] px-4 sm:px-5">
+      <div className="w-full min-w-0 max-w-md rounded-[1.5rem] border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
         <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#DCE9DD] border-t-[#0B5D3B]" />
 
         <p className="mt-4 text-sm text-slate-500">

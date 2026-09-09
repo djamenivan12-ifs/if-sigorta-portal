@@ -996,38 +996,38 @@ export default async function DossierPage({
     false;
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
+        <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Link
             href="/admin/dossiers"
-            className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:min-h-0 sm:text-sm"
           >
             ← Retour aux dossiers
           </Link>
 
           <Link
             href="/admin/dashboard"
-            className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:min-h-0 sm:text-sm"
           >
             Tableau de bord
           </Link>
         </div>
 
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 Dossier d’assurance
               </p>
 
-              <h1 className="mt-3 break-all text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 break-all text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 {
                   insuranceRequest.request_code
                 }
               </h1>
 
-              <p className="mt-3 text-sm leading-7 text-slate-500">
+              <p className="mt-2 text-[12px] leading-5 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
                 Créé le{" "}
                 {formatDate(
                   insuranceRequest.created_at,
@@ -1036,7 +1036,7 @@ export default async function DossierPage({
             </div>
 
             <span
-              className={`inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold ${status.className}`}
+              className={`inline-flex w-fit max-w-full rounded-full px-3 py-1.5 text-[11px] font-semibold sm:px-4 sm:py-2 sm:text-sm ${status.className}`}
             >
               {
                 status.label
@@ -1045,24 +1045,24 @@ export default async function DossierPage({
           </div>
         </header>
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-5">
-            <section className={`rounded-[1.5rem] border p-5 sm:p-6 ${
+        <div className="mt-4 grid min-w-0 gap-4 sm:mt-6 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="min-w-0 space-y-4 sm:space-y-5">
+            <section className={`min-w-0 rounded-2xl border p-4 sm:rounded-[1.5rem] sm:p-6 ${
               isPartnerRequest
                 ? "border-[#CFE3CF] bg-[#F3F8F2]"
                 : "border-slate-200/80 bg-white"
             }`}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
                     Source du dossier
                   </p>
-                  <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+                  <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
                     {isPartnerRequest ? "Partenaire" : "Client direct"}
                   </h2>
                 </div>
 
-                <span className={`inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${
+                <span className={`inline-flex w-fit max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:py-1.5 sm:text-xs ${
                   isPartnerRequest
                     ? "bg-[#0B5D3B] text-white"
                     : "bg-slate-100 text-slate-700"
@@ -1072,7 +1072,7 @@ export default async function DossierPage({
               </div>
 
               {isPartnerRequest && (
-                <dl className="mt-6 grid gap-5 border-t border-[#CFE3CF] pt-5 sm:grid-cols-3">
+                <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 border-t border-[#CFE3CF] pt-4 sm:mt-6 sm:grid-cols-3 sm:gap-5 sm:pt-5">
                   <Information label="Partenaire" value={partnerData?.company_name ?? "Partenaire non disponible"} />
                   <Information label="Code partenaire" value={partnerData?.code ?? "—"} />
                   <Information label="Responsable" value={partnerData?.manager_name ?? "—"} />
@@ -1080,12 +1080,12 @@ export default async function DossierPage({
               )}
             </section>
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Informations du client
               </h2>
 
-              <dl className="mt-6 grid gap-5 sm:grid-cols-2">
+              <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-5">
                 <Information
                   label="Nom"
                   value={
@@ -1144,25 +1144,25 @@ export default async function DossierPage({
                 />
               </dl>
 
-              <div className="mt-6 border-t border-slate-200 pt-5">
-                <p className="text-sm text-slate-500">
+              <div className="mt-4 border-t border-slate-200 pt-4 sm:mt-6 sm:pt-5">
+                <p className="text-[12px] text-slate-500 sm:text-sm">
                   Adresse
                 </p>
 
-                <p className="mt-1 font-semibold leading-7 text-[#102B20]">
+                <p className="mt-1 break-words text-[13px] font-semibold leading-6 text-[#102B20] sm:text-base sm:leading-7">
                   {address ||
                     "—"}
                 </p>
               </div>
             </section>
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Identité et assurance
               </h2>
 
               <div
-                className={`mt-5 rounded-xl px-4 py-3 text-sm font-semibold ${
+                className={`mt-4 min-w-0 rounded-xl px-3 py-3 text-[12px] font-semibold sm:mt-5 sm:px-4 sm:text-sm ${
                   hasKimlik
                     ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
                     : "border-blue-200 bg-blue-50 text-blue-700"
@@ -1173,7 +1173,7 @@ export default async function DossierPage({
                   : "Le client effectue sa première demande de Kimlik."}
               </div>
 
-              <dl className="mt-6 grid gap-5 sm:grid-cols-2">
+              <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-5">
                 {hasKimlik ? (
                   <>
                     <Information
@@ -1232,12 +1232,12 @@ export default async function DossierPage({
               </dl>
             </section>
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Documents
               </h2>
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 min-w-0 space-y-3 sm:mt-6">
                 {documentsWithUrls.length ===
                 0 ? (
                   <p className="text-slate-500">
@@ -1252,23 +1252,23 @@ export default async function DossierPage({
                         key={
                           document.id
                         }
-                        className="flex flex-col gap-4 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-200 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4"
                       >
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-900">
+                          <p className="break-words text-[13px] font-semibold text-slate-900 sm:text-base">
                             {documentLabels[
                               document.document_type
                             ] ??
                               document.document_type}
                           </p>
 
-                          <p className="mt-1 truncate text-sm text-slate-600">
+                          <p className="mt-1 break-all text-[12px] text-slate-600 sm:text-sm">
                             {
                               document.original_file_name
                             }
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
                             {formatFileSize(
                               document.file_size,
                             )}
@@ -1282,7 +1282,7 @@ export default async function DossierPage({
                             }
                             target="_blank"
                             rel="noreferrer"
-                            className="shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto sm:min-h-0 sm:text-sm"
                           >
                             Ouvrir
                           </a>
@@ -1297,7 +1297,7 @@ export default async function DossierPage({
                 )}
               </div>
 
-              <p className="mt-4 text-xs leading-5 text-slate-500">
+              <p className="mt-4 text-[10px] leading-5 text-slate-500 sm:text-xs">
                 Les liens sont temporaires et expirent après dix minutes.
               </p>
             </section>
@@ -1312,7 +1312,7 @@ export default async function DossierPage({
             />
           </div>
 
-          <aside className="space-y-5">
+          <aside className="min-w-0 space-y-4 sm:space-y-5">
             <AssignAgent
               requestId={
                 insuranceRequest.id
@@ -1327,12 +1327,12 @@ export default async function DossierPage({
               }
             />
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
                 Paiement
               </h2>
 
-              <dl className="mt-6 space-y-5">
+              <dl className="mt-4 space-y-4 sm:mt-6 sm:space-y-5">
                 <Information
                   label="Statut"
                   value={
@@ -1371,7 +1371,7 @@ export default async function DossierPage({
               </dl>
 
               {payment?.rejection_reason && (
-                <div className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+                <div className="mt-4 break-words rounded-xl bg-red-50 px-3 py-3 text-[12px] leading-5 text-red-700 sm:mt-5 sm:px-4 sm:text-sm sm:leading-6">
                   Motif du refus :{" "}
                   {
                     payment.rejection_reason
@@ -1427,7 +1427,7 @@ export default async function DossierPage({
               />
             )}
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2 className="text-lg font-semibold text-[#102B20]">
                 Polices enregistrées
               </h2>
@@ -1443,7 +1443,7 @@ export default async function DossierPage({
                         key={
                           policyYear
                         }
-                        className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]"
+                        className="min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[12px] font-semibold text-[#0B5D3B] sm:px-4 sm:text-sm"
                       >
                         ✓ Police année{" "}
                         {
@@ -1454,14 +1454,14 @@ export default async function DossierPage({
                   )}
                 </div>
               ) : (
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-3 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
                   Aucune police n’est encore enregistrée.
                 </p>
               )}
             </section>
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
-              <div className="flex items-center justify-between gap-3">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+              <div className="flex min-w-0 items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold text-[#102B20]">
                   Historique
                 </h2>
@@ -1498,7 +1498,7 @@ export default async function DossierPage({
                           key={
                             activity.id
                           }
-                          className="relative flex gap-4"
+                          className="relative flex min-w-0 gap-3 sm:gap-4"
                         >
                           <div className="flex w-4 shrink-0 flex-col items-center">
                             <span
@@ -1519,27 +1519,27 @@ export default async function DossierPage({
                                 : ""
                             }`}
                           >
-                            <p className="text-sm font-semibold text-slate-900">
+                            <p className="break-words text-[12px] font-semibold text-slate-900 sm:text-sm">
                               {getActivityLabel(
                                 activity.action,
                               )}
                             </p>
 
                             {activity.description && (
-                              <p className="mt-1 text-sm leading-6 text-slate-600">
+                              <p className="mt-1 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
                                 {
                                   activity.description
                                 }
                               </p>
                             )}
 
-                            <p className="mt-2 text-xs font-semibold text-slate-500">
+                            <p className="mt-2 break-words text-[10px] font-semibold text-slate-500 sm:text-xs">
                               {
                                 activity.author
                               }
                             </p>
 
-                            <p className="mt-1 text-xs leading-5 text-slate-400">
+                            <p className="mt-1 text-[10px] leading-4 text-slate-400 sm:text-xs sm:leading-5">
                               {formatDate(
                                 activity.created_at,
                               )}
@@ -1553,12 +1553,12 @@ export default async function DossierPage({
               )}
             </section>
 
-            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+            <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2 className="text-lg font-semibold text-[#102B20]">
                 Dernière mise à jour
               </h2>
 
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
                 {formatDate(
                   insuranceRequest.updated_at,
                 )}
@@ -1584,12 +1584,12 @@ function Information({
   value,
 }: InformationProps) {
   return (
-    <div>
-      <dt className="text-sm text-slate-500">
+    <div className="min-w-0">
+      <dt className="text-[11px] text-slate-500 sm:text-sm">
         {label}
       </dt>
 
-      <dd className="mt-1 break-words font-semibold text-[#102B20]">
+      <dd className="mt-1 break-words text-[13px] font-semibold leading-5 text-[#102B20] sm:text-base sm:leading-6">
         {value === null ||
         value === undefined ||
         value === ""

@@ -97,7 +97,7 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-20 items-center gap-3 px-4 sm:px-5 lg:px-8">
+      <div className="flex h-16 items-center gap-2 px-3 sm:h-[72px] sm:gap-3 sm:px-4 lg:h-20 lg:px-8">
         {/* MOBILE MENU */}
 
         <button
@@ -106,7 +106,7 @@ export default function Header({
           onClick={
             onOpenMobileMenu
           }
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 lg:hidden"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 sm:h-11 sm:w-11 lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -148,7 +148,7 @@ export default function Header({
           </form>
         </div>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
           {/* NEW REQUEST */}
 
           <Link
@@ -179,7 +179,7 @@ export default function Header({
                 ? `${notificationCount} dossier${notificationCount > 1 ? "s" : ""} nécessite${notificationCount > 1 ? "nt" : ""} votre attention`
                 : "Aucune notification"
             }
-            className="relative z-10 flex h-11 w-11 touch-manipulation items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-50 active:bg-slate-100"
+            className="relative z-10 flex h-10 w-10 touch-manipulation items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-50 active:bg-slate-100 sm:h-11 sm:w-11"
           >
             <Bell
               className={`pointer-events-none h-5 w-5 ${
@@ -199,7 +199,7 @@ export default function Header({
             {notificationCount >
               0 && (
               <span
-                className={`pointer-events-none absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] font-bold shadow-sm ring-2 ring-white ${notificationBadgeClassName}`}
+                className={`pointer-events-none absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-bold shadow-sm ring-2 ring-white sm:-right-2 sm:-top-2 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-[10px] ${notificationBadgeClassName}`}
               >
                 {notificationCount >
                 99
@@ -222,7 +222,7 @@ export default function Header({
 
       {/* MOBILE SEARCH */}
 
-      <div className="border-t border-slate-100 px-4 py-3 lg:hidden">
+      <div className="border-t border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3 lg:hidden">
         <form
           onSubmit={(event) =>
             submitSearch(
@@ -233,7 +233,7 @@ export default function Header({
           className="flex gap-2"
         >
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:left-4" />
 
             <input
               type="search"
@@ -246,13 +246,13 @@ export default function Header({
                 )
               }
               placeholder="Rechercher..."
-              className="h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAF8] pl-10 pr-4 text-sm outline-none transition focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-[#F8FAF8] pl-9 pr-3 text-sm outline-none transition focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-11 sm:pl-10 sm:pr-4"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-sm font-semibold text-white transition hover:bg-[#084A2F]"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] text-sm font-semibold text-white transition hover:bg-[#084A2F] sm:h-11 sm:w-auto sm:px-4"
           >
             <Search className="h-4 w-4 sm:hidden" />
 

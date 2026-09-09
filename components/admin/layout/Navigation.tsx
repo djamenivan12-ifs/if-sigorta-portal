@@ -145,7 +145,7 @@ export default function Navigation({
     );
 
   return (
-    <nav className="space-y-1.5">
+    <nav className="space-y-1 lg:space-y-1.5">
       {visibleLinks.map(
         (link) => {
           const Icon =
@@ -168,7 +168,7 @@ export default function Navigation({
                 onNavigate
               }
               className={[
-                "group flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition",
+                "group flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-11 lg:gap-3 lg:px-3.5 lg:py-2.5 lg:text-sm",
                 active
                   ? "bg-[#123F2C] text-white shadow-sm"
                   : "text-slate-600 hover:bg-[#F3F8F2] hover:text-[#123F2C]",
@@ -178,7 +178,7 @@ export default function Navigation({
             >
               <div
                 className={[
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
                   active
                     ? "bg-white/10 text-[#B8E83D]"
                     : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-[#0B5D3B]",
@@ -186,7 +186,7 @@ export default function Navigation({
                   " ",
                 )}
               >
-                <Icon className="h-[17px] w-[17px]" />
+                <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />
               </div>
 
               <span className="min-w-0 flex-1 truncate">
@@ -198,7 +198,7 @@ export default function Navigation({
                 link.badge > 0 && (
                   <span
                     className={[
-                      "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-black",
+                      "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black sm:min-w-6 sm:px-2 sm:text-[11px] lg:min-w-6 lg:px-2 lg:text-[11px]",
                       active
                         ? "bg-white text-red-600"
                         : "bg-red-500 text-white",

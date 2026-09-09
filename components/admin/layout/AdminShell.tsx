@@ -82,7 +82,7 @@ export default function AdminShell({
         />
       </div>
 
-      {/* SIDEBAR MOBILE */}
+      {/* SIDEBAR MOBILE / TABLET */}
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-[70] lg:hidden">
@@ -97,7 +97,7 @@ export default function AdminShell({
             className="absolute inset-0 bg-slate-950/30 backdrop-blur-[2px]"
           />
 
-          <div className="absolute inset-y-0 left-0 w-[88%] max-w-[320px] shadow-2xl">
+          <div className="absolute inset-y-0 left-0 w-[86%] max-w-[300px] shadow-2xl sm:w-[72%] sm:max-w-[320px]">
             <div className="absolute right-3 top-3 z-10">
               <button
                 type="button"
@@ -149,7 +149,7 @@ export default function AdminShell({
           }
         />
 
-        <main className="min-h-[calc(100vh-5rem)]">
+        <main className="min-h-[calc(100vh-7rem)] lg:min-h-[calc(100vh-5rem)]">
           {children}
         </main>
       </div>

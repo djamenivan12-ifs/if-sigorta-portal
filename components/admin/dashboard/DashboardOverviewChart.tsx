@@ -20,78 +20,28 @@ type DashboardOverviewChartProps = {
   data?: ChartDataItem[];
 };
 
-const defaultData: ChartDataItem[] = [
-  {
-    label: "Lun",
-    requests: 8,
-    revenue: 14200,
-  },
-  {
-    label: "Mar",
-    requests: 13,
-    revenue: 23100,
-  },
-  {
-    label: "Mer",
-    requests: 10,
-    revenue: 18700,
-  },
-  {
-    label: "Jeu",
-    requests: 17,
-    revenue: 30400,
-  },
-  {
-    label: "Ven",
-    requests: 21,
-    revenue: 38900,
-  },
-  {
-    label: "Sam",
-    requests: 12,
-    revenue: 21600,
-  },
-  {
-    label: "Dim",
-    requests: 6,
-    revenue: 10800,
-  },
-];
-
-function formatCurrency(value: number) {
-  return `${value.toLocaleString("fr-FR")} TL`;
-}
+const defaultData: ChartDataItem[] = [];
 
 export default function DashboardOverviewChart({
   data = defaultData,
 }: DashboardOverviewChartProps) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Performance
-          </p>
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+      <div className="min-w-0">
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+          Performance
+        </p>
 
-          <h2 className="mt-2 text-xl font-bold text-slate-950">
-            Évolution des demandes
-          </h2>
+        <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+          Évolution des demandes
+        </h2>
 
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            Nombre de demandes enregistrées cette semaine.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />
-
-          <span className="text-xs font-semibold text-slate-600">
-            Demandes
-          </span>
-        </div>
+        <p className="mt-1.5 text-[13px] leading-5 text-slate-500 sm:mt-2 sm:text-sm sm:leading-6">
+          Activité enregistrée sur les sept derniers jours.
+        </p>
       </div>
 
-      <div className="mt-8 h-80 w-full">
+      <div className="mt-5 h-56 w-full min-w-0 sm:mt-7 sm:h-72">
         <ResponsiveContainer
           width="100%"
           height="100%"
@@ -100,8 +50,8 @@ export default function DashboardOverviewChart({
             data={data}
             margin={{
               top: 10,
-              right: 10,
-              left: -20,
+              right: 4,
+              left: -28,
               bottom: 0,
             }}
           >
@@ -115,13 +65,13 @@ export default function DashboardOverviewChart({
               >
                 <stop
                   offset="5%"
-                  stopColor="#2563eb"
-                  stopOpacity={0.25}
+                  stopColor="#0B5D3B"
+                  stopOpacity={0.2}
                 />
 
                 <stop
                   offset="95%"
-                  stopColor="#2563eb"
+                  stopColor="#0B5D3B"
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -130,51 +80,47 @@ export default function DashboardOverviewChart({
             <CartesianGrid
               strokeDasharray="4 4"
               vertical={false}
-              stroke="#e2e8f0"
+              stroke="#E2E8F0"
             />
 
             <XAxis
               dataKey="label"
               axisLine={false}
               tickLine={false}
+              minTickGap={8}
               tick={{
-                fill: "#64748b",
-                fontSize: 12,
+                fill: "#94A3B8",
+                fontSize: 11,
               }}
-              dy={10}
+              dy={8}
             />
 
             <YAxis
               axisLine={false}
               tickLine={false}
               allowDecimals={false}
+              width={36}
               tick={{
-                fill: "#64748b",
-                fontSize: 12,
+                fill: "#94A3B8",
+                fontSize: 11,
               }}
             />
 
             <Tooltip
-              cursor={{
-                stroke: "#93c5fd",
-                strokeWidth: 1,
-              }}
-              content={
-                <CustomTooltip />
-              }
+              content={<CustomTooltip />}
             />
 
             <Area
               type="monotone"
               dataKey="requests"
-              stroke="#2563eb"
+              stroke="#0B5D3B"
               strokeWidth={3}
               fill="url(#requestsGradient)"
               activeDot={{
                 r: 5,
                 strokeWidth: 3,
-                stroke: "#ffffff",
-                fill: "#2563eb",
+                stroke: "#FFFFFF",
+                fill: "#0B5D3B",
               }}
             />
           </AreaChart>
@@ -184,19 +130,17 @@ export default function DashboardOverviewChart({
   );
 }
 
-type TooltipProps = {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
   active?: boolean;
   payload?: Array<{
     payload: ChartDataItem;
   }>;
   label?: string;
-};
-
-function CustomTooltip({
-  active,
-  payload,
-  label,
-}: TooltipProps) {
+}) {
   if (
     !active ||
     !payload ||
@@ -205,25 +149,29 @@ function CustomTooltip({
     return null;
   }
 
-  const item = payload[0].payload;
+  const item =
+    payload[0].payload;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className="max-w-[220px] rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-xl sm:px-4 sm:py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 sm:text-xs">
         {label}
       </p>
 
-      <p className="mt-2 text-sm font-semibold text-slate-900">
+      <p className="mt-1.5 text-[13px] font-semibold text-slate-900 sm:mt-2 sm:text-sm">
         {item.requests} demande
-        {item.requests > 1 ? "s" : ""}
+        {item.requests > 1
+          ? "s"
+          : ""}
       </p>
 
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
         Revenu :{" "}
-        <span className="font-semibold text-slate-700">
-          {formatCurrency(
-            item.revenue,
-          )}
+        <span className="font-semibold text-[#0B5D3B]">
+          {item.revenue.toLocaleString(
+            "fr-FR",
+          )}{" "}
+          TL
         </span>
       </p>
     </div>

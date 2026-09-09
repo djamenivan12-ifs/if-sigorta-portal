@@ -30,34 +30,6 @@ function formatCurrency(
   )} TL`;
 }
 
-type MetricProps = {
-  label: string;
-  value: string;
-  description: string;
-};
-
-function Metric({
-  label,
-  value,
-  description,
-}: MetricProps) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-      <p className="text-sm font-medium text-slate-500">
-        {label}
-      </p>
-
-      <p className="mt-2 text-2xl font-bold text-slate-900">
-        {value}
-      </p>
-
-      <p className="mt-2 text-xs leading-5 text-slate-500">
-        {description}
-      </p>
-    </div>
-  );
-}
-
 export default function MonthlyPerformance({
   totalRequests,
   availablePolicies,
@@ -69,23 +41,19 @@ export default function MonthlyPerformance({
 }: MonthlyPerformanceProps) {
   const conversionRate =
     totalRequests > 0
-      ? (
-          availablePolicies /
-          totalRequests
-        ) *
+      ? (availablePolicies /
+          totalRequests) *
         100
       : 0;
 
   const rejectionRate =
     totalRequests > 0
-      ? (
-          rejectedPayments /
-          totalRequests
-        ) *
+      ? (rejectedPayments /
+          totalRequests) *
         100
       : 0;
 
-  const averageRevenuePerPayment =
+  const averageRevenue =
     confirmedPayments > 0
       ? revenue /
         confirmedPayments
@@ -97,100 +65,102 @@ export default function MonthlyPerformance({
 
   const oneYearShare =
     durationTotal > 0
-      ? (
-          oneYearRequests /
-          durationTotal
-        ) *
+      ? (oneYearRequests /
+          durationTotal) *
         100
       : 0;
 
   const twoYearShare =
     durationTotal > 0
-      ? (
-          twoYearRequests /
-          durationTotal
-        ) *
+      ? (twoYearRequests /
+          durationTotal) *
         100
       : 0;
 
+  const metrics = [
+    [
+      "Taux de conversion",
+      formatPercentage(
+        conversionRate,
+      ),
+      "Dossiers devenus assurances disponibles.",
+    ],
+    [
+      "Taux de refus",
+      formatPercentage(
+        rejectionRate,
+      ),
+      "Dossiers avec paiement refusé.",
+    ],
+    [
+      "Panier moyen",
+      formatCurrency(
+        averageRevenue,
+      ),
+      "Revenu moyen par paiement confirmé.",
+    ],
+    [
+      "Assurances 1 an",
+      formatPercentage(
+        oneYearShare,
+      ),
+      `${oneYearRequests.toLocaleString(
+        "fr-FR",
+      )} dossier(s) ce mois.`,
+    ],
+    [
+      "Assurances 2 ans",
+      formatPercentage(
+        twoYearShare,
+      ),
+      `${twoYearRequests.toLocaleString(
+        "fr-FR",
+      )} dossier(s) ce mois.`,
+    ],
+    [
+      "Paiements confirmés",
+      confirmedPayments.toLocaleString(
+        "fr-FR",
+      ),
+      "Paiements validés sur la période.",
+    ],
+  ];
+
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#2F2963]">
-          Performance
-        </p>
+    <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
+      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+        Performance
+      </p>
 
-        <h2 className="mt-1 text-xl font-bold text-slate-900">
-          Analyse du mois
-        </h2>
+      <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+        Analyse du mois
+      </h2>
 
-        <p className="mt-2 text-sm text-slate-500">
-          Indicateurs de conversion,
-          paiement et répartition des
-          assurances.
-        </p>
-      </div>
+      <div className="mt-5 grid grid-cols-1 gap-2.5 sm:mt-6 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
+        {metrics.map(
+          ([
+            label,
+            value,
+            description,
+          ]) => (
+            <div
+              key={label}
+              className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4 sm:rounded-2xl sm:p-5"
+            >
+              <p className="text-[13px] font-medium leading-5 text-slate-500 sm:text-sm">
+                {label}
+              </p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Metric
-          label="Taux de conversion"
-          value={formatPercentage(
-            conversionRate,
-          )}
-          description="Part des dossiers du mois devenus des assurances disponibles."
-        />
+              <p className="mt-1.5 break-words text-xl font-semibold leading-tight tracking-[-0.03em] text-[#102B20] sm:mt-2 sm:text-2xl">
+                {value}
+              </p>
 
-        <Metric
-          label="Taux de refus"
-          value={formatPercentage(
-            rejectionRate,
-          )}
-          description="Part des dossiers du mois actuellement en paiement refusé."
-        />
-
-        <Metric
-          label="Panier moyen"
-          value={formatCurrency(
-            averageRevenuePerPayment,
-          )}
-          description="Revenu moyen par paiement confirmé."
-        />
-
-        <Metric
-          label="Part assurances 1 an"
-          value={formatPercentage(
-            oneYearShare,
-          )}
-          description={`${oneYearRequests.toLocaleString(
-            "fr-FR",
-          )} dossier${
-            oneYearRequests !== 1
-              ? "s"
-              : ""
-          } sur le mois.`}
-        />
-
-        <Metric
-          label="Part assurances 2 ans"
-          value={formatPercentage(
-            twoYearShare,
-          )}
-          description={`${twoYearRequests.toLocaleString(
-            "fr-FR",
-          )} dossier${
-            twoYearRequests !== 1
-              ? "s"
-              : ""
-          } sur le mois.`}
-        />
-
-        <Metric
-          label="Paiements confirmés"
-          value={confirmedPayments.toLocaleString(
-            "fr-FR",
-          )}
-          description="Nombre de paiements validés sur la période."
-        />
+              <p className="mt-1.5 break-words text-[11px] leading-4 text-slate-400 sm:mt-2 sm:text-xs sm:leading-5">
+                {description}
+              </p>
+            </div>
+          ),
+        )}
       </div>
     </section>
   );

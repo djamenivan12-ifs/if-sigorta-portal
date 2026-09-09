@@ -58,7 +58,6 @@ const ACTIVE_STATUSES = [
   "payment_review",
   "payment_confirmed",
   "policy_preparation",
-  "policy_available",
 ];
 
 const AVAILABLE_STATUSES = [
@@ -471,7 +470,18 @@ export default async function AgentDashboard({
    */
 
   const completedRequests =
-    new Set<string>();
+    new Set<string>(
+      requests
+        .filter(
+          (request) =>
+            request.status ===
+            "policy_available",
+        )
+        .map(
+          (request) =>
+            request.id,
+        ),
+    );
 
   for (
     const activity of
@@ -724,33 +734,33 @@ export default async function AgentDashboard({
    */
 
   return (
-    <main className="px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1500px]">
         {/* BIENVENUE */}
 
-        <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6 lg:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B5D3B] sm:text-sm">
+        <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-6 sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#0B5D3B]">
             Espace agent
           </p>
 
-          <h1 className="mt-1.5 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-2 sm:text-3xl">
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
             Hey{" "}
             {
               userName
             }
           </h1>
 
-          <p className="mt-2 max-w-3xl text-[13px] leading-5 text-slate-600 sm:text-base sm:leading-6">
+          <p className="mt-2 max-w-3xl text-slate-600">
             Gérez vos dossiers et prenez en charge les nouvelles demandes disponibles sans attendre l’administrateur.
           </p>
         </section>
 
         {/* FILE D'ATTENTE */}
 
-        <section className="mt-5 min-w-0 overflow-hidden rounded-2xl border border-[#CFE3CF] bg-white sm:mt-6 sm:rounded-[1.5rem]">
-          <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-6">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-[#CFE3CF] bg-white">
+          <div className="flex flex-col gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0B5D3B] sm:text-sm">
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#0B5D3B]">
                 File d’attente
               </p>
 
@@ -758,13 +768,13 @@ export default async function AgentDashboard({
                 Nouvelles demandes disponibles
               </h2>
 
-              <p className="mt-1 max-w-3xl text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
                 Ces dossiers n’ont encore aucun responsable. Le premier agent qui clique sur « Prendre en charge » devient responsable du dossier.
               </p>
             </div>
 
             <div className="flex shrink-0 items-center gap-3">
-              <span className="flex h-10 min-w-10 items-center justify-center rounded-full bg-[#0B5D3B] px-2.5 text-sm font-bold text-white sm:h-12 sm:min-w-12 sm:px-3 sm:text-lg">
+              <span className="flex h-12 min-w-12 items-center justify-center rounded-full bg-[#0B5D3B] px-3 text-lg font-bold text-white">
                 {
                   availableRequests.length
                 }
@@ -781,16 +791,16 @@ export default async function AgentDashboard({
 
           {availableRequests.length ===
           0 ? (
-            <div className="p-7 text-center sm:p-10">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B] sm:h-12 sm:w-12">
+            <div className="p-10 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B]">
                 ✓
               </div>
 
-              <p className="mt-3 text-[13px] font-semibold text-slate-700 sm:mt-4 sm:text-base">
+              <p className="mt-4 font-semibold text-slate-700">
                 Aucun dossier non attribué
               </p>
 
-              <p className="mt-1.5 text-[12px] leading-5 text-slate-500 sm:mt-2 sm:text-sm">
+              <p className="mt-2 text-sm text-slate-500">
                 Toutes les demandes disponibles ont été prises en charge.
               </p>
             </div>
@@ -832,23 +842,23 @@ export default async function AgentDashboard({
                       key={
                         request.id
                       }
-                      className="p-4 transition hover:bg-slate-50 sm:p-6"
+                      className="p-5 transition hover:bg-slate-50 sm:p-6"
                     >
-                      <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0">
-                          <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
-                            <strong className="break-all text-[13px] text-[#0B5D3B] sm:text-base">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <strong className="text-[#0B5D3B]">
                               {
                                 request.request_code
                               }
                             </strong>
 
-                            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700 sm:px-3 sm:text-xs">
+                            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
                               Non attribué
                             </span>
 
                             <span
-                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${statusInformation.className}`}
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
                             >
                               {
                                 statusInformation.label
@@ -857,7 +867,7 @@ export default async function AgentDashboard({
 
                             {waitingMinutes >=
                               30 && (
-                              <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-semibold text-red-700 sm:px-3 sm:text-xs">
+                              <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
                                 Disponible depuis{" "}
                                 {formatDuration(
                                   waitingMinutes,
@@ -866,13 +876,13 @@ export default async function AgentDashboard({
                             )}
                           </div>
 
-                          <p className="mt-2.5 break-words text-[13px] font-bold text-slate-900 sm:mt-3 sm:text-base">
+                          <p className="mt-3 text-base font-bold text-slate-900">
                             {
                               clientName
                             }
                           </p>
 
-                          <div className="mt-2 flex flex-col gap-1 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-1 sm:text-xs">
+                          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
                             <span>
                               Créé :{" "}
                               <strong className="text-slate-700">
@@ -897,8 +907,8 @@ export default async function AgentDashboard({
                           </div>
                         </div>
 
-                        <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 sm:flex-row lg:w-auto">
-                          <div className="w-full min-w-0 sm:min-w-44 sm:flex-1 lg:flex-none">
+                        <div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row lg:w-auto">
+                          <div className="min-w-44">
                             <ClaimRequestButton
   requestId={request.id}
   assignedAgentId={
@@ -913,7 +923,7 @@ export default async function AgentDashboard({
 
                           <Link
                             href={`/admin/dossiers/${request.id}`}
-                            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
+                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                           >
                             Ouvrir
                           </Link>
@@ -929,7 +939,7 @@ export default async function AgentDashboard({
 
         {/* KPI PRINCIPAUX */}
 
-        <section className="mt-5 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Mes dossiers"
             value={
@@ -978,8 +988,8 @@ export default async function AgentDashboard({
         {/* PRIORITÉS */}
 
         <section className="mt-6">
-          <div className="mb-3 sm:mb-4">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-[#102B20]">
               Mes priorités
             </h2>
 
@@ -988,7 +998,7 @@ export default async function AgentDashboard({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
             <PriorityCard
               label="À surveiller"
               value={
@@ -1029,7 +1039,7 @@ export default async function AgentDashboard({
 
         {/* PERFORMANCE */}
 
-        <section className="mt-5 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <MetricCard
             label="Taux de finalisation"
             value={`${completionRate.toLocaleString(
@@ -1078,10 +1088,10 @@ export default async function AgentDashboard({
 
         {/* MES DOSSIERS */}
 
-        <section className="mt-5 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
-          <div className="flex flex-col gap-2.5 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-6">
+        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
+          <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2 className="text-xl font-semibold text-[#102B20]">
                 Mes dossiers récents
               </h2>
 
@@ -1092,7 +1102,7 @@ export default async function AgentDashboard({
 
             <Link
               href="/admin/dossiers?agent=me"
-              className="text-[12px] font-semibold text-[#0B5D3B] hover:text-[#084A2F] sm:text-base"
+              className="font-semibold text-[#0B5D3B] hover:text-[#084A2F]"
             >
               Voir tous mes dossiers →
             </Link>
@@ -1100,12 +1110,12 @@ export default async function AgentDashboard({
 
           {recentRequests.length ===
           0 ? (
-            <div className="p-7 text-center sm:p-10">
+            <div className="p-10 text-center">
               <p className="font-semibold text-slate-700">
                 Vous n’avez encore aucun dossier
               </p>
 
-              <p className="mt-1.5 text-[12px] leading-5 text-slate-500 sm:mt-2 sm:text-sm">
+              <p className="mt-2 text-sm text-slate-500">
                 Prenez un dossier dans la file d’attente pour commencer.
               </p>
             </div>
@@ -1208,14 +1218,14 @@ export default async function AgentDashboard({
                       key={
                         request.id
                       }
-                      className="p-4 transition hover:bg-slate-50 sm:p-5"
+                      className="p-5 transition hover:bg-slate-50"
                     >
-                      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="text-[12px] font-semibold text-[#0B5D3B] hover:text-[#084A2F] sm:text-base"
+                              className="font-semibold text-[#0B5D3B] hover:text-[#084A2F]"
                             >
                               {
                                 request.request_code
@@ -1223,7 +1233,7 @@ export default async function AgentDashboard({
                             </Link>
 
                             <span
-                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${statusInformation.className}`}
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
                             >
                               {
                                 statusInformation.label
@@ -1231,7 +1241,7 @@ export default async function AgentDashboard({
                             </span>
 
                             <span
-                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${priorityClassName}`}
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${priorityClassName}`}
                             >
                               {
                                 priorityLabel
@@ -1239,7 +1249,7 @@ export default async function AgentDashboard({
                             </span>
                           </div>
 
-                          <p className="mt-1.5 text-[13px] font-semibold text-slate-800 sm:mt-2 sm:text-base">
+                          <p className="mt-2 font-semibold text-slate-800">
                             {
                               clientName
                             }
@@ -1250,7 +1260,7 @@ export default async function AgentDashboard({
                           ) &&
                             minutesWithoutProgress >
                               0 && (
-                              <p className="mt-1 text-[11px] leading-4 text-slate-400 sm:text-xs">
+                              <p className="mt-1 text-xs text-slate-400">
                                 Sans progression depuis{" "}
                                 {formatDuration(
                                   minutesWithoutProgress,
@@ -1261,7 +1271,7 @@ export default async function AgentDashboard({
 
                         <Link
                           href={`/admin/dossiers/${request.id}`}
-                          className="inline-flex min-h-10 w-full shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:w-auto sm:text-sm"
+                          className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                         >
                           Ouvrir →
                         </Link>
@@ -1293,22 +1303,22 @@ function StatCard({
   icon,
 }: StatCardProps) {
   return (
-    <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0B5D3B]/10 text-[#0B5D3B] sm:h-10 sm:w-10">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B5D3B]/10 text-[#0B5D3B]">
         {icon}
       </div>
 
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
+      <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
         {value.toLocaleString(
           "fr-FR",
         )}
       </p>
 
-      <p className="mt-1.5 text-[13px] font-semibold text-slate-800 sm:mt-2 sm:text-base">
+      <p className="mt-2 font-semibold text-slate-800">
         {label}
       </p>
 
-      <p className="mt-1 text-[11px] leading-4 text-slate-500 sm:text-xs sm:leading-5">
+      <p className="mt-1 text-xs leading-5 text-slate-500">
         {
           description
         }
@@ -1336,25 +1346,25 @@ function PriorityCard({
   return (
     <Link
       href="/admin/notifications"
-      className={`min-w-0 rounded-xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm sm:rounded-2xl sm:p-5 ${className}`}
+      className={`rounded-2xl border p-5 transition hover:-translate-y-0.5 hover:shadow-sm ${className}`}
     >
       <div className="flex items-center justify-between">
         {icon}
 
-        <span className="text-2xl font-bold sm:text-3xl">
+        <span className="text-3xl font-bold">
           {value.toLocaleString(
             "fr-FR",
           )}
         </span>
       </div>
 
-      <p className="mt-3 text-[13px] font-bold sm:mt-4 sm:text-base">
+      <p className="mt-4 font-bold">
         {
           label
         }
       </p>
 
-      <p className="mt-1 text-[11px] leading-4 opacity-80 sm:text-xs">
+      <p className="mt-1 text-xs opacity-80">
         {
           description
         }
@@ -1375,20 +1385,20 @@ function MetricCard({
   description,
 }: MetricCardProps) {
   return (
-    <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5">
-      <p className="text-[12px] font-medium text-slate-500 sm:text-sm">
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5">
+      <p className="text-sm font-medium text-slate-500">
         {
           label
         }
       </p>
 
-      <p className="mt-1.5 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-2 sm:text-2xl">
+      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[#102B20]">
         {
           value
         }
       </p>
 
-      <p className="mt-1.5 text-[11px] leading-4 text-slate-500 sm:mt-2 sm:text-xs sm:leading-5">
+      <p className="mt-2 text-xs leading-5 text-slate-500">
         {
           description
         }

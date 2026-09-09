@@ -466,7 +466,7 @@ export default function Etape1Page() {
   }
 
   const inputClassName =
-    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+    "w-full min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
 
   const fieldLabelClassName =
     "mb-2 block text-sm font-semibold text-slate-700";
@@ -657,7 +657,7 @@ export default function Etape1Page() {
               {/* PERSONAL INFORMATION */}
 
               <section>
-                <div className="grid min-w-0 gap-5 sm:grid-cols-2">
+                <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-2">
                   <div>
                     <label
                       htmlFor="firstName"
@@ -712,7 +712,7 @@ export default function Etape1Page() {
                     />
                   </div>
 
-                  <div className="sm:col-span-2">
+                  <div className="lg:col-span-2">
                     <label
                       htmlFor="fatherName"
                       className={fieldLabelClassName}
@@ -788,7 +788,7 @@ export default function Etape1Page() {
                     </select>
                   </div>
 
-                  <div className="sm:col-span-2">
+                  <div className="lg:col-span-2">
                     <label
                       htmlFor="nationality"
                       className={fieldLabelClassName}

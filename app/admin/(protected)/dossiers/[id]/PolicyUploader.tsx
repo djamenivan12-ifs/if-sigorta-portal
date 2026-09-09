@@ -1141,7 +1141,7 @@ export default function PolicyUploader({
 
       {/* DATES */}
 
-      <div className="mt-6 rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
+      <div className="mt-6 min-w-0 rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4 sm:p-5">
         <div>
           <h3 className="font-semibold text-[#102B20]">
             Période de validité
@@ -1152,8 +1152,8 @@ export default function PolicyUploader({
           </p>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label className="block">
+        <div className="mt-5 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
+          <label className="block min-w-0">
             <span className="text-sm font-semibold text-slate-700">
               Date de début
             </span>
@@ -1189,7 +1189,7 @@ export default function PolicyUploader({
               disabled={
                 loading
               }
-              className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -1199,7 +1199,7 @@ export default function PolicyUploader({
             </p>
           </label>
 
-          <label className="block">
+          <label className="block min-w-0">
             <span className="text-sm font-semibold text-slate-700">
               Date de fin
             </span>
@@ -1229,7 +1229,7 @@ export default function PolicyUploader({
               disabled={
                 loading
               }
-              className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-500">

@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   sendPartnerWhatsAppMessage,
+  sendWhatsAppMessage,
 } from "@/lib/whatsapp/sendWhatsAppMessage";
 
 const BUCKET_NAME =
@@ -1582,7 +1583,131 @@ export async function POST(
 
     /*
      * ============================================
-     * 15. WHATSAPP PARTENAIRE
+     * 15. WHATSAPP CLIENT DIRECT
+     * ============================================
+     *
+     * Uniquement :
+     * dossier direct + transition réelle vers
+     * policy_available.
+     *
+     * Un remplacement ultérieur de la police
+     * ne renvoie donc pas le message.
+     */
+
+    if (
+      becamePolicyAvailable &&
+      isDirectRequest
+    ) {
+      try {
+        const clientRelation =
+          insuranceRequest.client;
+
+        const client =
+          Array.isArray(
+            clientRelation,
+          )
+            ? (
+                clientRelation[0] ??
+                null
+              )
+            : clientRelation;
+
+        const whatsappCountryCode =
+          client
+            ?.whatsapp_country_code
+            ?.trim() ??
+          "";
+
+        const whatsappNumber =
+          client
+            ?.whatsapp_number
+            ?.trim() ??
+          "";
+
+        const phoneNumber =
+          `${whatsappCountryCode}${whatsappNumber}`;
+
+        if (
+          whatsappCountryCode &&
+          whatsappNumber
+        ) {
+          await sendWhatsAppMessage({
+            phoneNumber,
+
+            matricule:
+              insuranceRequest.request_code,
+
+            firstName:
+              client?.first_name
+                ?.trim() ??
+              "",
+
+            preferredLanguage:
+              insuranceRequest.preferred_language,
+          });
+
+          await safeLogActivity({
+            requestId:
+              id,
+
+            userId:
+              user.id,
+
+            action:
+              "policy_whatsapp_sent",
+
+            description:
+              "Le client a été informé sur WhatsApp que son assurance est disponible.",
+          });
+        } else {
+          console.error(
+            "Notification WhatsApp client non envoyée : numéro client incomplet.",
+          );
+
+          await safeLogActivity({
+            requestId:
+              id,
+
+            userId:
+              user.id,
+
+            action:
+              "policy_whatsapp_failed",
+
+            description:
+              "Notification WhatsApp client impossible : numéro client incomplet.",
+          });
+        }
+      } catch (
+        whatsappError
+      ) {
+        console.error(
+          "Notification WhatsApp client impossible :",
+          whatsappError,
+        );
+
+        await safeLogActivity({
+          requestId:
+            id,
+
+          userId:
+            user.id,
+
+          action:
+            "policy_whatsapp_failed",
+
+          description:
+            whatsappError instanceof
+              Error
+              ? `Échec de la notification WhatsApp client : ${whatsappError.message}`
+              : "Échec de la notification WhatsApp client.",
+        });
+      }
+    }
+
+    /*
+     * ============================================
+     * 16. WHATSAPP PARTENAIRE
      * ============================================
      *
      * Uniquement :
@@ -1751,7 +1876,7 @@ export async function POST(
 
     /*
      * ============================================
-     * 16. SUCCÈS
+     * 17. SUCCÈS
      * ============================================
      */
 
@@ -1784,7 +1909,10 @@ export async function POST(
 
         whatsappNotificationTriggered:
           becamePolicyAvailable &&
-          isPartnerRequest,
+          (
+            isDirectRequest ||
+            isPartnerRequest
+          ),
       },
       {
         status: 200,

@@ -8,6 +8,32 @@ type RequestBody = {
   content?: string;
 };
 
+async function safeLogActivity({
+  requestId,
+  userId,
+  action,
+  description,
+}: {
+  requestId: string;
+  userId: string;
+  action: string;
+  description: string;
+}) {
+  try {
+    await logActivity({
+      requestId,
+      userId,
+      action,
+      description,
+    });
+  } catch (error) {
+    console.error(
+      "Impossible d'enregistrer l'activité de la note :",
+      error,
+    );
+  }
+}
+
 export async function POST(
   request: Request,
   context: {
@@ -17,6 +43,11 @@ export async function POST(
   },
 ) {
   try {
+    /*
+     * ============================================
+     * 1. AUTHENTIFICATION
+     * ============================================
+     */
     const sessionClient =
       await createServerSupabaseClient();
 
@@ -32,10 +63,18 @@ export async function POST(
         },
         {
           status: 401,
+          headers: {
+            "Cache-Control": "no-store",
+          },
         },
       );
     }
 
+    /*
+     * ============================================
+     * 2. RÔLE
+     * ============================================
+     */
     const role = user.app_metadata?.role;
 
     if (
@@ -49,10 +88,18 @@ export async function POST(
         },
         {
           status: 403,
+          headers: {
+            "Cache-Control": "no-store",
+          },
         },
       );
     }
 
+    /*
+     * ============================================
+     * 3. IDENTIFIANT DU DOSSIER
+     * ============================================
+     */
     const { id } = await context.params;
 
     if (!id) {
@@ -62,12 +109,36 @@ export async function POST(
         },
         {
           status: 400,
+          headers: {
+            "Cache-Control": "no-store",
+          },
         },
       );
     }
 
-    const body =
-      (await request.json()) as RequestBody;
+    /*
+     * ============================================
+     * 4. CONTENU DE LA NOTE
+     * ============================================
+     */
+    let body: RequestBody;
+
+    try {
+      body =
+        (await request.json()) as RequestBody;
+    } catch {
+      return NextResponse.json(
+        {
+          error: "Les données envoyées sont invalides.",
+        },
+        {
+          status: 400,
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        },
+      );
+    }
 
     const content =
       body.content?.trim() ?? "";
@@ -80,6 +151,9 @@ export async function POST(
         },
         {
           status: 400,
+          headers: {
+            "Cache-Control": "no-store",
+          },
         },
       );
     }
@@ -92,10 +166,18 @@ export async function POST(
         },
         {
           status: 400,
+          headers: {
+            "Cache-Control": "no-store",
+          },
         },
       );
     }
 
+    /*
+     * ============================================
+     * 5. DOSSIER
+     * ============================================
+     */
     const serviceClient =
       createServiceClient();
 
@@ -104,7 +186,12 @@ export async function POST(
       error: requestError,
     } = await serviceClient
       .from("insurance_requests")
-      .select("id")
+      .select(
+        `
+          id,
+          assigned_agent_id
+        `,
+      )
       .eq("id", id)
       .maybeSingle();
 
@@ -121,10 +208,49 @@ export async function POST(
         },
         {
           status: 404,
+          headers: {
+            "Cache-Control": "no-store",
+          },
         },
       );
     }
 
+    /*
+     * ============================================
+     * 6. AUTORISATION AGENT
+     * ============================================
+     *
+     * Un agent ne peut ajouter une note que sur
+     * un dossier qui lui est attribué.
+     *
+     * L'admin conserve son accès à tous les dossiers.
+     */
+    if (
+      role === "agent" &&
+      insuranceRequest.assigned_agent_id !==
+        user.id
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            insuranceRequest.assigned_agent_id
+              ? "Ce dossier est attribué à un autre agent."
+              : "Vous devez d’abord prendre en charge ce dossier.",
+        },
+        {
+          status: 403,
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        },
+      );
+    }
+
+    /*
+     * ============================================
+     * 7. AJOUT DE LA NOTE
+     * ============================================
+     */
     const {
       data: note,
       error: insertError,
@@ -153,7 +279,15 @@ export async function POST(
       );
     }
 
-    await logActivity({
+    /*
+     * ============================================
+     * 8. HISTORIQUE
+     * ============================================
+     *
+     * Une erreur d'historique ne doit pas faire
+     * croire que l'ajout de la note a échoué.
+     */
+    await safeLogActivity({
       requestId: id,
       userId: user.id,
       action: "note_added",
@@ -161,10 +295,23 @@ export async function POST(
         "Une note interne a été ajoutée au dossier.",
     });
 
-    return NextResponse.json({
-      success: true,
-      note,
-    });
+    /*
+     * ============================================
+     * 9. SUCCÈS
+     * ============================================
+     */
+    return NextResponse.json(
+      {
+        success: true,
+        note,
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
+    );
   } catch (error) {
     console.error(
       "Erreur lors de l’ajout de la note :",
@@ -180,6 +327,9 @@ export async function POST(
       },
       {
         status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
       },
     );
   }

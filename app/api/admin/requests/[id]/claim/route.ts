@@ -52,20 +52,25 @@ export async function POST(
 
     /*
      * 2. Vérifier le rôle
+     *
+     * Seuls les agents peuvent utiliser la route
+     * de prise en charge.
+     *
+     * Les administrateurs utilisent la route
+     * d'attribution depuis leur section dédiée.
      */
     const role =
       user.app_metadata?.role;
 
     if (
-      role !== "agent" &&
-      role !== "admin"
+      role !== "agent"
     ) {
       return NextResponse.json(
         {
           success: false,
 
           error:
-            "Vous n’avez pas l’autorisation de prendre en charge un dossier.",
+            "Seul un agent peut prendre en charge directement un dossier.",
         },
         {
           status: 403,
@@ -232,6 +237,10 @@ export async function POST(
      * - être celui demandé ;
      * - ne pas être déjà attribué ;
      * - avoir encore un statut traitable.
+     *
+     * Les conditions sont répétées dans l'UPDATE
+     * afin d'empêcher deux agents de prendre
+     * simultanément le même dossier.
      */
     const assignedAt =
       new Date().toISOString();
@@ -264,10 +273,7 @@ export async function POST(
         .in(
           "status",
           [
-            "waiting_payment",
-            "payment_review",
-            "payment_confirmed",
-            "policy_preparation",
+            ...CLAIMABLE_STATUSES,
           ],
         )
         .select(

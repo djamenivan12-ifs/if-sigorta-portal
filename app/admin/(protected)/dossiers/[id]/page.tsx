@@ -584,9 +584,37 @@ export default async function DossierPage({
         ),
       );
 
-  const canAssign =
+  const currentUserRole:
+    | "agent"
+    | "admin" =
     user.app_metadata?.role ===
+    "admin"
+      ? "admin"
+      : "agent";
+
+  const canAssign =
+    currentUserRole ===
     "admin";
+
+  const isAssignedToCurrentUser =
+    insuranceRequest.assigned_agent_id ===
+    user.id;
+
+  const isAssignedToAnotherUser =
+    Boolean(
+      insuranceRequest.assigned_agent_id,
+    ) &&
+    !isAssignedToCurrentUser;
+
+  const canTreatRequest =
+    currentUserRole ===
+      "admin" ||
+    isAssignedToCurrentUser;
+
+  const shouldClaimBeforeTreatment =
+    currentUserRole ===
+      "agent" &&
+    !insuranceRequest.assigned_agent_id;
 
   const {
     data: documentsData,
@@ -1325,6 +1353,12 @@ export default async function DossierPage({
               canAssign={
                 canAssign
               }
+              currentUserId={
+                user.id
+              }
+              currentUserRole={
+                currentUserRole
+              }
             />
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
@@ -1380,51 +1414,75 @@ export default async function DossierPage({
               )}
             </section>
 
-            <RequestActions
-              requestId={
-                insuranceRequest.id
-              }
-              currentStatus={
-                insuranceRequest.status
-              }
-            />
+            {!canTreatRequest && (
+              <section className="min-w-0 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:rounded-[1.5rem] sm:p-6">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">
+                  Traitement verrouillé
+                </p>
 
-            {(
-              insuranceRequest.status ===
-                "policy_preparation" ||
-              insuranceRequest.status ===
-                "policy_available"
-            ) && (
-              <PolicyUploader
-                requestId={
-                  insuranceRequest.id
-                }
-                insuranceDurationYears={
-                  insuranceDurationYears
-                }
-                existingPolicyYears={
-                  existingPolicyYears
-                }
-                hasKimlik={
-                  hasKimlik
-                }
-                kimlikExpirationDate={
-                  insuranceRequest.kimlik_expiration_date ??
-                  null
-                }
-                requestedStartDate={
-                  insuranceRequest.insurance_start_date ??
-                  null
-                }
-                policyStartDate={
-                  insuranceRequest.policy_start_date ??
-                  null
-                }
-                policyEndDate={
-                  insuranceRequest.policy_end_date ??
-                  null
-                }
-              />
+                <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-amber-900 sm:text-xl">
+                  {shouldClaimBeforeTreatment
+                    ? "Prenez d’abord ce dossier en charge"
+                    : "Ce dossier est attribué à un autre responsable"}
+                </h2>
+
+                <p className="mt-2 text-[12px] leading-5 text-amber-800 sm:text-sm sm:leading-6">
+                  {shouldClaimBeforeTreatment
+                    ? "Vous pouvez consulter les informations du dossier, mais les actions de traitement restent bloquées tant que vous n’avez pas cliqué sur « Prendre en charge ce dossier » dans la section Responsable."
+                    : "Vous pouvez consulter ce dossier, mais vous ne pouvez pas effectuer d’action de traitement tant qu’il reste attribué à un autre responsable."}
+                </p>
+              </section>
+            )}
+
+            {canTreatRequest && (
+              <>
+                <RequestActions
+                  requestId={
+                    insuranceRequest.id
+                  }
+                  currentStatus={
+                    insuranceRequest.status
+                  }
+                />
+
+                {(
+                  insuranceRequest.status ===
+                    "policy_preparation" ||
+                  insuranceRequest.status ===
+                    "policy_available"
+                ) && (
+                  <PolicyUploader
+                    requestId={
+                      insuranceRequest.id
+                    }
+                    insuranceDurationYears={
+                      insuranceDurationYears
+                    }
+                    existingPolicyYears={
+                      existingPolicyYears
+                    }
+                    hasKimlik={
+                      hasKimlik
+                    }
+                    kimlikExpirationDate={
+                      insuranceRequest.kimlik_expiration_date ??
+                      null
+                    }
+                    requestedStartDate={
+                      insuranceRequest.insurance_start_date ??
+                      null
+                    }
+                    policyStartDate={
+                      insuranceRequest.policy_start_date ??
+                      null
+                    }
+                    policyEndDate={
+                      insuranceRequest.policy_end_date ??
+                      null
+                    }
+                  />
+                )}
+              </>
             )}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">

@@ -160,6 +160,7 @@ function formatDate(
     {
       dateStyle: "long",
       timeStyle: "short",
+      timeZone: "Europe/Istanbul",
     },
   ).format(date);
 }

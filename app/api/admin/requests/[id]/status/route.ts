@@ -17,6 +17,7 @@ type AllowedAction =
 type UpdateStatusPayload = {
   action?: AllowedAction;
   rejectionReason?: string;
+  insuranceCompanyId?: string;
 };
 
 type RouteContext = {
@@ -246,7 +247,12 @@ async function handleStatusUpdate(
           `
             id,
             status,
-            assigned_agent_id
+            assigned_agent_id,
+            calculated_age,
+            insurance_duration_years,
+            insurance_company_id,
+            insurance_cost_rate_id,
+            actual_insurance_cost
           `,
         )
         .eq(
@@ -928,12 +934,278 @@ async function handleStatusUpdate(
         );
       }
 
+      const insuranceCompanyId =
+        body.insuranceCompanyId
+          ?.trim() ?? "";
+
+      if (
+        !insuranceCompanyId
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Veuillez sélectionner un assureur.",
+          },
+          400,
+        );
+      }
+
+      const age =
+        Number(
+          insuranceRequest
+            .calculated_age,
+        );
+
+      const durationYears =
+        Number(
+          insuranceRequest
+            .insurance_duration_years,
+        );
+
+      if (
+        !Number.isInteger(
+          age,
+        ) ||
+        age < 0
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "L’âge calculé du client est invalide.",
+          },
+          400,
+        );
+      }
+
+      if (
+        durationYears !== 1 &&
+        durationYears !== 2
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "La durée d’assurance est invalide.",
+          },
+          400,
+        );
+      }
+
+      const {
+        data:
+          insuranceCompany,
+        error:
+          insuranceCompanyError,
+      } =
+        await serviceClient
+          .from(
+            "insurance_companies",
+          )
+          .select(
+            `
+              id,
+              name,
+              is_active
+            `,
+          )
+          .eq(
+            "id",
+            insuranceCompanyId,
+          )
+          .maybeSingle();
+
+      if (
+        insuranceCompanyError
+      ) {
+        throw new Error(
+          insuranceCompanyError.message,
+        );
+      }
+
+      if (
+        !insuranceCompany
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Assureur introuvable.",
+          },
+          404,
+        );
+      }
+
+      if (
+        !insuranceCompany.is_active
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Cet assureur est actuellement inactif.",
+          },
+          409,
+        );
+      }
+
+      const turkeyDateParts =
+        new Intl.DateTimeFormat(
+          "en-GB",
+          {
+            timeZone:
+              "Europe/Istanbul",
+            year:
+              "numeric",
+            month:
+              "2-digit",
+            day:
+              "2-digit",
+          },
+        ).formatToParts(
+          new Date(),
+        );
+
+      const turkeyYear =
+        turkeyDateParts.find(
+          (part) =>
+            part.type ===
+            "year",
+        )?.value ?? "";
+
+      const turkeyMonth =
+        turkeyDateParts.find(
+          (part) =>
+            part.type ===
+            "month",
+        )?.value ?? "";
+
+      const turkeyDay =
+        turkeyDateParts.find(
+          (part) =>
+            part.type ===
+            "day",
+        )?.value ?? "";
+
+      const today =
+        `${turkeyYear}-${turkeyMonth}-${turkeyDay}`;
+
+      const {
+        data:
+          matchingRate,
+        error:
+          matchingRateError,
+      } =
+        await serviceClient
+          .from(
+            "insurance_cost_rates",
+          )
+          .select(
+            `
+              id,
+              real_cost,
+              effective_from,
+              created_at
+            `,
+          )
+          .eq(
+            "insurance_company_id",
+            insuranceCompanyId,
+          )
+          .eq(
+            "is_active",
+            true,
+          )
+          .eq(
+            "duration_years",
+            durationYears,
+          )
+          .lte(
+            "min_age",
+            age,
+          )
+          .gte(
+            "max_age",
+            age,
+          )
+          .lte(
+            "effective_from",
+            today,
+          )
+          .order(
+            "effective_from",
+            {
+              ascending:
+                false,
+            },
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false,
+            },
+          )
+          .limit(
+            1,
+          )
+          .maybeSingle();
+
+      if (
+        matchingRateError
+      ) {
+        throw new Error(
+          matchingRateError.message,
+        );
+      }
+
+      if (
+        !matchingRate
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Aucun tarif actif de cet assureur ne correspond à l’âge et à la durée de ce dossier.",
+          },
+          409,
+        );
+      }
+
+      const actualInsuranceCost =
+        Number(
+          matchingRate.real_cost,
+        );
+
+      if (
+        !Number.isFinite(
+          actualInsuranceCost,
+        ) ||
+        actualInsuranceCost <
+          0
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Le coût réel configuré pour cet assureur est invalide.",
+          },
+          500,
+        );
+      }
+
       /*
        * Transition atomique :
        *
        * payment_confirmed
        *      ↓
+       * sélection assureur + coût figé
+       *      ↓
        * policy_preparation
+       *
+       * Le coût réel est calculé exclusivement
+       * côté serveur à partir du tarif actif.
        */
 
       const {
@@ -947,6 +1219,21 @@ async function handleStatusUpdate(
             "insurance_requests",
           )
           .update({
+            insurance_company_id:
+              insuranceCompany.id,
+
+            insurance_cost_rate_id:
+              matchingRate.id,
+
+            actual_insurance_cost:
+              actualInsuranceCost,
+
+            insurance_company_selected_at:
+              now,
+
+            insurance_company_selected_by:
+              user.id,
+
             status:
               "policy_preparation",
 
@@ -962,7 +1249,13 @@ async function handleStatusUpdate(
             "payment_confirmed",
           )
           .select(
-            "id",
+            `
+              id,
+              status,
+              insurance_company_id,
+              insurance_cost_rate_id,
+              actual_insurance_cost
+            `,
           )
           .maybeSingle();
 
@@ -998,7 +1291,7 @@ async function handleStatusUpdate(
           "policy_preparation_started",
 
         description:
-          "Préparation de l’assurance commencée.",
+          `Assureur sélectionné : ${insuranceCompany.name}. Préparation de l’assurance commencée.`,
       });
 
       return jsonResponse(
@@ -1010,6 +1303,13 @@ async function handleStatusUpdate(
 
           status:
             "policy_preparation",
+
+          insuranceCompany: {
+            id:
+              insuranceCompany.id,
+            name:
+              insuranceCompany.name,
+          },
         },
       );
     }

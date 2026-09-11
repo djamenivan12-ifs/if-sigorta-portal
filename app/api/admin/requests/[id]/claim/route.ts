@@ -10,6 +10,10 @@ const CLAIMABLE_STATUSES = [
   "policy_preparation",
 ] as const;
 
+type InternalRole =
+  | "agent"
+  | "admin";
+
 export async function POST(
   request: Request,
   context: {
@@ -20,7 +24,9 @@ export async function POST(
 ) {
   try {
     /*
-     * 1. Vérifier l'utilisateur connecté
+     * ============================================
+     * 1. UTILISATEUR CONNECTÉ
+     * ============================================
      */
     const sessionClient =
       await createServerSupabaseClient();
@@ -40,46 +46,58 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Vous devez être connecté.",
         },
         {
           status: 401,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
-     * 2. Vérifier le rôle
+     * ============================================
+     * 2. RÔLE
+     * ============================================
      *
-     * Seuls les agents peuvent utiliser la route
-     * de prise en charge.
-     *
-     * Les administrateurs utilisent la route
-     * d'attribution depuis leur section dédiée.
+     * Un agent OU un administrateur peut
+     * prendre directement en charge un dossier
+     * non attribué.
      */
     const role =
-      user.app_metadata?.role;
+      user.app_metadata
+        ?.role as
+        | InternalRole
+        | undefined;
 
     if (
-      role !== "agent"
+      role !== "agent" &&
+      role !== "admin"
     ) {
       return NextResponse.json(
         {
           success: false,
-
           error:
-            "Seul un agent peut prendre en charge directement un dossier.",
+            "Vous n’êtes pas autorisé à prendre en charge un dossier.",
         },
         {
           status: 403,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
-     * 3. Récupérer l'identifiant du dossier
+     * ============================================
+     * 3. IDENTIFIANT DU DOSSIER
+     * ============================================
      */
     const {
       id: requestId,
@@ -90,12 +108,15 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Identifiant du dossier absent.",
         },
         {
           status: 400,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
@@ -104,7 +125,9 @@ export async function POST(
       createServiceClient();
 
     /*
-     * 4. Vérifier que le dossier existe
+     * ============================================
+     * 4. DOSSIER
+     * ============================================
      */
     const {
       data:
@@ -141,19 +164,23 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Dossier introuvable.",
         },
         {
           status: 404,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
-     * 5. Vérifier que le statut permet encore
-     * la prise en charge du dossier.
+     * ============================================
+     * 5. STATUT AUTORISÉ
+     * ============================================
      */
     if (
       !CLAIMABLE_STATUSES.includes(
@@ -164,27 +191,35 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           error:
             "Ce dossier ne peut plus être pris en charge dans son état actuel.",
         },
         {
           status: 409,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
-     * 6. Si le dossier est déjà attribué
+     * ============================================
+     * 6. DOSSIER DÉJÀ ATTRIBUÉ
+     * ============================================
      */
     if (
-      insuranceRequest.assigned_agent_id
+      insuranceRequest
+        .assigned_agent_id
     ) {
       /*
-       * Déjà attribué à l'utilisateur connecté.
+       * Le dossier appartient déjà
+       * à l'utilisateur connecté.
        */
       if (
-        insuranceRequest.assigned_agent_id ===
+        insuranceRequest
+          .assigned_agent_id ===
         user.id
       ) {
         return NextResponse.json(
@@ -210,37 +245,44 @@ export async function POST(
           },
           {
             status: 200,
+            headers: {
+              "Cache-Control":
+                "no-store",
+            },
           },
         );
       }
 
       /*
-       * Attribué à un autre utilisateur.
+       * Le dossier appartient
+       * à quelqu'un d'autre.
        */
       return NextResponse.json(
         {
           success: false,
-
           error:
-            "Ce dossier a déjà été pris en charge par un autre agent.",
+            "Ce dossier a déjà été pris en charge par un autre utilisateur.",
         },
         {
           status: 409,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
-     * 7. Attribution atomique
+     * ============================================
+     * 7. ATTRIBUTION ATOMIQUE
+     * ============================================
      *
-     * Le dossier doit :
-     * - être celui demandé ;
-     * - ne pas être déjà attribué ;
-     * - avoir encore un statut traitable.
+     * L'UPDATE vérifie une seconde fois que
+     * assigned_agent_id est toujours NULL.
      *
-     * Les conditions sont répétées dans l'UPDATE
-     * afin d'empêcher deux agents de prendre
-     * simultanément le même dossier.
+     * Cela évite que deux utilisateurs
+     * prennent simultanément le même dossier.
      */
     const assignedAt =
       new Date().toISOString();
@@ -294,26 +336,31 @@ export async function POST(
     }
 
     /*
-     * Si aucune ligne n'a été modifiée,
-     * le dossier a probablement été pris
-     * entre-temps ou son statut a changé.
+     * Quelqu'un a pris le dossier
+     * entre la lecture et l'UPDATE,
+     * ou son statut a changé.
      */
     if (!updatedRequest) {
       return NextResponse.json(
         {
           success: false,
-
           error:
-            "Ce dossier vient d’être pris en charge par un autre agent ou son statut a changé.",
+            "Ce dossier vient d’être pris en charge par un autre utilisateur ou son statut a changé.",
         },
         {
           status: 409,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
         },
       );
     }
 
     /*
-     * 8. Nom de l'agent
+     * ============================================
+     * 8. NOM DE L'UTILISATEUR
+     * ============================================
      */
     const firstName =
       user.user_metadata
@@ -329,17 +376,28 @@ export async function POST(
         .trim() ??
       "";
 
-    const agentName =
+    const userName =
       `${firstName} ${lastName}`.trim() ||
       user.user_metadata
         ?.name
         ?.toString()
         .trim() ||
       user.email ||
-      "Agent";
+      (role === "admin"
+        ? "Administrateur"
+        : "Agent");
 
     /*
-     * 9. Historique
+     * ============================================
+     * 9. HISTORIQUE
+     * ============================================
+     *
+     * Une prise en charge personnelle
+     * n'envoie volontairement aucun e-mail.
+     *
+     * L'utilisateur est déjà présent
+     * dans l'application et vient
+     * lui-même d'effectuer l'action.
      */
     const {
       error:
@@ -360,12 +418,12 @@ export async function POST(
             "request_claimed",
 
           description:
-            `Dossier ${insuranceRequest.request_code} pris en charge par ${agentName}.`,
+            `Dossier ${insuranceRequest.request_code} pris en charge par ${userName}.`,
         });
 
     /*
-     * Une erreur de journalisation
-     * ne doit pas annuler l'attribution.
+     * Une erreur du journal ne doit jamais
+     * annuler la prise en charge.
      */
     if (activityError) {
       console.error(
@@ -375,7 +433,9 @@ export async function POST(
     }
 
     /*
-     * 10. Réponse
+     * ============================================
+     * 10. RÉPONSE
+     * ============================================
      */
     return NextResponse.json(
       {
@@ -395,15 +455,25 @@ export async function POST(
         agentId:
           user.id,
 
-        agentName,
+        agentName:
+          userName,
+
+        role,
 
         assignedAt,
+
+        assignmentEmailSent:
+          false,
 
         message:
           "Dossier pris en charge avec succès.",
       },
       {
         status: 200,
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
       },
     );
   } catch (error) {
@@ -423,6 +493,10 @@ export async function POST(
       },
       {
         status: 500,
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
       },
     );
   }

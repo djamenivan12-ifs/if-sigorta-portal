@@ -743,7 +743,13 @@ export async function PATCH(
     let assignmentEmailSent =
       false;
 
-    if (agentId) {
+    const isSelfAssignment =
+      agentId === currentUser.id;
+
+    if (
+      agentId &&
+      !isSelfAssignment
+    ) {
       if (
         agentEmail &&
         agentName

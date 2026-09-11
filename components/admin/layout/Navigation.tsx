@@ -20,6 +20,7 @@ import {
   Settings,
   UserCog,
   Users,
+  WalletCards,
 } from "lucide-react";
 
 type NavigationProps = {
@@ -98,6 +99,12 @@ export default function Navigation({
       href: "/admin/statistiques",
       label: "Statistiques",
       icon: BarChart3,
+      adminOnly: true,
+    },
+    {
+      href: "/admin/comptabilite",
+      label: "Comptabilité",
+      icon: WalletCards,
       adminOnly: true,
     },
     {

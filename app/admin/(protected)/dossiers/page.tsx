@@ -1138,25 +1138,25 @@ export default async function DossiersPage({
     );
 
   return (
-    <main className="min-h-screen bg-[#F6F8F5] px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-[1500px]">
-        <header className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-[1500px]">
+        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
                 IF Sigorta
               </p>
 
-              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
                 Tous les dossiers
               </h1>
 
-              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+              <p className="mt-2 text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
                 Consultez, recherchez et prenez en charge les demandes clients.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
               <a
                 href={`/api/admin/exports/dossiers?${new URLSearchParams({
                   ...(search
@@ -1195,14 +1195,14 @@ export default async function DossiersPage({
                       }
                     : {}),
                 }).toString()}`}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:w-auto sm:px-5 sm:text-sm"
               >
                 📊 Export Excel
               </a>
 
               <Link
                 href="/admin/dashboard"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto sm:px-5 sm:text-sm"
               >
                 ← Tableau de bord
               </Link>
@@ -1210,25 +1210,25 @@ export default async function DossiersPage({
           </div>
         </header>
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-[#102B20]">
               Recherche et filtres
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
               Retrouvez rapidement un dossier.
             </p>
           </div>
 
           <form
             method="GET"
-            className="space-y-5"
+            className="min-w-0 space-y-4 sm:space-y-5"
           >
             <div>
               <label
                 htmlFor="q"
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
               >
                 Recherche générale
               </label>
@@ -1241,15 +1241,15 @@ export default async function DossiersPage({
                   search
                 }
                 placeholder="Matricule, nom, prénom, WhatsApp, passeport, Kimlik, partenaire ou code partenaire"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-[13px] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-6">
               <div>
                 <label
                   htmlFor="status"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
                 >
                   Statut
                 </label>
@@ -1260,7 +1260,7 @@ export default async function DossiersPage({
                   defaultValue={
                     status
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 >
                   {statusOptions.map(
                     (
@@ -1287,7 +1287,7 @@ export default async function DossiersPage({
               <div>
                 <label
                   htmlFor="nationality"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
                 >
                   Nationalité
                 </label>
@@ -1298,7 +1298,7 @@ export default async function DossiersPage({
                   defaultValue={
                     nationality
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 >
                   <option value="">
                     Toutes les nationalités
@@ -1328,7 +1328,7 @@ export default async function DossiersPage({
               <div>
                 <label
                   htmlFor="duration"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
                 >
                   Durée
                 </label>
@@ -1339,7 +1339,7 @@ export default async function DossiersPage({
                   defaultValue={
                     duration
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 >
                   <option value="">
                     Toutes les durées
@@ -1358,7 +1358,7 @@ export default async function DossiersPage({
               <div>
                 <label
                   htmlFor="agent"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
                 >
                   Responsable
                 </label>
@@ -1369,7 +1369,7 @@ export default async function DossiersPage({
                   defaultValue={
                     agent
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 >
                   <option value="">
                     Tous les responsables
@@ -1412,14 +1412,14 @@ export default async function DossiersPage({
               </div>
 
               <div>
-                <label htmlFor="source" className="mb-2 block text-sm font-medium text-slate-700">
+                <label htmlFor="source" className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm">
                   Source
                 </label>
                 <select
                   id="source"
                   name="source"
                   defaultValue={source}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 >
                   <option value="">Toutes les sources</option>
                   <option value="direct">Client direct</option>
@@ -1430,7 +1430,7 @@ export default async function DossiersPage({
               <div>
                 <label
                   htmlFor="dateFrom"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
                 >
                   À partir du
                 </label>
@@ -1442,16 +1442,16 @@ export default async function DossiersPage({
                   defaultValue={
                     dateFrom
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 />
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div>
                 <label
                   htmlFor="dateTo"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
                 >
                   Jusqu’au
                 </label>
@@ -1463,21 +1463,21 @@ export default async function DossiersPage({
                   defaultValue={
                     dateTo
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
                 />
               </div>
 
-              <div className="flex items-end gap-3">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
                 <button
                   type="submit"
-                  className="min-h-12 rounded-xl bg-[#0B5D3B] px-6 font-black text-white transition hover:bg-[#084A2F]"
+                  className="min-h-11 w-full rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
                 >
                   Appliquer les filtres
                 </button>
 
                 <Link
                   href="/admin/dossiers"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-6 font-semibold text-slate-700 hover:bg-slate-50"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
                 >
                   Réinitialiser
                 </Link>
@@ -1487,21 +1487,21 @@ export default async function DossiersPage({
         </section>
 
         {errorMessage && (
-          <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-4 min-w-0 rounded-xl bg-red-50 px-3 py-3 text-[13px] text-red-700 sm:mt-6 sm:px-4 sm:text-sm">
             {
               errorMessage
             }
           </div>
         )}
 
-        <section className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white">
-          <div className="flex items-center justify-between border-b border-slate-200 p-6">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
+          <div className="flex min-w-0 flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
                 Résultats
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
                 {totalRequests.toLocaleString(
                   "fr-FR",
                 )}{" "}
@@ -1533,65 +1533,249 @@ export default async function DossiersPage({
 
           {paginatedRequests.length ===
           0 ? (
-            <div className="p-12 text-center">
+            <div className="p-6 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun dossier trouvé
               </p>
             </div>
           ) : (
-            <TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1880px]">
+            <>
+              <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
+                {paginatedRequests.map((request) => {
+                  const client =
+                    unwrapClient(request.client);
+
+                  const partner =
+                    unwrapPartner(request.partner);
+
+                  const clientName =
+                    client
+                      ? `${client.first_name} ${client.last_name}`.trim()
+                      : "Client inconnu";
+
+                  const whatsapp =
+                    client
+                      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
+                      : "";
+
+                  const statusInformation =
+                    statusLabels[request.status] ?? {
+                      label: request.status,
+                      className:
+                        "bg-slate-100 text-slate-700",
+                    };
+
+                  const assignedAgentName =
+                    request.assigned_agent_id
+                      ? agentNames.get(
+                          request.assigned_agent_id,
+                        ) ?? "Agent"
+                      : null;
+
+                  const isMine =
+                    request.assigned_agent_id ===
+                    user.id;
+
+                  const sourceLabel =
+                    request.source === "partner"
+                      ? partner
+                        ? `${partner.company_name} (${partner.code})`
+                        : "Partenaire"
+                      : "Client direct";
+
+                  return (
+                    <article
+                      key={request.id}
+                      className="min-w-0 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+                    >
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <Link
+                            href={`/admin/dossiers/${request.id}`}
+                            className="break-all text-[13px] font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                          >
+                            {request.request_code}
+                          </Link>
+
+                          <p className="mt-1 break-words text-[14px] font-semibold text-slate-900">
+                            {clientName}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`inline-flex max-w-[52%] shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold leading-4 ${statusInformation.className}`}
+                        >
+                          {statusInformation.label}
+                        </span>
+                      </div>
+
+                      <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3">
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Source
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700">
+                            {sourceLabel}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Responsable
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700">
+                            {!request.assigned_agent_id
+                              ? "Non attribué"
+                              : role === "admin"
+                                ? assignedAgentName
+                                : isMine
+                                  ? "Vous"
+                                  : "Déjà pris en charge"}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Nationalité
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700">
+                            {client?.nationality ?? "—"}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            WhatsApp
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700">
+                            {whatsapp || "—"}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Passeport
+                          </dt>
+                          <dd className="mt-1 break-all text-[12px] font-semibold text-slate-700">
+                            {request.passport_number ?? "—"}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Kimlik
+                          </dt>
+                          <dd className="mt-1 break-all text-[12px] font-semibold text-slate-700">
+                            {request.kimlik_number ?? "—"}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Durée
+                          </dt>
+                          <dd className="mt-1 text-[12px] font-semibold text-slate-700">
+                            {request.insurance_duration_years} an
+                            {request.insurance_duration_years === 2
+                              ? "s"
+                              : ""}
+                          </dd>
+                        </div>
+
+                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Montant
+                          </dt>
+                          <dd className="mt-1 break-words text-[12px] font-bold text-slate-800">
+                            {Number(
+                              request.calculated_price ?? 0,
+                            ).toLocaleString("fr-FR")}{" "}
+                            TL
+                          </dd>
+                        </div>
+                      </dl>
+
+                      <div className="mt-3 rounded-xl border border-slate-100 p-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                          Date
+                        </p>
+                        <p className="mt-1 text-[11px] leading-5 text-slate-600">
+                          {formatDate(request.created_at)}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 min-w-0">
+                        <ClaimRequestButton
+                          requestId={request.id}
+                          assignedAgentId={
+                            request.assigned_agent_id
+                          }
+                          assignedAgentName={
+                            assignedAgentName
+                          }
+                          currentUserId={user.id}
+                          currentUserRole={role}
+                        />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="hidden lg:block">
+<TableContainer className="rounded-none border-0 shadow-none">
+              <Table className="min-w-[1880px] table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>
+                    <TableHead className="w-[180px]">
                       Matricule
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[290px]">
                       Client
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[190px]">
                       Source
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[150px]">
                       Nationalité
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[170px]">
                       WhatsApp
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[150px]">
                       Passeport
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[150px]">
                       Kimlik
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[110px]">
                       Durée
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[120px]">
                       Montant
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[240px]">
                       Responsable
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[190px]">
                       Statut
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[170px]">
                       Date
                     </TableHead>
 
-                    <TableHead>
+                    <TableHead className="w-[220px]">
                       Action
                     </TableHead>
                   </TableRow>
@@ -1658,6 +1842,21 @@ export default async function DossiersPage({
                             {
                               clientName
                             }
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            {request.source === "partner"
+                              ? (() => {
+                                  const partner =
+                                    unwrapPartner(
+                                      request.partner,
+                                    );
+
+                                  return partner
+                                    ? `${partner.company_name} (${partner.code})`
+                                    : "Partenaire";
+                                })()
+                              : "Client direct"}
                           </TableCell>
 
                           <TableCell className="whitespace-nowrap">
@@ -1770,11 +1969,13 @@ export default async function DossiersPage({
                 </TableBody>
               </Table>
             </TableContainer>
+              </div>
+            </>
           )}
 
           {totalPages >
             1 && (
-            <div className="flex flex-col gap-4 border-t border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
               <p className="text-sm text-slate-500">
                 Page{" "}
                 <strong>
@@ -1790,7 +1991,7 @@ export default async function DossiersPage({
                 </strong>
               </p>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 {currentPage >
                   1 && (
                   <Link

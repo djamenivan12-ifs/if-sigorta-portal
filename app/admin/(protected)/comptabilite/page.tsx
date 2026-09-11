@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Banknote,
   Building2,
@@ -935,11 +936,12 @@ export default async function ComptabilitePage() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="truncate font-bold text-slate-900">
-                            {
-                              company.name
-                            }
-                          </p>
+                          <Link
+                            href={`/admin/comptabilite/assureurs/${company.id}`}
+                            className="block truncate font-bold text-slate-900 transition hover:text-[#0B5D3B] hover:underline"
+                          >
+                            {company.name}
+                          </Link>
 
                           <p className="mt-1 text-xs text-slate-500">
                             {
@@ -1045,11 +1047,12 @@ export default async function ComptabilitePage() {
                           className="text-slate-700"
                         >
                           <td className="whitespace-nowrap px-6 py-4">
-                            <div className="font-bold text-slate-900">
-                              {
-                                company.name
-                              }
-                            </div>
+                            <Link
+                              href={`/admin/comptabilite/assureurs/${company.id}`}
+                              className="font-bold text-slate-900 transition hover:text-[#0B5D3B] hover:underline"
+                            >
+                              {company.name}
+                            </Link>
 
                             <div className="mt-1 text-xs text-slate-500">
                               {company.active

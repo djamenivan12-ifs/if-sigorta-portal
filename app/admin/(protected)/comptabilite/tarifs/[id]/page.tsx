@@ -2,10 +2,9 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Building2,
-  CalendarDays,
-  Pencil,
 } from "lucide-react";
 
+import EditInsuranceRateForm from "@/components/admin/accounting/EditInsuranceRateForm";
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -125,150 +124,55 @@ export default async function EditAccountingRatePage({
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Modifiez les informations de ce tarif réel.
+            Modifiez le tarif réel utilisé pour les nouveaux dossiers.
           </p>
         </div>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F3F8F2] text-[#0B5D3B]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F3F8F2] text-[#0B5D3B]">
               <Building2 className="h-5 w-5" />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Assureur
               </p>
 
-              <h2 className="font-black text-slate-900">
-                {typedCompany?.name ??
-                  "Assureur inconnu"}
-              </h2>
+              {typedCompany ? (
+                <Link
+                  href={`/admin/comptabilite/assureurs/${typedCompany.id}`}
+                  className="block break-words font-black text-slate-900 transition hover:text-[#0B5D3B] hover:underline"
+                >
+                  {typedCompany.name}
+                </Link>
+              ) : (
+                <h2 className="font-black text-slate-900">
+                  Assureur inconnu
+                </h2>
+              )}
             </div>
           </div>
 
-          <form className="space-y-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  Âge minimum
-                </label>
-
-                <input
-                  type="number"
-                  defaultValue={
-                    typedRate.min_age
-                  }
-                  min={0}
-                  className="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm font-semibold outline-none transition focus:border-[#0B5D3B] focus:ring-2 focus:ring-[#0B5D3B]/10"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  Âge maximum
-                </label>
-
-                <input
-                  type="number"
-                  defaultValue={
-                    typedRate.max_age
-                  }
-                  min={0}
-                  className="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm font-semibold outline-none transition focus:border-[#0B5D3B] focus:ring-2 focus:ring-[#0B5D3B]/10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Durée
-              </label>
-
-              <div className="flex h-12 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold text-slate-700">
-                <CalendarDays className="h-4 w-4 text-slate-400" />
-
-                {typedRate.duration_years}{" "}
-                an
-                {typedRate.duration_years > 1
-                  ? "s"
-                  : ""}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Coût réel
-              </label>
-
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  defaultValue={Number(
-                    typedRate.real_cost,
-                  )}
-                  className="h-12 w-full rounded-xl border border-slate-200 px-4 pr-14 text-sm font-semibold outline-none transition focus:border-[#0B5D3B] focus:ring-2 focus:ring-[#0B5D3B]/10"
-                />
-
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                  TL
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Date d’entrée en vigueur
-              </label>
-
-              <input
-                type="date"
-                defaultValue={
-                  typedRate.effective_from
-                }
-                className="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm font-semibold outline-none transition focus:border-[#0B5D3B] focus:ring-2 focus:ring-[#0B5D3B]/10"
-              />
-            </div>
-
-            <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 p-4">
-              <div>
-                <p className="text-sm font-bold text-slate-800">
-                  Tarif actif
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Un tarif inactif ne devra plus être utilisé pour les nouveaux dossiers.
-                </p>
-              </div>
-
-              <input
-                type="checkbox"
-                defaultChecked={
-                  typedRate.is_active
-                }
-                className="h-5 w-5 accent-[#0B5D3B]"
-              />
-            </label>
-
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-              <Link
-                href="/admin/comptabilite/tarifs"
-                className="flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-5 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
-              >
-                Annuler
-              </Link>
-
-              <button
-                type="button"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0B5D3B] px-5 text-sm font-bold text-white transition hover:bg-[#084B30]"
-              >
-                <Pencil className="h-4 w-4" />
-                Enregistrer les modifications
-              </button>
-            </div>
-          </form>
+          <EditInsuranceRateForm
+            rate={{
+              id: typedRate.id,
+              minAge: typedRate.min_age,
+              maxAge: typedRate.max_age,
+              durationYears:
+                typedRate.duration_years,
+              realCost: Number(
+                typedRate.real_cost,
+              ),
+              effectiveFrom:
+                typedRate.effective_from.slice(
+                  0,
+                  10,
+                ),
+              isActive:
+                typedRate.is_active,
+            }}
+          />
         </section>
       </div>
     </main>

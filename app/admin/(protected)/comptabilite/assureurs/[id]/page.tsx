@@ -68,6 +68,20 @@ type RateRow = {
   created_at: string;
 };
 
+type RateHistoryRow = {
+  id: string;
+  insurance_cost_rate_id: string;
+  insurance_company_id: string;
+  min_age: number;
+  max_age: number;
+  duration_years: number;
+  real_cost: number | string;
+  effective_from: string;
+  is_active: boolean;
+  changed_by: string | null;
+  changed_at: string;
+};
+
 function toNumber(
   value: number | string | null | undefined,
 ) {
@@ -109,6 +123,23 @@ function formatDate(value: string) {
   }
 
   return `${day}/${month}/${year}`;
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Istanbul",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export default async function InsuranceCompanyPage({
@@ -167,6 +198,7 @@ export default async function InsuranceCompanyPage({
     depositsResult,
     requestsResult,
     ratesResult,
+    rateHistoryResult,
   ] = await Promise.all([
     serviceClient
       .from("insurance_company_deposits")
@@ -226,6 +258,26 @@ export default async function InsuranceCompanyPage({
       .order("duration_years", {
         ascending: true,
       }),
+
+    serviceClient
+      .from("insurance_cost_rate_history")
+      .select(`
+        id,
+        insurance_cost_rate_id,
+        insurance_company_id,
+        min_age,
+        max_age,
+        duration_years,
+        real_cost,
+        effective_from,
+        is_active,
+        changed_by,
+        changed_at
+      `)
+      .eq("insurance_company_id", id)
+      .order("changed_at", {
+        ascending: false,
+      }),
   ]);
 
   if (depositsResult.error) {
@@ -246,6 +298,12 @@ export default async function InsuranceCompanyPage({
     );
   }
 
+  if (rateHistoryResult.error) {
+    throw new Error(
+      rateHistoryResult.error.message,
+    );
+  }
+
   const deposits =
     (depositsResult.data ?? []) as DepositRow[];
 
@@ -254,6 +312,9 @@ export default async function InsuranceCompanyPage({
 
   const rates =
     (ratesResult.data ?? []) as RateRow[];
+
+  const rateHistory =
+    (rateHistoryResult.data ?? []) as RateHistoryRow[];
 
   const requestIds =
     requests.map((request) => request.id);
@@ -842,11 +903,11 @@ export default async function InsuranceCompanyPage({
           <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <h2 className="text-lg font-bold text-slate-950">
-                Tarifs
+                Tarifs actuels
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Historique des coûts réels enregistrés pour cette compagnie.
+                Grilles tarifaires actuellement enregistrées pour cette compagnie.
               </p>
             </div>
 
@@ -993,6 +1054,161 @@ export default async function InsuranceCompanyPage({
                               ? "Actif"
                               : "Inactif"}
                           </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 p-5 sm:p-6">
+            <h2 className="text-lg font-bold text-slate-950">
+              Historique des modifications de tarifs
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Anciennes valeurs conservées automatiquement avant chaque modification d’un tarif.
+            </p>
+          </div>
+
+          {rateHistory.length === 0 ? (
+            <EmptyState
+              title="Aucune modification enregistrée"
+              description="Les anciennes valeurs apparaîtront ici après la modification d’un tarif."
+            />
+          ) : (
+            <>
+              <div className="space-y-3 p-4 md:hidden">
+                {rateHistory.map((history) => (
+                  <article
+                    key={history.id}
+                    className="rounded-xl border border-slate-200 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-black text-slate-950">
+                          {history.min_age} – {history.max_age} ans
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-slate-500">
+                          Ancienne valeur • {history.duration_years} an
+                          {history.duration_years > 1 ? "s" : ""}
+                        </p>
+                      </div>
+
+                      <span
+                        className={[
+                          "shrink-0 rounded-full px-2.5 py-1 text-xs font-bold",
+                          history.is_active
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-500",
+                        ].join(" ")}
+                      >
+                        {history.is_active ? "Actif" : "Inactif"}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <MobileValue
+                        label="Ancien coût réel"
+                        value={formatCurrency(
+                          toNumber(history.real_cost),
+                        )}
+                      />
+
+                      <MobileValue
+                        label="Ancienne entrée en vigueur"
+                        value={formatDate(
+                          history.effective_from,
+                        )}
+                      />
+
+                      <div className="sm:col-span-2">
+                        <MobileValue
+                          label="Modification enregistrée le"
+                          value={formatDateTime(
+                            history.changed_at,
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="min-w-[950px] w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="whitespace-nowrap px-6 py-3">
+                        Tranche d’âge
+                      </th>
+                      <th className="whitespace-nowrap px-6 py-3">
+                        Durée
+                      </th>
+                      <th className="whitespace-nowrap px-6 py-3">
+                        Ancien coût
+                      </th>
+                      <th className="whitespace-nowrap px-6 py-3">
+                        Ancienne entrée en vigueur
+                      </th>
+                      <th className="whitespace-nowrap px-6 py-3">
+                        Ancien statut
+                      </th>
+                      <th className="whitespace-nowrap px-6 py-3">
+                        Modifié le
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-100">
+                    {rateHistory.map((history) => (
+                      <tr
+                        key={history.id}
+                        className="text-slate-700"
+                      >
+                        <td className="whitespace-nowrap px-6 py-4 font-bold text-slate-900">
+                          {history.min_age} – {history.max_age} ans
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4">
+                          {history.duration_years} an
+                          {history.duration_years > 1 ? "s" : ""}
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4 font-black">
+                          {formatCurrency(
+                            toNumber(history.real_cost),
+                          )}
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4">
+                          {formatDate(
+                            history.effective_from,
+                          )}
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <span
+                            className={[
+                              "rounded-full px-2.5 py-1 text-xs font-bold",
+                              history.is_active
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-slate-100 text-slate-500",
+                            ].join(" ")}
+                          >
+                            {history.is_active ? "Actif" : "Inactif"}
+                          </span>
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4">
+                          {formatDateTime(
+                            history.changed_at,
+                          )}
                         </td>
                       </tr>
                     ))}

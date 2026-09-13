@@ -1,3 +1,8 @@
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { listAllUsers } from "@/lib/supabase/listAllUsers";
+
+import { normalizeActivityAction } from "@/lib/activity/normalizeAction";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -9,8 +14,6 @@ import AssignAgent from "@/components/admin/requests/AssignAgent";
 import NotesSection from "./NotesSection";
 import PolicyUploader from "./PolicyUploader";
 import RequestActions from "./RequestActions";
-
-const BUCKET_NAME = "insurance-documents";
 
 type PageProps = {
   params: Promise<{
@@ -40,10 +43,9 @@ type ActivityLogRow = {
   created_at: string;
 };
 
-type ActivityLogWithAuthor =
-  ActivityLogRow & {
-    author: string;
-  };
+type ActivityLogWithAuthor = ActivityLogRow & {
+  author: string;
+};
 
 type RequestNoteRow = {
   id: string;
@@ -59,19 +61,14 @@ type NoteWithAuthor = {
   author: string;
 };
 
-const documentLabels: Record<
-  string,
-  string
-> = {
+const documentLabels: Record<string, string> = {
   passport: "Passeport",
   kimlik_front: "Kimlik recto",
   kimlik_back: "Kimlik verso",
   payment_receipt: "Dekont",
   insurance_policy: "Police d’assurance",
-  insurance_policy_year_1:
-    "Police d’assurance — Année 1",
-  insurance_policy_year_2:
-    "Police d’assurance — Année 2",
+  insurance_policy_year_1: "Police d’assurance — Année 1",
+  insurance_policy_year_2: "Police d’assurance — Année 2",
 };
 
 const statusLabels: Record<
@@ -83,257 +80,164 @@ const statusLabels: Record<
 > = {
   draft: {
     label: "Brouillon",
-    className:
-      "bg-slate-100 text-slate-700",
+    className: "bg-slate-100 text-slate-700",
   },
 
   waiting_payment: {
-    label:
-      "Paiement attendu",
-    className:
-      "bg-amber-100 text-amber-800",
+    label: "Paiement attendu",
+    className: "bg-amber-100 text-amber-800",
   },
 
   payment_review: {
-    label:
-      "Paiement à vérifier",
-    className:
-      "bg-orange-100 text-orange-800",
+    label: "Paiement à vérifier",
+    className: "bg-orange-100 text-orange-800",
   },
 
   payment_confirmed: {
-    label:
-      "Paiement confirmé",
-    className:
-      "bg-green-100 text-green-800",
+    label: "Paiement confirmé",
+    className: "bg-green-100 text-green-800",
   },
 
   policy_preparation: {
-    label:
-      "Assurance en préparation",
-    className:
-      "bg-blue-100 text-blue-800",
+    label: "Assurance en préparation",
+    className: "bg-blue-100 text-blue-800",
   },
 
   policy_available: {
-    label:
-      "Assurance disponible",
-    className:
-      "bg-emerald-100 text-emerald-800",
+    label: "Assurance disponible",
+    className: "bg-emerald-100 text-emerald-800",
   },
 
   payment_rejected: {
-    label:
-      "Paiement refusé",
-    className:
-      "bg-red-100 text-red-800",
+    label: "Paiement refusé",
+    className: "bg-red-100 text-red-800",
   },
 
   cancelled: {
-    label:
-      "Dossier annulé",
-    className:
-      "bg-slate-200 text-slate-800",
+    label: "Dossier annulé",
+    className: "bg-slate-200 text-slate-800",
   },
 };
 
-function formatDate(
-  value: string | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle: "long",
-      timeStyle: "short",
-      timeZone: "Europe/Istanbul",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function formatSimpleDate(
-  value: string | null,
-) {
+function formatSimpleDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(
-      `${value}T00:00:00`,
-    );
+  const date = new Date(`${value}T00:00:00`);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle: "long",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+  }).format(date);
 }
 
-function formatFileSize(
-  value: number | null,
-) {
+function formatFileSize(value: number | null) {
   if (!value) {
     return "—";
   }
 
-  if (
-    value <
-    1024 * 1024
-  ) {
-    return `${Math.round(
-      value / 1024,
-    )} Ko`;
+  if (value < 1024 * 1024) {
+    return `${Math.round(value / 1024)} Ko`;
   }
 
-  return `${(
-    value /
-    (1024 * 1024)
-  ).toFixed(2)} Mo`;
+  return `${(value / (1024 * 1024)).toFixed(2)} Mo`;
 }
 
-function getActivityLabel(
-  action: string,
-) {
-  const labels: Record<
-    string,
-    string
-  > = {
-    request_created:
-      "Dossier créé",
+function getActivityLabel(action: string) {
+  action = normalizeActivityAction(action);
 
-    payment_uploaded:
-      "Paiement envoyé",
+  const labels: Record<string, string> = {
+    request_created: "Dossier créé",
 
-    payment_confirmed:
-      "Paiement confirmé",
+    payment_uploaded: "Paiement envoyé",
 
-    payment_rejected:
-      "Paiement refusé",
+    payment_confirmed: "Paiement confirmé",
 
-    policy_preparation_started:
-      "Préparation de l’assurance commencée",
+    payment_rejected: "Paiement refusé",
 
-    request_cancelled:
-      "Dossier annulé",
+    policy_preparation_started: "Préparation de l’assurance commencée",
 
-    policy_uploaded_year_1:
-      "Police année 1 déposée",
+    request_cancelled: "Dossier annulé",
 
-    policy_uploaded_year_2:
-      "Police année 2 déposée",
+    policy_uploaded_year_1: "Police année 1 déposée",
 
-    policy_replaced_year_1:
-      "Police année 1 remplacée",
+    policy_uploaded_year_2: "Police année 2 déposée",
 
-    policy_replaced_year_2:
-      "Police année 2 remplacée",
+    policy_replaced_year_1: "Police année 1 remplacée",
 
-    policy_downloaded:
-      "Police téléchargée",
+    policy_replaced_year_2: "Police année 2 remplacée",
 
-    whatsapp_sent:
-      "Notification WhatsApp envoyée",
+    policy_downloaded: "Police téléchargée",
 
-    whatsapp_failed:
-      "Échec de la notification WhatsApp",
+    whatsapp_sent: "Notification WhatsApp envoyée",
 
-    client_updated:
-      "Informations du client modifiées",
+    whatsapp_failed: "Échec de la notification WhatsApp",
 
-    note_added:
-      "Note interne ajoutée",
+    client_updated: "Informations du client modifiées",
 
-    request_assigned:
-      "Dossier attribué",
+    note_added: "Note interne ajoutée",
 
-    request_unassigned:
-      "Attribution supprimée",
+    request_assigned: "Dossier attribué",
+
+    request_unassigned: "Attribution supprimée",
   };
 
-  return (
-    labels[action] ??
-    action.replaceAll(
-      "_",
-      " ",
-    )
-  );
+  return labels[action] ?? action.replaceAll("_", " ");
 }
 
-function getActivityDotClassName(
-  action: string,
-) {
+function getActivityDotClassName(action: string) {
   if (
     action === "payment_rejected" ||
     action === "request_cancelled" ||
-    action === "whatsapp_failed"
+    normalizeActivityAction(action) === "whatsapp_failed"
   ) {
     return "bg-red-500";
   }
 
   if (
     action === "payment_confirmed" ||
-    action === "whatsapp_sent" ||
-    action.startsWith(
-      "policy_uploaded",
-    ) ||
-    action.startsWith(
-      "policy_replaced",
-    )
+    normalizeActivityAction(action) === "whatsapp_sent" ||
+    action.startsWith("policy_uploaded") ||
+    action.startsWith("policy_replaced")
   ) {
     return "bg-[#0B5D3B]";
   }
 
-  if (
-    action ===
-    "policy_preparation_started"
-  ) {
+  if (action === "policy_preparation_started") {
     return "bg-[#0B5D3B]";
   }
 
-  if (
-    action ===
-    "payment_uploaded"
-  ) {
+  if (action === "payment_uploaded") {
     return "bg-amber-500";
   }
 
-  if (
-    action ===
-    "note_added"
-  ) {
+  if (action === "note_added") {
     return "bg-[#31513B]";
   }
 
-  if (
-    action ===
-      "request_assigned" ||
-    action ===
-      "request_unassigned"
-  ) {
+  if (action === "request_assigned" || action === "request_unassigned") {
     return "bg-[#7AA88A]";
   }
 
@@ -341,89 +245,47 @@ function getActivityDotClassName(
 }
 
 async function getUserDisplayName(
-  serviceClient: ReturnType<
-    typeof createServiceClient
-  >,
+  serviceClient: ReturnType<typeof createServiceClient>,
   userId: string,
 ): Promise<string> {
-  const {
-    data,
-    error,
-  } =
-    await serviceClient.auth.admin.getUserById(
-      userId,
-    );
+  const { data, error } = await serviceClient.auth.admin.getUserById(userId);
 
-  if (
-    error ||
-    !data?.user
-  ) {
+  if (error || !data?.user) {
     return "Utilisateur";
   }
 
-  const user =
-    data.user;
+  const user = data.user;
 
-  const firstName =
-    user.user_metadata
-      ?.first_name
-      ?.toString()
-      .trim() ?? "";
+  const firstName = user.user_metadata?.first_name?.toString().trim() ?? "";
 
-  const lastName =
-    user.user_metadata
-      ?.last_name
-      ?.toString()
-      .trim() ?? "";
+  const lastName = user.user_metadata?.last_name?.toString().trim() ?? "";
 
-  const fullName =
-    `${firstName} ${lastName}`.trim();
+  const fullName = `${firstName} ${lastName}`.trim();
 
   if (fullName) {
     return fullName;
   }
 
-  const name =
-    user.user_metadata
-      ?.name
-      ?.toString()
-      .trim();
+  const name = user.user_metadata?.name?.toString().trim();
 
   if (name) {
     return name;
   }
 
-  return (
-    user.email ??
-    "Utilisateur"
-  );
+  return user.email ?? "Utilisateur";
 }
 
-export default async function DossierPage({
-  params,
-}: PageProps) {
-  const { user } =
-    await requireRole([
-      "agent",
-      "admin",
-    ]);
+export default async function DossierPage({ params }: PageProps) {
+  const { user, role } = await requireRole(["agent", "admin"]);
 
-  const { id } =
-    await params;
+  const { id } = await params;
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
-  const {
-    data: insuranceRequest,
-    error: requestError,
-  } =
-    await serviceClient
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
+  const { data: insuranceRequest, error: requestError } = await serviceClient
+    .from("insurance_requests")
+    .select(
+      `
           id,
           request_code,
           source,
@@ -486,145 +348,87 @@ export default async function DossierPage({
             rejection_reason
           )
         `,
-      )
-      .eq(
-        "id",
-        id,
-      )
-      .maybeSingle();
+    )
+    .eq("id", id)
+    .maybeSingle();
 
   if (requestError) {
-    throw new Error(
-      requestError.message,
-    );
+    throw new Error(requestError.message);
   }
 
   if (!insuranceRequest) {
     notFound();
   }
 
-  const partnerData =
-    Array.isArray(
-      insuranceRequest.partner,
-    )
-      ? insuranceRequest
-          .partner[0]
-      : insuranceRequest.partner;
+  if (
+    role === "agent" &&
+    insuranceRequest.assigned_agent_id &&
+    insuranceRequest.assigned_agent_id !== user.id
+  )
+    notFound();
+  const partnerData = Array.isArray(insuranceRequest.partner)
+    ? insuranceRequest.partner[0]
+    : insuranceRequest.partner;
 
-  const isPartnerRequest =
-    insuranceRequest.source ===
-    "partner";
+  const isPartnerRequest = insuranceRequest.source === "partner";
 
   /*
    * Liste des agents disponibles
    * pour l’attribution du dossier.
    */
-  const {
-    data: usersData,
-    error: usersError,
-  } =
-    await serviceClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 100,
-    });
+  const { data: usersData, error: usersError } =
+    await listAllUsers(serviceClient);
 
   if (usersError) {
-    throw new Error(
-      usersError.message,
-    );
+    throw new Error(usersError.message);
   }
 
-  const agents =
-    usersData.users
-      .filter((authUser) => {
-        const role =
-          authUser.app_metadata?.role;
+  const agents = usersData.users
+    .filter((authUser) => {
+      const role = authUser.app_metadata?.role;
 
-        return (
-          role === "agent" ||
-          role === "admin"
-        );
-      })
-      .map((authUser) => {
-        const firstName =
-          authUser.user_metadata
-            ?.first_name
-            ?.toString()
-            .trim() ?? "";
+      return role === "agent" || role === "admin";
+    })
+    .map((authUser) => {
+      const firstName =
+        authUser.user_metadata?.first_name?.toString().trim() ?? "";
 
-        const lastName =
-          authUser.user_metadata
-            ?.last_name
-            ?.toString()
-            .trim() ?? "";
+      const lastName =
+        authUser.user_metadata?.last_name?.toString().trim() ?? "";
 
-        const fullName =
-          `${firstName} ${lastName}`.trim();
+      const fullName = `${firstName} ${lastName}`.trim();
 
-        const role =
-          authUser.app_metadata?.role ===
-          "admin"
-            ? ("admin" as const)
-            : ("agent" as const);
+      const role =
+        authUser.app_metadata?.role === "admin"
+          ? ("admin" as const)
+          : ("agent" as const);
 
-        return {
-          id: authUser.id,
-          name:
-            fullName ||
-            authUser.email ||
-            "Agent",
-          email:
-            authUser.email ?? "",
-          role,
-        };
-      })
-      .sort((first, second) =>
-        first.name.localeCompare(
-          second.name,
-          "fr-FR",
-        ),
-      );
+      return {
+        id: authUser.id,
+        name: fullName || authUser.email || "Agent",
+        email: authUser.email ?? "",
+        role,
+      };
+    })
+    .sort((first, second) => first.name.localeCompare(second.name, "fr-FR"));
 
-  const currentUserRole:
-    | "agent"
-    | "admin" =
-    user.app_metadata?.role ===
-    "admin"
-      ? "admin"
-      : "agent";
+  const currentUserRole: "agent" | "admin" =
+    user.app_metadata?.role === "admin" ? "admin" : "agent";
 
-  const canAssign =
-    currentUserRole ===
-    "admin";
+  const canAssign = currentUserRole === "admin";
 
   const isAssignedToCurrentUser =
-    insuranceRequest.assigned_agent_id ===
-    user.id;
-
-  const isAssignedToAnotherUser =
-    Boolean(
-      insuranceRequest.assigned_agent_id,
-    ) &&
-    !isAssignedToCurrentUser;
+    insuranceRequest.assigned_agent_id === user.id;
 
   const canTreatRequest =
-    currentUserRole ===
-      "admin" ||
-    isAssignedToCurrentUser;
+    currentUserRole === "admin" || isAssignedToCurrentUser;
 
   const shouldClaimBeforeTreatment =
-    currentUserRole ===
-      "agent" &&
-    !insuranceRequest.assigned_agent_id;
+    currentUserRole === "agent" && !insuranceRequest.assigned_agent_id;
 
-  const {
-    data: documentsData,
-    error: documentsError,
-  } =
-    await serviceClient
-      .from(
-        "uploaded_documents",
-      )
+  const { data: documentsData, error: documentsError } = await readAll(
+    serviceClient
+      .from("uploaded_documents")
       .select(
         `
           id,
@@ -636,94 +440,45 @@ export default async function DossierPage({
           uploaded_at
         `,
       )
-      .eq(
-        "request_id",
-        id,
-      )
-      .order(
-        "uploaded_at",
-        {
-          ascending: true,
-        },
-      );
+      .eq("request_id", id)
+      .order("uploaded_at", {
+        ascending: true,
+      })
+      .order("id"),
+  );
 
-  if (
-    documentsError
-  ) {
-    throw new Error(
-      documentsError.message,
-    );
+  if (documentsError) {
+    throw new Error(documentsError.message);
   }
 
-  const documents =
-    (documentsData ??
-      []) as DocumentRow[];
+  const documents = (documentsData ?? []) as DocumentRow[];
 
-  const {
-    data: policiesData,
-    error: policiesError,
-  } =
-    await serviceClient
-      .from(
-        "insurance_policies",
-      )
-      .select(
-        "policy_year",
-      )
-      .eq(
-        "request_id",
-        id,
-      )
-      .order(
-        "policy_year",
-        {
-          ascending: true,
-        },
-      );
+  const { data: policiesData, error: policiesError } = await readAll(
+    serviceClient
+      .from("insurance_policies")
+      .select("policy_year")
+      .eq("request_id", id)
+      .order("policy_year", {
+        ascending: true,
+      })
+      .order("id"),
+  );
 
-  if (
-    policiesError
-  ) {
-    throw new Error(
-      policiesError.message,
-    );
+  if (policiesError) {
+    throw new Error(policiesError.message);
   }
 
-  const existingPolicyYears =
-    Array.from(
-      new Set(
-        (
-          (policiesData ??
-            []) as PolicyRow[]
-        )
-          .map(
-            (policy) =>
-              Number(
-                policy.policy_year,
-              ),
-          )
-          .filter(
-            (
-              policyYear,
-            ) =>
-              policyYear ===
-                1 ||
-              policyYear ===
-                2,
-          ),
-      ),
-    );
+  const existingPolicyYears = Array.from(
+    new Set(
+      ((policiesData ?? []) as PolicyRow[])
+        .map((policy) => Number(policy.policy_year))
+        .filter((policyYear) => policyYear === 1 || policyYear === 2),
+    ),
+  );
 
-  const {
-    data:
-      activityLogsData,
-    error:
-      activityLogsError,
-  } =
-    await serviceClient
-      .from(
-        "activity_logs",
-      )
+  const { data: activityLogsData, error: activityLogsError } = await readAll(
+    serviceClient
+      .from("activity_logs")
       .select(
         `
           id,
@@ -733,39 +488,22 @@ export default async function DossierPage({
           created_at
         `,
       )
-      .eq(
-        "request_id",
-        id,
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        },
-      );
+      .eq("request_id", id)
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
-  if (
-    activityLogsError
-  ) {
-    throw new Error(
-      activityLogsError.message,
-    );
+  if (activityLogsError) {
+    throw new Error(activityLogsError.message);
   }
 
-  const activityLogs =
-    (activityLogsData ??
-      []) as ActivityLogRow[];
+  const activityLogs = (activityLogsData ?? []) as ActivityLogRow[];
 
-  const {
-    data:
-      requestNotesData,
-    error:
-      requestNotesError,
-  } =
-    await serviceClient
-      .from(
-        "request_notes",
-      )
+  const { data: requestNotesData, error: requestNotesError } = await readAll(
+    serviceClient
+      .from("request_notes")
       .select(
         `
           id,
@@ -774,258 +512,142 @@ export default async function DossierPage({
           created_at
         `,
       )
-      .eq(
-        "request_id",
-        id,
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        },
-      );
+      .eq("request_id", id)
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
-  if (
-    requestNotesError
-  ) {
-    throw new Error(
-      requestNotesError.message,
-    );
+  if (requestNotesError) {
+    throw new Error(requestNotesError.message);
   }
 
-  const requestNotes =
-    (requestNotesData ??
-      []) as RequestNoteRow[];
+  const requestNotes = (requestNotesData ?? []) as RequestNoteRow[];
 
   /*
    * Utilisateurs des notes + historique
    */
-  const allUserIds =
-    Array.from(
-      new Set(
-        [
-          ...requestNotes.map(
-            (note) =>
-              note.user_id,
-          ),
+  const allUserIds = Array.from(
+    new Set(
+      [
+        ...requestNotes.map((note) => note.user_id),
 
-          ...activityLogs.map(
-            (activity) =>
-              activity.user_id,
-          ),
-        ].filter(
-          (
-            userId,
-          ): userId is string =>
-            Boolean(
-              userId,
-            ),
-        ),
-      ),
-    );
-
-  const userNames =
-    new Map<
-      string,
-      string
-    >();
-
-  await Promise.all(
-    allUserIds.map(
-      async (
-        userId,
-      ) => {
-        const displayName =
-          await getUserDisplayName(
-            serviceClient,
-            userId,
-          );
-
-        userNames.set(
-          userId,
-          displayName,
-        );
-      },
+        ...activityLogs.map((activity) => activity.user_id),
+      ].filter((userId): userId is string => Boolean(userId)),
     ),
   );
 
-  const notesWithAuthors:
-    NoteWithAuthor[] =
-    requestNotes.map(
-      (note) => ({
-        id:
-          note.id,
+  const userNames = new Map<string, string>();
 
-        content:
-          note.content,
+  await Promise.all(
+    allUserIds.map(async (userId) => {
+      const displayName = await getUserDisplayName(serviceClient, userId);
 
-        created_at:
-          note.created_at,
-
-        author:
-          note.user_id
-            ? userNames.get(
-                note.user_id,
-              ) ??
-              "Utilisateur"
-            : "Système",
-      }),
-    );
-
- const activitiesWithAuthors:
-  ActivityLogWithAuthor[] =
-  activityLogs.map(
-    (activity) => ({
-      ...activity,
-
-      author:
-        activity.user_id
-          ? userNames.get(
-              activity.user_id,
-            ) ??
-            "Utilisateur"
-          : activity.action ===
-                "request_created" ||
-              activity.action ===
-                "payment_uploaded" ||
-              activity.action ===
-                "payment_resubmitted" ||
-              activity.action ===
-                "policy_downloaded"
-            ? isPartnerRequest
-              ? partnerData?.company_name
-                ? `Partenaire — ${partnerData.company_name}`
-                : "Partenaire"
-              : "Client"
-            : "Système",
+      userNames.set(userId, displayName);
     }),
   );
 
-  const documentsWithUrls =
-    await Promise.all(
-      documents.map(
-        async (
-          document,
-        ) => {
-          const {
-            data,
-            error,
-          } =
-            await serviceClient.storage
-              .from(
-                BUCKET_NAME,
-              )
-              .createSignedUrl(
-                document.storage_path,
-                60 * 10,
-              );
+  const notesWithAuthors: NoteWithAuthor[] = requestNotes.map((note) => ({
+    id: note.id,
 
-          return {
-            ...document,
+    content: note.content,
 
-            signedUrl:
-              error ||
-              !data
-                ? null
-                : data.signedUrl,
-          };
-        },
-      ),
-    );
+    created_at: note.created_at,
 
-  const client =
-    Array.isArray(
-      insuranceRequest.client,
-    )
-      ? insuranceRequest
-          .client[0]
-      : insuranceRequest.client;
+    author: note.user_id
+      ? (userNames.get(note.user_id) ?? "Utilisateur")
+      : "Système",
+  }));
 
-  const payment =
-    Array.isArray(
-      insuranceRequest.payment,
-    )
-      ? insuranceRequest
-          .payment[0]
-      : insuranceRequest.payment;
+  const activitiesWithAuthors: ActivityLogWithAuthor[] = activityLogs.map(
+    (activity) => ({
+      ...activity,
 
-  const status =
-    statusLabels[
-      insuranceRequest.status
-    ] ?? {
-      label:
-        insuranceRequest.status,
+      author: activity.user_id
+        ? (userNames.get(activity.user_id) ?? "Utilisateur")
+        : activity.action === "request_created" ||
+            activity.action === "payment_uploaded" ||
+            activity.action === "payment_resubmitted" ||
+            activity.action === "policy_downloaded"
+          ? isPartnerRequest
+            ? partnerData?.company_name
+              ? `Partenaire — ${partnerData.company_name}`
+              : "Partenaire"
+            : "Client"
+          : "Système",
+    }),
+  );
 
-      className:
-        "bg-slate-100 text-slate-700",
-    };
+  const documentsWithUrls = documents.map((document) => ({
+    ...document,
+    signedUrl: `/api/admin/requests/${id}/documents/${document.id}`,
+  }));
 
-  const province =
-    Array.isArray(
-      client?.province,
-    )
-      ? client
-          .province[0]
-      : client?.province;
+  const client = Array.isArray(insuranceRequest.client)
+    ? insuranceRequest.client[0]
+    : insuranceRequest.client;
 
-  const district =
-    Array.isArray(
-      client?.district,
-    )
-      ? client
-          .district[0]
-      : client?.district;
+  const payment = Array.isArray(insuranceRequest.payment)
+    ? insuranceRequest.payment[0]
+    : insuranceRequest.payment;
 
-  const neighborhood =
-    Array.isArray(
-      client?.neighborhood,
-    )
-      ? client
-          .neighborhood[0]
-      : client?.neighborhood;
+  const status = statusLabels[insuranceRequest.status] ?? {
+    label: insuranceRequest.status,
 
-  const address =
-    client
-      ? [
-          neighborhood?.name,
+    className: "bg-slate-100 text-slate-700",
+  };
 
-          client.street,
+  const province = Array.isArray(client?.province)
+    ? client.province[0]
+    : client?.province;
 
-          client
-            .building_number
-            ? `Bina No: ${client.building_number}`
-            : null,
+  const district = Array.isArray(client?.district)
+    ? client.district[0]
+    : client?.district;
 
-          client
-            .apartment_number
-            ? `Daire No: ${client.apartment_number}`
-            : null,
+  const neighborhood = Array.isArray(client?.neighborhood)
+    ? client.neighborhood[0]
+    : client?.neighborhood;
 
-          district?.name,
+  const address = client
+    ? [
+        neighborhood?.name,
 
-          province?.name,
-        ]
-          .filter(
-            Boolean,
-          )
-          .join(", ")
-      : "—";
+        client.street,
 
-  const insuranceDurationYears:
-    | 1
-    | 2 =
-    insuranceRequest
-      .insurance_duration_years ===
-    2
-      ? 2
-      : 1;
+        client.building_number ? `Bina No: ${client.building_number}` : null,
 
-  const hasKimlik =
-    insuranceRequest.has_kimlik !==
-    false;
+        client.apartment_number ? `Daire No: ${client.apartment_number}` : null,
+
+        district?.name,
+
+        province?.name,
+      ]
+        .filter(Boolean)
+        .join(", ")
+    : "—";
+
+  const insuranceDurationYears: 1 | 2 =
+    insuranceRequest.insurance_duration_years === 2 ? 2 : 1;
+
+  const hasKimlik = insuranceRequest.has_kimlik !== false;
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Dossiers"
+      href="/admin/dossiers"
+      detail={true}
+      sections={[
+        { id: "section-1", label: "Informations du client" },
+        { id: "section-2", label: "Identité et assurance" },
+        { id: "section-3", label: "Documents" },
+        { id: "section-4", label: "Paiement" },
+        { id: "section-5", label: "Polices enregistrées" },
+        { id: "section-6", label: "Historique" },
+        { id: "section-7", label: "Dernière mise à jour" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Link
@@ -1051,36 +673,31 @@ export default async function DossierPage({
               </p>
 
               <h1 className="mt-2 break-all text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
-                {
-                  insuranceRequest.request_code
-                }
+                {insuranceRequest.request_code}
               </h1>
 
               <p className="mt-2 text-[12px] leading-5 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
-                Créé le{" "}
-                {formatDate(
-                  insuranceRequest.created_at,
-                )}
+                Créé le {formatDate(insuranceRequest.created_at)}
               </p>
             </div>
 
             <span
               className={`inline-flex w-fit max-w-full rounded-full px-3 py-1.5 text-[11px] font-semibold sm:px-4 sm:py-2 sm:text-sm ${status.className}`}
             >
-              {
-                status.label
-              }
+              {status.label}
             </span>
           </div>
         </header>
 
         <div className="mt-4 grid min-w-0 gap-4 sm:mt-6 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0 space-y-4 sm:space-y-5">
-            <section className={`min-w-0 rounded-2xl border p-4 sm:rounded-[1.5rem] sm:p-6 ${
-              isPartnerRequest
-                ? "border-[#CFE3CF] bg-[#F3F8F2]"
-                : "border-slate-200/80 bg-white"
-            }`}>
+            <section
+              className={`min-w-0 rounded-2xl border p-4 sm:rounded-[1.5rem] sm:p-6 ${
+                isPartnerRequest
+                  ? "border-[#CFE3CF] bg-[#F3F8F2]"
+                  : "border-slate-200/80 bg-white"
+              }`}
+            >
               <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
@@ -1091,77 +708,69 @@ export default async function DossierPage({
                   </h2>
                 </div>
 
-                <span className={`inline-flex w-fit max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:py-1.5 sm:text-xs ${
-                  isPartnerRequest
-                    ? "bg-[#0B5D3B] text-white"
-                    : "bg-slate-100 text-slate-700"
-                }`}>
+                <span
+                  className={`inline-flex w-fit max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:py-1.5 sm:text-xs ${
+                    isPartnerRequest
+                      ? "bg-[#0B5D3B] text-white"
+                      : "bg-slate-100 text-slate-700"
+                  }`}
+                >
                   {isPartnerRequest ? "Dossier partenaire" : "Dossier direct"}
                 </span>
               </div>
 
               {isPartnerRequest && (
                 <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 border-t border-[#CFE3CF] pt-4 sm:mt-6 sm:grid-cols-3 sm:gap-5 sm:pt-5">
-                  <Information label="Partenaire" value={partnerData?.company_name ?? "Partenaire non disponible"} />
-                  <Information label="Code partenaire" value={partnerData?.code ?? "—"} />
-                  <Information label="Responsable" value={partnerData?.manager_name ?? "—"} />
+                  <Information
+                    label="Partenaire"
+                    value={
+                      partnerData?.company_name ?? "Partenaire non disponible"
+                    }
+                  />
+                  <Information
+                    label="Code partenaire"
+                    value={partnerData?.code ?? "—"}
+                  />
+                  <Information
+                    label="Responsable"
+                    value={partnerData?.manager_name ?? "—"}
+                  />
                 </dl>
               )}
             </section>
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-1"
+              >
                 Informations du client
               </h2>
 
               <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-5">
-                <Information
-                  label="Nom"
-                  value={
-                    client?.last_name
-                  }
-                />
+                <Information label="Nom" value={client?.last_name} />
 
-                <Information
-                  label="Prénom"
-                  value={
-                    client?.first_name
-                  }
-                />
+                <Information label="Prénom" value={client?.first_name} />
 
-                <Information
-                  label="Nom du père"
-                  value={
-                    client?.father_name
-                  }
-                />
+                <Information label="Nom du père" value={client?.father_name} />
 
                 <Information
                   label="Date de naissance"
-                  value={
-                    client?.birth_date
-                  }
+                  value={client?.birth_date}
                 />
 
                 <Information
                   label="Sexe"
                   value={
-                    client?.gender ===
-                    "male"
+                    client?.gender === "male"
                       ? "Homme"
-                      : client?.gender ===
-                          "female"
+                      : client?.gender === "female"
                         ? "Femme"
                         : client?.gender
                   }
                 />
 
-                <Information
-                  label="Nationalité"
-                  value={
-                    client?.nationality
-                  }
-                />
+                <Information label="Nationalité" value={client?.nationality} />
 
                 <Information
                   label="WhatsApp"
@@ -1174,19 +783,19 @@ export default async function DossierPage({
               </dl>
 
               <div className="mt-4 border-t border-slate-200 pt-4 sm:mt-6 sm:pt-5">
-                <p className="text-[12px] text-slate-500 sm:text-sm">
-                  Adresse
-                </p>
+                <p className="text-[12px] text-slate-500 sm:text-sm">Adresse</p>
 
                 <p className="mt-1 break-words text-[13px] font-semibold leading-6 text-[#102B20] sm:text-base sm:leading-7">
-                  {address ||
-                    "—"}
+                  {address || "—"}
                 </p>
               </div>
             </section>
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-2"
+              >
                 Identité et assurance
               </h2>
 
@@ -1207,9 +816,7 @@ export default async function DossierPage({
                   <>
                     <Information
                       label="Numéro de Kimlik"
-                      value={
-                        insuranceRequest.kimlik_number
-                      }
+                      value={insuranceRequest.kimlik_number}
                     />
 
                     <Information
@@ -1230,9 +837,7 @@ export default async function DossierPage({
 
                 <Information
                   label="Numéro du passeport"
-                  value={
-                    insuranceRequest.passport_number
-                  }
+                  value={insuranceRequest.passport_number}
                 />
 
                 <Information
@@ -1243,10 +848,7 @@ export default async function DossierPage({
                 <Information
                   label="Durée"
                   value={`${insuranceDurationYears} an${
-                    insuranceDurationYears ===
-                    2
-                      ? "s"
-                      : ""
+                    insuranceDurationYears === 2 ? "s" : ""
                   }`}
                 />
 
@@ -1254,75 +856,59 @@ export default async function DossierPage({
                   label="Prix"
                   value={`${Number(
                     insuranceRequest.calculated_price,
-                  ).toLocaleString(
-                    "fr-FR",
-                  )} TL`}
+                  ).toLocaleString("fr-FR")} TL`}
                 />
               </dl>
             </section>
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-3"
+              >
                 Documents
               </h2>
 
               <div className="mt-4 min-w-0 space-y-3 sm:mt-6">
-                {documentsWithUrls.length ===
-                0 ? (
-                  <p className="text-slate-500">
-                    Aucun document disponible.
-                  </p>
+                {documentsWithUrls.length === 0 ? (
+                  <p className="text-slate-500">Aucun document disponible.</p>
                 ) : (
-                  documentsWithUrls.map(
-                    (
-                      document,
-                    ) => (
-                      <article
-                        key={
-                          document.id
-                        }
-                        className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-200 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4"
-                      >
-                        <div className="min-w-0">
-                          <p className="break-words text-[13px] font-semibold text-slate-900 sm:text-base">
-                            {documentLabels[
-                              document.document_type
-                            ] ??
-                              document.document_type}
-                          </p>
+                  documentsWithUrls.map((document) => (
+                    <article
+                      key={document.id}
+                      className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-200 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4"
+                    >
+                      <div className="min-w-0">
+                        <p className="break-words text-[13px] font-semibold text-slate-900 sm:text-base">
+                          {documentLabels[document.document_type] ??
+                            document.document_type}
+                        </p>
 
-                          <p className="mt-1 break-all text-[12px] text-slate-600 sm:text-sm">
-                            {
-                              document.original_file_name
-                            }
-                          </p>
+                        <p className="mt-1 break-all text-[12px] text-slate-600 sm:text-sm">
+                          {document.original_file_name}
+                        </p>
 
-                          <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
-                            {formatFileSize(
-                              document.file_size,
-                            )}
-                          </p>
-                        </div>
+                        <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+                          {formatFileSize(document.file_size)}
+                        </p>
+                      </div>
 
-                        {document.signedUrl ? (
-                          <a
-                            href={
-                              document.signedUrl
-                            }
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto sm:min-h-0 sm:text-sm"
-                          >
-                            Ouvrir
-                          </a>
-                        ) : (
-                          <span className="text-sm text-red-600">
-                            Lien indisponible
-                          </span>
-                        )}
-                      </article>
-                    ),
-                  )
+                      {document.signedUrl ? (
+                        <a
+                          href={document.signedUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto sm:min-h-0 sm:text-sm"
+                        >
+                          Ouvrir
+                        </a>
+                      ) : (
+                        <span className="text-sm text-red-600">
+                          Lien indisponible
+                        </span>
+                      )}
+                    </article>
+                  ))
                 )}
               </div>
 
@@ -1332,56 +918,37 @@ export default async function DossierPage({
             </section>
 
             <NotesSection
-              requestId={
-                insuranceRequest.id
-              }
-              notes={
-                notesWithAuthors
-              }
+              requestId={insuranceRequest.id}
+              notes={notesWithAuthors}
             />
           </div>
 
           <aside className="min-w-0 space-y-4 sm:space-y-5">
             <AssignAgent
-              requestId={
-                insuranceRequest.id
-              }
-              currentAgentId={
-                insuranceRequest.assigned_agent_id ??
-                null
-              }
+              requestId={insuranceRequest.id}
+              currentAgentId={insuranceRequest.assigned_agent_id ?? null}
               agents={agents}
-              canAssign={
-                canAssign
-              }
-              currentUserId={
-                user.id
-              }
-              currentUserRole={
-                currentUserRole
-              }
+              canAssign={canAssign}
+              currentUserId={user.id}
+              currentUserRole={currentUserRole}
             />
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-4"
+              >
                 Paiement
               </h2>
 
               <dl className="mt-4 space-y-4 sm:mt-6 sm:space-y-5">
-                <Information
-                  label="Statut"
-                  value={
-                    payment?.status
-                  }
-                />
+                <Information label="Statut" value={payment?.status} />
 
                 <Information
                   label="Montant attendu"
                   value={
                     payment
-                      ? `${Number(
-                          payment.expected_amount,
-                        ).toLocaleString(
+                      ? `${Number(payment.expected_amount).toLocaleString(
                           "fr-FR",
                         )} TL`
                       : "—"
@@ -1390,27 +957,18 @@ export default async function DossierPage({
 
                 <Information
                   label="Soumis le"
-                  value={formatDate(
-                    payment?.submitted_at ??
-                      null,
-                  )}
+                  value={formatDate(payment?.submitted_at ?? null)}
                 />
 
                 <Information
                   label="Vérifié le"
-                  value={formatDate(
-                    payment?.verified_at ??
-                      null,
-                  )}
+                  value={formatDate(payment?.verified_at ?? null)}
                 />
               </dl>
 
               {payment?.rejection_reason && (
                 <div className="mt-4 break-words rounded-xl bg-red-50 px-3 py-3 text-[12px] leading-5 text-red-700 sm:mt-5 sm:px-4 sm:text-sm sm:leading-6">
-                  Motif du refus :{" "}
-                  {
-                    payment.rejection_reason
-                  }
+                  Motif du refus : {payment.rejection_reason}
                 </div>
               )}
             </section>
@@ -1438,79 +996,48 @@ export default async function DossierPage({
             {canTreatRequest && (
               <>
                 <RequestActions
-                  requestId={
-                    insuranceRequest.id
-                  }
-                  currentStatus={
-                    insuranceRequest.status
-                  }
+                  requestId={insuranceRequest.id}
+                  currentStatus={insuranceRequest.status}
                 />
 
-                {(
-                  insuranceRequest.status ===
-                    "policy_preparation" ||
-                  insuranceRequest.status ===
-                    "policy_available"
-                ) && (
+                {(insuranceRequest.status === "policy_preparation" ||
+                  insuranceRequest.status === "policy_available") && (
                   <PolicyUploader
-                    requestId={
-                      insuranceRequest.id
-                    }
-                    insuranceDurationYears={
-                      insuranceDurationYears
-                    }
-                    existingPolicyYears={
-                      existingPolicyYears
-                    }
-                    hasKimlik={
-                      hasKimlik
-                    }
+                    requestId={insuranceRequest.id}
+                    insuranceDurationYears={insuranceDurationYears}
+                    existingPolicyYears={existingPolicyYears}
+                    hasKimlik={hasKimlik}
                     kimlikExpirationDate={
-                      insuranceRequest.kimlik_expiration_date ??
-                      null
+                      insuranceRequest.kimlik_expiration_date ?? null
                     }
                     requestedStartDate={
-                      insuranceRequest.insurance_start_date ??
-                      null
+                      insuranceRequest.insurance_start_date ?? null
                     }
-                    policyStartDate={
-                      insuranceRequest.policy_start_date ??
-                      null
-                    }
-                    policyEndDate={
-                      insuranceRequest.policy_end_date ??
-                      null
-                    }
+                    policyStartDate={insuranceRequest.policy_start_date ?? null}
+                    policyEndDate={insuranceRequest.policy_end_date ?? null}
                   />
                 )}
               </>
             )}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold text-[#102B20]">
+              <h2
+                className="text-lg font-semibold text-[#102B20]"
+                id="section-5"
+              >
                 Polices enregistrées
               </h2>
 
-              {existingPolicyYears.length >
-              0 ? (
+              {existingPolicyYears.length > 0 ? (
                 <div className="mt-4 space-y-2">
-                  {existingPolicyYears.map(
-                    (
-                      policyYear,
-                    ) => (
-                      <div
-                        key={
-                          policyYear
-                        }
-                        className="min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[12px] font-semibold text-[#0B5D3B] sm:px-4 sm:text-sm"
-                      >
-                        ✓ Police année{" "}
-                        {
-                          policyYear
-                        }
-                      </div>
-                    ),
-                  )}
+                  {existingPolicyYears.map((policyYear) => (
+                    <div
+                      key={policyYear}
+                      className="min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[12px] font-semibold text-[#0B5D3B] sm:px-4 sm:text-sm"
+                    >
+                      ✓ Police année {policyYear}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="mt-3 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
@@ -1521,139 +1048,105 @@ export default async function DossierPage({
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-[#102B20]">
+                <h2
+                  className="text-lg font-semibold text-[#102B20]"
+                  id="section-6"
+                >
                   Historique
                 </h2>
 
-                {activitiesWithAuthors.length >
-                  0 && (
+                {activitiesWithAuthors.length > 0 && (
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                    {
-                      activitiesWithAuthors.length
-                    }
+                    {activitiesWithAuthors.length}
                   </span>
                 )}
               </div>
 
-              {activitiesWithAuthors.length ===
-              0 ? (
+              {activitiesWithAuthors.length === 0 ? (
                 <p className="mt-4 text-sm leading-6 text-slate-600">
                   Aucune activité n’est encore enregistrée pour ce dossier.
                 </p>
               ) : (
                 <div className="mt-6">
-                  {activitiesWithAuthors.map(
-                    (
-                      activity,
-                      index,
-                    ) => {
-                      const isLast =
-                        index ===
-                        activitiesWithAuthors.length -
-                          1;
+                  {activitiesWithAuthors.map((activity, index) => {
+                    const isLast = index === activitiesWithAuthors.length - 1;
 
-                      return (
-                        <div
-                          key={
-                            activity.id
-                          }
-                          className="relative flex min-w-0 gap-3 sm:gap-4"
-                        >
-                          <div className="flex w-4 shrink-0 flex-col items-center">
-                            <span
-                              className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ring-4 ring-white ${getActivityDotClassName(
-                                activity.action,
-                              )}`}
-                            />
+                    return (
+                      <div
+                        key={activity.id}
+                        className="relative flex min-w-0 gap-3 sm:gap-4"
+                      >
+                        <div className="flex w-4 shrink-0 flex-col items-center">
+                          <span
+                            className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ring-4 ring-white ${getActivityDotClassName(
+                              activity.action,
+                            )}`}
+                          />
 
-                            {!isLast && (
-                              <div className="min-h-16 w-px flex-1 bg-slate-200" />
-                            )}
-                          </div>
-
-                          <div
-                            className={`min-w-0 flex-1 ${
-                              !isLast
-                                ? "pb-6"
-                                : ""
-                            }`}
-                          >
-                            <p className="break-words text-[12px] font-semibold text-slate-900 sm:text-sm">
-                              {getActivityLabel(
-                                activity.action,
-                              )}
-                            </p>
-
-                            {activity.description && (
-                              <p className="mt-1 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
-                                {
-                                  activity.description
-                                }
-                              </p>
-                            )}
-
-                            <p className="mt-2 break-words text-[10px] font-semibold text-slate-500 sm:text-xs">
-                              {
-                                activity.author
-                              }
-                            </p>
-
-                            <p className="mt-1 text-[10px] leading-4 text-slate-400 sm:text-xs sm:leading-5">
-                              {formatDate(
-                                activity.created_at,
-                              )}
-                            </p>
-                          </div>
+                          {!isLast && (
+                            <div className="min-h-16 w-px flex-1 bg-slate-200" />
+                          )}
                         </div>
-                      );
-                    },
-                  )}
+
+                        <div
+                          className={`min-w-0 flex-1 ${!isLast ? "pb-6" : ""}`}
+                        >
+                          <p className="break-words text-[12px] font-semibold text-slate-900 sm:text-sm">
+                            {getActivityLabel(activity.action)}
+                          </p>
+
+                          {activity.description && (
+                            <p className="mt-1 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
+                              {activity.description}
+                            </p>
+                          )}
+
+                          <p className="mt-2 break-words text-[10px] font-semibold text-slate-500 sm:text-xs">
+                            {activity.author}
+                          </p>
+
+                          <p className="mt-1 text-[10px] leading-4 text-slate-400 sm:text-xs sm:leading-5">
+                            {formatDate(activity.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold text-[#102B20]">
+              <h2
+                className="text-lg font-semibold text-[#102B20]"
+                id="section-7"
+              >
                 Dernière mise à jour
               </h2>
 
               <p className="mt-3 break-words text-[12px] leading-5 text-slate-600 sm:text-sm sm:leading-6">
-                {formatDate(
-                  insuranceRequest.updated_at,
-                )}
+                {formatDate(insuranceRequest.updated_at)}
               </p>
             </section>
           </aside>
         </div>
       </div>
-    </main>
+    </PageFrame>
   );
 }
 
 type InformationProps = {
   label: string;
-  value?:
-    | string
-    | number
-    | null;
+  value?: string | number | null;
 };
 
-function Information({
-  label,
-  value,
-}: InformationProps) {
+function Information({ label, value }: InformationProps) {
   return (
     <div className="min-w-0">
-      <dt className="text-[11px] text-slate-500 sm:text-sm">
-        {label}
-      </dt>
+      <dt className="text-[11px] text-slate-500 sm:text-sm">{label}</dt>
 
       <dd className="mt-1 break-words text-[13px] font-semibold leading-5 text-[#102B20] sm:text-base sm:leading-6">
-        {value === null ||
-        value === undefined ||
-        value === ""
-          ? "—"
-          : value}
+        {value === null || value === undefined || value === "" ? "—" : value}
       </dd>
     </div>
   );

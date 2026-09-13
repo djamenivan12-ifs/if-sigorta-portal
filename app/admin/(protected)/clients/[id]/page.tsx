@@ -1,3 +1,7 @@
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
+
+import { normalizeActivityAction } from "@/lib/activity/normalizeAction";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -125,50 +129,42 @@ const statusLabels: Record<
 > = {
   draft: {
     label: "Brouillon",
-    className:
-      "bg-slate-100 text-slate-700",
+    className: "bg-slate-100 text-slate-700",
   },
 
   waiting_payment: {
     label: "Paiement attendu",
-    className:
-      "bg-amber-100 text-amber-800",
+    className: "bg-amber-100 text-amber-800",
   },
 
   payment_review: {
     label: "Paiement à vérifier",
-    className:
-      "bg-orange-100 text-orange-800",
+    className: "bg-orange-100 text-orange-800",
   },
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
-    className:
-      "border border-amber-200 bg-amber-50 text-amber-700",
+    className: "border border-amber-200 bg-amber-50 text-amber-700",
   },
 
   policy_available: {
     label: "Assurance disponible",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   payment_rejected: {
     label: "Paiement refusé",
-    className:
-      "bg-red-100 text-red-800",
+    className: "bg-red-100 text-red-800",
   },
 
   cancelled: {
     label: "Dossier annulé",
-    className:
-      "bg-slate-200 text-slate-700",
+    className: "bg-slate-200 text-slate-700",
   },
 };
 
@@ -181,213 +177,122 @@ const paymentStatusLabels: Record<
 > = {
   pending: {
     label: "En attente",
-    className:
-      "bg-amber-50 text-amber-700",
+    className: "bg-amber-50 text-amber-700",
   },
 
   submitted: {
     label: "Envoyé",
-    className:
-      "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
+    className: "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
   },
 
   verified: {
     label: "Validé",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   confirmed: {
     label: "Validé",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   rejected: {
     label: "Refusé",
-    className:
-      "bg-red-50 text-red-700",
+    className: "bg-red-50 text-red-700",
   },
 };
 
-const activityLabels: Record<
-  string,
-  string
-> = {
-  request_created:
-    "Dossier créé",
+const activityLabels: Record<string, string> = {
+  request_created: "Dossier créé",
 
-  request_assigned:
-    "Dossier attribué",
+  request_assigned: "Dossier attribué",
 
-  request_claimed:
-    "Dossier pris en charge",
+  request_claimed: "Dossier pris en charge",
 
-  request_unassigned:
-    "Attribution supprimée",
+  request_unassigned: "Attribution supprimée",
 
-  payment_uploaded:
-    "Paiement envoyé",
+  payment_uploaded: "Paiement envoyé",
 
-  payment_confirmed:
-    "Paiement confirmé",
+  payment_confirmed: "Paiement confirmé",
 
-  payment_rejected:
-    "Paiement refusé",
+  payment_rejected: "Paiement refusé",
 
-  policy_preparation_started:
-    "Préparation de l’assurance commencée",
+  policy_preparation_started: "Préparation de l’assurance commencée",
 
-  policy_uploaded_year_1:
-    "Police année 1 déposée",
+  policy_uploaded_year_1: "Police année 1 déposée",
 
-  policy_uploaded_year_2:
-    "Police année 2 déposée",
+  policy_uploaded_year_2: "Police année 2 déposée",
 
-  policy_replaced_year_1:
-    "Police année 1 remplacée",
+  policy_replaced_year_1: "Police année 1 remplacée",
 
-  policy_replaced_year_2:
-    "Police année 2 remplacée",
+  policy_replaced_year_2: "Police année 2 remplacée",
 
-  policy_downloaded:
-    "Police téléchargée",
+  policy_downloaded: "Police téléchargée",
 
-  whatsapp_sent:
-    "Notification WhatsApp envoyée",
+  whatsapp_sent: "Notification WhatsApp envoyée",
 
-  whatsapp_failed:
-    "Échec de la notification WhatsApp",
+  whatsapp_failed: "Échec de la notification WhatsApp",
 
-  client_updated:
-    "Informations client modifiées",
+  client_updated: "Informations client modifiées",
 
-  note_added:
-    "Note interne ajoutée",
+  note_added: "Note interne ajoutée",
 
-  request_cancelled:
-    "Dossier annulé",
+  request_cancelled: "Dossier annulé",
 };
 
-function unwrapName(
-  relation: NamedRelation,
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0]
-        ?.name ??
-      null
-    );
+function unwrapName(relation: NamedRelation) {
+  if (Array.isArray(relation)) {
+    return relation[0]?.name ?? null;
   }
 
-  return (
-    relation?.name ??
-    null
-  );
+  return relation?.name ?? null;
 }
 
-function unwrapPayment(
-  relation: PaymentRelation,
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0] ??
-      null
-    );
+function unwrapPayment(relation: PaymentRelation) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
 
   return relation;
 }
 
-function formatDate(
-  value:
-    | string
-    | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "medium",
-      timeStyle:
-        "short",
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function formatSimpleDate(
-  value:
-    | string
-    | null,
-) {
+function formatSimpleDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(
-      `${value}T00:00:00`,
-    );
+  const date = new Date(`${value}T00:00:00`);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "long",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+  }).format(date);
 }
 
-function formatMoney(
-  value:
-    | string
-    | number
-    | null
-    | undefined,
-) {
-  return `${Number(
-    value ??
-      0,
-  ).toLocaleString(
-    "fr-FR",
-    {
-      maximumFractionDigits:
-        2,
-    },
-  )} TL`;
+function formatMoney(value: string | number | null | undefined) {
+  return `${Number(value ?? 0).toLocaleString("fr-FR", {
+    maximumFractionDigits: 2,
+  })} TL`;
 }
 
 function getInitials({
@@ -397,88 +302,48 @@ function getInitials({
   firstName: string;
   lastName: string;
 }) {
-  const first =
-    firstName
-      .trim()
-      .charAt(0);
+  const first = firstName.trim().charAt(0);
 
-  const last =
-    lastName
-      .trim()
-      .charAt(0);
+  const last = lastName.trim().charAt(0);
 
-  return (
-    `${first}${last}`
-      .toUpperCase() ||
-    "CL"
-  );
+  return `${first}${last}`.toUpperCase() || "CL";
 }
 
-function getActivityLabel(
-  action: string,
-) {
-  return (
-    activityLabels[
-      action
-    ] ??
-    action.replaceAll(
-      "_",
-      " ",
-    )
-  );
+function getActivityLabel(action: string) {
+  return activityLabels[action] ?? action.replaceAll("_", " ");
 }
 
-function getActivityDot(
-  action: string,
-) {
+function getActivityDot(action: string) {
   if (
-    action ===
-      "payment_rejected" ||
-    action ===
-      "request_cancelled" ||
-    action ===
-      "whatsapp_failed"
+    action === "payment_rejected" ||
+    action === "request_cancelled" ||
+    normalizeActivityAction(action) === "whatsapp_failed"
   ) {
     return "bg-red-500";
   }
 
   if (
-    action ===
-      "payment_confirmed" ||
-    action ===
-      "whatsapp_sent" ||
-    action.startsWith(
-      "policy_uploaded",
-    ) ||
-    action.startsWith(
-      "policy_replaced",
-    )
+    action === "payment_confirmed" ||
+    normalizeActivityAction(action) === "whatsapp_sent" ||
+    action.startsWith("policy_uploaded") ||
+    action.startsWith("policy_replaced")
   ) {
     return "bg-[#0B5D3B]";
   }
 
-  if (
-    action ===
-      "payment_uploaded"
-  ) {
+  if (action === "payment_uploaded") {
     return "bg-amber-500";
   }
 
   if (
-    action ===
-      "request_assigned" ||
-    action ===
-      "request_claimed" ||
-    action ===
-      "request_unassigned"
+    action === "request_assigned" ||
+    action === "request_claimed" ||
+    action === "request_unassigned"
   ) {
     return "bg-[#7AA88A]";
   }
 
-  if (
-    action ===
-      "policy_preparation_started"
-  ) {
+  if (action === "policy_preparation_started") {
     return "bg-[#31513B]";
   }
 
@@ -486,73 +351,35 @@ function getActivityDot(
 }
 
 async function getAuthUserName(
-  serviceClient: ReturnType<
-    typeof createServiceClient
-  >,
+  serviceClient: ReturnType<typeof createServiceClient>,
   userId: string,
 ) {
-  const {
-    data,
-    error,
-  } =
-    await serviceClient.auth.admin.getUserById(
-      userId,
-    );
+  const { data, error } = await serviceClient.auth.admin.getUserById(userId);
 
-  if (
-    error ||
-    !data.user
-  ) {
+  if (error || !data.user) {
     return "Utilisateur";
   }
 
-  const user =
-    data.user;
+  const user = data.user;
 
-  const firstName =
-    user.user_metadata
-      ?.first_name
-      ?.toString()
-      .trim() ??
-    "";
+  const firstName = user.user_metadata?.first_name?.toString().trim() ?? "";
 
-  const lastName =
-    user.user_metadata
-      ?.last_name
-      ?.toString()
-      .trim() ??
-    "";
+  const lastName = user.user_metadata?.last_name?.toString().trim() ?? "";
 
   return (
     `${firstName} ${lastName}`.trim() ||
-    user.user_metadata
-      ?.name
-      ?.toString()
-      .trim() ||
+    user.user_metadata?.name?.toString().trim() ||
     user.email ||
     "Utilisateur"
   );
 }
 
-export default async function ClientDetailsPage({
-  params,
-}: PageProps) {
-  const {
-    user,
-    role,
-  } =
-    await requireRole([
-      "admin",
-      "agent",
-    ]);
+export default async function ClientDetailsPage({ params }: PageProps) {
+  const { user, role } = await requireRole(["admin", "agent"]);
 
-  const {
-    id,
-  } =
-    await params;
+  const { id } = await params;
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
   /*
    * ============================
@@ -560,16 +387,10 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const {
-    data: clientData,
-    error: clientError,
-  } =
-    await serviceClient
-      .from(
-        "clients",
-      )
-      .select(
-        `
+  const { data: clientData, error: clientError } = await serviceClient
+    .from("clients")
+    .select(
+      `
           id,
           first_name,
           last_name,
@@ -595,27 +416,19 @@ export default async function ClientDetailsPage({
             name
           )
         `,
-      )
-      .eq(
-        "id",
-        id,
-      )
-      .maybeSingle();
+    )
+    .eq("id", id)
+    .maybeSingle();
 
-  if (
-    clientError
-  ) {
-    throw new Error(
-      clientError.message,
-    );
+  if (clientError) {
+    throw new Error(clientError.message);
   }
 
   if (!clientData) {
     notFound();
   }
 
-  const client =
-    clientData as unknown as ClientRow;
+  const client = clientData as unknown as ClientRow;
 
   /*
    * ============================
@@ -623,14 +436,9 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const {
-    data: clientNotesData,
-    error: clientNotesError,
-  } =
-    await serviceClient
-      .from(
-        "client_notes",
-      )
+  const { data: clientNotesData, error: clientNotesError } = await readAll(
+    serviceClient
+      .from("client_notes")
       .select(
         `
           id,
@@ -641,29 +449,18 @@ export default async function ClientDetailsPage({
           updated_at
         `,
       )
-      .eq(
-        "client_id",
-        id,
-      )
-      .order(
-        "created_at",
-        {
-          ascending:
-            false,
-        },
-      );
+      .eq("client_id", id)
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
-  if (
-    clientNotesError
-  ) {
-    throw new Error(
-      clientNotesError.message,
-    );
+  if (clientNotesError) {
+    throw new Error(clientNotesError.message);
   }
 
-  const clientNotes =
-    (clientNotesData ??
-      []) as ClientNoteRow[];
+  const clientNotes = (clientNotesData ?? []) as ClientNoteRow[];
 
   /*
    * ============================
@@ -671,14 +468,9 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await serviceClient
-      .from(
-        "insurance_requests",
-      )
+  const { data: requestsData, error: requestsError } = await readAll(
+    serviceClient
+      .from("insurance_requests")
       .select(
         `
           id,
@@ -702,29 +494,18 @@ export default async function ClientDetailsPage({
           )
         `,
       )
-      .eq(
-        "client_id",
-        id,
-      )
-      .order(
-        "created_at",
-        {
-          ascending:
-            false,
-        },
-      );
+      .eq("client_id", id)
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
-  if (
-    requestsError
-  ) {
-    throw new Error(
-      requestsError.message,
-    );
+  if (requestsError) {
+    throw new Error(requestsError.message);
   }
 
-  const allRequests =
-    (requestsData ??
-      []) as unknown as RequestRow[];
+  const allRequests = (requestsData ?? []) as unknown as RequestRow[];
 
   /*
    * Agent :
@@ -739,28 +520,19 @@ export default async function ClientDetailsPage({
       ? allRequests
       : allRequests.filter(
           (request) =>
-            request.assigned_agent_id ===
-              user.id ||
-            request.assigned_agent_id ===
-              null,
+            request.assigned_agent_id === user.id ||
+            request.assigned_agent_id === null,
         );
 
   /*
    * Un agent ne peut pas ouvrir une fiche client
    * s'il n'a accès à aucun dossier de ce client.
    */
-  if (
-    role === "agent" &&
-    requests.length === 0
-  ) {
+  if (role === "agent" && requests.length === 0) {
     notFound();
   }
 
-  const requestIds =
-    requests.map(
-      (request) =>
-        request.id,
-    );
+  const requestIds = requests.map((request) => request.id);
 
   /*
    * ============================
@@ -768,79 +540,53 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  let policies:
-    PolicyRow[] = [];
+  let policies: PolicyRow[] = [];
 
-  let documents:
-    DocumentRow[] = [];
+  let documents: DocumentRow[] = [];
 
-  let activities:
-    ActivityRow[] = [];
+  let activities: ActivityRow[] = [];
 
-  let notes:
-    RequestNoteRow[] = [];
+  let notes: RequestNoteRow[] = [];
 
-  if (
-    requestIds.length >
-    0
-  ) {
-    const [
-      policiesResult,
-      documentsResult,
-      activitiesResult,
-      notesResult,
-    ] =
+  if (requestIds.length > 0) {
+    const [policiesResult, documentsResult, activitiesResult, notesResult] =
       await Promise.all([
-        serviceClient
-          .from(
-            "insurance_policies",
-          )
-          .select(
-            `
+        readAll(
+          serviceClient
+            .from("insurance_policies")
+            .select(
+              `
               request_id,
               policy_year,
               uploaded_at
             `,
-          )
-          .in(
-            "request_id",
-            requestIds,
-          )
-          .order(
-            "uploaded_at",
-            {
-              ascending:
-                false,
-            },
-          ),
+            )
+            .in("request_id", requestIds)
+            .order("uploaded_at", {
+              ascending: false,
+            })
+            .order("id"),
+        ),
 
-        serviceClient
-          .from(
-            "uploaded_documents",
-          )
-          .select(
-            `
+        readAll(
+          serviceClient
+            .from("uploaded_documents")
+            .select(
+              `
               request_id,
               document_type,
               uploaded_at
             `,
-          )
-          .in(
-            "request_id",
-            requestIds,
-          )
-          .order(
-            "uploaded_at",
-            {
-              ascending:
-                false,
-            },
-          ),
+            )
+            .in("request_id", requestIds)
+            .order("uploaded_at", {
+              ascending: false,
+            })
+            .order("id"),
+        ),
 
         serviceClient
-          .from(
-            "activity_logs",
-          )
+          .from("activity_logs")
           .select(
             `
               id,
@@ -851,25 +597,14 @@ export default async function ClientDetailsPage({
               created_at
             `,
           )
-          .in(
-            "request_id",
-            requestIds,
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
-            },
-          )
-          .limit(
-            100,
-          ),
+          .in("request_id", requestIds)
+          .order("created_at", {
+            ascending: false,
+          })
+          .limit(100),
 
         serviceClient
-          .from(
-            "request_notes",
-          )
+          .from("request_notes")
           .select(
             `
               id,
@@ -879,69 +614,36 @@ export default async function ClientDetailsPage({
               created_at
             `,
           )
-          .in(
-            "request_id",
-            requestIds,
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
-            },
-          )
-          .limit(
-            50,
-          ),
+          .in("request_id", requestIds)
+          .order("created_at", {
+            ascending: false,
+          })
+          .limit(50),
       ]);
 
-    if (
-      policiesResult.error
-    ) {
-      throw new Error(
-        policiesResult.error.message,
-      );
+    if (policiesResult.error) {
+      throw new Error(policiesResult.error.message);
     }
 
-    if (
-      documentsResult.error
-    ) {
-      throw new Error(
-        documentsResult.error.message,
-      );
+    if (documentsResult.error) {
+      throw new Error(documentsResult.error.message);
     }
 
-    if (
-      activitiesResult.error
-    ) {
-      throw new Error(
-        activitiesResult.error.message,
-      );
+    if (activitiesResult.error) {
+      throw new Error(activitiesResult.error.message);
     }
 
-    if (
-      notesResult.error
-    ) {
-      throw new Error(
-        notesResult.error.message,
-      );
+    if (notesResult.error) {
+      throw new Error(notesResult.error.message);
     }
 
-    policies =
-      (policiesResult.data ??
-        []) as PolicyRow[];
+    policies = (policiesResult.data ?? []) as PolicyRow[];
 
-    documents =
-      (documentsResult.data ??
-        []) as DocumentRow[];
+    documents = (documentsResult.data ?? []) as DocumentRow[];
 
-    activities =
-      (activitiesResult.data ??
-        []) as ActivityRow[];
+    activities = (activitiesResult.data ?? []) as ActivityRow[];
 
-    notes =
-      (notesResult.data ??
-        []) as RequestNoteRow[];
+    notes = (notesResult.data ?? []) as RequestNoteRow[];
   }
 
   /*
@@ -950,98 +652,43 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const userIds =
-    Array.from(
-      new Set(
-        [
-          ...requests.map(
-            (request) =>
-              request.assigned_agent_id,
-          ),
+  const userIds = Array.from(
+    new Set(
+      [
+        ...requests.map((request) => request.assigned_agent_id),
 
-          ...activities.map(
-            (activity) =>
-              activity.user_id,
-          ),
+        ...activities.map((activity) => activity.user_id),
 
-          ...notes.map(
-            (note) =>
-              note.user_id,
-          ),
+        ...notes.map((note) => note.user_id),
 
-          ...clientNotes.map(
-            (note) =>
-              note.user_id,
-          ),
-        ].filter(
-          (
-            value,
-          ): value is string =>
-            Boolean(
-              value,
-            ),
-        ),
-      ),
-    );
-
-  const userNames =
-    new Map<
-      string,
-      string
-    >();
-
-  await Promise.all(
-    userIds.map(
-      async (
-        userId,
-      ) => {
-        const name =
-          await getAuthUserName(
-            serviceClient,
-            userId,
-          );
-
-        userNames.set(
-          userId,
-          name,
-        );
-      },
+        ...clientNotes.map((note) => note.user_id),
+      ].filter((value): value is string => Boolean(value)),
     ),
   );
 
-  const agents:
-    AgentInfo[] =
-    Array.from(
-      new Set(
-        requests
-          .map(
-            (request) =>
-              request.assigned_agent_id,
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-    ).map(
-      (agentId) => ({
-        id:
-          agentId,
+  const userNames = new Map<string, string>();
 
-        name:
-          userNames.get(
-            agentId,
-          ) ??
-          "Agent",
+  await Promise.all(
+    userIds.map(async (userId) => {
+      const name = await getAuthUserName(serviceClient, userId);
 
-        email:
-          "",
-      }),
-    );
+      userNames.set(userId, name);
+    }),
+  );
+
+  const agents: AgentInfo[] = Array.from(
+    new Set(
+      requests
+        .map((request) => request.assigned_agent_id)
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ).map((agentId) => ({
+    id: agentId,
+
+    name: userNames.get(agentId) ?? "Agent",
+
+    email: "",
+  }));
 
   /*
    * ============================
@@ -1049,72 +696,37 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const totalRequests =
-    requests.length;
+  const totalRequests = requests.length;
 
-  const activeStatuses =
-    new Set([
-      "waiting_payment",
-      "payment_review",
-      "payment_confirmed",
-      "policy_preparation",
-    ]);
+  const activeStatuses = new Set([
+    "waiting_payment",
+    "payment_review",
+    "payment_confirmed",
+    "policy_preparation",
+  ]);
 
-  const activeCount =
-    requests.filter(
-      (request) =>
-        activeStatuses.has(
-          request.status,
-        ),
-    ).length;
+  const activeCount = requests.filter((request) =>
+    activeStatuses.has(request.status),
+  ).length;
 
-  const availablePoliciesCount =
-    requests.filter(
-      (request) =>
-        request.status ===
-        "policy_available",
-    ).length;
+  const availablePoliciesCount = requests.filter(
+    (request) => request.status === "policy_available",
+  ).length;
 
-  const totalAmount =
-    requests.reduce(
-      (
-        total,
-        request,
-      ) =>
-        total +
-        Number(
-          request.calculated_price ??
-            0,
-        ),
-      0,
-    );
+  const totalAmount = requests.reduce(
+    (total, request) => total + Number(request.calculated_price ?? 0),
+    0,
+  );
 
-  const verifiedPayments =
-    requests.filter(
-      (request) => {
-        const payment =
-          unwrapPayment(
-            request.payment,
-          );
+  const verifiedPayments = requests.filter((request) => {
+    const payment = unwrapPayment(request.payment);
 
-        return (
-          payment?.status ===
-            "verified" ||
-          payment?.status ===
-            "confirmed" ||
-          Boolean(
-            payment?.verified_at,
-          )
-        );
-      },
-    ).length;
+    return payment?.status === "verified" || payment?.status === "confirmed";
+  }).length;
 
-  const policyYearsCount =
-    policies.length;
+  const policyYearsCount = policies.length;
 
-  const latestRequest =
-    requests[0] ??
-    null;
+  const latestRequest = requests[0] ?? null;
 
   /*
    * ============================
@@ -1122,47 +734,28 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const clientName =
-    `${client.first_name} ${client.last_name}`.trim();
+  const clientName = `${client.first_name} ${client.last_name}`.trim();
 
   const whatsapp =
     `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim();
 
-  const province =
-    unwrapName(
-      client.province,
-    );
+  const province = unwrapName(client.province);
 
-  const district =
-    unwrapName(
-      client.district,
-    );
+  const district = unwrapName(client.district);
 
-  const neighborhood =
-    unwrapName(
-      client.neighborhood,
-    );
+  const neighborhood = unwrapName(client.neighborhood);
 
   const address =
     [
       neighborhood,
       client.street,
-      client.building_number
-        ? `Bina No: ${client.building_number}`
-        : null,
-      client.apartment_number
-        ? `Daire No: ${client.apartment_number}`
-        : null,
+      client.building_number ? `Bina No: ${client.building_number}` : null,
+      client.apartment_number ? `Daire No: ${client.apartment_number}` : null,
       district,
       province,
     ]
-      .filter(
-        Boolean,
-      )
-      .join(
-        ", ",
-      ) ||
-    "—";
+      .filter(Boolean)
+      .join(", ") || "—";
 
   /*
    * ============================
@@ -1170,47 +763,40 @@ export default async function ClientDetailsPage({
    * ============================
    */
 
-  const recentActivities =
-    activities.slice(
-      0,
-      20,
-    );
+  const recentActivities = activities.slice(0, 20);
 
-  const recentNotes =
-    notes.slice(
-      0,
-      10,
-    );
+  const recentNotes = notes.slice(0, 10);
 
-  const formattedClientNotes =
-    clientNotes.map(
-      (note) => ({
-        id:
-          note.id,
+  const formattedClientNotes = clientNotes.map((note) => ({
+    id: note.id,
 
-        content:
-          note.content,
+    content: note.content,
 
-        createdAt:
-          formatDate(
-            note.created_at,
-          ),
+    createdAt: formatDate(note.created_at),
 
-        authorName:
-          note.user_id
-            ? userNames.get(
-                note.user_id,
-              ) ??
-              "Utilisateur"
-            : "Système",
+    authorName: note.user_id
+      ? (userNames.get(note.user_id) ?? "Utilisateur")
+      : "Système",
 
-        userId:
-          note.user_id,
-      }),
-    );
+    userId: note.user_id,
+  }));
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Clients"
+      href="/admin/clients"
+      detail={true}
+      sections={[
+        { id: "section-1", label: "Identité" },
+        { id: "section-2", label: "Contact & adresse" },
+        { id: "section-3", label: "Agents associés" },
+        { id: "section-4", label: "Dossiers du client" },
+        { id: "section-5", label: "Paiements" },
+        { id: "section-6", label: "Documents" },
+        { id: "section-7", label: "Notes internes" },
+        { id: "section-8", label: "Historique récent" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* Navigation */}
 
@@ -1240,10 +826,8 @@ export default async function ClientDetailsPage({
               <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] text-base font-black text-white sm:h-16 sm:w-16 sm:rounded-2xl sm:text-xl">
                   {getInitials({
-                    firstName:
-                      client.first_name,
-                    lastName:
-                      client.last_name,
+                    firstName: client.first_name,
+                    lastName: client.last_name,
                   })}
                 </div>
 
@@ -1258,16 +842,13 @@ export default async function ClientDetailsPage({
 
                   <div className="mt-2 flex min-w-0 flex-col gap-1 text-[12px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:text-sm">
                     <span>
-                      {client.nationality ??
-                        "Nationalité non renseignée"}
+                      {client.nationality ?? "Nationalité non renseignée"}
                     </span>
 
                     {whatsapp && (
                       <span>
                         WhatsApp :{" "}
-                        <strong className="text-slate-700">
-                          {whatsapp}
-                        </strong>
+                        <strong className="text-slate-700">{whatsapp}</strong>
                       </span>
                     )}
                   </div>
@@ -1302,55 +883,35 @@ export default async function ClientDetailsPage({
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-5">
           <StatCard
             label="Dossiers"
-            value={
-              totalRequests.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={totalRequests.toLocaleString("fr-FR")}
             description="Dossiers visibles"
             className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <StatCard
             label="En cours"
-            value={
-              activeCount.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={activeCount.toLocaleString("fr-FR")}
             description="Dossiers actifs"
             className="border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]"
           />
 
           <StatCard
             label="Assurances disponibles"
-            value={
-              availablePoliciesCount.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={availablePoliciesCount.toLocaleString("fr-FR")}
             description={`${policyYearsCount} police(s) déposée(s)`}
             className="border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <StatCard
             label="Paiements validés"
-            value={
-              verifiedPayments.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={verifiedPayments.toLocaleString("fr-FR")}
             description="Paiements confirmés"
             className="border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]"
           />
 
           <StatCard
             label="Valeur dossiers"
-            value={
-              formatMoney(
-                totalAmount,
-              )
-            }
+            value={formatMoney(totalAmount)}
             description="Montant cumulé"
             className="bg-[#F1F6EA] text-[#49613E]"
           />
@@ -1363,62 +924,42 @@ export default async function ClientDetailsPage({
             {/* Identité */}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold text-[#102B20]">
+              <h2
+                className="text-lg font-semibold text-[#102B20]"
+                id="section-1"
+              >
                 Identité
               </h2>
 
               <div className="mt-4 space-y-3 sm:mt-5 sm:space-y-4">
-                <InfoRow
-                  label="Nom"
-                  value={
-                    client.last_name
-                  }
-                />
+                <InfoRow label="Nom" value={client.last_name} />
 
-                <InfoRow
-                  label="Prénom"
-                  value={
-                    client.first_name
-                  }
-                />
+                <InfoRow label="Prénom" value={client.first_name} />
 
                 <InfoRow
                   label="Nom du père"
-                  value={
-                    client.father_name ??
-                    "—"
-                  }
+                  value={client.father_name ?? "—"}
                 />
 
                 <InfoRow
                   label="Naissance"
-                  value={
-                    formatSimpleDate(
-                      client.birth_date,
-                    )
-                  }
+                  value={formatSimpleDate(client.birth_date)}
                 />
 
                 <InfoRow
                   label="Sexe"
                   value={
-                    client.gender ===
-                    "male"
+                    client.gender === "male"
                       ? "Homme"
-                      : client.gender ===
-                          "female"
+                      : client.gender === "female"
                         ? "Femme"
-                        : client.gender ??
-                          "—"
+                        : (client.gender ?? "—")
                   }
                 />
 
                 <InfoRow
                   label="Nationalité"
-                  value={
-                    client.nationality ??
-                    "—"
-                  }
+                  value={client.nationality ?? "—"}
                 />
               </div>
             </section>
@@ -1426,56 +967,46 @@ export default async function ClientDetailsPage({
             {/* Contact */}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold text-[#102B20]">
+              <h2
+                className="text-lg font-semibold text-[#102B20]"
+                id="section-2"
+              >
                 Contact & adresse
               </h2>
 
               <div className="mt-4 space-y-3 sm:mt-5 sm:space-y-4">
-                <InfoRow
-                  label="WhatsApp"
-                  value={
-                    whatsapp ||
-                    "—"
-                  }
-                />
+                <InfoRow label="WhatsApp" value={whatsapp || "—"} />
 
-                <InfoRow
-                  label="Adresse"
-                  value={
-                    address
-                  }
-                />
+                <InfoRow label="Adresse" value={address} />
               </div>
             </section>
 
             {/* Responsables */}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold text-[#102B20]">
+              <h2
+                className="text-lg font-semibold text-[#102B20]"
+                id="section-3"
+              >
                 Agents associés
               </h2>
 
-              {agents.length ===
-              0 ? (
+              {agents.length === 0 ? (
                 <p className="mt-4 text-sm text-slate-500">
                   Aucun agent n’est actuellement associé aux dossiers visibles.
                 </p>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {agents.map(
-                    (agent) => (
-                      <div
-                        key={
-                          agent.id
-                        }
-                        className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] px-3 py-3 sm:px-4"
-                      >
-                        <p className="font-semibold text-slate-800">
-                          {agent.name}
-                        </p>
-                      </div>
-                    ),
-                  )}
+                  {agents.map((agent) => (
+                    <div
+                      key={agent.id}
+                      className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] px-3 py-3 sm:px-4"
+                    >
+                      <p className="font-semibold text-slate-800">
+                        {agent.name}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               )}
             </section>
@@ -1489,7 +1020,10 @@ export default async function ClientDetailsPage({
             <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:rounded-[1.5rem]">
               <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
-                  <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+                  <h2
+                    className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                    id="section-4"
+                  >
                     Dossiers du client
                   </h2>
 
@@ -1500,15 +1034,11 @@ export default async function ClientDetailsPage({
 
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
                   {requests.length} dossier
-                  {requests.length !==
-                  1
-                    ? "s"
-                    : ""}
+                  {requests.length !== 1 ? "s" : ""}
                 </span>
               </div>
 
-              {requests.length ===
-              0 ? (
+              {requests.length === 0 ? (
                 <div className="p-6 text-center text-[13px] text-slate-500 sm:p-10 sm:text-sm">
                   Aucun dossier visible.
                 </div>
@@ -1516,33 +1046,23 @@ export default async function ClientDetailsPage({
                 <>
                   <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
                     {requests.map((request) => {
-                      const status =
-                        statusLabels[request.status] ?? {
-                          label: request.status,
-                          className:
-                            "bg-slate-100 text-slate-700",
-                        };
+                      const status = statusLabels[request.status] ?? {
+                        label: request.status,
+                        className: "bg-slate-100 text-slate-700",
+                      };
 
-                      const payment =
-                        unwrapPayment(request.payment);
+                      const payment = unwrapPayment(request.payment);
 
-                      const paymentInfo =
-                        payment?.status
-                          ? paymentStatusLabels[
-                              payment.status
-                            ] ?? {
-                              label: payment.status,
-                              className:
-                                "bg-slate-100 text-slate-700",
-                            }
-                          : null;
+                      const paymentInfo = payment?.status
+                        ? (paymentStatusLabels[payment.status] ?? {
+                            label: payment.status,
+                            className: "bg-slate-100 text-slate-700",
+                          })
+                        : null;
 
-                      const requestPolicies =
-                        policies.filter(
-                          (policy) =>
-                            policy.request_id ===
-                            request.id,
-                        );
+                      const requestPolicies = policies.filter(
+                        (policy) => policy.request_id === request.id,
+                      );
 
                       return (
                         <article
@@ -1559,11 +1079,8 @@ export default async function ClientDetailsPage({
                               </Link>
 
                               <p className="mt-1 text-[11px] text-slate-400">
-                                {request.insurance_duration_years ??
-                                  1}{" "}
-                                an
-                                {(request.insurance_duration_years ??
-                                  1) > 1
+                                {request.insurance_duration_years ?? 1} an
+                                {(request.insurance_duration_years ?? 1) > 1
                                   ? "s"
                                   : ""}
                               </p>
@@ -1583,9 +1100,8 @@ export default async function ClientDetailsPage({
                               </dt>
                               <dd className="mt-1 break-words text-[12px] font-semibold text-slate-700">
                                 {request.assigned_agent_id
-                                  ? userNames.get(
-                                      request.assigned_agent_id,
-                                    ) ?? "Agent"
+                                  ? (userNames.get(request.assigned_agent_id) ??
+                                    "Agent")
                                   : "Non attribué"}
                               </dd>
                             </div>
@@ -1595,9 +1111,7 @@ export default async function ClientDetailsPage({
                                 Montant
                               </dt>
                               <dd className="mt-1 break-words text-[12px] font-bold text-slate-800">
-                                {formatMoney(
-                                  request.calculated_price,
-                                )}
+                                {formatMoney(request.calculated_price)}
                               </dd>
                             </div>
 
@@ -1651,105 +1165,64 @@ export default async function ClientDetailsPage({
                   </div>
 
                   <div className="hidden overflow-x-auto lg:block">
+                    <table
+                      className="min-w-full divide-y divide-slate-200"
+                      aria-label="Clients"
+                    >
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <TableHeader>Dossier</TableHeader>
 
-                  <table className="min-w-full divide-y divide-slate-200">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <TableHeader>
-                          Dossier
-                        </TableHeader>
+                          <TableHeader>Statut</TableHeader>
 
-                        <TableHeader>
-                          Statut
-                        </TableHeader>
+                          <TableHeader>Responsable</TableHeader>
 
-                        <TableHeader>
-                          Responsable
-                        </TableHeader>
+                          <TableHeader>Montant</TableHeader>
 
-                        <TableHeader>
-                          Montant
-                        </TableHeader>
+                          <TableHeader>Paiement</TableHeader>
 
-                        <TableHeader>
-                          Paiement
-                        </TableHeader>
+                          <TableHeader>Polices</TableHeader>
 
-                        <TableHeader>
-                          Polices
-                        </TableHeader>
+                          <TableHeader>Créé</TableHeader>
 
-                        <TableHeader>
-                          Créé
-                        </TableHeader>
+                          <TableHeader>Action</TableHeader>
+                        </tr>
+                      </thead>
 
-                        <TableHeader>
-                          Action
-                        </TableHeader>
-                      </tr>
-                    </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {requests.map((request) => {
+                          const status = statusLabels[request.status] ?? {
+                            label: request.status,
+                            className: "bg-slate-100 text-slate-700",
+                          };
 
-                    <tbody className="divide-y divide-slate-100">
-                      {requests.map(
-                        (
-                          request,
-                        ) => {
-                          const status =
-                            statusLabels[
-                              request.status
-                            ] ?? {
-                              label:
-                                request.status,
-                              className:
-                                "bg-slate-100 text-slate-700",
-                            };
+                          const payment = unwrapPayment(request.payment);
 
-                          const payment =
-                            unwrapPayment(
-                              request.payment,
-                            );
+                          const paymentInfo = payment?.status
+                            ? (paymentStatusLabels[payment.status] ?? {
+                                label: payment.status,
+                                className: "bg-slate-100 text-slate-700",
+                              })
+                            : null;
 
-                          const paymentInfo =
-                            payment?.status
-                              ? paymentStatusLabels[
-                                  payment.status
-                                ] ?? {
-                                  label:
-                                    payment.status,
-                                  className:
-                                    "bg-slate-100 text-slate-700",
-                                }
-                              : null;
-
-                          const requestPolicies =
-                            policies.filter(
-                              (policy) =>
-                                policy.request_id ===
-                                request.id,
-                            );
+                          const requestPolicies = policies.filter(
+                            (policy) => policy.request_id === request.id,
+                          );
 
                           return (
                             <tr
-                              key={
-                                request.id
-                              }
+                              key={request.id}
                               className="transition hover:bg-slate-50"
                             >
                               <TableCell>
                                 <div>
                                   <p className="font-black text-[#0B5D3B]">
-                                    {
-                                      request.request_code
-                                    }
+                                    {request.request_code}
                                   </p>
 
                                   <p className="mt-1 text-xs text-slate-400">
-                                    {request.insurance_duration_years ??
-                                      1}{" "}
-                                    an
-                                    {(request.insurance_duration_years ??
-                                      1) >
-                                    1
+                                    {request.insurance_duration_years ?? 1} an
+                                    {(request.insurance_duration_years ?? 1) > 1
                                       ? "s"
                                       : ""}
                                   </p>
@@ -1760,18 +1233,14 @@ export default async function ClientDetailsPage({
                                 <span
                                   className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
                                 >
-                                  {
-                                    status.label
-                                  }
+                                  {status.label}
                                 </span>
                               </TableCell>
 
                               <TableCell>
                                 {request.assigned_agent_id ? (
                                   <span className="text-sm font-medium text-slate-700">
-                                    {userNames.get(
-                                      request.assigned_agent_id,
-                                    ) ??
+                                    {userNames.get(request.assigned_agent_id) ??
                                       "Agent"}
                                   </span>
                                 ) : (
@@ -1782,9 +1251,7 @@ export default async function ClientDetailsPage({
                               </TableCell>
 
                               <TableCell>
-                                {formatMoney(
-                                  request.calculated_price,
-                                )}
+                                {formatMoney(request.calculated_price)}
                               </TableCell>
 
                               <TableCell>
@@ -1792,9 +1259,7 @@ export default async function ClientDetailsPage({
                                   <span
                                     className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${paymentInfo.className}`}
                                   >
-                                    {
-                                      paymentInfo.label
-                                    }
+                                    {paymentInfo.label}
                                   </span>
                                 ) : (
                                   "—"
@@ -1803,16 +1268,12 @@ export default async function ClientDetailsPage({
 
                               <TableCell>
                                 <span className="font-semibold text-slate-700">
-                                  {
-                                    requestPolicies.length
-                                  }
+                                  {requestPolicies.length}
                                 </span>
                               </TableCell>
 
                               <TableCell>
-                                {formatDate(
-                                  request.created_at,
-                                )}
+                                {formatDate(request.created_at)}
                               </TableCell>
 
                               <TableCell>
@@ -1825,11 +1286,9 @@ export default async function ClientDetailsPage({
                               </TableCell>
                             </tr>
                           );
-                        },
-                      )}
-                    </tbody>
-                  </table>
-                
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </>
               )}
@@ -1838,7 +1297,10 @@ export default async function ClientDetailsPage({
             {/* Paiements */}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-5"
+              >
                 Paiements
               </h2>
 
@@ -1847,83 +1309,60 @@ export default async function ClientDetailsPage({
               </p>
 
               <div className="mt-5 space-y-3">
-                {requests.map(
-                  (
-                    request,
-                  ) => {
-                    const payment =
-                      unwrapPayment(
-                        request.payment,
-                      );
+                {requests.map((request) => {
+                  const payment = unwrapPayment(request.payment);
 
-                    if (!payment) {
-                      return null;
-                    }
+                  if (!payment) {
+                    return null;
+                  }
 
-                    const paymentInfo =
-                      payment.status
-                        ? paymentStatusLabels[
-                            payment.status
-                          ] ?? {
-                            label:
-                              payment.status,
-                            className:
-                              "bg-slate-100 text-slate-700",
-                          }
-                        : {
-                            label:
-                              "Inconnu",
-                            className:
-                              "bg-slate-100 text-slate-700",
-                          };
+                  const paymentInfo = payment.status
+                    ? (paymentStatusLabels[payment.status] ?? {
+                        label: payment.status,
+                        className: "bg-slate-100 text-slate-700",
+                      })
+                    : {
+                        label: "Inconnu",
+                        className: "bg-slate-100 text-slate-700",
+                      };
 
-                    return (
-                      <div
-                        key={
-                          request.id
-                        }
-                        className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div>
-                          <Link
-                            href={`/admin/dossiers/${request.id}`}
-                            className="font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
-                          >
-                            {
-                              request.request_code
-                            }
-                          </Link>
+                  return (
+                    <div
+                      key={request.id}
+                      className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <Link
+                          href={`/admin/dossiers/${request.id}`}
+                          className="font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                        >
+                          {request.request_code}
+                        </Link>
 
-                          <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
-                            Montant attendu :{" "}
-                            <strong className="text-slate-700">
-                              {formatMoney(
-                                payment.expected_amount,
-                              )}
-                            </strong>
-                          </p>
-                        </div>
-
-                        <div className="flex min-w-0 flex-wrap items-center gap-2">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentInfo.className}`}
-                          >
-                            {
-                              paymentInfo.label
-                            }
-                          </span>
-
-                          <span className="text-xs text-slate-400">
-                            {formatDate(
-                              payment.verified_at ??
-                                payment.submitted_at,
-                            )}
-                          </span>
-                        </div>
+                        <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
+                          Montant attendu :{" "}
+                          <strong className="text-slate-700">
+                            {formatMoney(payment.expected_amount)}
+                          </strong>
+                        </p>
                       </div>
-                    );
-                  },
-                )}
+
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentInfo.className}`}
+                        >
+                          {paymentInfo.label}
+                        </span>
+
+                        <span className="text-xs text-slate-400">
+                          {formatDate(
+                            payment.verified_at ?? payment.submitted_at,
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
@@ -1932,7 +1371,10 @@ export default async function ClientDetailsPage({
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+                  <h2
+                    className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                    id="section-6"
+                  >
                     Documents
                   </h2>
 
@@ -1942,9 +1384,7 @@ export default async function ClientDetailsPage({
                 </div>
 
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                  {
-                    documents.length
-                  }
+                  {documents.length}
                 </span>
               </div>
 
@@ -1953,9 +1393,7 @@ export default async function ClientDetailsPage({
                   label="Passeports"
                   value={
                     documents.filter(
-                      (document) =>
-                        document.document_type ===
-                        "passport",
+                      (document) => document.document_type === "passport",
                     ).length
                   }
                 />
@@ -1965,10 +1403,8 @@ export default async function ClientDetailsPage({
                   value={
                     documents.filter(
                       (document) =>
-                        document.document_type ===
-                          "kimlik_front" ||
-                        document.document_type ===
-                          "kimlik_back",
+                        document.document_type === "kimlik_front" ||
+                        document.document_type === "kimlik_back",
                     ).length
                   }
                 />
@@ -1978,18 +1414,12 @@ export default async function ClientDetailsPage({
                   value={
                     documents.filter(
                       (document) =>
-                        document.document_type ===
-                        "payment_receipt",
+                        document.document_type === "payment_receipt",
                     ).length
                   }
                 />
 
-                <DocumentCounter
-                  label="Polices"
-                  value={
-                    policies.length
-                  }
-                />
+                <DocumentCounter label="Polices" value={policies.length} />
               </div>
 
               <p className="mt-4 text-xs text-slate-400">
@@ -2000,24 +1430,19 @@ export default async function ClientDetailsPage({
             {/* Notes générales du client */}
 
             <ClientNotes
-              clientId={
-                client.id
-              }
-              notes={
-                formattedClientNotes
-              }
-              currentUserId={
-                user.id
-              }
-              role={
-                role
-              }
+              clientId={client.id}
+              notes={formattedClientNotes}
+              currentUserId={user.id}
+              role={role}
             />
 
             {/* Notes internes agrégées */}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-7"
+              >
                 Notes internes
               </h2>
 
@@ -2025,65 +1450,45 @@ export default async function ClientDetailsPage({
                 Dernières notes enregistrées dans les dossiers de ce client.
               </p>
 
-              {recentNotes.length ===
-              0 ? (
+              {recentNotes.length === 0 ? (
                 <div className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">
                   Aucune note interne.
                 </div>
               ) : (
                 <div className="mt-5 space-y-3">
-                  {recentNotes.map(
-                    (
-                      note,
-                    ) => {
-                      const request =
-                        requests.find(
-                          (
-                            item,
-                          ) =>
-                            item.id ===
-                            note.request_id,
-                        );
+                  {recentNotes.map((note) => {
+                    const request = requests.find(
+                      (item) => item.id === note.request_id,
+                    );
 
-                      return (
-                        <div
-                          key={
-                            note.id
-                          }
-                          className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-xs font-black text-[#0B5D3B]">
-                              {request?.request_code ??
-                                "Dossier"}
-                            </p>
-
-                            <p className="text-xs text-slate-400">
-                              {formatDate(
-                                note.created_at,
-                              )}
-                            </p>
-                          </div>
-
-                          <p className="mt-2 whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-700 sm:text-sm">
-                            {
-                              note.content
-                            }
+                    return (
+                      <div
+                        key={note.id}
+                        className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-xs font-black text-[#0B5D3B]">
+                            {request?.request_code ?? "Dossier"}
                           </p>
 
-                          <p className="mt-2 break-words text-[10px] leading-5 text-slate-400 sm:text-xs">
-                            Par{" "}
-                            {note.user_id
-                              ? userNames.get(
-                                  note.user_id,
-                                ) ??
-                                "Utilisateur"
-                              : "Système"}
+                          <p className="text-xs text-slate-400">
+                            {formatDate(note.created_at)}
                           </p>
                         </div>
-                      );
-                    },
-                  )}
+
+                        <p className="mt-2 whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-700 sm:text-sm">
+                          {note.content}
+                        </p>
+
+                        <p className="mt-2 break-words text-[10px] leading-5 text-slate-400 sm:text-xs">
+                          Par{" "}
+                          {note.user_id
+                            ? (userNames.get(note.user_id) ?? "Utilisateur")
+                            : "Système"}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -2091,7 +1496,10 @@ export default async function ClientDetailsPage({
             {/* Historique global */}
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-8"
+              >
                 Historique récent
               </h2>
 
@@ -2099,98 +1507,73 @@ export default async function ClientDetailsPage({
                 Dernières actions enregistrées sur les dossiers du client.
               </p>
 
-              {recentActivities.length ===
-              0 ? (
+              {recentActivities.length === 0 ? (
                 <div className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">
                   Aucun historique disponible.
                 </div>
               ) : (
                 <div className="mt-6 space-y-0">
-                  {recentActivities.map(
-                    (
-                      activity,
-                      index,
-                    ) => {
-                      const request =
-                        requests.find(
-                          (
-                            item,
-                          ) =>
-                            item.id ===
-                            activity.request_id,
-                        );
+                  {recentActivities.map((activity, index) => {
+                    const request = requests.find(
+                      (item) => item.id === activity.request_id,
+                    );
 
-                      return (
+                    return (
+                      <div
+                        key={activity.id}
+                        className="relative flex min-w-0 gap-3 pb-5 sm:gap-4 sm:pb-6"
+                      >
+                        {index < recentActivities.length - 1 && (
+                          <div className="absolute left-[7px] top-5 h-[calc(100%-4px)] w-px bg-slate-200" />
+                        )}
+
                         <div
-                          key={
-                            activity.id
-                          }
-                          className="relative flex min-w-0 gap-3 pb-5 sm:gap-4 sm:pb-6"
-                        >
-                          {index <
-                            recentActivities.length -
-                              1 && (
-                            <div className="absolute left-[7px] top-5 h-[calc(100%-4px)] w-px bg-slate-200" />
+                          className={`relative z-10 mt-1.5 h-4 w-4 shrink-0 rounded-full ring-4 ring-white ${getActivityDot(
+                            activity.action,
+                          )}`}
+                        />
+
+                        <div className="min-w-0">
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <p className="font-semibold text-slate-800">
+                              {getActivityLabel(activity.action)}
+                            </p>
+
+                            {request && (
+                              <Link
+                                href={`/admin/dossiers/${request.id}`}
+                                className="text-xs font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                              >
+                                {request.request_code}
+                              </Link>
+                            )}
+                          </div>
+
+                          {activity.description && (
+                            <p className="mt-1 break-words text-[13px] leading-6 text-slate-500 sm:text-sm">
+                              {activity.description}
+                            </p>
                           )}
 
-                          <div
-                            className={`relative z-10 mt-1.5 h-4 w-4 shrink-0 rounded-full ring-4 ring-white ${getActivityDot(
-                              activity.action,
-                            )}`}
-                          />
-
-                          <div className="min-w-0">
-                            <div className="flex min-w-0 flex-wrap items-center gap-2">
-                              <p className="font-semibold text-slate-800">
-                                {getActivityLabel(
-                                  activity.action,
-                                )}
-                              </p>
-
-                              {request && (
-                                <Link
-                                  href={`/admin/dossiers/${request.id}`}
-                                  className="text-xs font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
-                                >
-                                  {
-                                    request.request_code
-                                  }
-                                </Link>
-                              )}
-                            </div>
-
-                            {activity.description && (
-                              <p className="mt-1 break-words text-[13px] leading-6 text-slate-500 sm:text-sm">
-                                {
-                                  activity.description
-                                }
-                              </p>
-                            )}
-
-                            <p className="mt-2 break-words text-[10px] leading-5 text-slate-400 sm:text-xs">
-                              {activity.user_id
-                                ? userNames.get(
-                                    activity.user_id,
-                                  ) ??
-                                  "Utilisateur"
-                                : "Système"}
-                              {" · "}
-                              {formatDate(
-                                activity.created_at,
-                              )}
-                            </p>
-                          </div>
+                          <p className="mt-2 break-words text-[10px] leading-5 text-slate-400 sm:text-xs">
+                            {activity.user_id
+                              ? (userNames.get(activity.user_id) ??
+                                "Utilisateur")
+                              : "Système"}
+                            {" · "}
+                            {formatDate(activity.created_at)}
+                          </p>
                         </div>
-                      );
-                    },
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
           </div>
         </div>
       </div>
-    </main>
+    </PageFrame>
   );
 }
 
@@ -2201,110 +1584,70 @@ type StatCardProps = {
   className: string;
 };
 
-function StatCard({
-  label,
-  value,
-  description,
-  className,
-}: StatCardProps) {
+function StatCard({ label, value, description, className }: StatCardProps) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
         className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
-        {
-          label
-        }
+        {label}
       </span>
 
       <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
-        {
-          value
-        }
+        {value}
       </p>
 
       <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">
-        {
-          description
-        }
+        {description}
       </p>
     </div>
   );
 }
 
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-        {
-          label
-        }
+        {label}
       </p>
 
       <p className="mt-1 break-words text-sm font-semibold text-slate-700">
-        {
-          value
-        }
+        {value}
       </p>
     </div>
   );
 }
 
-function DocumentCounter({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
+function DocumentCounter({ label, value }: { label: string; value: number }) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3 sm:p-4">
       <p className="text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:text-2xl">
-        {value.toLocaleString(
-          "fr-FR",
-        )}
+        {value.toLocaleString("fr-FR")}
       </p>
 
       <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
-        {
-          label
-        }
+        {label}
       </p>
     </div>
   );
 }
 
 type TableContentProps = {
-  children:
-    React.ReactNode;
+  children: React.ReactNode;
 };
 
-function TableHeader({
-  children,
-}: TableContentProps) {
+function TableHeader({ children }: TableContentProps) {
   return (
     <th className="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-      {
-        children
-      }
+      {children}
     </th>
   );
 }
 
-function TableCell({
-  children,
-}: TableContentProps) {
+function TableCell({ children }: TableContentProps) {
   return (
     <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-700">
-      {
-        children
-      }
+      {children}
     </td>
   );
 }

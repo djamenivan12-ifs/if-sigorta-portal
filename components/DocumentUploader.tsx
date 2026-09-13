@@ -205,7 +205,7 @@ export default function DocumentUploader({
       </div>
 
       {!file ? (
-        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 px-4 py-8 text-center transition hover:border-[#0B5D3B] hover:bg-[#F3F8F2]">
+        <label className="mt-3 flex cursor-pointer focus-within:ring-4 focus-within:ring-[#0B5D3B]/30 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 px-4 py-8 text-center transition hover:border-[#0B5D3B] hover:bg-[#F3F8F2]">
           <span className="text-3xl">
             📄
           </span>
@@ -225,7 +225,7 @@ export default function DocumentUploader({
             onChange={
               handleFileChange
             }
-            className="hidden"
+            aria-label={label} className="sr-only"
           />
         </label>
       ) : (

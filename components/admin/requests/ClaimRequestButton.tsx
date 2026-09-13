@@ -1,196 +1,114 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useState } from "react";
 
 import Link from "next/link";
 
-import {
-  useRouter,
-} from "next/navigation";
+import { useRouter } from "next/navigation";
 
-type UserRole =
-  | "agent"
-  | "admin";
+type UserRole = "agent" | "admin";
 
 type ClaimRequestButtonProps = {
   requestId: string;
 
-  assignedAgentId:
-    | string
-    | null;
+  assignedAgentId: string | null;
 
-  assignedAgentName?:
-    | string
-    | null;
+  assignedAgentName?: string | null;
 
   currentUserId: string;
 
-  currentUserRole:
-    UserRole;
+  currentUserRole: UserRole;
 };
 
-export default function ClaimRequestButton({
+function ClaimRequestButtonContent({
   requestId,
   assignedAgentId,
   assignedAgentName,
   currentUserId,
   currentUserRole,
 }: ClaimRequestButtonProps) {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [
-    localAssignedAgentId,
-    setLocalAssignedAgentId,
-  ] =
-    useState<
-      string | null
-    >(
-      assignedAgentId,
-    );
+  const [localAssignedAgentId, setLocalAssignedAgentId] = useState<
+    string | null
+  >(assignedAgentId);
 
-  const [
-    localAssignedAgentName,
-    setLocalAssignedAgentName,
-  ] =
-    useState<
-      string | null
-    >(
-      assignedAgentName ??
-        null,
-    );
+  const [localAssignedAgentName, setLocalAssignedAgentName] = useState<
+    string | null
+  >(assignedAgentName ?? null);
 
-  const [
-    loading,
-    setLoading,
-  ] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] =
-    useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    setLocalAssignedAgentId(
-      assignedAgentId,
-    );
+  const alreadyMine = localAssignedAgentId === currentUserId;
 
-    setLocalAssignedAgentName(
-      assignedAgentName ??
-        null,
-    );
-  }, [
-    assignedAgentId,
-    assignedAgentName,
-  ]);
+  const assignedToSomeoneElse = Boolean(
+    localAssignedAgentId && localAssignedAgentId !== currentUserId,
+  );
 
-  const alreadyMine =
-    localAssignedAgentId ===
-    currentUserId;
-
-  const assignedToSomeoneElse =
-    Boolean(
-      localAssignedAgentId &&
-        localAssignedAgentId !==
-          currentUserId,
-    );
-
-  const isAvailable =
-    !localAssignedAgentId;
+  const isAvailable = !localAssignedAgentId;
 
   async function claimRequest() {
-    if (
-      loading ||
-      !isAvailable
-    ) {
+    if (loading || !isAvailable) {
       return;
     }
 
-    setLoading(
-      true,
-    );
+    setLoading(true);
 
-    setErrorMessage(
-      "",
-    );
+    setErrorMessage("");
 
     try {
-      const response =
-        await fetch(
-          `/api/admin/requests/${requestId}/claim`,
-          {
-            method:
-              "POST",
+      const response = await fetch(`/api/admin/requests/${requestId}/claim`, {
+        method: "POST",
 
-            cache:
-              "no-store",
-          },
+        cache: "no-store",
+      });
+
+      const result = (await response.json()) as {
+        success?: boolean;
+
+        alreadyClaimed?: boolean;
+
+        requestId?: string;
+
+        agentId?: string;
+
+        agentName?: string;
+
+        message?: string;
+
+        error?: string;
+      };
+
+      if (response.status === 409) {
+        setErrorMessage(
+          result.error ||
+            "Ce dossier vient d’être pris en charge ou a changé de statut.",
         );
-
-      const result =
-        (await response.json()) as {
-          success?: boolean;
-
-          alreadyClaimed?: boolean;
-
-          requestId?: string;
-
-          agentId?: string;
-
-          agentName?: string;
-
-          message?: string;
-
-          error?: string;
-        };
-
-      if (
-        response.status ===
-        409
-      ) {
         router.refresh();
-
         return;
       }
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
+      if (!response.ok || !result.success) {
         throw new Error(
-          result.error ||
-            "La prise en charge du dossier a échoué.",
+          result.error || "La prise en charge du dossier a échoué.",
         );
       }
 
-      setLocalAssignedAgentId(
-        result.agentId ??
-          currentUserId,
-      );
+      setLocalAssignedAgentId(result.agentId ?? currentUserId);
 
-      setLocalAssignedAgentName(
-        result.agentName ??
-          "Vous",
-      );
+      setLocalAssignedAgentName(result.agentName ?? "Vous");
 
       router.refresh();
-    } catch (
-      error
-    ) {
+    } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
           : "Une erreur inattendue est survenue.",
       );
     } finally {
-      setLoading(
-        false,
-      );
+      setLoading(false);
     }
   }
 
@@ -205,13 +123,8 @@ export default function ClaimRequestButton({
     );
   }
 
-  if (
-    assignedToSomeoneElse
-  ) {
-    if (
-      currentUserRole ===
-      "admin"
-    ) {
+  if (assignedToSomeoneElse) {
+    if (currentUserRole === "admin") {
       return (
         <div className="space-y-2">
           <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-center">
@@ -220,8 +133,7 @@ export default function ClaimRequestButton({
             </p>
 
             <p className="mt-1 text-sm font-semibold text-[#0B5D3B]">
-              {localAssignedAgentName ||
-                "Agent"}
+              {localAssignedAgentName || "Agent"}
             </p>
           </div>
 
@@ -246,24 +158,33 @@ export default function ClaimRequestButton({
     <div>
       <button
         type="button"
-        onClick={
-          claimRequest
-        }
-        disabled={
-          loading
-        }
+        onClick={claimRequest}
+        disabled={loading}
         className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading
-          ? "Prise en charge..."
-          : "Prendre en charge"}
+        {loading ? "Prise en charge..." : "Prendre en charge"}
       </button>
 
       {errorMessage && (
-        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div
+          role="alert"
+          className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        >
           {errorMessage}
         </div>
       )}
     </div>
+  );
+}
+export default function ClaimRequestButton(props: ClaimRequestButtonProps) {
+  return (
+    <ClaimRequestButtonContent
+      key={[
+        props.requestId,
+        props.assignedAgentId,
+        props.assignedAgentName,
+      ].join(":")}
+      {...props}
+    />
   );
 }

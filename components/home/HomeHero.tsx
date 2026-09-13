@@ -1,4 +1,7 @@
 "use client";
+import Image from "next/image";
+
+import { useLanguage } from "@/lib/useLanguage";
 
 import Link from "next/link";
 
@@ -8,15 +11,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import {
-  useEffect,
-  useState,
-} from "react";
 
-type Language =
-  | "fr"
-  | "en"
-  | "tr";
+
+
 
 const content = {
   fr: {
@@ -117,56 +114,10 @@ const content = {
 };
 
 export default function HomeHero() {
-  const [
-    language,
-    setLanguage,
-  ] =
-    useState<Language>(
-      "fr",
-    );
+  const [language] =
+    useLanguage();
 
-  useEffect(() => {
-    const saved =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      saved === "fr" ||
-      saved === "en" ||
-      saved === "tr"
-    ) {
-      setLanguage(
-        saved,
-      );
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language:
-            Language;
-        }>;
-
-      setLanguage(
-        customEvent.detail.language,
-      );
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   const t =
     content[
@@ -174,19 +125,19 @@ export default function HomeHero() {
     ];
 
   return (
-    <section className="bg-white px-4 pb-8 pt-4 sm:px-6 sm:pb-10 lg:px-8">
-      <div className="relative mx-auto min-h-[680px] max-w-[1600px] overflow-hidden rounded-[2rem] sm:min-h-[720px] lg:min-h-[760px]">
+    <section className="bg-white px-4 pb-4 pt-4 sm:px-6 sm:pb-6 lg:px-8">
+      <div className="relative mx-auto min-h-[640px] max-w-[1600px] overflow-hidden rounded-[2rem] sm:min-h-[680px] lg:min-h-[700px]">
         {/* PHOTO */}
 
-        <img
+        <Image fill sizes="100vw" preload
           src="/if-sigorta-hero.jpeg"
           alt="Client IF Sigorta en Turquie"
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-[62%_center] lg:object-center"
         />
 
         {/* DEGRADE GAUCHE UNIQUEMENT */}
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#062F22]/80 via-[#062F22]/38 via-45% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#062F22]/95 via-[#062F22]/65 to-[#062F22]/25 lg:from-[#062F22]/90 lg:via-[#062F22]/50 lg:via-45% lg:to-transparent" />
 
         {/* PETIT DEGRADE HAUT/BAS */}
 
@@ -194,12 +145,12 @@ export default function HomeHero() {
 
         {/* CONTENU */}
 
-        <div className="relative z-20 flex min-h-[680px] items-end px-6 pb-10 pt-32 sm:min-h-[720px] sm:px-8 sm:pb-14 sm:pt-36 lg:min-h-[760px] lg:items-center lg:px-12 lg:pb-0 lg:pt-28 xl:px-14">
-          <div className="max-w-3xl">
+        <div className="relative z-20 flex min-h-[640px] items-end px-6 pb-10 pt-32 sm:min-h-[680px] sm:px-8 sm:pb-14 sm:pt-36 lg:min-h-[700px] lg:items-center lg:px-12 lg:pb-12 lg:pt-32 xl:px-14">
+          <div className="w-full max-w-xl">
             {/* BADGE */}
 
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-black uppercase tracking-[0.08em] text-white/85 backdrop-blur-md sm:text-sm">
-              <ShieldCheck className="h-4 w-4 text-[#B8E83D]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-white/85 backdrop-blur-md sm:text-xs">
+              <ShieldCheck className="h-4 w-4 shrink-0 text-[#B8E83D]" />
 
               {
                 t.badge
@@ -208,7 +159,7 @@ export default function HomeHero() {
 
             {/* TITRE */}
 
-            <h1 className="mt-6 max-w-[710px] text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-white sm:text-[2.65rem] lg:text-[3.05rem] xl:text-[3.35rem]">
+            <h1 className="mt-6 max-w-[710px] text-[2.25rem] font-semibold leading-[1.02] tracking-[-0.035em] text-white sm:text-[2.65rem] lg:text-[3.05rem] xl:text-[3.35rem]">
   {t.title1}
 
   <span className="block">
@@ -222,7 +173,7 @@ export default function HomeHero() {
 
             {/* DESCRIPTION */}
 
-            <p className="mt-6 max-w-2xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+            <p className="mt-6 max-w-[490px] text-base leading-7 text-white/90 sm:text-lg sm:leading-8">
               {
                 t.description
               }
@@ -290,7 +241,7 @@ function TrustItem({
 }) {
   return (
     <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
-      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#B8E83D] text-[#15311F]">
+      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 text-white">
         <CheckCircle2 className="h-3.5 w-3.5" />
       </div>
 

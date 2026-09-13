@@ -1,3 +1,5 @@
+
+import { normalizeActivityAction } from "@/lib/activity/normalizeAction";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export type NotificationLevel =
@@ -69,7 +71,7 @@ const ACTIVE_REQUEST_STATUSES = [
   "policy_preparation",
 ];
 
-const PROGRESS_ACTIONS = [
+const PROGRESS_ACTIONS = ["policy_whatsapp_sent","partner_policy_whatsapp_sent",
   "request_created",
   "payment_uploaded",
   "payment_confirmed",
@@ -464,7 +466,7 @@ export async function getNotificationSummary({
         }
 
         if (
-          activity.action ===
+          normalizeActivityAction(activity.action) ===
           "whatsapp_sent"
         ) {
           completedRequests.add(

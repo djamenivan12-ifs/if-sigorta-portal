@@ -1,3 +1,8 @@
+import { readAll } from "@/lib/supabase/readAll";
+import { paginate } from "@/lib/admin/pagination";
+import { ListPagination } from "@/components/admin/pages/ListTools";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { listAllUsers } from "@/lib/supabase/listAllUsers";
 import Link from "next/link";
 
 import {
@@ -13,10 +18,10 @@ import {
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
-const BUCKET_NAME =
-  "insurance-documents";
+const BUCKET_NAME = "insurance-documents";
 
 type SearchParams = Promise<{
+  page?: string;
   status?: string;
   q?: string;
 }>;
@@ -40,29 +45,19 @@ type RequestRow = {
   id: string;
   request_code: string;
 
-  status:
-    | "policy_preparation"
-    | "policy_available";
+  status: "policy_preparation" | "policy_available";
 
-  assigned_agent_id:
-    | string
-    | null;
+  assigned_agent_id: string | null;
 
-  insurance_duration_years:
-    number;
+  insurance_duration_years: number;
 
-  policy_start_date:
-    | string
-    | null;
+  policy_start_date: string | null;
 
-  policy_end_date:
-    | string
-    | null;
+  policy_end_date: string | null;
 
   created_at: string;
 
-  client:
-    ClientRelation;
+  client: ClientRelation;
 };
 
 type PolicyRow = {
@@ -86,199 +81,96 @@ type PolicyView = {
   requestId: string;
   requestCode: string;
 
-  status:
-    | "policy_preparation"
-    | "policy_available";
+  status: "policy_preparation" | "policy_available";
 
   clientName: string;
   whatsapp: string;
 
   durationYears: number;
 
-  startDate:
-    | string
-    | null;
+  startDate: string | null;
 
-  endDate:
-    | string
-    | null;
+  endDate: string | null;
 
-  assignedAgentId:
-    | string
-    | null;
+  assignedAgentId: string | null;
 
-  assignedAgentName:
-    | string
-    | null;
+  assignedAgentName: string | null;
 
-  policies:
-    PolicyFile[];
+  policies: PolicyFile[];
 };
 
-function unwrapClient(
-  relation:
-    ClientRelation,
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0] ??
-      null
-    );
+function unwrapClient(relation: ClientRelation) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
 
   return relation;
 }
 
-function normalize(
-  value:
-    | string
-    | null
-    | undefined,
-) {
-  return (
-    value ??
-    ""
-  )
-    .trim()
-    .toLocaleLowerCase(
-      "fr-FR",
-    );
+function normalize(value: string | null | undefined) {
+  return (value ?? "").trim().toLocaleLowerCase("fr-FR");
 }
 
-function formatDate(
-  value:
-    string | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(
-      `${value}T00:00:00`,
-    );
+  const date = new Date(`${value}T00:00:00`);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "long",
-    },
-  ).format(
-    date,
-  );
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+  }).format(date);
 }
 
 async function getAgents() {
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
-  const {
-    data,
-    error,
-  } =
-    await serviceClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 200,
-    });
+  const { data, error } = await listAllUsers(serviceClient);
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
   return data.users
-    .filter(
-      (
-        user,
-      ) => {
-        const role =
-          user.app_metadata
-            ?.role;
+    .filter((user) => {
+      const role = user.app_metadata?.role;
 
-        return (
-          role ===
-            "agent" ||
-          role ===
-            "admin"
-        );
-      },
-    )
-    .map(
-      (
-        user,
-      ): AgentOption => {
-        const firstName =
-          user.user_metadata
-            ?.first_name
-            ?.toString()
-            .trim() ??
-          "";
+      return role === "agent" || role === "admin";
+    })
+    .map((user): AgentOption => {
+      const firstName = user.user_metadata?.first_name?.toString().trim() ?? "";
 
-        const lastName =
-          user.user_metadata
-            ?.last_name
-            ?.toString()
-            .trim() ??
-          "";
+      const lastName = user.user_metadata?.last_name?.toString().trim() ?? "";
 
-        const fullName =
-          `${firstName} ${lastName}`.trim();
+      const fullName = `${firstName} ${lastName}`.trim();
 
-        return {
-          id:
-            user.id,
+      return {
+        id: user.id,
 
-          name:
-            fullName ||
-            user.email ||
-            "Agent",
-        };
-      },
-    );
+        name: fullName || user.email || "Agent",
+      };
+    });
 }
 
 export default async function PoliciesPage({
   searchParams,
 }: {
-  searchParams:
-    SearchParams;
+  searchParams: SearchParams;
 }) {
-  const {
-    user,
-    role,
-  } =
-    await requireRole([
-      "admin",
-      "agent",
-    ]);
+  const { user, role } = await requireRole(["admin", "agent"]);
 
-  const params =
-    await searchParams;
+  const params = await searchParams;
 
-  const statusFilter =
-    params.status?.trim() ??
-    "";
+  const statusFilter = params.status?.trim() ?? "";
 
-  const search =
-    params.q?.trim() ??
-    "";
+  const search = params.q?.trim() ?? "";
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
   /*
    * ============================
@@ -286,13 +178,10 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  let requestsQuery =
-    serviceClient
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
+  let requestsQuery = serviceClient
+    .from("insurance_requests")
+    .select(
+      `
           id,
           request_code,
           status,
@@ -309,56 +198,27 @@ export default async function PoliciesPage({
             whatsapp_number
           )
         `,
-      )
-      .in(
-        "status",
-        [
-          "policy_preparation",
-          "policy_available",
-        ],
-      )
-      .order(
-        "created_at",
-        {
-          ascending:
-            false,
-        },
-      );
+    )
+    .in("status", ["policy_preparation", "policy_available"])
+    .order("created_at", {
+      ascending: false,
+    });
 
   /*
    * Un agent ne voit que
    * les dossiers qui lui sont attribués.
    */
-  if (
-    role ===
-    "agent"
-  ) {
-    requestsQuery =
-      requestsQuery.eq(
-        "assigned_agent_id",
-        user.id,
-      );
+  if (role === "agent") {
+    requestsQuery = requestsQuery.eq("assigned_agent_id", user.id);
   }
 
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await requestsQuery;
+  const { data: requestsData, error: requestsError } = await requestsQuery;
 
-  if (
-    requestsError
-  ) {
-    throw new Error(
-      requestsError.message,
-    );
+  if (requestsError) {
+    throw new Error(requestsError.message);
   }
 
-  let requests =
-    (
-      requestsData ??
-      []
-    ) as unknown as RequestRow[];
+  let requests = (requestsData ?? []) as unknown as RequestRow[];
 
   /*
    * ============================
@@ -366,32 +226,16 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  if (
-    statusFilter ===
-    "preparation"
-  ) {
-    requests =
-      requests.filter(
-        (
-          request,
-        ) =>
-          request.status ===
-          "policy_preparation",
-      );
+  if (statusFilter === "preparation") {
+    requests = requests.filter(
+      (request) => request.status === "policy_preparation",
+    );
   }
 
-  if (
-    statusFilter ===
-    "available"
-  ) {
-    requests =
-      requests.filter(
-        (
-          request,
-        ) =>
-          request.status ===
-          "policy_available",
-      );
+  if (statusFilter === "available") {
+    requests = requests.filter(
+      (request) => request.status === "policy_available",
+    );
   }
 
   /*
@@ -401,59 +245,28 @@ export default async function PoliciesPage({
    */
 
   if (search) {
-    const normalizedSearch =
-      normalize(
-        search,
+    const normalizedSearch = normalize(search);
+
+    requests = requests.filter((request) => {
+      const client = unwrapClient(request.client);
+
+      const clientName = client
+        ? `${client.first_name} ${client.last_name}`.trim()
+        : "";
+
+      const whatsapp = client
+        ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
+        : "";
+
+      return (
+        normalize(request.request_code).includes(normalizedSearch) ||
+        normalize(clientName).includes(normalizedSearch) ||
+        normalize(whatsapp).includes(normalizedSearch)
       );
-
-    requests =
-      requests.filter(
-        (
-          request,
-        ) => {
-          const client =
-            unwrapClient(
-              request.client,
-            );
-
-          const clientName =
-            client
-              ? `${client.first_name} ${client.last_name}`.trim()
-              : "";
-
-          const whatsapp =
-            client
-              ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
-              : "";
-
-          return (
-            normalize(
-              request.request_code,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            normalize(
-              clientName,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            normalize(
-              whatsapp,
-            ).includes(
-              normalizedSearch,
-            )
-          );
-        },
-      );
+    });
   }
 
-  const requestIds =
-    requests.map(
-      (
-        request,
-      ) =>
-        request.id,
-    );
+  const requestIds = requests.map((request) => request.id);
 
   /*
    * ============================
@@ -461,22 +274,12 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  let policyRows:
-    PolicyRow[] =
-    [];
+  let policyRows: PolicyRow[] = [];
 
-  if (
-    requestIds.length >
-    0
-  ) {
-    const {
-      data: policiesData,
-      error: policiesError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_policies",
-        )
+  if (requestIds.length > 0) {
+    const { data: policiesData, error: policiesError } = await readAll(
+      serviceClient
+        .from("insurance_policies")
         .select(
           `
             request_id,
@@ -484,31 +287,18 @@ export default async function PoliciesPage({
             storage_path
           `,
         )
-        .in(
-          "request_id",
-          requestIds,
-        )
-        .order(
-          "policy_year",
-          {
-            ascending:
-              true,
-          },
-        );
+        .in("request_id", requestIds)
+        .order("policy_year", {
+          ascending: true,
+        })
+        .order("id"),
+    );
 
-    if (
-      policiesError
-    ) {
-      throw new Error(
-        policiesError.message,
-      );
+    if (policiesError) {
+      throw new Error(policiesError.message);
     }
 
-    policyRows =
-      (
-        policiesData ??
-        []
-      ) as PolicyRow[];
+    policyRows = (policiesData ?? []) as PolicyRow[];
   }
 
   /*
@@ -517,37 +307,19 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  const policiesWithUrls =
-    await Promise.all(
-      policyRows.map(
-        async (
-          policy,
-        ) => {
-          const {
-            data,
-            error,
-          } =
-            await serviceClient.storage
-              .from(
-                BUCKET_NAME,
-              )
-              .createSignedUrl(
-                policy.storage_path,
-                60 * 10,
-              );
+  const policiesWithUrls = await Promise.all(
+    policyRows.map(async (policy) => {
+      const { data, error } = await serviceClient.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(policy.storage_path, 60 * 10);
 
-          return {
-            ...policy,
+      return {
+        ...policy,
 
-            signedUrl:
-              error ||
-              !data
-                ? null
-                : data.signedUrl,
-          };
-        },
-      ),
-    );
+        signedUrl: error || !data ? null : data.signedUrl,
+      };
+    }),
+  );
 
   /*
    * ============================
@@ -555,20 +327,9 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  const agents =
-    await getAgents();
+  const agents = await getAgents();
 
-  const agentNames =
-    new Map(
-      agents.map(
-        (
-          agent,
-        ) => [
-          agent.id,
-          agent.name,
-        ],
-      ),
-    );
+  const agentNames = new Map(agents.map((agent) => [agent.id, agent.name]));
 
   /*
    * ============================
@@ -576,92 +337,53 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  const policies:
-    PolicyView[] =
-    requests.map(
-      (
-        request,
-      ) => {
-        const client =
-          unwrapClient(
-            request.client,
-          );
+  const policies: PolicyView[] = requests.map((request) => {
+    const client = unwrapClient(request.client);
 
-        const clientName =
-          client
-            ? `${client.first_name} ${client.last_name}`.trim()
-            : "Client inconnu";
+    const clientName = client
+      ? `${client.first_name} ${client.last_name}`.trim()
+      : "Client inconnu";
 
-        const whatsapp =
-          client
-            ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
-            : "";
+    const whatsapp = client
+      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
+      : "";
 
-        const requestPolicies =
-          policiesWithUrls
-            .filter(
-              (
-                policy,
-              ) =>
-                policy.request_id ===
-                request.id,
-            )
-            .map(
-              (
-                policy,
-              ) => ({
-                year:
-                  Number(
-                    policy.policy_year,
-                  ),
+    const requestPolicies = policiesWithUrls
+      .filter((policy) => policy.request_id === request.id)
+      .map((policy) => ({
+        year: Number(policy.policy_year),
 
-                storagePath:
-                  policy.storage_path,
+        storagePath: policy.storage_path,
 
-                signedUrl:
-                  policy.signedUrl,
-              }),
-            );
+        signedUrl: policy.signedUrl,
+      }));
 
-        return {
-          requestId:
-            request.id,
+    return {
+      requestId: request.id,
 
-          requestCode:
-            request.request_code,
+      requestCode: request.request_code,
 
-          status:
-            request.status,
+      status: request.status,
 
-          clientName,
+      clientName,
 
-          whatsapp,
+      whatsapp,
 
-          durationYears:
-            request.insurance_duration_years,
+      durationYears: request.insurance_duration_years,
 
-          startDate:
-            request.policy_start_date,
+      startDate: request.policy_start_date,
 
-          endDate:
-            request.policy_end_date,
+      endDate: request.policy_end_date,
 
-          assignedAgentId:
-            request.assigned_agent_id,
+      assignedAgentId: request.assigned_agent_id,
 
-          assignedAgentName:
-            request.assigned_agent_id
-              ? agentNames.get(
-                  request.assigned_agent_id,
-                ) ??
-                "Agent"
-              : null,
+      assignedAgentName: request.assigned_agent_id
+        ? (agentNames.get(request.assigned_agent_id) ?? "Agent")
+        : null,
 
-          policies:
-            requestPolicies,
-        };
-      },
-    );
+      policies: requestPolicies,
+    };
+  });
 
   /*
    * ============================
@@ -669,44 +391,30 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  const preparationCount =
-    policies.filter(
-      (
-        item,
-      ) =>
-        item.status ===
-        "policy_preparation",
-    ).length;
+  const preparationCount = policies.filter(
+    (item) => item.status === "policy_preparation",
+  ).length;
 
-  const availableCount =
-    policies.filter(
-      (
-        item,
-      ) =>
-        item.status ===
-        "policy_available",
-    ).length;
+  const availableCount = policies.filter(
+    (item) => item.status === "policy_available",
+  ).length;
 
-  const oneYearCount =
-    policies.filter(
-      (
-        item,
-      ) =>
-        item.durationYears ===
-        1,
-    ).length;
+  const oneYearCount = policies.filter(
+    (item) => item.durationYears === 1,
+  ).length;
 
-  const twoYearCount =
-    policies.filter(
-      (
-        item,
-      ) =>
-        item.durationYears ===
-        2,
-    ).length;
+  const twoYearCount = policies.filter(
+    (item) => item.durationYears === 2,
+  ).length;
 
+  const listing = paginate(policies, params.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Polices"
+      href="/admin/polices"
+      detail={false}
+      sections={[{ id: "section-1", label: "Liste des polices" }]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
@@ -722,7 +430,8 @@ export default async function PoliciesPage({
               </h1>
 
               <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
-                Suivez les polices en préparation et les assurances déjà disponibles.
+                Suivez les polices en préparation et les assurances déjà
+                disponibles.
               </p>
             </div>
 
@@ -740,36 +449,28 @@ export default async function PoliciesPage({
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
           <StatCard
             label="À préparer"
-            value={
-              preparationCount
-            }
+            value={preparationCount}
             description="Polices en cours"
             className="bg-amber-50 text-amber-700"
           />
 
           <StatCard
             label="Disponibles"
-            value={
-              availableCount
-            }
+            value={availableCount}
             description="Assurances terminées"
             className="bg-[#EEF6EC] text-[#0B5D3B]"
           />
 
           <StatCard
             label="1 an"
-            value={
-              oneYearCount
-            }
+            value={oneYearCount}
             description="Demandes d’un an"
             className="bg-[#F3F8F2] text-[#31513B]"
           />
 
           <StatCard
             label="2 ans"
-            value={
-              twoYearCount
-            }
+            value={twoYearCount}
             description="Demandes de deux ans"
             className="bg-amber-50 text-amber-700"
           />
@@ -782,35 +483,33 @@ export default async function PoliciesPage({
             method="GET"
             className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]"
           >
-            <input
-              type="search"
-              name="q"
-              defaultValue={
-                search
-              }
-              placeholder="Client, code dossier ou WhatsApp..."
-              className="min-h-11 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
-            />
+            <label className="admin-filter-field">
+              Rechercher
+              <input
+                type="search"
+                name="q"
+                defaultValue={search}
+                placeholder="Client, code dossier ou WhatsApp..."
+                className="min-h-11 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                aria-label="Rechercher"
+              />
+            </label>
 
-            <select
-              name="status"
-              defaultValue={
-                statusFilter
-              }
-              className="min-h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
-            >
-              <option value="">
-                Toutes les polices
-              </option>
+            <label className="admin-filter-field">
+              Statut
+              <select
+                name="status"
+                defaultValue={statusFilter}
+                className="min-h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                aria-label="Statut"
+              >
+                <option value="">Toutes les polices</option>
 
-              <option value="preparation">
-                À préparer
-              </option>
+                <option value="preparation">À préparer</option>
 
-              <option value="available">
-                Disponibles
-              </option>
-            </select>
+                <option value="available">Disponibles</option>
+              </select>
+            </label>
 
             <button
               type="submit"
@@ -832,24 +531,20 @@ export default async function PoliciesPage({
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 p-4 sm:p-6">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
               Liste des polices
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              {policies.length.toLocaleString(
-                "fr-FR",
-              )}{" "}
-              dossier
-              {policies.length !==
-              1
-                ? "s"
-                : ""}
+              {policies.length.toLocaleString("fr-FR")} dossier
+              {policies.length !== 1 ? "s" : ""}
             </p>
           </div>
 
-          {policies.length ===
-          0 ? (
+          {policies.length === 0 ? (
             <div className="p-8 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucune police trouvée
@@ -858,7 +553,7 @@ export default async function PoliciesPage({
           ) : (
             <>
               <div className="divide-y divide-slate-100 lg:hidden">
-                {policies.map((item) => {
+                {listing.rows.map((item) => {
                   const year1 = item.policies.find(
                     (policy) => policy.year === 1,
                   );
@@ -1023,235 +718,178 @@ export default async function PoliciesPage({
               </div>
 
               <div className="hidden lg:block">
-            <TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1500px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      Client
-                    </TableHead>
+                <TableContainer className="rounded-none border-0 shadow-none">
+                  <Table className="min-w-[1500px]" aria-label="Polices">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Client</TableHead>
 
-                    <TableHead>
-                      Dossier
-                    </TableHead>
+                        <TableHead>Dossier</TableHead>
 
-                    <TableHead>
-                      Responsable
-                    </TableHead>
+                        <TableHead>Responsable</TableHead>
 
-                    <TableHead>
-                      Durée
-                    </TableHead>
+                        <TableHead>Durée</TableHead>
 
-                    <TableHead>
-                      Début
-                    </TableHead>
+                        <TableHead>Début</TableHead>
 
-                    <TableHead>
-                      Fin
-                    </TableHead>
+                        <TableHead>Fin</TableHead>
 
-                    <TableHead>
-                      Année 1
-                    </TableHead>
+                        <TableHead>Année 1</TableHead>
 
-                    <TableHead>
-                      Année 2
-                    </TableHead>
+                        <TableHead>Année 2</TableHead>
 
-                    <TableHead>
-                      Statut
-                    </TableHead>
+                        <TableHead>Statut</TableHead>
 
-                    <TableHead className="text-right">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                <TableBody>
-                  {policies.map(
-                    (
-                      item,
-                    ) => {
-                      const year1 =
-                        item.policies.find(
-                          (
-                            policy,
-                          ) =>
-                            policy.year ===
-                            1,
+                    <TableBody>
+                      {listing.rows.map((item) => {
+                        const year1 = item.policies.find(
+                          (policy) => policy.year === 1,
                         );
 
-                      const year2 =
-                        item.policies.find(
-                          (
-                            policy,
-                          ) =>
-                            policy.year ===
-                            2,
+                        const year2 = item.policies.find(
+                          (policy) => policy.year === 2,
                         );
 
-                      return (
-                        <TableRow
-                          key={
-                            item.requestId
-                          }
-                        >
-                          <TableCell>
-                            <div className="min-w-[190px]">
-                              <p className="font-semibold text-slate-900">
-                                {
-                                  item.clientName
-                                }
-                              </p>
+                        return (
+                          <TableRow key={item.requestId}>
+                            <TableCell>
+                              <div className="min-w-[190px]">
+                                <p className="font-semibold text-slate-900">
+                                  {item.clientName}
+                                </p>
 
-                              {item.whatsapp && (
-                                <a
-                                  href={`https://wa.me/${item.whatsapp.replace(/\D/g, "")}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="mt-1 block text-xs font-medium text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
-                                >
-                                  {
-                                    item.whatsapp
-                                  }
-                                </a>
+                                {item.whatsapp && (
+                                  <a
+                                    href={`https://wa.me/${item.whatsapp.replace(/\D/g, "")}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-1 block text-xs font-medium text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                  >
+                                    {item.whatsapp}
+                                  </a>
+                                )}
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              <Link
+                                href={`/admin/dossiers/${item.requestId}`}
+                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                              >
+                                {item.requestCode}
+                              </Link>
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {item.assignedAgentName ?? "Non attribué"}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {item.durationYears} an
+                              {item.durationYears === 2 ? "s" : ""}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(item.startDate)}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(item.endDate)}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {year1 ? (
+                                year1.signedUrl ? (
+                                  <a
+                                    href={year1.signedUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                                  >
+                                    Ouvrir PDF
+                                  </a>
+                                ) : (
+                                  <span className="text-xs font-semibold text-[#0B5D3B]">
+                                    Enregistrée
+                                  </span>
+                                )
+                              ) : (
+                                <span className="text-xs font-semibold text-slate-400">
+                                  Manquante
+                                </span>
                               )}
-                            </div>
-                          </TableCell>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <Link
-                              href={`/admin/dossiers/${item.requestId}`}
-                              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
-                            >
-                              {
-                                item.requestCode
-                              }
-                            </Link>
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {item.assignedAgentName ??
-                              "Non attribué"}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {
-                              item.durationYears
-                            }{" "}
-                            an
-                            {item.durationYears ===
-                            2
-                              ? "s"
-                              : ""}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(
-                              item.startDate,
-                            )}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(
-                              item.endDate,
-                            )}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {year1 ? (
-                              year1.signedUrl ? (
-                                <a
-                                  href={
-                                    year1.signedUrl
-                                  }
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
-                                >
-                                  Ouvrir PDF
-                                </a>
+                            <TableCell className="whitespace-nowrap">
+                              {item.durationYears === 1 ? (
+                                <span className="text-slate-400">—</span>
+                              ) : year2 ? (
+                                year2.signedUrl ? (
+                                  <a
+                                    href={year2.signedUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                                  >
+                                    Ouvrir PDF
+                                  </a>
+                                ) : (
+                                  <span className="text-xs font-semibold text-[#0B5D3B]">
+                                    Enregistrée
+                                  </span>
+                                )
                               ) : (
-                                <span className="text-xs font-semibold text-[#0B5D3B]">
-                                  Enregistrée
+                                <span className="text-xs font-semibold text-slate-400">
+                                  Manquante
                                 </span>
-                              )
-                            ) : (
-                              <span className="text-xs font-semibold text-slate-400">
-                                Manquante
-                              </span>
-                            )}
-                          </TableCell>
+                              )}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {item.durationYears ===
-                            1 ? (
-                              <span className="text-slate-400">
-                                —
-                              </span>
-                            ) : year2 ? (
-                              year2.signedUrl ? (
-                                <a
-                                  href={
-                                    year2.signedUrl
-                                  }
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
-                                >
-                                  Ouvrir PDF
-                                </a>
+                            <TableCell className="whitespace-nowrap">
+                              {item.status === "policy_available" ? (
+                                <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
+                                  Disponible
+                                </span>
                               ) : (
-                                <span className="text-xs font-semibold text-[#0B5D3B]">
-                                  Enregistrée
+                                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                                  En préparation
                                 </span>
-                              )
-                            ) : (
-                              <span className="text-xs font-semibold text-slate-400">
-                                Manquante
-                              </span>
-                            )}
-                          </TableCell>
+                              )}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {item.status ===
-                            "policy_available" ? (
-                              <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
-                                Disponible
-                              </span>
-                            ) : (
-                              <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-                                En préparation
-                              </span>
-                            )}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap text-right">
-                            <Link
-                              href={`/admin/dossiers/${item.requestId}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
-                            >
-                              {item.status ===
-                              "policy_preparation"
-                                ? "Préparer"
-                                : "Ouvrir"}
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                            <TableCell className="whitespace-nowrap text-right">
+                              <Link
+                                href={`/admin/dossiers/${item.requestId}`}
+                                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                              >
+                                {item.status === "policy_preparation"
+                                  ? "Préparer"
+                                  : "Ouvrir"}
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </div>
             </>
           )}
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/polices"
+          params={params}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }
 
@@ -1262,33 +900,20 @@ type StatCardProps = {
   className: string;
 };
 
-function StatCard({
-  label,
-  value,
-  description,
-  className,
-}: StatCardProps) {
+function StatCard({ label, value, description, className }: StatCardProps) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
         className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
-        {
-          label
-        }
+        {label}
       </span>
 
       <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
-        {value.toLocaleString(
-          "fr-FR",
-        )}
+        {value.toLocaleString("fr-FR")}
       </p>
 
-      <p className="mt-1 text-xs text-slate-500">
-        {
-          description
-        }
-      </p>
+      <p className="mt-1 text-xs text-slate-500">{description}</p>
     </div>
   );
 }

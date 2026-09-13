@@ -1,3 +1,7 @@
+import { readAll } from "@/lib/supabase/readAll";
+import { paginate } from "@/lib/admin/pagination";
+import { ListPagination } from "@/components/admin/pages/ListTools";
+import PageFrame from "@/components/admin/pages/PageFrame";
 import Link from "next/link";
 
 import {
@@ -14,6 +18,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
 type SearchParams = Promise<{
+  page?: string;
   q?: string;
   nationality?: string;
 }>;
@@ -66,166 +71,93 @@ const statusLabels: Record<
 > = {
   draft: {
     label: "Brouillon",
-    className:
-      "bg-slate-100 text-slate-700",
+    className: "bg-slate-100 text-slate-700",
   },
 
   waiting_payment: {
     label: "Paiement attendu",
-    className:
-      "bg-amber-100 text-amber-800",
+    className: "bg-amber-100 text-amber-800",
   },
 
   payment_review: {
     label: "Paiement à vérifier",
-    className:
-      "bg-orange-100 text-orange-800",
+    className: "bg-orange-100 text-orange-800",
   },
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
-    className:
-      "border border-amber-200 bg-amber-50 text-amber-700",
+    className: "border border-amber-200 bg-amber-50 text-amber-700",
   },
 
   policy_available: {
     label: "Assurance disponible",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   payment_rejected: {
     label: "Paiement refusé",
-    className:
-      "bg-red-100 text-red-800",
+    className: "bg-red-100 text-red-800",
   },
 
   cancelled: {
     label: "Dossier annulé",
-    className:
-      "bg-slate-200 text-slate-700",
+    className: "bg-slate-200 text-slate-700",
   },
 };
 
-function normalize(
-  value:
-    | string
-    | null
-    | undefined,
-) {
-  return (
-    value ??
-    ""
-  )
-    .trim()
-    .toLocaleLowerCase(
-      "fr-FR",
-    );
+function normalize(value: string | null | undefined) {
+  return (value ?? "").trim().toLocaleLowerCase("fr-FR");
 }
 
-function normalizePhone(
-  value:
-    | string
-    | null
-    | undefined,
-) {
-  return (
-    value ??
-    ""
-  ).replace(
-    /\D/g,
-    "",
-  );
+function normalizePhone(value: string | null | undefined) {
+  return (value ?? "").replace(/\D/g, "");
 }
 
-function formatDate(
-  value:
-    | string
-    | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "medium",
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
 
-      timeStyle:
-        "short",
+    timeStyle: "short",
 
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function formatMoney(
-  value:
-    | number
-    | string
-    | null
-    | undefined,
-) {
-  return `${Number(
-    value ??
-      0,
-  ).toLocaleString(
-    "fr-FR",
-    {
-      maximumFractionDigits:
-        2,
-    },
-  )} TL`;
+function formatMoney(value: number | string | null | undefined) {
+  return `${Number(value ?? 0).toLocaleString("fr-FR", {
+    maximumFractionDigits: 2,
+  })} TL`;
 }
 
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams:
-    SearchParams;
+  searchParams: SearchParams;
 }) {
-  const {
-    user,
-    role,
-  } =
-    await requireRole([
-      "admin",
-      "agent",
-    ]);
+  const { user, role } = await requireRole(["admin", "agent"]);
 
-  const params =
-    await searchParams;
+  const params = await searchParams;
 
-  const search =
-    params.q?.trim() ??
-    "";
+  const search = params.q?.trim() ?? "";
 
-  const nationalityFilter =
-    params.nationality?.trim() ??
-    "";
+  const nationalityFilter = params.nationality?.trim() ?? "";
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
   /*
    * ============================
@@ -233,14 +165,9 @@ export default async function ClientsPage({
    * ============================
    */
 
-  const {
-    data: clientsData,
-    error: clientsError,
-  } =
-    await serviceClient
-      .from(
-        "clients",
-      )
+  const { data: clientsData, error: clientsError } = await readAll(
+    serviceClient
+      .from("clients")
       .select(
         `
           id,
@@ -251,32 +178,20 @@ export default async function ClientsPage({
           whatsapp_number
         `,
       )
-      .order(
-        "last_name",
-        {
-          ascending:
-            true,
-        },
-      )
-      .order(
-        "first_name",
-        {
-          ascending:
-            true,
-        },
-      );
+      .order("last_name", {
+        ascending: true,
+      })
+      .order("first_name", {
+        ascending: true,
+      })
+      .order("id"),
+  );
 
-  if (
-    clientsError
-  ) {
-    throw new Error(
-      clientsError.message,
-    );
+  if (clientsError) {
+    throw new Error(clientsError.message);
   }
 
-  const clients =
-    (clientsData ??
-      []) as ClientRow[];
+  const clients = (clientsData ?? []) as ClientRow[];
 
   /*
    * ============================
@@ -284,13 +199,8 @@ export default async function ClientsPage({
    * ============================
    */
 
-  let requestsQuery =
-    serviceClient
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
+  let requestsQuery = serviceClient.from("insurance_requests").select(
+    `
           id,
           client_id,
           request_code,
@@ -299,64 +209,36 @@ export default async function ClientsPage({
           assigned_agent_id,
           created_at
         `,
-      );
+  );
 
-  if (
-    role ===
-    "agent"
-  ) {
-    requestsQuery =
-      requestsQuery.or(
-        `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
-      );
-  }
-
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await requestsQuery.order(
-      "created_at",
-      {
-        ascending:
-          false,
-      },
-    );
-
-  if (
-    requestsError
-  ) {
-    throw new Error(
-      requestsError.message,
+  if (role === "agent") {
+    requestsQuery = requestsQuery.or(
+      `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
     );
   }
 
-  const requests =
-    (requestsData ??
-      []) as RequestRow[];
+  const { data: requestsData, error: requestsError } = await readAll(
+    requestsQuery
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
-  const visibleClientIds =
-    new Set(
-      requests.map(
-        (
-          request,
-        ) =>
-          request.client_id,
-      ),
-    );
+  if (requestsError) {
+    throw new Error(requestsError.message);
+  }
+
+  const requests = (requestsData ?? []) as RequestRow[];
+
+  const visibleClientIds = new Set(
+    requests.map((request) => request.client_id),
+  );
 
   const visibleClients =
-    role ===
-    "admin"
+    role === "admin"
       ? clients
-      : clients.filter(
-          (
-            client,
-          ) =>
-            visibleClientIds.has(
-              client.id,
-            ),
-        );
+      : clients.filter((client) => visibleClientIds.has(client.id));
 
   /*
    * ============================
@@ -364,36 +246,13 @@ export default async function ClientsPage({
    * ============================
    */
 
-  const nationalities =
-    Array.from(
-      new Set(
-        visibleClients
-          .map(
-            (
-              client,
-            ) =>
-              client.nationality
-                ?.trim(),
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-    ).sort(
-      (
-        first,
-        second,
-      ) =>
-        first.localeCompare(
-          second,
-          "fr-FR",
-        ),
-    );
+  const nationalities = Array.from(
+    new Set(
+      visibleClients
+        .map((client) => client.nationality?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ).sort((first, second) => first.localeCompare(second, "fr-FR"));
 
   /*
    * ============================
@@ -401,82 +260,47 @@ export default async function ClientsPage({
    * ============================
    */
 
-  let clientViews:
-    ClientView[] =
-    visibleClients.map(
-      (
-        client,
-      ) => {
-        const clientRequests =
-          requests.filter(
-            (
-              request,
-            ) =>
-              request.client_id ===
-              client.id,
-          );
-
-        const latestRequest =
-          clientRequests[0] ??
-          null;
-
-        const totalAmount =
-          clientRequests.reduce(
-            (
-              total,
-              request,
-            ) =>
-              total +
-              Number(
-                request.calculated_price ??
-                  0,
-              ),
-            0,
-          );
-
-        const activeRequestCount =
-          clientRequests.filter(
-            (
-              request,
-            ) =>
-              ACTIVE_STATUSES.has(
-                request.status,
-              ),
-          ).length;
-
-        const whatsapp =
-          `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim();
-
-        return {
-          id:
-            client.id,
-
-          firstName:
-            client.first_name,
-
-          lastName:
-            client.last_name,
-
-          fullName:
-            `${client.first_name} ${client.last_name}`.trim(),
-
-          nationality:
-            client.nationality ??
-            "—",
-
-          whatsapp,
-
-          requestCount:
-            clientRequests.length,
-
-          totalAmount,
-
-          latestRequest,
-
-          activeRequestCount,
-        };
-      },
+  let clientViews: ClientView[] = visibleClients.map((client) => {
+    const clientRequests = requests.filter(
+      (request) => request.client_id === client.id,
     );
+
+    const latestRequest = clientRequests[0] ?? null;
+
+    const totalAmount = clientRequests.reduce(
+      (total, request) => total + Number(request.calculated_price ?? 0),
+      0,
+    );
+
+    const activeRequestCount = clientRequests.filter((request) =>
+      ACTIVE_STATUSES.has(request.status),
+    ).length;
+
+    const whatsapp =
+      `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim();
+
+    return {
+      id: client.id,
+
+      firstName: client.first_name,
+
+      lastName: client.last_name,
+
+      fullName: `${client.first_name} ${client.last_name}`.trim(),
+
+      nationality: client.nationality ?? "—",
+
+      whatsapp,
+
+      requestCount: clientRequests.length,
+
+      totalAmount,
+
+      latestRequest,
+
+      activeRequestCount,
+    };
+  });
 
   /*
    * ============================
@@ -484,79 +308,30 @@ export default async function ClientsPage({
    * ============================
    */
 
-  if (
-    nationalityFilter
-  ) {
-    clientViews =
-      clientViews.filter(
-        (
-          client,
-        ) =>
-          client.nationality ===
-          nationalityFilter,
-      );
+  if (nationalityFilter) {
+    clientViews = clientViews.filter(
+      (client) => client.nationality === nationalityFilter,
+    );
   }
 
   if (search) {
-    const normalizedSearch =
-      normalize(
-        search,
-      );
+    const normalizedSearch = normalize(search);
 
-    const phoneSearch =
-      normalizePhone(
-        search,
-      );
+    const phoneSearch = normalizePhone(search);
 
-    clientViews =
-      clientViews.filter(
-        (
-          client,
-        ) => {
-          const latestCode =
-            client.latestRequest
-              ?.request_code ??
-            "";
+    clientViews = clientViews.filter((client) => {
+      const latestCode = client.latestRequest?.request_code ?? "";
 
-          return (
-            normalize(
-              client.fullName,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            normalize(
-              client.firstName,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            normalize(
-              client.lastName,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            normalize(
-              client.nationality,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            normalize(
-              latestCode,
-            ).includes(
-              normalizedSearch,
-            ) ||
-            (
-              Boolean(
-                phoneSearch,
-              ) &&
-              normalizePhone(
-                client.whatsapp,
-              ).includes(
-                phoneSearch,
-              )
-            )
-          );
-        },
+      return (
+        normalize(client.fullName).includes(normalizedSearch) ||
+        normalize(client.firstName).includes(normalizedSearch) ||
+        normalize(client.lastName).includes(normalizedSearch) ||
+        normalize(client.nationality).includes(normalizedSearch) ||
+        normalize(latestCode).includes(normalizedSearch) ||
+        (Boolean(phoneSearch) &&
+          normalizePhone(client.whatsapp).includes(phoneSearch))
       );
+    });
   }
 
   /*
@@ -565,42 +340,30 @@ export default async function ClientsPage({
    * ============================
    */
 
-  const totalClients =
-    clientViews.length;
+  const totalClients = clientViews.length;
 
-  const clientsWithActiveRequests =
-    clientViews.filter(
-      (
-        client,
-      ) =>
-        client.activeRequestCount >
-        0,
-    ).length;
+  const clientsWithActiveRequests = clientViews.filter(
+    (client) => client.activeRequestCount > 0,
+  ).length;
 
-  const totalRequests =
-    clientViews.reduce(
-      (
-        total,
-        client,
-      ) =>
-        total +
-        client.requestCount,
-      0,
-    );
+  const totalRequests = clientViews.reduce(
+    (total, client) => total + client.requestCount,
+    0,
+  );
 
-  const totalAmount =
-    clientViews.reduce(
-      (
-        total,
-        client,
-      ) =>
-        total +
-        client.totalAmount,
-      0,
-    );
+  const totalAmount = clientViews.reduce(
+    (total, client) => total + client.totalAmount,
+    0,
+  );
 
+  const listing = paginate(clientViews, params.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Clients"
+      href="/admin/clients"
+      detail={false}
+      sections={[{ id: "section-1", label: "Liste des clients" }]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
@@ -616,7 +379,8 @@ export default async function ClientsPage({
               </h1>
 
               <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
-                Consultez les clients, leurs dossiers et accédez à leur fiche CRM complète.
+                Consultez les clients, leurs dossiers et accédez à leur fiche
+                CRM complète.
               </p>
             </div>
 
@@ -634,44 +398,28 @@ export default async function ClientsPage({
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
           <StatCard
             label="Clients"
-            value={
-              totalClients.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={totalClients.toLocaleString("fr-FR")}
             description="Clients visibles"
             className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <StatCard
             label="Clients actifs"
-            value={
-              clientsWithActiveRequests.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={clientsWithActiveRequests.toLocaleString("fr-FR")}
             description="Au moins un dossier actif"
             className="bg-[#EEF6EC] text-[#31513B]"
           />
 
           <StatCard
             label="Dossiers"
-            value={
-              totalRequests.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={totalRequests.toLocaleString("fr-FR")}
             description="Dossiers associés"
             className="bg-[#EAF4E8] text-[#0B5D3B]"
           />
 
           <StatCard
             label="Valeur totale"
-            value={
-              formatMoney(
-                totalAmount,
-              )
-            }
+            value={formatMoney(totalAmount)}
             description="Montant cumulé"
             className="bg-[#F1F6EA] text-[#49613E]"
           />
@@ -684,46 +432,35 @@ export default async function ClientsPage({
             method="GET"
             className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_260px_auto_auto]"
           >
-            <input
-              type="search"
-              name="q"
-              defaultValue={
-                search
-              }
-              placeholder="Nom, WhatsApp, nationalité, matricule..."
-              className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
-            />
+            <label className="admin-filter-field">
+              Rechercher
+              <input
+                type="search"
+                name="q"
+                defaultValue={search}
+                placeholder="Nom, WhatsApp, nationalité, matricule..."
+                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                aria-label="Rechercher"
+              />
+            </label>
 
-            <select
-              name="nationality"
-              defaultValue={
-                nationalityFilter
-              }
-              className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
-            >
-              <option value="">
-                Toutes les nationalités
-              </option>
+            <label className="admin-filter-field">
+              Nationalité
+              <select
+                name="nationality"
+                defaultValue={nationalityFilter}
+                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                aria-label="Nationalité"
+              >
+                <option value="">Toutes les nationalités</option>
 
-              {nationalities.map(
-                (
-                  nationality,
-                ) => (
-                  <option
-                    key={
-                      nationality
-                    }
-                    value={
-                      nationality
-                    }
-                  >
-                    {
-                      nationality
-                    }
+                {nationalities.map((nationality) => (
+                  <option key={nationality} value={nationality}>
+                    {nationality}
                   </option>
-                ),
-              )}
-            </select>
+                ))}
+              </select>
+            </label>
 
             <button
               type="submit"
@@ -746,52 +483,48 @@ export default async function ClientsPage({
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="flex min-w-0 flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-1"
+              >
                 Liste des clients
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                {clientViews.length.toLocaleString(
-                  "fr-FR",
-                )}{" "}
-                client
-                {clientViews.length !==
-                1
-                  ? "s"
-                  : ""}
+                {clientViews.length.toLocaleString("fr-FR")} client
+                {clientViews.length !== 1 ? "s" : ""}
               </p>
             </div>
 
-            {role ===
-              "agent" && (
+            {role === "agent" && (
               <span className="text-xs text-slate-400">
                 Vos clients + clients liés aux dossiers non attribués
               </span>
             )}
           </div>
 
-          {clientViews.length ===
-          0 ? (
+          {clientViews.length === 0 ? (
             <div className="p-6 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun client trouvé
               </p>
 
               <p className="mt-2 text-sm text-slate-500">
-                Modifiez les critères de recherche ou créez une nouvelle demande.
+                Modifiez les critères de recherche ou créez une nouvelle
+                demande.
               </p>
             </div>
           ) : (
             <>
               <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
-                {clientViews.map((client) => {
+                {listing.rows.map((client) => {
                   const latestRequest = client.latestRequest;
 
                   const statusInformation = latestRequest
-                    ? statusLabels[latestRequest.status] ?? {
+                    ? (statusLabels[latestRequest.status] ?? {
                         label: latestRequest.status,
                         className: "bg-slate-100 text-slate-700",
-                      }
+                      })
                     : null;
 
                   return (
@@ -906,197 +639,139 @@ export default async function ClientsPage({
 
               <div className="hidden lg:block">
                 <TableContainer className="rounded-none border-0 shadow-none">
-                  <Table className="min-w-[1350px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      Client
-                    </TableHead>
+                  <Table className="min-w-[1350px]" aria-label="Clients">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Client</TableHead>
 
-                    <TableHead>
-                      Nationalité
-                    </TableHead>
+                        <TableHead>Nationalité</TableHead>
 
-                    <TableHead>
-                      WhatsApp
-                    </TableHead>
+                        <TableHead>WhatsApp</TableHead>
 
-                    <TableHead>
-                      Dossiers
-                    </TableHead>
+                        <TableHead>Dossiers</TableHead>
 
-                    <TableHead>
-                      Actifs
-                    </TableHead>
+                        <TableHead>Actifs</TableHead>
 
-                    <TableHead>
-                      Valeur totale
-                    </TableHead>
+                        <TableHead>Valeur totale</TableHead>
 
-                    <TableHead>
-                      Dernier dossier
-                    </TableHead>
+                        <TableHead>Dernier dossier</TableHead>
 
-                    <TableHead>
-                      Dernier statut
-                    </TableHead>
+                        <TableHead>Dernier statut</TableHead>
 
-                    <TableHead>
-                      Date
-                    </TableHead>
+                        <TableHead>Date</TableHead>
 
-                    <TableHead className="text-right">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                <TableBody>
-                  {clientViews.map(
-                    (
-                      client,
-                    ) => {
-                      const latestRequest =
-                        client.latestRequest;
+                    <TableBody>
+                      {listing.rows.map((client) => {
+                        const latestRequest = client.latestRequest;
 
-                      const statusInformation =
-                        latestRequest
-                          ? statusLabels[
-                              latestRequest.status
-                            ] ?? {
-                              label:
-                                latestRequest.status,
+                        const statusInformation = latestRequest
+                          ? (statusLabels[latestRequest.status] ?? {
+                              label: latestRequest.status,
 
-                              className:
-                                "bg-slate-100 text-slate-700",
-                            }
+                              className: "bg-slate-100 text-slate-700",
+                            })
                           : null;
 
-                      return (
-                        <TableRow
-                          key={
-                            client.id
-                          }
-                        >
-                          <TableCell>
-                            <div className="min-w-[220px]">
-                              <p className="font-semibold text-slate-900">
-                                {
-                                  client.fullName
-                                }
-                              </p>
+                        return (
+                          <TableRow key={client.id}>
+                            <TableCell>
+                              <div className="min-w-[220px]">
+                                <p className="font-semibold text-slate-900">
+                                  {client.fullName}
+                                </p>
 
-                              <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">
-                                ID client :{" "}
-                                {
-                                  client.id
-                                }
-                              </p>
-                            </div>
-                          </TableCell>
+                                <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">
+                                  ID client : {client.id}
+                                </p>
+                              </div>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {
-                              client.nationality
-                            }
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {client.nationality}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {client.whatsapp ? (
-                              <a
-                                href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
-                              >
-                                {
-                                  client.whatsapp
-                                }
-                              </a>
-                            ) : (
-                              "—"
-                            )}
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {client.whatsapp ? (
+                                <a
+                                  href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                >
+                                  {client.whatsapp}
+                                </a>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <span className="font-bold text-slate-900">
-                              {
-                                client.requestCount
-                              }
-                            </span>
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            <span
-                              className={`inline-flex min-w-9 justify-center rounded-full px-3 py-1 text-xs font-bold ${
-                                client.activeRequestCount >
-                                0
-                                  ? "bg-[#EEF6EC] text-[#31513B]"
-                                  : "bg-slate-100 text-slate-600"
-                              }`}
-                            >
-                              {
-                                client.activeRequestCount
-                              }
-                            </span>
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap font-semibold text-slate-900">
-                            {formatMoney(
-                              client.totalAmount,
-                            )}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {latestRequest ? (
-                              <Link
-                                href={`/admin/dossiers/${latestRequest.id}`}
-                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
-                              >
-                                {
-                                  latestRequest.request_code
-                                }
-                              </Link>
-                            ) : (
-                              "—"
-                            )}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {statusInformation ? (
-                              <span
-                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
-                              >
-                                {
-                                  statusInformation.label
-                                }
+                            <TableCell className="whitespace-nowrap">
+                              <span className="font-bold text-slate-900">
+                                {client.requestCount}
                               </span>
-                            ) : (
-                              "—"
-                            )}
-                          </TableCell>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(
-                              latestRequest
-                                ?.created_at ??
-                                null,
-                            )}
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <span
+                                className={`inline-flex min-w-9 justify-center rounded-full px-3 py-1 text-xs font-bold ${
+                                  client.activeRequestCount > 0
+                                    ? "bg-[#EEF6EC] text-[#31513B]"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                {client.activeRequestCount}
+                              </span>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap text-right">
-                            <Link
-                              href={`/admin/clients/${client.id}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
-                            >
-                              Voir le client
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )}
-                </TableBody>
+                            <TableCell className="whitespace-nowrap font-semibold text-slate-900">
+                              {formatMoney(client.totalAmount)}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {latestRequest ? (
+                                <Link
+                                  href={`/admin/dossiers/${latestRequest.id}`}
+                                  className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                >
+                                  {latestRequest.request_code}
+                                </Link>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {statusInformation ? (
+                                <span
+                                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
+                                >
+                                  {statusInformation.label}
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(latestRequest?.created_at ?? null)}
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap text-right">
+                              <Link
+                                href={`/admin/clients/${client.id}`}
+                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                              >
+                                Voir le client
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
                   </Table>
                 </TableContainer>
               </div>
@@ -1104,7 +779,14 @@ export default async function ClientsPage({
           )}
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/clients"
+          params={params}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }
 
@@ -1115,32 +797,21 @@ type StatCardProps = {
   className: string;
 };
 
-function StatCard({
-  label,
-  value,
-  description,
-  className,
-}: StatCardProps) {
+function StatCard({ label, value, description, className }: StatCardProps) {
   return (
     <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:rounded-[1.5rem] sm:p-5">
       <span
         className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
-        {
-          label
-        }
+        {label}
       </span>
 
       <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
-        {
-          value
-        }
+        {value}
       </p>
 
       <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">
-        {
-          description
-        }
+        {description}
       </p>
     </div>
   );

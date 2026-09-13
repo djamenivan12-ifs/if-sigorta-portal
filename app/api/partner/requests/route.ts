@@ -1,3 +1,4 @@
+import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
 import {
   NextResponse,
 } from "next/server";
@@ -1306,6 +1307,7 @@ export async function POST(
           document,
         );
 
+      await verifyStoredDocument(serviceClient, BUCKET_NAME, document.storagePath);
       const {
         error:
           moveError,

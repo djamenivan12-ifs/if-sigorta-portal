@@ -1,3 +1,4 @@
+import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
 import {
   NextResponse,
 } from "next/server";
@@ -871,7 +872,8 @@ export async function POST(
       `${id}/payment_receipt/` +
       `${Date.now()}-${crypto.randomUUID()}-${safeFileName}`;
 
-    const {
+    await verifyStoredDocument(serviceClient, BUCKET_NAME, pendingStoragePath);
+      const {
       error:
         moveError,
     } =

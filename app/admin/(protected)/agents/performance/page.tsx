@@ -1,3 +1,19 @@
+import { PROGRESS_ACTIONS } from "@/lib/dashboard/model";
+import { getMinutesBetween, getLastProgress } from "@/lib/admin/progress";
+import { readAll } from "@/lib/supabase/readAll";
+import {
+  paginate,
+  scalar,
+  matchesSearch,
+  type ListParams,
+} from "@/lib/admin/pagination";
+import {
+  ListPagination,
+  ListFilters,
+} from "@/components/admin/pages/ListTools";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { listAllUsers } from "@/lib/supabase/listAllUsers";
+
 import Link from "next/link";
 
 import {
@@ -27,11 +43,7 @@ type ActivityRow = {
   created_at: string;
 };
 
-type AgentPriority =
-  | "normal"
-  | "watch"
-  | "late"
-  | "critical";
+type AgentPriority = "normal" | "watch" | "late" | "critical";
 
 type AgentPerformance = {
   id: string;
@@ -54,66 +66,17 @@ type AgentPerformance = {
 };
 
 const ACTIVE_STATUSES = [
-  "waiting_payment",
   "payment_review",
   "payment_confirmed",
   "policy_preparation",
 ];
 
-const COMPLETED_STATUSES = [
-  "policy_available",
-];
+const COMPLETED_STATUSES = ["policy_available"];
 
-const PROGRESS_ACTIONS = [
-  "request_created",
-  "payment_uploaded",
-  "payment_confirmed",
-  "policy_preparation_started",
-  "policy_uploaded_year_1",
-  "policy_uploaded_year_2",
-  "policy_replaced_year_1",
-  "policy_replaced_year_2",
-  "whatsapp_sent",
-];
+// Durations are shared with the agent detail view; invalid timestamps stay unknown.
 
-function getMinutesBetween(
-  startValue: string,
-  endValue: string,
-) {
-  const start =
-    new Date(startValue);
-
-  const end =
-    new Date(endValue);
-
-  if (
-    Number.isNaN(
-      start.getTime(),
-    ) ||
-    Number.isNaN(
-      end.getTime(),
-    )
-  ) {
-    return 0;
-  }
-
-  const difference =
-    end.getTime() -
-    start.getTime();
-
-  if (difference <= 0) {
-    return 0;
-  }
-
-  return Math.floor(
-    difference / 60000,
-  );
-}
-
-function formatAverageTime(
-  minutes: number | null,
-) {
-  if (minutes === null) {
+function formatAverageTime(minutes: number | null) {
+  if (minutes === null || !Number.isFinite(minutes)) {
     return "—";
   }
 
@@ -125,22 +88,16 @@ function formatAverageTime(
     return `${minutes} min`;
   }
 
-  const hours =
-    Math.floor(
-      minutes / 60,
-    );
+  const hours = Math.floor(minutes / 60);
 
-  const remainingMinutes =
-    minutes % 60;
+  const remainingMinutes = minutes % 60;
 
   return remainingMinutes > 0
     ? `${hours} h ${remainingMinutes} min`
     : `${hours} h`;
 }
 
-function getPriorityWeight(
-  priority: AgentPriority,
-) {
+function getPriorityWeight(priority: AgentPriority) {
   switch (priority) {
     case "critical":
       return 3;
@@ -156,101 +113,54 @@ function getPriorityWeight(
   }
 }
 
-export default async function AgentPerformancePage() {
-  await requireRole([
-    "admin",
-  ]);
+export default async function AgentPerformancePage({
+  searchParams = Promise.resolve({}),
+}: { searchParams?: Promise<ListParams> } = {}) {
+  await requireRole(["admin"]);
 
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
   /*
    * 1. Utilisateurs agents / admins
    */
-  const {
-    data: usersData,
-    error: usersError,
-  } =
-    await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
+  const { data: usersData, error: usersError } = await listAllUsers(supabase);
 
   if (usersError) {
-    throw new Error(
-      usersError.message,
-    );
+    throw new Error(usersError.message);
   }
 
-  const agents =
-    usersData.users
-      .filter(
-        (
-          user,
-        ) => {
-          const role =
-            user.app_metadata
-              ?.role;
+  const agents = usersData.users
+    .filter((user) => {
+      const role = user.app_metadata?.role;
 
-          return (
-            role ===
-              "agent" ||
-            role ===
-              "admin"
-          );
-        },
-      )
-      .map(
-        (
-          user,
-        ) => {
-          const firstName =
-            user.user_metadata
-              ?.first_name
-              ?.toString()
-              .trim() ??
-            "";
+      return role === "agent" || role === "admin";
+    })
+    .map((user) => {
+      const firstName = user.user_metadata?.first_name?.toString().trim() ?? "";
 
-          const lastName =
-            user.user_metadata
-              ?.last_name
-              ?.toString()
-              .trim() ??
-            "";
+      const lastName = user.user_metadata?.last_name?.toString().trim() ?? "";
 
-          const name =
-            `${firstName} ${lastName}`.trim() ||
-            user.user_metadata
-              ?.name
-              ?.toString()
-              .trim() ||
-            user.email ||
-            "Agent";
+      const name =
+        `${firstName} ${lastName}`.trim() ||
+        user.user_metadata?.name?.toString().trim() ||
+        user.email ||
+        "Agent";
 
-          return {
-            id:
-              user.id,
+      return {
+        id: user.id,
 
-            name,
+        name,
 
-            email:
-              user.email ??
-              "",
-          };
-        },
-      );
+        email: user.email ?? "",
+      };
+    });
 
   /*
    * 2. Tous les dossiers attribués
    */
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await supabase
-      .from(
-        "insurance_requests",
-      )
+  const { data: requestsData, error: requestsError } = await readAll(
+    supabase
+      .from("insurance_requests")
       .select(
         `
           id,
@@ -260,49 +170,27 @@ export default async function AgentPerformancePage() {
           assigned_agent_id
         `,
       )
-      .not(
-        "assigned_agent_id",
-        "is",
-        null,
-      );
+      .not("assigned_agent_id", "is", null)
+      .order("id"),
+  );
 
   if (requestsError) {
-    throw new Error(
-      requestsError.message,
-    );
+    throw new Error(requestsError.message);
   }
 
-  const requests =
-    (requestsData ??
-      []) as RequestRow[];
+  const requests = (requestsData ?? []) as RequestRow[];
 
   /*
    * 3. Historique de progression
    */
-  const requestIds =
-    requests.map(
-      (
-        request,
-      ) =>
-        request.id,
-    );
+  const requestIds = requests.map((request) => request.id);
 
-  let activities:
-    ActivityRow[] =
-    [];
+  let activities: ActivityRow[] = [];
 
-  if (
-    requestIds.length >
-    0
-  ) {
-    const {
-      data: activitiesData,
-      error: activitiesError,
-    } =
-      await supabase
-        .from(
-          "activity_logs",
-        )
+  if (requestIds.length > 0) {
+    const { data: activitiesData, error: activitiesError } = await readAll(
+      supabase
+        .from("activity_logs")
         .select(
           `
             request_id,
@@ -310,391 +198,229 @@ export default async function AgentPerformancePage() {
             created_at
           `,
         )
-        .in(
-          "request_id",
-          requestIds,
-        )
-        .in(
-          "action",
-          PROGRESS_ACTIONS,
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              false,
-          },
-        );
+        .in("request_id", requestIds)
+        .in("action", PROGRESS_ACTIONS)
+        .order("created_at", {
+          ascending: false,
+        })
+        .order("id"),
+    );
 
     if (activitiesError) {
-      throw new Error(
-        activitiesError.message,
-      );
+      throw new Error(activitiesError.message);
     }
 
-    activities =
-      (activitiesData ??
-        []) as ActivityRow[];
+    activities = (activitiesData ?? []) as ActivityRow[];
   }
 
   /*
    * 4. Dernière progression de chaque dossier
    */
-  const lastProgressByRequest =
-    new Map<
-      string,
-      string
-    >();
+  const now = new Date().toISOString();
+  const lastProgressByRequest = new Map<string, string>();
 
-  const whatsappSentRequests =
-    new Set<string>();
-
-  for (
-    const activity of
-    activities
-  ) {
+  for (const activity of activities) {
     if (
-      !lastProgressByRequest.has(
-        activity.request_id,
-      )
+      Number.isFinite(Date.parse(activity.created_at)) &&
+      Date.parse(activity.created_at) <= Date.parse(now) &&
+      (!lastProgressByRequest.has(activity.request_id) ||
+        Date.parse(activity.created_at) >
+          Date.parse(lastProgressByRequest.get(activity.request_id)!))
     ) {
-      lastProgressByRequest.set(
-        activity.request_id,
-        activity.created_at,
-      );
-    }
-
-    if (
-      activity.action ===
-      "whatsapp_sent"
-    ) {
-      whatsappSentRequests.add(
-        activity.request_id,
-      );
+      lastProgressByRequest.set(activity.request_id, activity.created_at);
     }
   }
-
-  const now =
-    new Date().toISOString();
 
   /*
    * 5. Calcul des performances
    */
-  const performances:
-    AgentPerformance[] =
-    agents.map(
-      (
-        agent,
-      ) => {
-        const agentRequests =
-          requests.filter(
-            (
-              request,
-            ) =>
-              request.assigned_agent_id ===
-              agent.id,
-          );
-
-        const total =
-          agentRequests.length;
-
-        const active =
-          agentRequests.filter(
-            (
-              request,
-            ) =>
-              ACTIVE_STATUSES.includes(
-                request.status,
-              ),
-          ).length;
-
-        const completed =
-          agentRequests.filter(
-            (
-              request,
-            ) =>
-              COMPLETED_STATUSES.includes(
-                request.status,
-              ) ||
-              whatsappSentRequests.has(
-                request.id,
-              ),
-          ).length;
-
-        let watch = 0;
-        let late = 0;
-        let critical = 0;
-
-        let priority:
-          AgentPriority =
-          "normal";
-
-        for (
-          const request of
-          agentRequests
-        ) {
-          /*
-           * Une notification WhatsApp signifie
-           * que le workflow principal est terminé.
-           */
-          if (
-            whatsappSentRequests.has(
-              request.id,
-            )
-          ) {
-            continue;
-          }
-
-          /*
-           * Dossiers annulés :
-           * pas comptés dans les retards.
-           */
-          if (
-            request.status ===
-            "cancelled"
-          ) {
-            continue;
-          }
-
-          /*
-           * Les polices disponibles restent
-           * suivies jusqu'à notification du client.
-           */
-          const shouldMonitor =
-  ACTIVE_STATUSES.includes(
-    request.status,
-  );
-
-          if (!shouldMonitor) {
-            continue;
-          }
-
-          const lastProgressAt =
-            lastProgressByRequest.get(
-              request.id,
-            ) ??
-            request.assigned_at ??
-            request.created_at;
-
-          const minutes =
-            getMinutesBetween(
-              lastProgressAt,
-              now,
-            );
-
-          let requestPriority:
-            AgentPriority =
-            "normal";
-
-          if (
-            minutes >= 30
-          ) {
-            critical += 1;
-
-            requestPriority =
-              "critical";
-          } else if (
-            minutes >= 15
-          ) {
-            late += 1;
-
-            requestPriority =
-              "late";
-          } else if (
-            minutes >= 5
-          ) {
-            watch += 1;
-
-            requestPriority =
-              "watch";
-          }
-
-          if (
-            getPriorityWeight(
-              requestPriority,
-            ) >
-            getPriorityWeight(
-              priority,
-            )
-          ) {
-            priority =
-              requestPriority;
-          }
-        }
-
-        const delayed =
-          watch +
-          late +
-          critical;
-
-        /*
-         * Temps de prise en charge
-         */
-        const claimTimes =
-          agentRequests
-            .filter(
-              (
-                request,
-              ) =>
-                Boolean(
-                  request.assigned_at,
-                ),
-            )
-            .map(
-              (
-                request,
-              ) =>
-                getMinutesBetween(
-                  request.created_at,
-                  request.assigned_at!,
-                ),
-            );
-
-        const averageClaimMinutes =
-          claimTimes.length >
-          0
-            ? Math.round(
-                claimTimes.reduce(
-                  (
-                    totalValue,
-                    currentValue,
-                  ) =>
-                    totalValue +
-                    currentValue,
-                  0,
-                ) /
-                  claimTimes.length,
-              )
-            : null;
-
-        const completionRate =
-          total > 0
-            ? (
-                completed /
-                total
-              ) *
-              100
-            : 0;
-
-        return {
-          id:
-            agent.id,
-
-          name:
-            agent.name,
-
-          email:
-            agent.email,
-
-          total,
-          active,
-          completed,
-
-          watch,
-          late,
-          critical,
-          delayed,
-
-          averageClaimMinutes,
-
-          completionRate,
-
-          priority,
-        };
-      },
+  const performances: AgentPerformance[] = agents.map((agent) => {
+    const agentRequests = requests.filter(
+      (request) => request.assigned_agent_id === agent.id,
     );
+
+    const total = agentRequests.length;
+
+    const active = agentRequests.filter((request) =>
+      ACTIVE_STATUSES.includes(request.status),
+    ).length;
+
+    const completed = agentRequests.filter((request) =>
+      COMPLETED_STATUSES.includes(request.status),
+    ).length;
+
+    let watch = 0;
+    let late = 0;
+    let critical = 0;
+
+    let priority: AgentPriority = "normal";
+
+    for (const request of agentRequests) {
+      /*
+       * Une notification WhatsApp signifie
+       * que le workflow principal est terminé.
+       */
+      if (COMPLETED_STATUSES.includes(request.status)) {
+        continue;
+      }
+
+      /*
+       * Dossiers annulés :
+       * pas comptés dans les retards.
+       */
+      if (request.status === "cancelled") {
+        continue;
+      }
+
+      /*
+       * Les polices disponibles restent
+       * suivies jusqu'à notification du client.
+       */
+      const shouldMonitor = ACTIVE_STATUSES.includes(request.status);
+
+      if (!shouldMonitor) {
+        continue;
+      }
+
+      const lastProgressAt = getLastProgress(
+        request,
+        lastProgressByRequest,
+        now,
+      );
+
+      const minutes = getMinutesBetween(lastProgressAt, now);
+
+      let requestPriority: AgentPriority = "normal";
+
+      if (minutes >= 30) {
+        critical += 1;
+
+        requestPriority = "critical";
+      } else if (minutes >= 15) {
+        late += 1;
+
+        requestPriority = "late";
+      } else if (minutes >= 5) {
+        watch += 1;
+
+        requestPriority = "watch";
+      }
+
+      if (getPriorityWeight(requestPriority) > getPriorityWeight(priority)) {
+        priority = requestPriority;
+      }
+    }
+
+    const delayed = watch + late + critical;
+
+    /*
+     * Temps de prise en charge
+     */
+    const claimTimes = agentRequests
+      .filter((request) => Boolean(request.assigned_at))
+      .map((request) =>
+        getMinutesBetween(request.created_at, request.assigned_at!),
+      )
+      .filter(Number.isFinite);
+
+    const averageClaimMinutes =
+      claimTimes.length > 0
+        ? Math.round(
+            claimTimes.reduce(
+              (totalValue, currentValue) => totalValue + currentValue,
+              0,
+            ) / claimTimes.length,
+          )
+        : null;
+
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
+
+    return {
+      id: agent.id,
+
+      name: agent.name,
+
+      email: agent.email,
+
+      total,
+      active,
+      completed,
+
+      watch,
+      late,
+      critical,
+      delayed,
+
+      averageClaimMinutes,
+
+      completionRate,
+
+      priority,
+    };
+  });
 
   /*
    * Priorités élevées d'abord,
    * puis agents avec le plus de dossiers.
    */
-  performances.sort(
-    (
-      first,
-      second,
-    ) => {
-      const priorityDifference =
-        getPriorityWeight(
-          second.priority,
-        ) -
-        getPriorityWeight(
-          first.priority,
-        );
+  performances.sort((first, second) => {
+    const priorityDifference =
+      getPriorityWeight(second.priority) - getPriorityWeight(first.priority);
 
-      if (
-        priorityDifference !==
-        0
-      ) {
-        return priorityDifference;
-      }
+    if (priorityDifference !== 0) {
+      return priorityDifference;
+    }
 
-      return (
-        second.total -
-        first.total
-      );
-    },
-  );
+    return second.total - first.total;
+  });
 
   /*
    * 6. KPI globaux
    */
-  const totalAssigned =
-    performances.reduce(
-      (
-        total,
-        agent,
-      ) =>
-        total +
-        agent.total,
-      0,
-    );
+  const totalAssigned = performances.reduce(
+    (total, agent) => total + agent.total,
+    0,
+  );
 
-  const totalActive =
-    performances.reduce(
-      (
-        total,
-        agent,
-      ) =>
-        total +
-        agent.active,
-      0,
-    );
+  const totalActive = performances.reduce(
+    (total, agent) => total + agent.active,
+    0,
+  );
 
-  const totalCompleted =
-    performances.reduce(
-      (
-        total,
-        agent,
-      ) =>
-        total +
-        agent.completed,
-      0,
-    );
+  const totalCompleted = performances.reduce(
+    (total, agent) => total + agent.completed,
+    0,
+  );
 
-  const totalDelayed =
-    performances.reduce(
-      (
-        total,
-        agent,
-      ) =>
-        total +
-        agent.delayed,
-      0,
-    );
+  const totalDelayed = performances.reduce(
+    (total, agent) => total + agent.delayed,
+    0,
+  );
 
-  const totalCritical =
-    performances.reduce(
-      (
-        total,
-        agent,
-      ) =>
-        total +
-        agent.critical,
-      0,
-    );
+  const totalCritical = performances.reduce(
+    (total, agent) => total + agent.critical,
+    0,
+  );
 
+  const listParams = await searchParams;
+  const listQuery = scalar(listParams.q);
+  const listFilter = scalar(listParams.filter);
+  const filteredRows = performances.filter(
+    (row) =>
+      matchesSearch([row.name, row.email], listQuery) &&
+      (!listFilter || row.priority === listFilter),
+  );
+  const listing = paginate(filteredRows, listParams.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Performance des agents"
+      href="/admin/agents/performance"
+      detail={false}
+      sections={[
+        { id: "section-1", label: "Agents" },
+        { id: "section-2", label: "Niveaux de surveillance" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* EN-TÊTE */}
 
@@ -710,9 +436,8 @@ export default async function AgentPerformancePage() {
               </h1>
 
               <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-600 sm:text-sm">
-                Suivez la charge de travail, les délais
-                de traitement et la progression des
-                dossiers attribués.
+                Suivez la charge de travail, les délais de traitement et la
+                progression des dossiers attribués.
               </p>
             </div>
 
@@ -724,47 +449,49 @@ export default async function AgentPerformancePage() {
             </Link>
           </div>
         </header>
+        <ListFilters
+          base="/admin/agents/performance"
+          query={listQuery}
+          selected={listFilter}
+          options={[
+            { value: "critical", label: "Priorité élevée" },
+            { value: "late", label: "En retard" },
+            { value: "watch", label: "À surveiller" },
+            { value: "normal", label: "Normal" },
+          ]}
+          label="Priorité"
+        />
 
         {/* KPI */}
 
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
           <SummaryCard
             label="Attribués"
-            value={
-              totalAssigned
-            }
+            value={totalAssigned}
             className="bg-[#EEF6EC] text-[#31513B]"
           />
 
           <SummaryCard
             label="Actifs"
-            value={
-              totalActive
-            }
+            value={totalActive}
             className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <SummaryCard
             label="Terminés"
-            value={
-              totalCompleted
-            }
+            value={totalCompleted}
             className="bg-[#EAF4E8] text-[#0B5D3B]"
           />
 
           <SummaryCard
             label="À surveiller"
-            value={
-              totalDelayed
-            }
+            value={totalDelayed}
             className="bg-amber-50 text-amber-700"
           />
 
           <SummaryCard
             label="Critiques"
-            value={
-              totalCritical
-            }
+            value={totalCritical}
             className="bg-red-50 text-red-700"
           />
         </section>
@@ -773,33 +500,20 @@ export default async function AgentPerformancePage() {
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
-            <h2 className="text-lg font-semibold text-[#102B20]">
+            <h2 className="text-lg font-semibold text-[#102B20]" id="section-1">
               Agents
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              {performances.length.toLocaleString(
-                "fr-FR",
-              )}{" "}
-              utilisateur
-              {performances.length !==
-              1
-                ? "s"
-                : ""}{" "}
-              interne
-              {performances.length !==
-              1
-                ? "s"
-                : ""}
+              {performances.length.toLocaleString("fr-FR")} utilisateur
+              {performances.length !== 1 ? "s" : ""} interne
+              {performances.length !== 1 ? "s" : ""}
             </p>
           </div>
 
-          {performances.length ===
-          0 ? (
+          {listing.total === 0 ? (
             <div className="px-4 py-10 text-center sm:px-6 sm:py-16">
-              <p className="font-semibold text-slate-700">
-                Aucun agent
-              </p>
+              <p className="font-semibold text-slate-700">Aucun agent</p>
 
               <p className="mt-2 text-sm text-slate-500">
                 Aucun utilisateur interne n’a été trouvé.
@@ -808,313 +522,230 @@ export default async function AgentPerformancePage() {
           ) : (
             <>
               <div className="divide-y divide-slate-100 lg:hidden">
-                {performances.map(
-                  (
-                    agent,
-                  ) => (
-                    <article
-                      key={agent.id}
-                      className="min-w-0 p-4 sm:p-5"
+                {listing.rows.map((agent) => (
+                  <article key={agent.id} className="min-w-0 p-4 sm:p-5">
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                          {agent.name}
+                        </p>
+
+                        <p className="mt-1 break-all text-[11px] leading-5 text-slate-500 sm:text-xs">
+                          {agent.email}
+                        </p>
+                      </div>
+
+                      <PriorityBadge priority={agent.priority} />
+                    </div>
+
+                    <div className="mt-4 grid min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+                      <PerformanceMetric
+                        label="Attribués"
+                        value={agent.total}
+                      />
+
+                      <PerformanceMetric label="Actifs" value={agent.active} />
+
+                      <PerformanceMetric
+                        label="Terminés"
+                        value={agent.completed}
+                      />
+
+                      <PerformanceMetric
+                        label="À surveiller"
+                        value={agent.watch}
+                      />
+
+                      <PerformanceMetric label="En retard" value={agent.late} />
+
+                      <PerformanceMetric
+                        label="Critiques"
+                        value={agent.critical}
+                      />
+
+                      <PerformanceMetric
+                        label="Prise en charge moy."
+                        value={formatAverageTime(agent.averageClaimMinutes)}
+                      />
+
+                      <PerformanceMetric
+                        label="Finalisation"
+                        value={`${agent.completionRate.toLocaleString("fr-FR", {
+                          maximumFractionDigits: 1,
+                        })}%`}
+                      />
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[11px] font-medium text-slate-500 sm:text-xs">
+                          Progression
+                        </span>
+
+                        <span className="text-[11px] font-semibold text-slate-600 sm:text-xs">
+                          {agent.completed}/{agent.total}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full bg-[#0B5D3B]"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              Math.max(0, agent.completionRate),
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/admin/agents/${agent.id}`}
+                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
                     >
-                      <div className="flex min-w-0 items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
-                            {agent.name}
-                          </p>
-
-                          <p className="mt-1 break-all text-[11px] leading-5 text-slate-500 sm:text-xs">
-                            {agent.email}
-                          </p>
-                        </div>
-
-                        <PriorityBadge
-                          priority={agent.priority}
-                        />
-                      </div>
-
-                      <div className="mt-4 grid min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-                        <PerformanceMetric
-                          label="Attribués"
-                          value={agent.total}
-                        />
-
-                        <PerformanceMetric
-                          label="Actifs"
-                          value={agent.active}
-                        />
-
-                        <PerformanceMetric
-                          label="Terminés"
-                          value={agent.completed}
-                        />
-
-                        <PerformanceMetric
-                          label="À surveiller"
-                          value={agent.watch}
-                        />
-
-                        <PerformanceMetric
-                          label="En retard"
-                          value={agent.late}
-                        />
-
-                        <PerformanceMetric
-                          label="Critiques"
-                          value={agent.critical}
-                        />
-
-                        <PerformanceMetric
-                          label="Prise en charge moy."
-                          value={formatAverageTime(
-                            agent.averageClaimMinutes,
-                          )}
-                        />
-
-                        <PerformanceMetric
-                          label="Finalisation"
-                          value={`${agent.completionRate.toLocaleString(
-                            "fr-FR",
-                            {
-                              maximumFractionDigits:
-                                1,
-                            },
-                          )}%`}
-                        />
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-[11px] font-medium text-slate-500 sm:text-xs">
-                            Progression
-                          </span>
-
-                          <span className="text-[11px] font-semibold text-slate-600 sm:text-xs">
-                            {agent.completed}/{agent.total}
-                          </span>
-                        </div>
-
-                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className="h-full rounded-full bg-[#0B5D3B]"
-                            style={{
-                              width: `${Math.min(
-                                100,
-                                Math.max(
-                                  0,
-                                  agent.completionRate,
-                                ),
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <Link
-                        href={`/admin/agents/${agent.id}`}
-                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
-                      >
-                        Voir l’agent
-                      </Link>
-                    </article>
-                  ),
-                )}
+                      Voir l’agent
+                    </Link>
+                  </article>
+                ))}
               </div>
 
               <div className="hidden lg:block">
-            <TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1500px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      Agent
-                    </TableHead>
+                <TableContainer className="rounded-none border-0 shadow-none">
+                  <Table
+                    className="min-w-[1500px]"
+                    aria-label="Performance des agents"
+                  >
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Agent</TableHead>
 
-                    <TableHead>
-                      Priorité
-                    </TableHead>
+                        <TableHead>Priorité</TableHead>
 
-                    <TableHead>
-                      Attribués
-                    </TableHead>
+                        <TableHead>Attribués</TableHead>
 
-                    <TableHead>
-                      Actifs
-                    </TableHead>
+                        <TableHead>Actifs</TableHead>
 
-                    <TableHead>
-                      Terminés
-                    </TableHead>
+                        <TableHead>Terminés</TableHead>
 
-                    <TableHead>
-                      À surveiller
-                    </TableHead>
+                        <TableHead>À surveiller</TableHead>
 
-                    <TableHead>
-                      En retard
-                    </TableHead>
+                        <TableHead>En retard</TableHead>
 
-                    <TableHead>
-                      Critiques
-                    </TableHead>
+                        <TableHead>Critiques</TableHead>
 
-                    <TableHead>
-                      Prise en charge moy.
-                    </TableHead>
+                        <TableHead>Prise en charge moy.</TableHead>
 
-                    <TableHead>
-                      Finalisation
-                    </TableHead>
+                        <TableHead>Finalisation</TableHead>
 
-                    <TableHead className="text-right">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {performances.map(
-                    (
-                      agent,
-                    ) => (
-                      <TableRow
-                        key={
-                          agent.id
-                        }
-                      >
-                        <TableCell>
-                          <div className="min-w-[220px]">
-                            <p className="font-semibold text-[#102B20]">
-                              {
-                                agent.name
-                              }
-                            </p>
-
-                            <p className="mt-1 text-xs text-slate-500">
-                              {
-                                agent.email
-                              }
-                            </p>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <PriorityBadge
-                            priority={
-                              agent.priority
-                            }
-                          />
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="font-semibold text-[#102B20]">
-                            {
-                              agent.total
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="inline-flex min-w-9 justify-center rounded-full border border-[#DDE7D8] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#31513B]">
-                            {
-                              agent.active
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="inline-flex min-w-9 justify-center rounded-full border border-[#CFE3CF] bg-[#EEF6EC] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
-                            {
-                              agent.completed
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="inline-flex min-w-9 justify-center rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-                            {
-                              agent.watch
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="inline-flex min-w-9 justify-center rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-                            {
-                              agent.late
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="inline-flex min-w-9 justify-center rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
-                            {
-                              agent.critical
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap font-medium text-slate-700">
-                          {formatAverageTime(
-                            agent.averageClaimMinutes,
-                          )}
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <div className="min-w-[150px]">
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-sm font-semibold text-slate-900">
-                                {agent.completionRate.toLocaleString(
-                                  "fr-FR",
-                                  {
-                                    maximumFractionDigits:
-                                      1,
-                                  },
-                                )}
-                                %
-                              </span>
-
-                              <span className="text-xs text-slate-500">
-                                {
-                                  agent.completed
-                                }
-                                /
-                                {
-                                  agent.total
-                                }
-                              </span>
-                            </div>
-
-                            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                              <div
-                                className="h-full rounded-full bg-[#0B5D3B]"
-                                style={{
-                                  width: `${Math.min(
-                                    100,
-                                    Math.max(
-                                      0,
-                                      agent.completionRate,
-                                    ),
-                                  )}%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap text-right">
-                          <Link
-                            href={`/admin/agents/${agent.id}`}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
-                          >
-                            Voir l’agent
-                          </Link>
-                        </TableCell>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    </TableHeader>
+
+                    <TableBody>
+                      {listing.rows.map((agent) => (
+                        <TableRow key={agent.id}>
+                          <TableCell>
+                            <div className="min-w-[220px]">
+                              <p className="font-semibold text-[#102B20]">
+                                {agent.name}
+                              </p>
+
+                              <p className="mt-1 text-xs text-slate-500">
+                                {agent.email}
+                              </p>
+                            </div>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <PriorityBadge priority={agent.priority} />
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="font-semibold text-[#102B20]">
+                              {agent.total}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="inline-flex min-w-9 justify-center rounded-full border border-[#DDE7D8] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#31513B]">
+                              {agent.active}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="inline-flex min-w-9 justify-center rounded-full border border-[#CFE3CF] bg-[#EEF6EC] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
+                              {agent.completed}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="inline-flex min-w-9 justify-center rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                              {agent.watch}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="inline-flex min-w-9 justify-center rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+                              {agent.late}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="inline-flex min-w-9 justify-center rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
+                              {agent.critical}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap font-medium text-slate-700">
+                            {formatAverageTime(agent.averageClaimMinutes)}
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <div className="min-w-[150px]">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="text-sm font-semibold text-slate-900">
+                                  {agent.completionRate.toLocaleString(
+                                    "fr-FR",
+                                    {
+                                      maximumFractionDigits: 1,
+                                    },
+                                  )}
+                                  %
+                                </span>
+
+                                <span className="text-xs text-slate-500">
+                                  {agent.completed}/{agent.total}
+                                </span>
+                              </div>
+
+                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                                <div
+                                  className="h-full rounded-full bg-[#0B5D3B]"
+                                  style={{
+                                    width: `${Math.min(
+                                      100,
+                                      Math.max(0, agent.completionRate),
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap text-right">
+                            <Link
+                              href={`/admin/agents/${agent.id}`}
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                            >
+                              Voir l’agent
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </div>
             </>
           )}
@@ -1123,102 +754,83 @@ export default async function AgentPerformancePage() {
         {/* LÉGENDE */}
 
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
-          <h2 className="font-semibold text-[#102B20]">
+          <h2 className="font-semibold text-[#102B20]" id="section-2">
             Niveaux de surveillance
           </h2>
 
           <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
             <div className="min-w-0 rounded-xl border border-amber-200 bg-amber-50 p-3 sm:rounded-2xl sm:p-4">
-              <p className="font-semibold text-amber-800">
-                À surveiller
-              </p>
+              <p className="font-semibold text-amber-800">À surveiller</p>
 
               <p className="mt-1 text-sm text-amber-700">
-                Aucune progression depuis au moins
-                5 minutes.
+                Aucune progression depuis au moins 5 minutes.
               </p>
             </div>
 
             <div className="min-w-0 rounded-xl border border-orange-200 bg-orange-50 p-3 sm:rounded-2xl sm:p-4">
-              <p className="font-semibold text-orange-800">
-                En retard
-              </p>
+              <p className="font-semibold text-orange-800">En retard</p>
 
               <p className="mt-1 text-sm text-orange-700">
-                Aucune progression depuis au moins
-                15 minutes.
+                Aucune progression depuis au moins 15 minutes.
               </p>
             </div>
 
             <div className="min-w-0 rounded-xl border border-red-200 bg-red-50 p-3 sm:rounded-2xl sm:p-4">
-              <p className="font-semibold text-red-800">
-                Priorité élevée
-              </p>
+              <p className="font-semibold text-red-800">Priorité élevée</p>
 
               <p className="mt-1 text-sm text-red-700">
-                Aucune progression depuis au moins
-                30 minutes ou paiement refusé.
+                Aucune progression depuis au moins 30 minutes ou paiement
+                refusé.
               </p>
             </div>
           </div>
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/agents/performance"
+          params={listParams}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }
 
-function PriorityBadge({
-  priority,
-}: {
-  priority:
-    AgentPriority;
-}) {
+function PriorityBadge({ priority }: { priority: AgentPriority }) {
   const config = {
     normal: {
-      label:
-        "Normal",
+      label: "Normal",
 
-      className:
-        "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+      className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
     },
 
     watch: {
-      label:
-        "À surveiller",
+      label: "À surveiller",
 
-      className:
-        "bg-amber-50 text-amber-700",
+      className: "bg-amber-50 text-amber-700",
     },
 
     late: {
-      label:
-        "En retard",
+      label: "En retard",
 
-      className:
-        "bg-orange-50 text-orange-700",
+      className: "bg-orange-50 text-orange-700",
     },
 
     critical: {
-      label:
-        "Priorité élevée",
+      label: "Priorité élevée",
 
-      className:
-        "bg-red-50 text-red-700",
+      className: "bg-red-50 text-red-700",
     },
   };
 
-  const item =
-    config[
-      priority
-    ];
+  const item = config[priority];
 
   return (
     <span
       className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${item.className}`}
     >
-      {
-        item.label
-      }
+      {item.label}
     </span>
   );
 }
@@ -1228,10 +840,7 @@ type PerformanceMetricProps = {
   value: string | number;
 };
 
-function PerformanceMetric({
-  label,
-  value,
-}: PerformanceMetricProps) {
+function PerformanceMetric({ label, value }: PerformanceMetricProps) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3">
       <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 sm:text-[10px]">
@@ -1251,25 +860,17 @@ type SummaryCardProps = {
   className: string;
 };
 
-function SummaryCard({
-  label,
-  value,
-  className,
-}: SummaryCardProps) {
+function SummaryCard({ label, value, className }: SummaryCardProps) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${className}`}
       >
-        {
-          label
-        }
+        {label}
       </span>
 
       <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
-        {value.toLocaleString(
-          "fr-FR",
-        )}
+        {value.toLocaleString("fr-FR")}
       </p>
     </div>
   );

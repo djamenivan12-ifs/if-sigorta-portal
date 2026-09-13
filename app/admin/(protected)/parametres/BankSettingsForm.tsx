@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  useState,
-} from "react";
+import { useState } from "react";
 
-import {
-  useRouter,
-} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type BankSettingsFormProps = {
   initialBeneficiary: string;
@@ -19,50 +15,19 @@ export default function BankSettingsForm({
   initialBankName,
   initialIban,
 }: BankSettingsFormProps) {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [
-    beneficiary,
-    setBeneficiary,
-  ] =
-    useState(
-      initialBeneficiary,
-    );
+  const [beneficiary, setBeneficiary] = useState(initialBeneficiary);
 
-  const [
-    bankName,
-    setBankName,
-  ] =
-    useState(
-      initialBankName,
-    );
+  const [bankName, setBankName] = useState(initialBankName);
 
-  const [
-    iban,
-    setIban,
-  ] =
-    useState(
-      initialIban,
-    );
+  const [iban, setIban] = useState(initialIban);
 
-  const [
-    loading,
-    setLoading,
-  ] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] =
-    useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] =
-    useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   async function save() {
     setLoading(true);
@@ -70,51 +35,33 @@ export default function BankSettingsForm({
     setSuccessMessage("");
 
     try {
-      const response =
-        await fetch(
-          "/api/admin/settings/bank",
-          {
-            method:
-              "PUT",
+      const response = await fetch("/api/admin/settings/bank", {
+        method: "PUT",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-            body:
-              JSON.stringify({
-                beneficiary,
-                bankName,
-                iban,
-              }),
-          },
-        );
+        body: JSON.stringify({
+          beneficiary,
+          bankName,
+          iban,
+        }),
+      });
 
-      const result =
-        (await response.json()) as {
-          success?: boolean;
-          error?: string;
-        };
+      const result = (await response.json()) as {
+        success?: boolean;
+        error?: string;
+      };
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
-        throw new Error(
-          result.error ||
-            "L’enregistrement a échoué.",
-        );
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "L’enregistrement a échoué.");
       }
 
-      setSuccessMessage(
-        "Coordonnées bancaires enregistrées avec succès.",
-      );
+      setSuccessMessage("Coordonnées bancaires enregistrées avec succès.");
 
       router.refresh();
-    } catch (
-      error
-    ) {
+    } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -142,22 +89,14 @@ export default function BankSettingsForm({
           <input
             id="beneficiary"
             type="text"
-            value={
-              beneficiary
-            }
-            onChange={(
-              event,
-            ) => {
-              setBeneficiary(
-                event.target.value,
-              );
+            value={beneficiary}
+            onChange={(event) => {
+              setBeneficiary(event.target.value);
 
               setErrorMessage("");
               setSuccessMessage("");
             }}
-            className={
-              inputClassName
-            }
+            className={inputClassName}
           />
         </div>
 
@@ -172,22 +111,14 @@ export default function BankSettingsForm({
           <input
             id="bank-name"
             type="text"
-            value={
-              bankName
-            }
-            onChange={(
-              event,
-            ) => {
-              setBankName(
-                event.target.value,
-              );
+            value={bankName}
+            onChange={(event) => {
+              setBankName(event.target.value);
 
               setErrorMessage("");
               setSuccessMessage("");
             }}
-            className={
-              inputClassName
-            }
+            className={inputClassName}
           />
         </div>
 
@@ -202,15 +133,9 @@ export default function BankSettingsForm({
           <input
             id="iban"
             type="text"
-            value={
-              iban
-            }
-            onChange={(
-              event,
-            ) => {
-              setIban(
-                event.target.value.toUpperCase(),
-              );
+            value={iban}
+            onChange={(event) => {
+              setIban(event.target.value.toUpperCase());
 
               setErrorMessage("");
               setSuccessMessage("");
@@ -221,29 +146,27 @@ export default function BankSettingsForm({
       </div>
 
       {errorMessage && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {
-            errorMessage
-          }
+        <div
+          className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          role="alert"
+        >
+          {errorMessage}
         </div>
       )}
 
       {successMessage && (
-        <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-medium text-[#0B5D3B]">
-          {
-            successMessage
-          }
+        <div
+          className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-medium text-[#0B5D3B]"
+          role="status"
+        >
+          {successMessage}
         </div>
       )}
 
       <button
         type="button"
-        onClick={
-          save
-        }
-        disabled={
-          loading
-        }
+        onClick={save}
+        disabled={loading}
         className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         {loading

@@ -3,8 +3,8 @@ import {
 } from "next/server";
 
 import {
-  requireRole,
-} from "@/lib/auth/requireRole";
+  requireApiRole,
+} from "@/lib/auth/requireApiRole";
 
 import {
   createServiceClient,
@@ -60,11 +60,12 @@ export async function GET(
   context: RouteContext,
 ) {
   try {
-    const { user } =
-      await requireRole([
+    const apiAuth = await requireApiRole([
         "agent",
         "admin",
       ]);
+    if (!apiAuth.success) return apiAuth.response;
+    const { user } = apiAuth;
 
     const {
       id,

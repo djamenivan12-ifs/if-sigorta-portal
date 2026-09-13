@@ -584,7 +584,7 @@ export default async function PartnerDossierPage({
                 Votre justificatif de paiement
                 a bien été transmis. IF Sigorta
                 vérifie actuellement le paiement.
-                Aucune autre action n'est
+                Aucune autre action n&apos;est
                 nécessaire pour le moment.
               </p>
             </div>
@@ -615,7 +615,7 @@ export default async function PartnerDossierPage({
           </p>
 
           <p className="mt-1 text-sm leading-6 text-blue-800">
-            Le paiement est validé et l'assurance
+            Le paiement est validé et l&apos;assurance
             du client est actuellement en cours de
             préparation.
           </p>
@@ -645,7 +645,7 @@ export default async function PartnerDossierPage({
           </p>
 
           <p className="mt-1 text-sm leading-6 text-red-800">
-            Le justificatif transmis n'a pas été
+            Le justificatif transmis n&apos;a pas été
             validé. Consultez le motif du refus puis
             envoyez un nouveau justificatif depuis
             ce dossier.
@@ -1033,7 +1033,7 @@ export default async function PartnerDossierPage({
               Tarif enregistré lors de la création
               du dossier. Une modification
               ultérieure des tarifs partenaire
-              n'affectera pas ce montant.
+              n&apos;affectera pas ce montant.
             </p>
           </section>
 
@@ -1053,7 +1053,7 @@ export default async function PartnerDossierPage({
             </div>
 
             <p className="mt-4 text-sm leading-6 text-slate-500">
-              L'état de cette demande est mis
+              L&apos;état de cette demande est mis
               à jour au fur et à mesure de son
               traitement par IF Sigorta.
             </p>

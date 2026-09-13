@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 
-import {
-  usePathname,
-} from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import {
   BarChart3,
@@ -24,22 +22,17 @@ import {
 } from "lucide-react";
 
 type NavigationProps = {
-  role:
-    | "admin"
-    | "agent";
+  role: "admin" | "agent";
 
-  urgentRenewalCount?:
-    number;
+  urgentRenewalCount?: number;
 
-  onNavigate?:
-    () => void;
+  onNavigate?: () => void;
 };
 
 type NavigationLink = {
   href: string;
   label: string;
-  icon:
-    typeof LayoutDashboard;
+  icon: typeof LayoutDashboard;
   adminOnly?: boolean;
   badge?: number;
 };
@@ -49,8 +42,7 @@ export default function Navigation({
   urgentRenewalCount = 0,
   onNavigate,
 }: NavigationProps) {
-  const pathname =
-    usePathname();
+  const pathname = usePathname();
 
   const links: NavigationLink[] = [
     {
@@ -82,8 +74,7 @@ export default function Navigation({
       href: "/admin/renouvellements",
       label: "Renouvellements",
       icon: RefreshCcw,
-      badge:
-        urgentRenewalCount,
+      badge: urgentRenewalCount,
     },
     {
       href: "/admin/recherche",
@@ -133,96 +124,72 @@ export default function Navigation({
     },
   ];
 
-  function isActive(
-    href: string,
-  ) {
+  function isActive(href: string) {
     return (
       pathname === href ||
-      pathname.startsWith(
-        `${href}/`,
-      )
+      (pathname.startsWith(`${href}/`) &&
+        !links.some(
+          (link) =>
+            link.href !== href &&
+            link.href.startsWith(`${href}/`) &&
+            (pathname === link.href || pathname.startsWith(`${link.href}/`)),
+        ))
     );
   }
 
-  const visibleLinks =
-    links.filter(
-      (link) =>
-        !link.adminOnly ||
-        role === "admin",
-    );
+  const visibleLinks = links.filter(
+    (link) => !link.adminOnly || role === "admin",
+  );
 
   return (
-    <nav className="space-y-1 lg:space-y-1.5">
-      {visibleLinks.map(
-        (link) => {
-          const Icon =
-            link.icon;
+    <nav
+      aria-label="Navigation principale"
+      className="space-y-1 lg:space-y-1.5"
+    >
+      {visibleLinks.map((link) => {
+        const Icon = link.icon;
 
-          const active =
-            isActive(
-              link.href,
-            );
+        const active = isActive(link.href);
 
-          return (
-            <Link
-              key={
-                link.href
-              }
-              href={
-                link.href
-              }
-              onClick={
-                onNavigate
-              }
+        return (
+          <Link
+            aria-current={active ? "page" : undefined}
+            key={link.href}
+            href={link.href}
+            onClick={onNavigate}
+            className={[
+              "group flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-11 lg:gap-3 lg:px-3.5 lg:py-2.5 lg:text-sm",
+              active
+                ? "bg-[#123F2C] text-white shadow-sm"
+                : "text-slate-600 hover:bg-[#F3F8F2] hover:text-[#123F2C]",
+            ].join(" ")}
+          >
+            <div
               className={[
-                "group flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-11 lg:gap-3 lg:px-3.5 lg:py-2.5 lg:text-sm",
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
                 active
-                  ? "bg-[#123F2C] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-[#F3F8F2] hover:text-[#123F2C]",
-              ].join(
-                " ",
-              )}
+                  ? "bg-white/10 text-[#B8E83D]"
+                  : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-[#0B5D3B]",
+              ].join(" ")}
             >
-              <div
+              <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />
+            </div>
+
+            <span className="min-w-0 flex-1 truncate">{link.label}</span>
+
+            {typeof link.badge === "number" && link.badge > 0 && (
+              <span
                 className={[
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
-                  active
-                    ? "bg-white/10 text-[#B8E83D]"
-                    : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-[#0B5D3B]",
-                ].join(
-                  " ",
-                )}
+                  "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black sm:min-w-6 sm:px-2 sm:text-[11px] lg:min-w-6 lg:px-2 lg:text-[11px]",
+                  active ? "bg-white text-red-600" : "bg-red-500 text-white",
+                ].join(" ")}
               >
-                <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />
-              </div>
-
-              <span className="min-w-0 flex-1 truncate">
-                {link.label}
+                {link.badge > 99 ? "99+" : link.badge}
               </span>
-
-              {typeof link.badge ===
-                "number" &&
-                link.badge > 0 && (
-                  <span
-                    className={[
-                      "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black sm:min-w-6 sm:px-2 sm:text-[11px] lg:min-w-6 lg:px-2 lg:text-[11px]",
-                      active
-                        ? "bg-white text-red-600"
-                        : "bg-red-500 text-white",
-                    ].join(
-                      " ",
-                    )}
-                  >
-                    {link.badge >
-                    99
-                      ? "99+"
-                      : link.badge}
-                  </span>
-                )}
-            </Link>
-          );
-        },
-      )}
+            )}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

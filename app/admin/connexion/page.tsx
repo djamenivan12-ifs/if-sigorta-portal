@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+
 
 import {
   FormEvent,
@@ -113,7 +115,7 @@ export default function ConnexionAgentPage() {
               aria-label="IF Sigorta"
               className="inline-flex items-center"
             >
-              <img
+              <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
                 src="/if-sigorta-logo.png"
                 alt="IF Sigorta"
                 className="h-[110px] w-auto object-contain object-left"
@@ -169,7 +171,7 @@ export default function ConnexionAgentPage() {
                 href="/"
                 aria-label="IF Sigorta"
               >
-                <img
+                <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
                   src="/if-sigorta-logo.png"
                   alt="IF Sigorta"
                   className="h-[78px] max-w-full object-contain sm:h-[95px]"

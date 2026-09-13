@@ -1,3 +1,5 @@
+import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
+import { isValidDate } from "@/lib/validation/date";
 import { NextResponse } from "next/server";
 
 import { logActivity } from "@/lib/activity/logActivity";
@@ -204,21 +206,7 @@ function validateUploadedDocument(
   }
 }
 
-function isValidDate(
-  value: string,
-): boolean {
-  if (!value) {
-    return false;
-  }
 
-  const date = new Date(
-    `${value}T00:00:00`,
-  );
-
-  return !Number.isNaN(
-    date.getTime(),
-  );
-}
 
 function getTodayDate(): string {
   return new Date()
@@ -1144,6 +1132,7 @@ export async function POST(
           document,
         );
 
+      await verifyStoredDocument(serviceClient, BUCKET_NAME, document.storagePath);
       const {
         error:
           moveError,
@@ -1460,9 +1449,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        success:
-          true,
-
+        success: true, calculatedPrice, calculatedAge,
         requestId:
           insuranceRequest.id,
 

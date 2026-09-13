@@ -116,13 +116,15 @@ export async function POST(
       );
     }
 
+    const { data: dossier, error: accessError } = await serviceClient.from("insurance_requests").select("assigned_agent_id").eq("id", renewal.request_id).maybeSingle();
+    if (accessError) throw accessError;
+    if (!dossier || (auth.role === "agent" && dossier.assigned_agent_id && dossier.assigned_agent_id !== user.id)) return NextResponse.json({success:false,error:"Ce dossier ne vous est pas attribué."},{status:403});
+    if (!["pending", "contacted", "interested"].includes(renewal.status)) return NextResponse.json({success:false,error:"Ce renouvellement ne peut plus être modifié."},{status:409});
+    if (renewal.status === "interested") return NextResponse.json({success:true});
     const now =
       new Date().toISOString();
 
-    const {
-      error:
-        updateError,
-    } =
+    const { data: updatedRenewal, error: updateError } =
       await serviceClient
         .from(
           "insurance_renewals",
@@ -134,10 +136,7 @@ export async function POST(
           updated_at:
             now,
         })
-        .eq(
-          "id",
-          id,
-        );
+        .eq("id", id).eq("status", renewal.status).select("id").maybeSingle();
 
     if (updateError) {
       throw new Error(
@@ -149,9 +148,8 @@ export async function POST(
      * Historique du dossier.
      */
 
-    if (
-      renewal.request_id
-    ) {
+    if (!updatedRenewal) return NextResponse.json({success:false,error:"Le renouvellement a changé. Actualisez la page."},{status:409});
+    if (renewal.request_id) {
       const {
         error:
           activityError,
@@ -171,7 +169,7 @@ export async function POST(
               "renewal_contacted",
 
             description:
-              "Le client a été contacté sur WhatsApp pour son renouvellement.",
+              "Un contact WhatsApp a été préparé pour le renouvellement.",
 
             created_at:
               now,

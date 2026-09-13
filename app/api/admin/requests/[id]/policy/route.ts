@@ -1,3 +1,4 @@
+import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
 import { NextResponse } from "next/server";
 
 import { logActivity } from "@/lib/activity/logActivity";
@@ -267,72 +268,7 @@ function validatePendingPolicy({
   };
 }
 
-async function verifyStorageObject(
-  serviceClient: ReturnType<
-    typeof createServiceClient
-  >,
-  storagePath: string,
-) {
-  const lastSlashIndex =
-    storagePath.lastIndexOf(
-      "/",
-    );
-
-  if (
-    lastSlashIndex <= 0 ||
-    lastSlashIndex ===
-      storagePath.length - 1
-  ) {
-    throw new Error(
-      "Chemin Storage invalide.",
-    );
-  }
-
-  const folder =
-    storagePath.slice(
-      0,
-      lastSlashIndex,
-    );
-
-  const fileName =
-    storagePath.slice(
-      lastSlashIndex + 1,
-    );
-
-  const {
-    data,
-    error,
-  } =
-    await serviceClient.storage
-      .from(BUCKET_NAME)
-      .list(
-        folder,
-        {
-          search:
-            fileName,
-          limit: 10,
-        },
-      );
-
-  if (error) {
-    throw new Error(
-      `Vérification du fichier impossible : ${error.message}`,
-    );
-  }
-
-  const exists =
-    (data ?? []).some(
-      (item) =>
-        item.name ===
-        fileName,
-    );
-
-  if (!exists) {
-    throw new Error(
-      "Le fichier téléversé est introuvable dans le stockage.",
-    );
-  }
-}
+async function verifyStorageObject(serviceClient:ReturnType<typeof createServiceClient>, storagePath:string) { await verifyStoredDocument(serviceClient,BUCKET_NAME,storagePath,true); }
 
 export async function POST(
   request: Request,
@@ -1566,8 +1502,7 @@ export async function POST(
                 now,
             },
             {
-              onConflict:
-                "request_id",
+              onConflict: "request_id", ignoreDuplicates: true,
             },
           );
 

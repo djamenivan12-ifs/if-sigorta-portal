@@ -1,3 +1,5 @@
+
+import { normalizeActivityAction } from "@/lib/activity/normalizeAction";
 type ActivityItem = {
   action: string;
   created_at: string;
@@ -243,7 +245,7 @@ function getProgressValue(
   const whatsappSent =
     activities.some(
       (activity) =>
-        activity.action ===
+        normalizeActivityAction(activity.action) ===
         "whatsapp_sent",
     );
 
@@ -495,7 +497,7 @@ export default function RequestTimeline({
   const whatsappSent =
     findActivity(
       activities,
-      [
+      ["policy_whatsapp_sent","partner_policy_whatsapp_sent",
         "whatsapp_sent",
       ],
     );

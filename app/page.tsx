@@ -1,4 +1,7 @@
 "use client";
+import Image from "next/image";
+
+import { useLanguage } from "@/lib/useLanguage";
 
 import Link from "next/link";
 
@@ -22,10 +25,7 @@ import HomeHeader from "@/components/home/HomeHeader";
 import HomeHero from "@/components/home/HomeHero";
 import TrackRequestForm from "@/components/home/TrackRequestForm";
 
-type Language =
-  | "fr"
-  | "en"
-  | "tr";
+
 
 const translations = {
   fr: {
@@ -360,13 +360,8 @@ const translations = {
 };
 
 export default function HomePage() {
-  const [
-    language,
-    setLanguage,
-  ] =
-    useState<Language>(
-      "fr",
-    );
+  const [language] =
+    useLanguage();
 
   const [
     publicWhatsappNumber,
@@ -376,48 +371,7 @@ export default function HomePage() {
       "",
     );
 
-  useEffect(() => {
-    const saved =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      saved === "fr" ||
-      saved === "en" ||
-      saved === "tr"
-    ) {
-      setLanguage(
-        saved,
-      );
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language:
-            Language;
-        }>;
-
-      setLanguage(
-        customEvent.detail.language,
-      );
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled =
@@ -573,7 +527,7 @@ export default function HomePage() {
 
       <section
         id="fonctionnement"
-        className="bg-white py-14 sm:py-20 lg:py-28"
+        className="bg-white py-10 sm:py-14 lg:py-16"
       >
         <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid min-w-0 gap-10 sm:gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
@@ -807,7 +761,7 @@ export default function HomePage() {
             <div className="max-w-sm">
               <div className="flex items-center gap-3">
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden">
-                  <img
+                  <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
                     src="/if-sigorta-logo.png"
                     alt="IF Sigorta"
                     className="h-full w-full scale-[1.55] object-contain"

@@ -22,7 +22,7 @@ try {
     "";
 }
 
-const connectSources = [
+const connectSources = [supabaseOrigin.replace(/^http/, "ws"),
   "'self'",
   supabaseOrigin,
 ].filter(

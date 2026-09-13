@@ -1,3 +1,8 @@
+import { CLAIMABLE_STATUSES } from "@/lib/insurance/requestWorkflow";
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { collectRows } from "@/lib/supabase/collectRows";
+import { listAllUsers } from "@/lib/supabase/listAllUsers";
 import Link from "next/link";
 
 import ClaimRequestButton from "@/components/admin/requests/ClaimRequestButton";
@@ -41,25 +46,15 @@ type RequestRow = {
     | Array<{ code: string; company_name: string }>
     | null;
 
-  assigned_agent_id:
-    | string
-    | null;
+  assigned_agent_id: string | null;
 
-  passport_number:
-    | string
-    | null;
+  passport_number: string | null;
 
-  kimlik_number:
-    | string
-    | null;
+  kimlik_number: string | null;
 
-  calculated_price:
-    | number
-    | string
-    | null;
+  calculated_price: number | string | null;
 
-  insurance_duration_years:
-    number;
+  insurance_duration_years: number;
 
   created_at: string;
 
@@ -68,105 +63,72 @@ type RequestRow = {
         first_name: string;
         last_name: string;
 
-        nationality:
-          | string
-          | null;
+        nationality: string | null;
 
-        whatsapp_country_code:
-          | string
-          | null;
+        whatsapp_country_code: string | null;
 
-        whatsapp_number:
-          | string
-          | null;
+        whatsapp_number: string | null;
       }
     | Array<{
         first_name: string;
         last_name: string;
 
-        nationality:
-          | string
-          | null;
+        nationality: string | null;
 
-        whatsapp_country_code:
-          | string
-          | null;
+        whatsapp_country_code: string | null;
 
-        whatsapp_number:
-          | string
-          | null;
+        whatsapp_number: string | null;
       }>
     | null;
 };
 
 type ClientNationalityRow = {
-  nationality:
-    | string
-    | null;
+  nationality: string | null;
 };
 
 type AgentOption = {
   id: string;
   name: string;
 
-  role:
-    | "admin"
-    | "agent";
+  role: "admin" | "agent";
 };
 
 const statusOptions = [
   {
     value: "",
-    label:
-      "Tous les statuts",
+    label: "Tous les statuts",
   },
   {
-    value:
-      "draft",
-    label:
-      "Brouillon",
+    value: "draft",
+    label: "Brouillon",
   },
   {
-    value:
-      "waiting_payment",
-    label:
-      "Paiement attendu",
+    value: "waiting_payment",
+    label: "Paiement attendu",
   },
   {
-    value:
-      "payment_review",
-    label:
-      "Paiement à vérifier",
+    value: "payment_review",
+    label: "Paiement à vérifier",
   },
   {
-    value:
-      "payment_confirmed",
-    label:
-      "Paiement confirmé",
+    value: "payment_confirmed",
+    label: "Paiement confirmé",
   },
   {
-    value:
-      "policy_preparation",
-    label:
-      "Assurance en préparation",
+    value: "policy_preparation",
+    label: "Assurance en préparation",
   },
   {
-    value:
-      "policy_available",
-    label:
-      "Assurance disponible",
+    value: "policy_available",
+    label: "Assurance disponible",
   },
   {
-    value:
-      "payment_rejected",
-    label:
-      "Paiement refusé",
+    value: "payment_rejected",
+    label: "Paiement refusé",
   },
   {
-    value:
-      "cancelled",
-    label:
-      "Dossier annulé",
+    value: "cancelled",
+    label: "Dossier annulé",
   },
 ];
 
@@ -178,307 +140,149 @@ const statusLabels: Record<
   }
 > = {
   draft: {
-    label:
-      "Brouillon",
+    label: "Brouillon",
 
-    className:
-      "bg-slate-100 text-slate-700",
+    className: "bg-slate-100 text-slate-700",
   },
 
   waiting_payment: {
-    label:
-      "Paiement attendu",
+    label: "Paiement attendu",
 
-    className:
-      "bg-amber-100 text-amber-800",
+    className: "bg-amber-100 text-amber-800",
   },
 
   payment_review: {
-    label:
-      "Paiement à vérifier",
+    label: "Paiement à vérifier",
 
-    className:
-      "bg-orange-100 text-orange-800",
+    className: "bg-orange-100 text-orange-800",
   },
 
   payment_confirmed: {
-    label:
-      "Paiement confirmé",
+    label: "Paiement confirmé",
 
-    className:
-      "bg-green-100 text-green-800",
+    className: "bg-green-100 text-green-800",
   },
 
   policy_preparation: {
-    label:
-      "Assurance en préparation",
+    label: "Assurance en préparation",
 
-    className:
-      "bg-blue-100 text-blue-800",
+    className: "bg-blue-100 text-blue-800",
   },
 
   policy_available: {
-    label:
-      "Assurance disponible",
+    label: "Assurance disponible",
 
-    className:
-      "bg-emerald-100 text-emerald-800",
+    className: "bg-emerald-100 text-emerald-800",
   },
 
   payment_rejected: {
-    label:
-      "Paiement refusé",
+    label: "Paiement refusé",
 
-    className:
-      "bg-red-100 text-red-800",
+    className: "bg-red-100 text-red-800",
   },
 
   cancelled: {
-    label:
-      "Dossier annulé",
+    label: "Dossier annulé",
 
-    className:
-      "bg-slate-200 text-slate-800",
+    className: "bg-slate-200 text-slate-800",
   },
 };
 
-function unwrapClient(
-  relation:
-    RequestRow["client"],
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0] ??
-      null
-    );
+function unwrapClient(relation: RequestRow["client"]) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
 
   return relation;
 }
 
-function unwrapPartner(
-  relation: RequestRow["partner"],
-) {
-  return Array.isArray(relation)
-    ? relation[0] ?? null
-    : relation;
+function unwrapPartner(relation: RequestRow["partner"]) {
+  return Array.isArray(relation) ? (relation[0] ?? null) : relation;
 }
 
-function formatDate(
-  value: string,
-) {
-  const date =
-    new Date(
-      value,
-    );
+function formatDate(value: string) {
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "short",
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "short",
 
-      timeStyle:
-        "short",
+    timeStyle: "short",
 
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(
-    date,
-  );
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function createStartDate(
-  value: string,
-) {
-  return new Date(
-    `${value}T00:00:00+03:00`,
-  );
+function createStartDate(value: string) {
+  return new Date(`${value}T00:00:00+03:00`);
 }
 
-function createEndDate(
-  value: string,
-) {
-  return new Date(
-    `${value}T23:59:59.999+03:00`,
-  );
+function createEndDate(value: string) {
+  return new Date(`${value}T23:59:59.999+03:00`);
 }
 
 async function getNationalities() {
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
-  const {
-    data,
-    error,
-  } =
-    await supabase
-      .from(
-        "clients",
-      )
-      .select(
-        "nationality",
-      );
+  const { data, error } = await readAll(
+    supabase.from("clients").select("nationality").order("id"),
+  );
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
-  const rows =
-    (data ??
-      []) as ClientNationalityRow[];
+  const rows = (data ?? []) as ClientNationalityRow[];
 
   return Array.from(
     new Set(
       rows
-        .map(
-          (
-            row,
-          ) =>
-            row.nationality
-              ?.trim(),
-        )
-        .filter(
-          (
-            value,
-          ): value is string =>
-            Boolean(
-              value,
-            ),
-        ),
+        .map((row) => row.nationality?.trim())
+        .filter((value): value is string => Boolean(value)),
     ),
-  ).sort(
-    (
-      first,
-      second,
-    ) =>
-      first.localeCompare(
-        second,
-        "fr-FR",
-      ),
-  );
+  ).sort((first, second) => first.localeCompare(second, "fr-FR"));
 }
 
 async function getAgents() {
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
-  const {
-    data,
-    error,
-  } =
-    await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 200,
-    });
+  const { data, error } = await listAllUsers(supabase);
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
   return data.users
-    .filter(
-      (
-        authUser,
-      ) => {
-        const role =
-          authUser
-            .app_metadata
-            ?.role;
+    .filter((authUser) => {
+      const role = authUser.app_metadata?.role;
 
-        return (
-          role ===
-            "agent" ||
-          role ===
-            "admin"
-        );
-      },
-    )
-    .map(
-      (
-        authUser,
-      ): AgentOption => {
-        const firstName =
-          authUser
-            .user_metadata
-            ?.first_name
-            ?.toString()
-            .trim() ??
-          "";
+      return role === "agent" || role === "admin";
+    })
+    .map((authUser): AgentOption => {
+      const firstName =
+        authUser.user_metadata?.first_name?.toString().trim() ?? "";
 
-        const lastName =
-          authUser
-            .user_metadata
-            ?.last_name
-            ?.toString()
-            .trim() ??
-          "";
+      const lastName =
+        authUser.user_metadata?.last_name?.toString().trim() ?? "";
 
-        const fullName =
-          `${firstName} ${lastName}`.trim();
+      const fullName = `${firstName} ${lastName}`.trim();
 
-        return {
-          id:
-            authUser.id,
+      return {
+        id: authUser.id,
 
-          name:
-            fullName ||
-            authUser.email ||
-            "Agent",
+        name: fullName || authUser.email || "Agent",
 
-          role:
-            authUser
-              .app_metadata
-              ?.role ===
-            "admin"
-              ? "admin"
-              : "agent",
-        };
-      },
-    )
-    .sort(
-      (
-        first,
-        second,
-      ) =>
-        first.name.localeCompare(
-          second.name,
-          "fr-FR",
-        ),
-    );
+        role: authUser.app_metadata?.role === "admin" ? "admin" : "agent",
+      };
+    })
+    .sort((first, second) => first.name.localeCompare(second.name, "fr-FR"));
 }
 
-function createAgentNameMap(
-  agents:
-    AgentOption[],
-) {
-  return new Map(
-    agents.map(
-      (
-        agent,
-      ) => [
-        agent.id,
-        agent.name,
-      ],
-    ),
-  );
+function createAgentNameMap(agents: AgentOption[]) {
+  return new Map(agents.map((agent) => [agent.id, agent.name]));
 }
 
 async function getRequests({
@@ -503,20 +307,14 @@ async function getRequests({
   source: string;
   currentUserId: string;
 
-  role:
-    | "admin"
-    | "agent";
+  role: "admin" | "agent";
 }) {
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
-  let query =
-    supabase
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
+  let query = supabase
+    .from("insurance_requests")
+    .select(
+      `
           id,
           request_code,
           status,
@@ -542,285 +340,120 @@ async function getRequests({
             whatsapp_number
           )
         `,
-      )
-      .order(
-        "created_at",
-        {
-          ascending:
-            false,
-        },
-      );
+    )
+    .order("created_at", {
+      ascending: false,
+    });
 
+  if (role === "agent")
+    query = query.or(
+      `assigned_agent_id.is.null,assigned_agent_id.eq.${currentUserId}`,
+    );
   if (status) {
-    query =
-      query.eq(
-        "status",
-        status,
-      );
+    query = query.eq("status", status);
   }
 
   if (source === "direct" || source === "partner") {
     query = query.eq("source", source);
   }
 
-  if (
-    duration ===
-      "1" ||
-    duration ===
-      "2"
-  ) {
-    query =
-      query.eq(
-        "insurance_duration_years",
-        Number(
-          duration,
-        ),
-      );
+  if (duration === "1" || duration === "2") {
+    query = query.eq("insurance_duration_years", Number(duration));
   }
 
-  if (
-    agent ===
-    "me"
-  ) {
-    query =
-      query.eq(
-        "assigned_agent_id",
-        currentUserId,
-      );
-  } else if (
-    agent ===
-    "unassigned"
-  ) {
-    query =
-      query.is(
-        "assigned_agent_id",
-        null,
-      );
-  } else if (
-    agent &&
-    role ===
-      "admin"
-  ) {
-    query =
-      query.eq(
-        "assigned_agent_id",
-        agent,
-      );
+  if (agent === "me") {
+    query = query.eq("assigned_agent_id", currentUserId);
+  } else if (agent === "unassigned") {
+    query = query.is("assigned_agent_id", null);
+  } else if (agent && role === "admin") {
+    query = query.eq("assigned_agent_id", agent);
   }
 
   if (dateFrom) {
-    const startDate =
-      createStartDate(
-        dateFrom,
-      );
+    const startDate = createStartDate(dateFrom);
 
-    if (
-      !Number.isNaN(
-        startDate.getTime(),
-      )
-    ) {
-      query =
-        query.gte(
-          "created_at",
-          startDate.toISOString(),
-        );
+    if (!Number.isNaN(startDate.getTime())) {
+      query = query.gte("created_at", startDate.toISOString());
     }
   }
 
   if (dateTo) {
-    const endDate =
-      createEndDate(
-        dateTo,
-      );
+    const endDate = createEndDate(dateTo);
 
-    if (
-      !Number.isNaN(
-        endDate.getTime(),
-      )
-    ) {
-      query =
-        query.lte(
-          "created_at",
-          endDate.toISOString(),
-        );
+    if (!Number.isNaN(endDate.getTime())) {
+      query = query.lte("created_at", endDate.toISOString());
     }
   }
 
-  const {
-    data,
-    error,
-  } =
-    await query;
+  query = query.order("id");
+  const { data, error } = await collectRows((from, to) =>
+    query.range(from, to),
+  );
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
-  let rows =
-    (data ??
-      []) as unknown as RequestRow[];
+  let rows = (data ?? []) as unknown as RequestRow[];
 
   if (nationality) {
-    const normalizedNationality =
-      nationality
-        .trim()
-        .toLocaleLowerCase(
-          "fr-FR",
-        );
+    const normalizedNationality = nationality.trim().toLocaleLowerCase("fr-FR");
 
-    rows =
-      rows.filter(
-        (
-          request,
-        ) => {
-          const client =
-            unwrapClient(
-              request.client,
-            );
+    rows = rows.filter((request) => {
+      const client = unwrapClient(request.client);
 
-          return (
-            client
-              ?.nationality ??
-            ""
-          )
-            .trim()
-            .toLocaleLowerCase(
-              "fr-FR",
-            ) ===
-            normalizedNationality;
-        },
+      return (
+        (client?.nationality ?? "").trim().toLocaleLowerCase("fr-FR") ===
+        normalizedNationality
       );
+    });
   }
 
   if (!search) {
     return rows;
   }
 
-  const normalizedSearch =
-    search
-      .trim()
-      .toLocaleLowerCase(
-        "fr-FR",
-      );
+  const normalizedSearch = search.trim().toLocaleLowerCase("fr-FR");
 
-  const normalizedPhoneSearch =
-    search.replace(
-      /\D/g,
-      "",
+  const normalizedPhoneSearch = search.replace(/\D/g, "");
+
+  return rows.filter((request) => {
+    const client = unwrapClient(request.client);
+
+    const firstName = client?.first_name ?? "";
+
+    const lastName = client?.last_name ?? "";
+
+    const fullName = `${firstName} ${lastName}`;
+
+    const reverseFullName = `${lastName} ${firstName}`;
+
+    const whatsapp = client
+      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
+      : "";
+
+    const normalizedWhatsapp = whatsapp.replace(/\D/g, "");
+
+    const passport = request.passport_number ?? "";
+
+    const kimlik = request.kimlik_number ?? "";
+
+    return (
+      request.request_code
+        .toLocaleLowerCase("fr-FR")
+        .includes(normalizedSearch) ||
+      firstName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
+      lastName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
+      fullName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
+      reverseFullName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
+      passport.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
+      kimlik.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
+      Boolean(
+        normalizedPhoneSearch &&
+        normalizedWhatsapp.includes(normalizedPhoneSearch),
+      )
     );
-
-  return rows.filter(
-    (
-      request,
-    ) => {
-      const client =
-        unwrapClient(
-          request.client,
-        );
-
-      const firstName =
-        client
-          ?.first_name ??
-        "";
-
-      const lastName =
-        client
-          ?.last_name ??
-        "";
-
-      const fullName =
-        `${firstName} ${lastName}`;
-
-      const reverseFullName =
-        `${lastName} ${firstName}`;
-
-      const whatsapp =
-        client
-          ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
-          : "";
-
-      const normalizedWhatsapp =
-        whatsapp.replace(
-          /\D/g,
-          "",
-        );
-
-      const passport =
-        request.passport_number ??
-        "";
-
-      const kimlik =
-        request.kimlik_number ??
-        "";
-
-      return (
-        request.request_code
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        firstName
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        lastName
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        fullName
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        reverseFullName
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        passport
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        kimlik
-          .toLocaleLowerCase(
-            "fr-FR",
-          )
-          .includes(
-            normalizedSearch,
-          ) ||
-
-        Boolean(
-          normalizedPhoneSearch &&
-            normalizedWhatsapp.includes(
-              normalizedPhoneSearch,
-            ),
-        )
-      );
-    },
-  );
+  });
 }
 
 function buildPageUrl({
@@ -844,182 +477,93 @@ function buildPageUrl({
   agent: string;
   source: string;
 }) {
-  const params =
-    new URLSearchParams();
+  const params = new URLSearchParams();
 
   if (search) {
-    params.set(
-      "q",
-      search,
-    );
+    params.set("q", search);
   }
 
   if (status) {
-    params.set(
-      "status",
-      status,
-    );
+    params.set("status", status);
   }
 
   if (nationality) {
-    params.set(
-      "nationality",
-      nationality,
-    );
+    params.set("nationality", nationality);
   }
 
   if (duration) {
-    params.set(
-      "duration",
-      duration,
-    );
+    params.set("duration", duration);
   }
 
   if (dateFrom) {
-    params.set(
-      "dateFrom",
-      dateFrom,
-    );
+    params.set("dateFrom", dateFrom);
   }
 
   if (dateTo) {
-    params.set(
-      "dateTo",
-      dateTo,
-    );
+    params.set("dateTo", dateTo);
   }
 
   if (agent) {
-    params.set(
-      "agent",
-      agent,
-    );
+    params.set("agent", agent);
   }
 
   if (source) {
     params.set("source", source);
   }
 
-  if (
-    page >
-    1
-  ) {
-    params.set(
-      "page",
-      page.toString(),
-    );
+  if (page > 1) {
+    params.set("page", page.toString());
   }
 
-  const query =
-    params.toString();
+  const query = params.toString();
 
-  return query
-    ? `/admin/dossiers?${query}`
-    : "/admin/dossiers";
+  return query ? `/admin/dossiers?${query}` : "/admin/dossiers";
 }
 
 export default async function DossiersPage({
   searchParams,
 }: {
-  searchParams:
-    SearchParams;
+  searchParams: SearchParams;
 }) {
-  const {
-    user,
-    role,
-  } =
-    await requireRole([
-      "agent",
-      "admin",
-    ]);
+  const { user, role } = await requireRole(["agent", "admin"]);
 
-  const params =
-    await searchParams;
+  const params = await searchParams;
 
-  const search =
-    params.q
-      ?.trim() ??
-    "";
+  const search = params.q?.trim() ?? "";
 
-  const status =
-    params.status
-      ?.trim() ??
-    "";
+  const status = params.status?.trim() ?? "";
 
-  const nationality =
-    params.nationality
-      ?.trim() ??
-    "";
+  const nationality = params.nationality?.trim() ?? "";
 
-  const duration =
-    params.duration
-      ?.trim() ??
-    "";
+  const duration = params.duration?.trim() ?? "";
 
-  const dateFrom =
-    params.dateFrom
-      ?.trim() ??
-    "";
+  const dateFrom = params.dateFrom?.trim() ?? "";
 
-  const dateTo =
-    params.dateTo
-      ?.trim() ??
-    "";
+  const dateTo = params.dateTo?.trim() ?? "";
 
-  const agent =
-    params.agent
-      ?.trim() ??
-    "";
+  const agent = params.agent?.trim() ?? "";
 
-  const source =
-    params.source
-      ?.trim() ??
-    "";
+  const source = params.source?.trim() ?? "";
 
-  const requestedPage =
-    Number(
-      params.page ??
-      "1",
-    );
+  const requestedPage = Number(params.page ?? "1");
 
   let currentPage =
-    Number.isFinite(
-      requestedPage,
-    ) &&
-    requestedPage >
-      0
-      ? Math.floor(
-          requestedPage,
-        )
+    Number.isFinite(requestedPage) && requestedPage > 0
+      ? Math.floor(requestedPage)
       : 1;
 
-  let requests:
-    RequestRow[] =
-    [];
+  let requests: RequestRow[] = [];
 
-  let nationalities:
-    string[] =
-    [];
+  let nationalities: string[] = [];
 
-  let agents:
-    AgentOption[] =
-    [];
+  let agents: AgentOption[] = [];
 
-  let agentNames =
-    new Map<
-      string,
-      string
-    >();
+  let agentNames = new Map<string, string>();
 
-  let errorMessage =
-    "";
+  let errorMessage = "";
 
   try {
-    const [
-      requestsResult,
-      nationalitiesResult,
-      agentsResult,
-    ] =
+    const [requestsResult, nationalitiesResult, agentsResult] =
       await Promise.all([
         getRequests({
           search,
@@ -1031,8 +575,7 @@ export default async function DossiersPage({
           agent,
           source,
 
-          currentUserId:
-            user.id,
+          currentUserId: user.id,
 
           role,
         }),
@@ -1042,103 +585,60 @@ export default async function DossiersPage({
         getAgents(),
       ]);
 
-    requests =
-      requestsResult;
+    requests = requestsResult;
 
-    nationalities =
-      nationalitiesResult;
+    nationalities = nationalitiesResult;
 
-    agents =
-      agentsResult;
+    agents = agentsResult;
 
-    agentNames =
-      createAgentNameMap(
-        agents,
-      );
-  } catch (
-    error
-  ) {
+    agentNames = createAgentNameMap(agents);
+  } catch (error) {
     errorMessage =
       error instanceof Error
         ? error.message
         : "Les dossiers n’ont pas pu être chargés.";
   }
 
-  const totalRequests =
-    requests.length;
+  const totalRequests = requests.length;
 
-  const totalPages =
-    Math.max(
-      1,
-      Math.ceil(
-        totalRequests /
-          ITEMS_PER_PAGE,
-      ),
-    );
+  const totalPages = Math.max(1, Math.ceil(totalRequests / ITEMS_PER_PAGE));
 
-  if (
-    currentPage >
-    totalPages
-  ) {
-    currentPage =
-      totalPages;
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
   }
 
-  const startIndex =
-    (currentPage -
-      1) *
-    ITEMS_PER_PAGE;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const endIndex =
-    startIndex +
-    ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
 
-  const paginatedRequests =
-    requests.slice(
-      startIndex,
-      endIndex,
-    );
+  const paginatedRequests = requests.slice(startIndex, endIndex);
 
-  const firstVisibleItem =
-    totalRequests ===
-    0
-      ? 0
-      : startIndex +
-        1;
+  const firstVisibleItem = totalRequests === 0 ? 0 : startIndex + 1;
 
-  const lastVisibleItem =
-    Math.min(
-      endIndex,
-      totalRequests,
-    );
+  const lastVisibleItem = Math.min(endIndex, totalRequests);
 
-  const visiblePages =
-    Array.from(
-      {
-        length:
-          totalPages,
-      },
-      (
-        _,
-        index,
-      ) =>
-        index + 1,
-    ).filter(
-      (
-        pageNumber,
-      ) =>
-        pageNumber ===
-          1 ||
-        pageNumber ===
-          totalPages ||
-        Math.abs(
-          pageNumber -
-            currentPage,
-        ) <= 2,
-    );
+  const visiblePages = Array.from(
+    {
+      length: totalPages,
+    },
+    (_, index) => index + 1,
+  ).filter(
+    (pageNumber) =>
+      pageNumber === 1 ||
+      pageNumber === totalPages ||
+      Math.abs(pageNumber - currentPage) <= 2,
+  );
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Dossiers"
+      href="/admin/dossiers"
+      detail={false}
+      sections={[
+        { id: "section-1", label: "Recherche et filtres" },
+        { id: "section-2", label: "Résultats" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -1212,7 +712,7 @@ export default async function DossiersPage({
 
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-[#102B20]">
+            <h2 className="text-lg font-semibold text-[#102B20]" id="section-1">
               Recherche et filtres
             </h2>
 
@@ -1221,10 +721,7 @@ export default async function DossiersPage({
             </p>
           </div>
 
-          <form
-            method="GET"
-            className="min-w-0 space-y-4 sm:space-y-5"
-          >
+          <form method="GET" className="min-w-0 space-y-4 sm:space-y-5">
             <div>
               <label
                 htmlFor="q"
@@ -1237,11 +734,10 @@ export default async function DossiersPage({
                 id="q"
                 name="q"
                 type="search"
-                defaultValue={
-                  search
-                }
+                defaultValue={search}
                 placeholder="Matricule, nom, prénom, WhatsApp, passeport, Kimlik, partenaire ou code partenaire"
                 className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-[13px] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                aria-label="Rechercher"
               />
             </div>
 
@@ -1257,30 +753,15 @@ export default async function DossiersPage({
                 <select
                   id="status"
                   name="status"
-                  defaultValue={
-                    status
-                  }
+                  defaultValue={status}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Statut"
                 >
-                  {statusOptions.map(
-                    (
-                      option,
-                    ) => (
-                      <option
-                        key={
-                          option.value ||
-                          "all"
-                        }
-                        value={
-                          option.value
-                        }
-                      >
-                        {
-                          option.label
-                        }
-                      </option>
-                    ),
-                  )}
+                  {statusOptions.map((option) => (
+                    <option key={option.value || "all"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -1295,33 +776,17 @@ export default async function DossiersPage({
                 <select
                   id="nationality"
                   name="nationality"
-                  defaultValue={
-                    nationality
-                  }
+                  defaultValue={nationality}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Nationalité"
                 >
-                  <option value="">
-                    Toutes les nationalités
-                  </option>
+                  <option value="">Toutes les nationalités</option>
 
-                  {nationalities.map(
-                    (
-                      nationalityOption,
-                    ) => (
-                      <option
-                        key={
-                          nationalityOption
-                        }
-                        value={
-                          nationalityOption
-                        }
-                      >
-                        {
-                          nationalityOption
-                        }
-                      </option>
-                    ),
-                  )}
+                  {nationalities.map((nationalityOption) => (
+                    <option key={nationalityOption} value={nationalityOption}>
+                      {nationalityOption}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -1336,22 +801,15 @@ export default async function DossiersPage({
                 <select
                   id="duration"
                   name="duration"
-                  defaultValue={
-                    duration
-                  }
+                  defaultValue={duration}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Durée"
                 >
-                  <option value="">
-                    Toutes les durées
-                  </option>
+                  <option value="">Toutes les durées</option>
 
-                  <option value="1">
-                    1 an
-                  </option>
+                  <option value="1">1 an</option>
 
-                  <option value="2">
-                    2 ans
-                  </option>
+                  <option value="2">2 ans</option>
                 </select>
               </div>
 
@@ -1366,53 +824,32 @@ export default async function DossiersPage({
                 <select
                   id="agent"
                   name="agent"
-                  defaultValue={
-                    agent
-                  }
+                  defaultValue={agent}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Responsable"
                 >
-                  <option value="">
-                    Tous les responsables
-                  </option>
+                  <option value="">Tous les responsables</option>
 
-                  <option value="me">
-                    Mes dossiers
-                  </option>
+                  <option value="me">Mes dossiers</option>
 
-                  <option value="unassigned">
-                    Non attribués
-                  </option>
+                  <option value="unassigned">Non attribués</option>
 
-                  {role ===
-                    "admin" &&
-                    agents.map(
-                      (
-                        agentOption,
-                      ) => (
-                        <option
-                          key={
-                            agentOption.id
-                          }
-                          value={
-                            agentOption.id
-                          }
-                        >
-                          {
-                            agentOption.name
-                          }
+                  {role === "admin" &&
+                    agents.map((agentOption) => (
+                      <option key={agentOption.id} value={agentOption.id}>
+                        {agentOption.name}
 
-                          {agentOption.role ===
-                          "admin"
-                            ? " — Admin"
-                            : ""}
-                        </option>
-                      ),
-                    )}
+                        {agentOption.role === "admin" ? " — Admin" : ""}
+                      </option>
+                    ))}
                 </select>
               </div>
 
               <div>
-                <label htmlFor="source" className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm">
+                <label
+                  htmlFor="source"
+                  className="mb-1.5 block text-[12px] font-medium text-slate-700 sm:mb-2 sm:text-sm"
+                >
                   Source
                 </label>
                 <select
@@ -1420,6 +857,7 @@ export default async function DossiersPage({
                   name="source"
                   defaultValue={source}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Origine"
                 >
                   <option value="">Toutes les sources</option>
                   <option value="direct">Client direct</option>
@@ -1439,10 +877,9 @@ export default async function DossiersPage({
                   id="dateFrom"
                   name="dateFrom"
                   type="date"
-                  defaultValue={
-                    dateFrom
-                  }
+                  defaultValue={dateFrom}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Du"
                 />
               </div>
             </div>
@@ -1460,10 +897,9 @@ export default async function DossiersPage({
                   id="dateTo"
                   name="dateTo"
                   type="date"
-                  defaultValue={
-                    dateTo
-                  }
+                  defaultValue={dateTo}
                   className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  aria-label="Au"
                 />
               </div>
 
@@ -1487,52 +923,38 @@ export default async function DossiersPage({
         </section>
 
         {errorMessage && (
-          <div className="mt-4 min-w-0 rounded-xl bg-red-50 px-3 py-3 text-[13px] text-red-700 sm:mt-6 sm:px-4 sm:text-sm">
-            {
-              errorMessage
-            }
+          <div
+            className="mt-4 min-w-0 rounded-xl bg-red-50 px-3 py-3 text-[13px] text-red-700 sm:mt-6 sm:px-4 sm:text-sm"
+            role="alert"
+          >
+            {errorMessage}
           </div>
         )}
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="flex min-w-0 flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+              <h2
+                className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]"
+                id="section-2"
+              >
                 Résultats
               </h2>
 
               <p className="mt-1 text-[12px] leading-5 text-slate-500 sm:text-sm">
-                {totalRequests.toLocaleString(
-                  "fr-FR",
-                )}{" "}
-                dossier
-                {totalRequests !==
-                1
-                  ? "s"
-                  : ""}
+                {totalRequests.toLocaleString("fr-FR")} dossier
+                {totalRequests !== 1 ? "s" : ""}
               </p>
             </div>
 
-            {totalRequests >
-              0 && (
+            {totalRequests > 0 && (
               <p className="text-sm text-slate-500">
-                {
-                  firstVisibleItem
-                }
-                –
-                {
-                  lastVisibleItem
-                }{" "}
-                sur{" "}
-                {
-                  totalRequests
-                }
+                {firstVisibleItem}–{lastVisibleItem} sur {totalRequests}
               </p>
             )}
           </div>
 
-          {paginatedRequests.length ===
-          0 ? (
+          {paginatedRequests.length === 0 ? (
             <div className="p-6 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun dossier trouvé
@@ -1542,39 +964,28 @@ export default async function DossiersPage({
             <>
               <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
                 {paginatedRequests.map((request) => {
-                  const client =
-                    unwrapClient(request.client);
+                  const client = unwrapClient(request.client);
 
-                  const partner =
-                    unwrapPartner(request.partner);
+                  const partner = unwrapPartner(request.partner);
 
-                  const clientName =
-                    client
-                      ? `${client.first_name} ${client.last_name}`.trim()
-                      : "Client inconnu";
+                  const clientName = client
+                    ? `${client.first_name} ${client.last_name}`.trim()
+                    : "Client inconnu";
 
-                  const whatsapp =
-                    client
-                      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
-                      : "";
+                  const whatsapp = client
+                    ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
+                    : "";
 
-                  const statusInformation =
-                    statusLabels[request.status] ?? {
-                      label: request.status,
-                      className:
-                        "bg-slate-100 text-slate-700",
-                    };
+                  const statusInformation = statusLabels[request.status] ?? {
+                    label: request.status,
+                    className: "bg-slate-100 text-slate-700",
+                  };
 
-                  const assignedAgentName =
-                    request.assigned_agent_id
-                      ? agentNames.get(
-                          request.assigned_agent_id,
-                        ) ?? "Agent"
-                      : null;
+                  const assignedAgentName = request.assigned_agent_id
+                    ? (agentNames.get(request.assigned_agent_id) ?? "Agent")
+                    : null;
 
-                  const isMine =
-                    request.assigned_agent_id ===
-                    user.id;
+                  const isMine = request.assigned_agent_id === user.id;
 
                   const sourceLabel =
                     request.source === "partner"
@@ -1676,9 +1087,7 @@ export default async function DossiersPage({
                           </dt>
                           <dd className="mt-1 text-[12px] font-semibold text-slate-700">
                             {request.insurance_duration_years} an
-                            {request.insurance_duration_years === 2
-                              ? "s"
-                              : ""}
+                            {request.insurance_duration_years === 2 ? "s" : ""}
                           </dd>
                         </div>
 
@@ -1705,17 +1114,24 @@ export default async function DossiersPage({
                       </div>
 
                       <div className="mt-4 min-w-0">
-                        <ClaimRequestButton
-                          requestId={request.id}
-                          assignedAgentId={
-                            request.assigned_agent_id
-                          }
-                          assignedAgentName={
-                            assignedAgentName
-                          }
-                          currentUserId={user.id}
-                          currentUserRole={role}
-                        />
+                        {!request.assigned_agent_id &&
+                          CLAIMABLE_STATUSES.includes(
+                            request.status as (typeof CLAIMABLE_STATUSES)[number],
+                          ) && (
+                            <ClaimRequestButton
+                              requestId={request.id}
+                              assignedAgentId={request.assigned_agent_id}
+                              assignedAgentName={assignedAgentName}
+                              currentUserId={user.id}
+                              currentUserRole={role}
+                            />
+                          )}
+                        <Link
+                          href={`/admin/dossiers/${request.id}`}
+                          className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-emerald-800 hover:bg-emerald-50"
+                        >
+                          Ouvrir le dossier →
+                        </Link>
                       </div>
                     </article>
                   );
@@ -1723,282 +1139,161 @@ export default async function DossiersPage({
               </div>
 
               <div className="hidden lg:block">
-<TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1880px] table-fixed">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[180px]">
-                      Matricule
-                    </TableHead>
+                <TableContainer className="rounded-none border-0 shadow-none">
+                  <Table
+                    className="admin-dossier-table min-w-[1050px] table-fixed"
+                    aria-label="Dossiers"
+                  >
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[210px]">
+                          Dossier / client
+                        </TableHead>
 
-                    <TableHead className="w-[290px]">
-                      Client
-                    </TableHead>
+                        <TableHead className="w-[190px]">Source</TableHead>
 
-                    <TableHead className="w-[190px]">
-                      Source
-                    </TableHead>
+                        <TableHead className="w-[150px]">Responsable</TableHead>
 
-                    <TableHead className="w-[150px]">
-                      Nationalité
-                    </TableHead>
+                        <TableHead className="w-[190px]">Statut</TableHead>
 
-                    <TableHead className="w-[170px]">
-                      WhatsApp
-                    </TableHead>
+                        <TableHead className="w-[170px]">Date</TableHead>
 
-                    <TableHead className="w-[150px]">
-                      Passeport
-                    </TableHead>
+                        <TableHead className="w-[180px]">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                    <TableHead className="w-[150px]">
-                      Kimlik
-                    </TableHead>
+                    <TableBody>
+                      {paginatedRequests.map((request) => {
+                        const client = unwrapClient(request.client);
 
-                    <TableHead className="w-[110px]">
-                      Durée
-                    </TableHead>
-
-                    <TableHead className="w-[120px]">
-                      Montant
-                    </TableHead>
-
-                    <TableHead className="w-[240px]">
-                      Responsable
-                    </TableHead>
-
-                    <TableHead className="w-[190px]">
-                      Statut
-                    </TableHead>
-
-                    <TableHead className="w-[170px]">
-                      Date
-                    </TableHead>
-
-                    <TableHead className="w-[220px]">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {paginatedRequests.map(
-                    (
-                      request,
-                    ) => {
-                      const client =
-                        unwrapClient(
-                          request.client,
-                        );
-
-                      const clientName =
-                        client
+                        const clientName = client
                           ? `${client.first_name} ${client.last_name}`.trim()
                           : "Client inconnu";
 
-                      const whatsapp =
-                        client
-                          ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
-                          : "";
-
-                      const statusInformation =
-                        statusLabels[
+                        const statusInformation = statusLabels[
                           request.status
                         ] ?? {
-                          label:
-                            request.status,
+                          label: request.status,
 
-                          className:
-                            "bg-slate-100 text-slate-700",
+                          className: "bg-slate-100 text-slate-700",
                         };
 
-                      const assignedAgentName =
-                        request.assigned_agent_id
-                          ? agentNames.get(
-                              request.assigned_agent_id,
-                            ) ??
-                            "Agent"
+                        const assignedAgentName = request.assigned_agent_id
+                          ? (agentNames.get(request.assigned_agent_id) ??
+                            "Agent")
                           : null;
 
-                      const isMine =
-                        request.assigned_agent_id ===
-                        user.id;
+                        const isMine = request.assigned_agent_id === user.id;
 
-                      return (
-                        <TableRow
-                          key={
-                            request.id
-                          }
-                        >
-                          <TableCell className="whitespace-nowrap">
-                            <span className="font-semibold text-slate-900">
-                              {
-                                request.request_code
-                              }
-                            </span>
-                          </TableCell>
+                        return (
+                          <TableRow key={request.id}>
+                            <TableCell>
+                              <Link
+                                href={`/admin/dossiers/${request.id}`}
+                                className="font-semibold text-emerald-800 hover:underline"
+                              >
+                                {request.request_code}
+                              </Link>
+                              <p
+                                className="mt-1 max-w-[200px] truncate text-xs text-slate-500"
+                                title={clientName}
+                              >
+                                {clientName}
+                              </p>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {
-                              clientName
-                            }
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {request.source === "partner"
-                              ? (() => {
-                                  const partner =
-                                    unwrapPartner(
+                            <TableCell className="whitespace-nowrap">
+                              {request.source === "partner"
+                                ? (() => {
+                                    const partner = unwrapPartner(
                                       request.partner,
                                     );
 
-                                  return partner
-                                    ? `${partner.company_name} (${partner.code})`
-                                    : "Partenaire";
-                                })()
-                              : "Client direct"}
-                          </TableCell>
+                                    return partner
+                                      ? `${partner.company_name} (${partner.code})`
+                                      : "Partenaire";
+                                  })()
+                                : "Client direct"}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {client
-                              ?.nationality ??
-                              "—"}
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {!request.assigned_agent_id ? (
+                                <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                                  Non attribué
+                                </span>
+                              ) : role === "admin" ? (
+                                <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                                  Pris en charge par {assignedAgentName}
+                                </span>
+                              ) : isMine ? (
+                                <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                                  Vous
+                                </span>
+                              ) : (
+                                <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                  Déjà pris en charge
+                                </span>
+                              )}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {whatsapp ||
-                              "—"}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {request.passport_number ??
-                              "—"}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {request.kimlik_number ??
-                              "—"}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {
-                              request.insurance_duration_years
-                            }{" "}
-                            an
-                            {request.insurance_duration_years ===
-                            2
-                              ? "s"
-                              : ""}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {Number(
-                              request.calculated_price ??
-                                0,
-                            ).toLocaleString(
-                              "fr-FR",
-                            )}{" "}
-                            TL
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {!request.assigned_agent_id ? (
-                              <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                                Non attribué
+                            <TableCell className="whitespace-nowrap">
+                              <span
+                                className={`inline-block whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
+                              >
+                                {statusInformation.label}
                               </span>
-                            ) : role ===
-                              "admin" ? (
-                              <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
-                                Pris en charge par{" "}
-                                {
-                                  assignedAgentName
-                                }
-                              </span>
-                            ) : isMine ? (
-                              <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
-                                Vous
-                              </span>
-                            ) : (
-                              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                                Déjà pris en charge
-                              </span>
-                            )}
-                          </TableCell>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <span
-                              className={`inline-block whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
-                            >
-                              {
-                                statusInformation.label
-                              }
-                            </span>
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(request.created_at)}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(
-                              request.created_at,
-                            )}
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            <div className="min-w-40">
-                              <ClaimRequestButton
-                                requestId={
-                                  request.id
-                                }
-                                assignedAgentId={
-                                  request.assigned_agent_id
-                                }
-                                assignedAgentName={
-                                  assignedAgentName
-                                }
-                                currentUserId={
-                                  user.id
-                                }
-                                currentUserRole={
-                                  role
-                                }
-                              />
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                            <TableCell className="whitespace-nowrap">
+                              <div className="min-w-0">
+                                {!request.assigned_agent_id &&
+                                  CLAIMABLE_STATUSES.includes(
+                                    request.status as (typeof CLAIMABLE_STATUSES)[number],
+                                  ) && (
+                                    <ClaimRequestButton
+                                      requestId={request.id}
+                                      assignedAgentId={
+                                        request.assigned_agent_id
+                                      }
+                                      assignedAgentName={assignedAgentName}
+                                      currentUserId={user.id}
+                                      currentUserRole={role}
+                                    />
+                                  )}
+                                <Link
+                                  href={`/admin/dossiers/${request.id}`}
+                                  className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-emerald-800 hover:bg-emerald-50"
+                                >
+                                  Ouvrir le dossier →
+                                </Link>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </div>
             </>
           )}
 
-          {totalPages >
-            1 && (
+          {totalPages > 1 && (
             <div className="flex min-w-0 flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
               <p className="text-sm text-slate-500">
-                Page{" "}
-                <strong>
-                  {
-                    currentPage
-                  }
-                </strong>{" "}
-                sur{" "}
-                <strong>
-                  {
-                    totalPages
-                  }
-                </strong>
+                Page <strong>{currentPage}</strong> sur{" "}
+                <strong>{totalPages}</strong>
               </p>
 
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                {currentPage >
-                  1 && (
+                {currentPage > 1 && (
                   <Link
                     href={buildPageUrl({
-                      page:
-                        currentPage -
-                        1,
+                      page: currentPage - 1,
 
                       search,
                       status,
@@ -2015,48 +1310,35 @@ export default async function DossiersPage({
                   </Link>
                 )}
 
-                {visiblePages.map(
-                  (
-                    pageNumber,
-                  ) => (
-                    <Link
-                      key={
-                        pageNumber
-                      }
-                      href={buildPageUrl({
-                        page:
-                          pageNumber,
+                {visiblePages.map((pageNumber) => (
+                  <Link
+                    key={pageNumber}
+                    href={buildPageUrl({
+                      page: pageNumber,
 
-                        search,
-                        status,
-                        nationality,
-                        duration,
-                        dateFrom,
-                        dateTo,
-                        agent,
-                        source,
-                      })}
-                      className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${
-                        pageNumber ===
-                        currentPage
-                          ? "bg-[#0B5D3B] text-white"
-                          : "border border-slate-200 bg-white text-slate-600 hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
-                      }`}
-                    >
-                      {
-                        pageNumber
-                      }
-                    </Link>
-                  ),
-                )}
+                      search,
+                      status,
+                      nationality,
+                      duration,
+                      dateFrom,
+                      dateTo,
+                      agent,
+                      source,
+                    })}
+                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${
+                      pageNumber === currentPage
+                        ? "bg-[#0B5D3B] text-white"
+                        : "border border-slate-200 bg-white text-slate-600 hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
+                    }`}
+                  >
+                    {pageNumber}
+                  </Link>
+                ))}
 
-                {currentPage <
-                  totalPages && (
+                {currentPage < totalPages && (
                   <Link
                     href={buildPageUrl({
-                      page:
-                        currentPage +
-                        1,
+                      page: currentPage + 1,
 
                       search,
                       status,
@@ -2077,6 +1359,6 @@ export default async function DossiersPage({
           )}
         </section>
       </div>
-    </main>
+    </PageFrame>
   );
 }

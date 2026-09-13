@@ -1,3 +1,4 @@
+import { consumeRateLimit, getClientIp } from "@/lib/security/rateLimit";
 import { NextResponse } from "next/server";
 
 import { createServiceClient } from "@/lib/supabase/service";
@@ -56,8 +57,10 @@ export async function POST(
   request: Request,
 ) {
   try {
-    const body =
-      (await request.json()) as UploadUrlPayload;
+    const quota = await consumeRateLimit({namespace:"public-document-upload",identifier:getClientIp(request),limit:30,windowSeconds:900});
+    if(!quota.allowed) return NextResponse.json({success:false,error:quota.unavailable ? "Service temporairement indisponible." : "Trop de documents envoyés. Réessayez plus tard."},{status:quota.unavailable?503:429,headers:{"Cache-Control":"no-store","Retry-After":String(quota.retryAfterSeconds)}});
+    const body = await request.json().catch(() => null) as UploadUrlPayload | null;
+    if (!body || typeof body !== "object") return NextResponse.json({success:false,error:"Données invalides."},{status:400});
 
     const {
       documentType,
@@ -156,7 +159,7 @@ export async function POST(
 
     const safeUploadSessionId =
       uploadSessionId &&
-      /^[a-f0-9-]{36}$/i.test(
+      /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
         uploadSessionId,
       )
         ? uploadSessionId

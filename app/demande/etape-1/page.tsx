@@ -1,10 +1,11 @@
 "use client";
+import Image from "next/image";
 
-import {
-  FormEvent,
-  useEffect,
-  useState,
-} from "react";
+import Link from "next/link";
+
+import { useLanguage } from "@/lib/useLanguage";
+
+import {FormEvent} from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -288,91 +289,16 @@ export default function Etape1Page() {
     language,
     setLanguage,
   ] =
-    useState<Language>(
-      "fr",
-    );
+    useLanguage();
 
-  useEffect(() => {
-    const savedLanguage =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      savedLanguage === "fr" ||
-      savedLanguage === "en" ||
-      savedLanguage === "tr"
-    ) {
-      setLanguage(
-        savedLanguage,
-      );
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language:
-            Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail?.language;
-
-      if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
-      ) {
-        setLanguage(
-          nextLanguage,
-        );
-      }
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   const t =
     translations[
       language
     ];
 
-  function changeLanguage(
-    nextLanguage: Language,
-  ) {
-    setLanguage(
-      nextLanguage,
-    );
-
-    window.localStorage.setItem(
-      "if-sigorta-language",
-      nextLanguage,
-    );
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "if-sigorta-language-change",
-        {
-          detail: {
-            language:
-              nextLanguage,
-          },
-        },
-      ),
-    );
-  }
+  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
 
   function handleSubmit(
     event:
@@ -511,17 +437,17 @@ export default function Etape1Page() {
       {/* TOP BAR */}
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
-          <a
+          <Link
             href="/"
             className="flex shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <img
+            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto max-w-[170px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
             />
-          </a>
+          </Link>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
@@ -564,12 +490,12 @@ export default function Etape1Page() {
               )}
             </div>
 
-            <a
+            <Link
               href="/"
               className="hidden text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:block"
             >
               {t.backHome}
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -876,12 +802,12 @@ export default function Etape1Page() {
               {/* ACTIONS */}
 
               <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
-                <a
+                <Link
                   href="/"
                   className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
                 >
                   {t.cancel}
-                </a>
+                </Link>
 
                 <button
                   type="submit"

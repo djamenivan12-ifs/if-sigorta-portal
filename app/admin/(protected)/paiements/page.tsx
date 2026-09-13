@@ -1,3 +1,8 @@
+import { paginate } from "@/lib/admin/pagination";
+import { ListPagination } from "@/components/admin/pages/ListTools";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { collectRows } from "@/lib/supabase/collectRows";
+import { normalizePaymentStatus } from "@/lib/insurance/paymentStatus";
 import Link from "next/link";
 
 import {
@@ -14,6 +19,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
 type SearchParams = Promise<{
+  page?: string;
   status?: string;
   q?: string;
 }>;
@@ -71,7 +77,7 @@ type PaymentView = {
   clientName: string;
   whatsapp: string;
 
-  paymentStatus: string;
+  paymentStatus: ReturnType<typeof normalizePaymentStatus>;
 
   amount: number;
 
@@ -90,168 +96,101 @@ const paymentStatusConfiguration: Record<
     className: string;
   }
 > = {
+  unknown: {
+    label: "Statut inconnu",
+    className: "bg-slate-100 text-slate-700",
+  },
   pending: {
     label: "En attente",
-    className:
-      "bg-slate-100 text-slate-700",
+    className: "bg-slate-100 text-slate-700",
   },
 
   submitted: {
     label: "À vérifier",
-    className:
-      "bg-orange-100 text-orange-800",
+    className: "bg-orange-100 text-orange-800",
   },
 
   review: {
     label: "À vérifier",
-    className:
-      "bg-orange-100 text-orange-800",
+    className: "bg-orange-100 text-orange-800",
   },
 
   confirmed: {
     label: "Confirmé",
-    className:
-      "bg-green-100 text-green-800",
+    className: "bg-green-100 text-green-800",
   },
 
   rejected: {
     label: "Refusé",
-    className:
-      "bg-red-100 text-red-800",
+    className: "bg-red-100 text-red-800",
   },
 };
 
-function unwrapClient(
-  relation: ClientRelation,
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0] ??
-      null
-    );
+function unwrapClient(relation: ClientRelation) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
 
   return relation;
 }
 
-function unwrapPayment(
-  relation: PaymentRelation,
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0] ??
-      null
-    );
+function unwrapPayment(relation: PaymentRelation) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
 
   return relation;
 }
 
-function formatDate(
-  value: string | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return "—";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "short",
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "short",
 
-      timeStyle:
-        "short",
+    timeStyle: "short",
 
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function formatAmount(
-  amount: number,
-) {
-  return `${amount.toLocaleString(
-    "fr-FR",
-    {
-      maximumFractionDigits:
-        2,
-    },
-  )} TL`;
+function formatAmount(amount: number) {
+  return `${amount.toLocaleString("fr-FR", {
+    maximumFractionDigits: 2,
+  })} TL`;
 }
 
-function normalize(
-  value:
-    | string
-    | null
-    | undefined,
-) {
-  return (
-    value ??
-    ""
-  )
-    .trim()
-    .toLocaleLowerCase(
-      "fr-FR",
-    );
+function normalize(value: string | null | undefined) {
+  return (value ?? "").trim().toLocaleLowerCase("fr-FR");
 }
 
 export default async function PaymentsPage({
   searchParams,
 }: {
-  searchParams:
-    SearchParams;
+  searchParams: SearchParams;
 }) {
-  const {
-    user,
-    role,
-  } =
-    await requireRole([
-      "admin",
-      "agent",
-    ]);
+  const { user, role } = await requireRole(["admin", "agent"]);
 
-  const params =
-    await searchParams;
+  const params = await searchParams;
 
-  const statusFilter =
-    params.status?.trim() ??
-    "";
+  const statusFilter = params.status?.trim() ?? "";
 
-  const search =
-    params.q?.trim() ??
-    "";
+  const search = params.q?.trim() ?? "";
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
-  let query =
-    serviceClient
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
+  let query = serviceClient
+    .from("insurance_requests")
+    .select(
+      `
           id,
           request_code,
           status,
@@ -266,7 +205,7 @@ export default async function PaymentsPage({
             whatsapp_number
           ),
 
-          payment:payments (
+          payment:payments!inner (
             status,
             expected_amount,
             submitted_at,
@@ -274,22 +213,10 @@ export default async function PaymentsPage({
             rejection_reason
           )
         `,
-      )
-      .in(
-        "status",
-        [
-          "payment_review",
-          "payment_confirmed",
-          "payment_rejected",
-        ],
-      )
-      .order(
-        "created_at",
-        {
-          ascending:
-            false,
-        },
-      );
+    )
+    .order("created_at", {
+      ascending: false,
+    });
 
   /*
    * Agent :
@@ -298,227 +225,123 @@ export default async function PaymentsPage({
    * Admin :
    * tous les paiements.
    */
-  if (
-    role ===
-    "agent"
-  ) {
-    query =
-      query.eq(
-        "assigned_agent_id",
-        user.id,
-      );
+  if (role === "agent") {
+    query = query.eq("assigned_agent_id", user.id);
   }
 
-  const {
-    data,
-    error,
-  } =
-    await query;
+  query = query.order("id");
+  const { data, error } = await collectRows((from, to) =>
+    query.range(from, to),
+  );
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
-  let payments:
-    PaymentView[] =
-    (
-      (data ??
-        []) as unknown as RequestRow[]
-    )
-      .map(
-        (
-          request,
-        ) => {
-          const client =
-            unwrapClient(
-              request.client,
-            );
+  let payments: PaymentView[] = ((data ?? []) as unknown as RequestRow[])
+    .map((request) => {
+      const client = unwrapClient(request.client);
 
-          const payment =
-            unwrapPayment(
-              request.payment,
-            );
+      const payment = unwrapPayment(request.payment);
 
-          if (!payment) {
-            return null;
-          }
+      if (!payment) {
+        return null;
+      }
 
-          const clientName =
-            client
-              ? `${client.first_name} ${client.last_name}`.trim()
-              : "Client inconnu";
+      const clientName = client
+        ? `${client.first_name} ${client.last_name}`.trim()
+        : "Client inconnu";
 
-          const whatsapp =
-            client
-              ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
-              : "";
+      const whatsapp = client
+        ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
+        : "";
 
-          return {
-            requestId:
-              request.id,
+      return {
+        requestId: request.id,
 
-            requestCode:
-              request.request_code,
+        requestCode: request.request_code,
 
-            requestStatus:
-              request.status,
+        requestStatus: request.status,
 
-            clientName,
+        clientName,
 
-            whatsapp,
+        whatsapp,
 
-            paymentStatus:
-              payment.status ??
-              "",
+        paymentStatus: normalizePaymentStatus(payment.status, request.status),
 
-            amount:
-              Number(
-                payment.expected_amount ??
-                  request.calculated_price ??
-                  0,
-              ),
+        amount: Number(
+          payment.expected_amount ?? request.calculated_price ?? 0,
+        ),
 
-            submittedAt:
-              payment.submitted_at,
+        submittedAt: payment.submitted_at,
 
-            verifiedAt:
-              payment.verified_at,
+        verifiedAt: payment.verified_at,
 
-            rejectionReason:
-              payment.rejection_reason,
+        rejectionReason: payment.rejection_reason,
 
-            assignedAgentId:
-              request.assigned_agent_id,
-          };
-        },
-      )
-      .filter(
-        (
-          value,
-        ): value is PaymentView =>
-          value !==
-          null,
-      );
+        assignedAgentId: request.assigned_agent_id,
+      };
+    })
+    .filter((value): value is PaymentView => value !== null);
 
   /*
    * Filtre par état du dossier.
    */
-  if (
-    statusFilter ===
-    "review"
-  ) {
-    payments =
-      payments.filter(
-        (
-          payment,
-        ) =>
-          payment.requestStatus ===
-          "payment_review",
-      );
+  if (statusFilter === "review") {
+    payments = payments.filter((payment) => payment.paymentStatus === "review");
   }
 
-  if (
-    statusFilter ===
-    "confirmed"
-  ) {
-    payments =
-      payments.filter(
-        (
-          payment,
-        ) =>
-          payment.requestStatus ===
-          "payment_confirmed",
-      );
+  if (statusFilter === "confirmed") {
+    payments = payments.filter(
+      (payment) => payment.paymentStatus === "confirmed",
+    );
   }
 
-  if (
-    statusFilter ===
-    "rejected"
-  ) {
-    payments =
-      payments.filter(
-        (
-          payment,
-        ) =>
-          payment.requestStatus ===
-          "payment_rejected",
-      );
+  if (statusFilter === "rejected") {
+    payments = payments.filter(
+      (payment) => payment.paymentStatus === "rejected",
+    );
   }
 
   /*
    * Recherche.
    */
   if (search) {
-    const normalizedSearch =
-      normalize(
-        search,
-      );
+    const normalizedSearch = normalize(search);
 
-    payments =
-      payments.filter(
-        (
-          payment,
-        ) =>
-          normalize(
-            payment.clientName,
-          ).includes(
-            normalizedSearch,
-          ) ||
-          normalize(
-            payment.requestCode,
-          ).includes(
-            normalizedSearch,
-          ) ||
-          normalize(
-            payment.whatsapp,
-          ).includes(
-            normalizedSearch,
-          ),
-      );
+    payments = payments.filter(
+      (payment) =>
+        normalize(payment.clientName).includes(normalizedSearch) ||
+        normalize(payment.requestCode).includes(normalizedSearch) ||
+        normalize(payment.whatsapp).includes(normalizedSearch),
+    );
   }
 
-  const reviewCount =
-    payments.filter(
-      (
-        payment,
-      ) =>
-        payment.requestStatus ===
-        "payment_review",
-    ).length;
+  const reviewCount = payments.filter(
+    (payment) => payment.paymentStatus === "review",
+  ).length;
 
-  const confirmedCount =
-    payments.filter(
-      (
-        payment,
-      ) =>
-        payment.requestStatus ===
-        "payment_confirmed",
-    ).length;
+  const confirmedCount = payments.filter(
+    (payment) => payment.paymentStatus === "confirmed",
+  ).length;
 
-  const rejectedCount =
-    payments.filter(
-      (
-        payment,
-      ) =>
-        payment.requestStatus ===
-        "payment_rejected",
-    ).length;
+  const rejectedCount = payments.filter(
+    (payment) => payment.paymentStatus === "rejected",
+  ).length;
 
-  const totalAmount =
-    payments.reduce(
-      (
-        total,
-        payment,
-      ) =>
-        total +
-        payment.amount,
-      0,
-    );
+  const totalAmount = payments.reduce(
+    (total, payment) => total + payment.amount,
+    0,
+  );
 
+  const listing = paginate(payments, params.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Paiements"
+      href="/admin/paiements"
+      detail={false}
+      sections={[{ id: "section-1", label: "Liste des paiements" }]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
@@ -534,7 +357,8 @@ export default async function PaymentsPage({
               </h1>
 
               <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
-                Consultez et traitez les paiements associés aux demandes d’assurance.
+                Consultez et traitez les paiements associés aux demandes
+                d’assurance.
               </p>
             </div>
 
@@ -552,45 +376,29 @@ export default async function PaymentsPage({
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
           <StatCard
             label="À vérifier"
-            value={
-              reviewCount.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={reviewCount.toLocaleString("fr-FR")}
             description="Dekonts à contrôler"
             className="bg-orange-50 text-orange-700"
           />
 
           <StatCard
             label="Confirmés"
-            value={
-              confirmedCount.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={confirmedCount.toLocaleString("fr-FR")}
             description="Paiements validés"
             className="bg-[#EEF6EC] text-[#0B5D3B]"
           />
 
           <StatCard
             label="Refusés"
-            value={
-              rejectedCount.toLocaleString(
-                "fr-FR",
-              )
-            }
+            value={rejectedCount.toLocaleString("fr-FR")}
             description="Paiements rejetés"
             className="bg-red-50 text-red-700"
           />
 
           <StatCard
             label="Montant"
-            value={
-              formatAmount(
-                totalAmount,
-              )
-            }
-            description="Valeur des paiements affichés"
+            value={formatAmount(totalAmount)}
+            description="Montants attendus des lignes affichées"
             className="bg-[#F3F8F2] text-[#31513B]"
           />
         </section>
@@ -602,39 +410,35 @@ export default async function PaymentsPage({
             method="GET"
             className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]"
           >
-            <input
-              type="search"
-              name="q"
-              defaultValue={
-                search
-              }
-              placeholder="Client, code dossier ou WhatsApp..."
-              className="min-h-10 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
-            />
+            <label className="admin-filter-field">
+              Rechercher
+              <input
+                type="search"
+                name="q"
+                defaultValue={search}
+                placeholder="Client, code dossier ou WhatsApp..."
+                className="min-h-10 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
+                aria-label="Rechercher"
+              />
+            </label>
 
-            <select
-              name="status"
-              defaultValue={
-                statusFilter
-              }
-              className="min-h-10 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
-            >
-              <option value="">
-                Tous les paiements
-              </option>
+            <label className="admin-filter-field">
+              Statut
+              <select
+                name="status"
+                defaultValue={statusFilter}
+                className="min-h-10 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
+                aria-label="Statut"
+              >
+                <option value="">Tous les paiements</option>
 
-              <option value="review">
-                À vérifier
-              </option>
+                <option value="review">À vérifier</option>
 
-              <option value="confirmed">
-                Confirmés
-              </option>
+                <option value="confirmed">Confirmés</option>
 
-              <option value="rejected">
-                Refusés
-              </option>
-            </select>
+                <option value="rejected">Refusés</option>
+              </select>
+            </label>
 
             <button
               type="submit"
@@ -656,24 +460,20 @@ export default async function PaymentsPage({
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 p-4 sm:p-6">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
               Liste des paiements
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              {payments.length.toLocaleString(
-                "fr-FR",
-              )}{" "}
-              paiement
-              {payments.length !==
-              1
-                ? "s"
-                : ""}
+              {payments.length.toLocaleString("fr-FR")} paiement
+              {payments.length !== 1 ? "s" : ""}
             </p>
           </div>
 
-          {payments.length ===
-          0 ? (
+          {payments.length === 0 ? (
             <div className="px-4 py-10 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun paiement trouvé
@@ -682,16 +482,10 @@ export default async function PaymentsPage({
           ) : (
             <>
               <div className="divide-y divide-slate-100 lg:hidden">
-                {payments.map((payment) => {
+                {listing.rows.map((payment) => {
                   const paymentStatus =
                     paymentStatusConfiguration[payment.paymentStatus] ??
-                    paymentStatusConfiguration[
-                      payment.requestStatus === "payment_confirmed"
-                        ? "confirmed"
-                        : payment.requestStatus === "payment_rejected"
-                          ? "rejected"
-                          : "review"
-                    ];
+                    paymentStatusConfiguration.unknown;
 
                   return (
                     <article
@@ -710,6 +504,11 @@ export default async function PaymentsPage({
                           >
                             {payment.requestCode}
                           </Link>
+                          {payment.requestStatus === "cancelled" && (
+                            <span className="ml-2 text-xs text-slate-500">
+                              Dossier annulé
+                            </span>
+                          )}
                         </div>
 
                         <span
@@ -793,170 +592,130 @@ export default async function PaymentsPage({
               </div>
 
               <div className="hidden lg:block">
-            <TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1300px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      Client
-                    </TableHead>
+                <TableContainer className="rounded-none border-0 shadow-none">
+                  <Table className="min-w-[1300px]" aria-label="Paiements">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Client</TableHead>
 
-                    <TableHead>
-                      Dossier
-                    </TableHead>
+                        <TableHead>Dossier</TableHead>
 
-                    <TableHead>
-                      WhatsApp
-                    </TableHead>
+                        <TableHead>WhatsApp</TableHead>
 
-                    <TableHead>
-                      Montant
-                    </TableHead>
+                        <TableHead>Montant</TableHead>
 
-                    <TableHead>
-                      Statut
-                    </TableHead>
+                        <TableHead>Statut</TableHead>
 
-                    <TableHead>
-                      Soumis le
-                    </TableHead>
+                        <TableHead>Soumis le</TableHead>
 
-                    <TableHead>
-                      Vérifié le
-                    </TableHead>
+                        <TableHead>Vérifié le</TableHead>
 
-                    <TableHead>
-                      Motif
-                    </TableHead>
+                        <TableHead>Motif</TableHead>
 
-                    <TableHead className="text-right">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                <TableBody>
-                  {payments.map(
-                    (
-                      payment,
-                    ) => {
-                      const paymentStatus =
-                        paymentStatusConfiguration[
-                          payment.paymentStatus
-                        ] ??
-                        paymentStatusConfiguration[
-                          payment.requestStatus ===
-                          "payment_confirmed"
-                            ? "confirmed"
-                            : payment.requestStatus ===
-                                "payment_rejected"
-                              ? "rejected"
-                              : "review"
-                        ];
+                    <TableBody>
+                      {listing.rows.map((payment) => {
+                        const paymentStatus =
+                          paymentStatusConfiguration[payment.paymentStatus] ??
+                          paymentStatusConfiguration.unknown;
 
-                      return (
-                        <TableRow
-                          key={
-                            payment.requestId
-                          }
-                        >
-                          <TableCell>
-                            <div className="min-w-[180px]">
-                              <p className="font-semibold text-slate-900">
-                                {
-                                  payment.clientName
-                                }
-                              </p>
-                            </div>
-                          </TableCell>
+                        return (
+                          <TableRow key={payment.requestId}>
+                            <TableCell>
+                              <div className="min-w-[180px]">
+                                <p className="font-semibold text-slate-900">
+                                  {payment.clientName}
+                                </p>
+                              </div>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <Link
-                              href={`/admin/dossiers/${payment.requestId}`}
-                              className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
-                            >
-                              {
-                                payment.requestCode
-                              }
-                            </Link>
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {payment.whatsapp ? (
-                              <a
-                                href={`https://wa.me/${payment.whatsapp.replace(/\D/g, "")}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="font-medium text-[#0B5D3B] transition hover:text-[#084A2F]"
+                            <TableCell className="whitespace-nowrap">
+                              <Link
+                                href={`/admin/dossiers/${payment.requestId}`}
+                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
                               >
-                                {
-                                  payment.whatsapp
-                                }
-                              </a>
-                            ) : (
-                              "—"
-                            )}
-                          </TableCell>
+                                {payment.requestCode}
+                              </Link>
+                              {payment.requestStatus === "cancelled" && (
+                                <span className="ml-2 text-xs text-slate-500">
+                                  Dossier annulé
+                                </span>
+                              )}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap font-semibold text-slate-900">
-                            {formatAmount(
-                              payment.amount,
-                            )}
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {payment.whatsapp ? (
+                                <a
+                                  href={`https://wa.me/${payment.whatsapp.replace(/\D/g, "")}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="font-medium text-[#0B5D3B] transition hover:text-[#084A2F]"
+                                >
+                                  {payment.whatsapp}
+                                </a>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <span
-                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${paymentStatus.className}`}
-                            >
-                              {
-                                paymentStatus.label
-                              }
-                            </span>
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap font-semibold text-slate-900">
+                              {formatAmount(payment.amount)}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(
-                              payment.submittedAt,
-                            )}
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <span
+                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${paymentStatus.className}`}
+                              >
+                                {paymentStatus.label}
+                              </span>
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(
-                              payment.verifiedAt,
-                            )}
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(payment.submittedAt)}
+                            </TableCell>
 
-                          <TableCell>
-                            <div className="max-w-[260px] whitespace-normal text-sm text-slate-600">
-                              {payment.rejectionReason ??
-                                "—"}
-                            </div>
-                          </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(payment.verifiedAt)}
+                            </TableCell>
 
-                          <TableCell className="whitespace-nowrap text-right">
-                            <Link
-                              href={`/admin/dossiers/${payment.requestId}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0B5D3B] px-4 text-sm font-black text-white transition hover:bg-[#084A2F]"
-                            >
-                              {payment.requestStatus ===
-                              "payment_review"
-                                ? "Vérifier"
-                                : "Ouvrir"}
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                            <TableCell>
+                              <div className="max-w-[260px] whitespace-normal text-sm text-slate-600">
+                                {payment.rejectionReason ?? "—"}
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="whitespace-nowrap text-right">
+                              <Link
+                                href={`/admin/dossiers/${payment.requestId}`}
+                                className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0B5D3B] px-4 text-sm font-black text-white transition hover:bg-[#084A2F]"
+                              >
+                                {payment.requestStatus === "payment_review"
+                                  ? "Vérifier"
+                                  : "Ouvrir"}
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </div>
             </>
           )}
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/paiements"
+          params={params}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }
 
@@ -967,33 +726,20 @@ type StatCardProps = {
   className: string;
 };
 
-function StatCard({
-  label,
-  value,
-  description,
-  className,
-}: StatCardProps) {
+function StatCard({ label, value, description, className }: StatCardProps) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <span
         className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${className}`}
       >
-        {
-          label
-        }
+        {label}
       </span>
 
       <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
-        {
-          value
-        }
+        {value}
       </p>
 
-      <p className="mt-1 text-xs text-slate-500">
-        {
-          description
-        }
-      </p>
+      <p className="mt-1 text-xs text-slate-500">{description}</p>
     </div>
   );
 }

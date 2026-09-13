@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+
 
 import {
   FormEvent,
@@ -88,10 +90,8 @@ function ConnexionPartenaireContent() {
     setLoading,
   ] = useState(false);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
+  const [submittedError,setErrorMessage] = useState("");
+  const errorMessage = submittedError || getUrlError(searchParams.get("error"));
 
   useEffect(() => {
     const urlError =
@@ -102,9 +102,7 @@ function ConnexionPartenaireContent() {
       );
 
     if (urlError) {
-      setErrorMessage(
-        urlError,
-      );
+
 
       const supabase =
         createClient();
@@ -193,7 +191,7 @@ function ConnexionPartenaireContent() {
               aria-label="IF Sigorta"
               className="inline-flex items-center"
             >
-              <img
+              <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
                 src="/if-sigorta-logo.png"
                 alt="IF Sigorta"
                 className="h-[110px] w-auto object-contain object-left"
@@ -243,7 +241,7 @@ function ConnexionPartenaireContent() {
                 href="/"
                 aria-label="IF Sigorta"
               >
-                <img
+                <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
                   src="/if-sigorta-logo.png"
                   alt="IF Sigorta"
                   className="h-[82px] w-auto object-contain sm:h-[105px]"

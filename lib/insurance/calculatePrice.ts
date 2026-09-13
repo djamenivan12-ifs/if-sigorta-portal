@@ -1,3 +1,5 @@
+import { calculateInsuranceAge } from "@/lib/validation/date";
+export { calculateInsuranceAge } from "@/lib/validation/date";
 export type InsuranceDuration = 1 | 2;
 
 export type PriceCalculationResult = {
@@ -41,28 +43,7 @@ const priceRanges: PriceRange[] = [
   },
 ];
 
-export function calculateInsuranceAge(
-  birthDate: string,
-  issueDate: Date = new Date(),
-): number | null {
-  if (!birthDate) {
-    return null;
-  }
 
-  const birthYear = Number(birthDate.slice(0, 4));
-
-  if (!Number.isInteger(birthYear)) {
-    return null;
-  }
-
-  const age = issueDate.getFullYear() - birthYear;
-
-  if (age < 0 || age > 120) {
-    return null;
-  }
-
-  return age;
-}
 
 export function calculateInsurancePrice(
   birthDate: string,

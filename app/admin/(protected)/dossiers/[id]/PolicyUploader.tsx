@@ -1,150 +1,83 @@
 "use client";
 
-import {
-  ChangeEvent,
-  DragEvent,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, DragEvent, useRef, useState } from "react";
 
-import {
-  useRouter,
-} from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const BUCKET_NAME =
-  "insurance-documents";
+const BUCKET_NAME = "insurance-documents";
 
 type PolicyUploaderProps = {
   requestId: string;
 
-  insuranceDurationYears:
-    | 1
-    | 2;
+  insuranceDurationYears: 1 | 2;
 
   existingPolicyYears?: number[];
 
   hasKimlik: boolean;
 
-  kimlikExpirationDate?:
-    | string
-    | null;
+  kimlikExpirationDate?: string | null;
 
-  requestedStartDate?:
-    | string
-    | null;
+  requestedStartDate?: string | null;
 
-  policyStartDate?:
-    | string
-    | null;
+  policyStartDate?: string | null;
 
-  policyEndDate?:
-    | string
-    | null;
+  policyEndDate?: string | null;
 };
 
-type PolicyYear =
-  | 1
-  | 2;
+type PolicyYear = 1 | 2;
 
-const MAX_FILE_SIZE =
-  10 *
-  1024 *
-  1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-function formatFileSize(
-  size: number,
-) {
-  if (
-    size <
-    1024 * 1024
-  ) {
-    return `${Math.round(
-      size / 1024,
-    )} Ko`;
+function formatFileSize(size: number) {
+  if (size < 1024 * 1024) {
+    return `${Math.round(size / 1024)} Ko`;
   }
 
-  return `${(
-    size /
-    (1024 * 1024)
-  ).toFixed(
-    2,
-  )} Mo`;
+  return `${(size / (1024 * 1024)).toFixed(2)} Mo`;
 }
 
-function validatePdf(
-  file: File,
-): string | null {
+function validatePdf(file: File): string | null {
   const isPdf =
-    file.type ===
-      "application/pdf" ||
-    file.name
-      .toLowerCase()
-      .endsWith(
-        ".pdf",
-      );
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
   if (!isPdf) {
     return "Seuls les fichiers PDF sont acceptés.";
   }
 
-  if (
-    file.size ===
-    0
-  ) {
+  if (file.size === 0) {
     return "Le fichier PDF est vide.";
   }
 
-  if (
-    file.size >
-    MAX_FILE_SIZE
-  ) {
+  if (file.size > MAX_FILE_SIZE) {
     return "Le fichier PDF ne doit pas dépasser 10 Mo.";
   }
 
   return null;
 }
 
-function isValidDate(
-  value: string,
-) {
+function isValidDate(value: string) {
   if (!value) {
     return false;
   }
 
-  const date =
-    new Date(
-      `${value}T00:00:00`,
-    );
+  const date = new Date(`${value}T00:00:00`);
 
-  return !Number.isNaN(
-    date.getTime(),
-  );
+  return !Number.isNaN(date.getTime());
 }
 
-function addYearsKeepingMonthAndDay(
-  value: string,
-  years: 1 | 2,
-) {
+function addYearsKeepingMonthAndDay(value: string, years: 1 | 2) {
   if (!isValidDate(value)) {
     return "";
   }
 
-  const [
-    yearText,
-    monthText,
-    dayText,
-  ] =
-    value.split("-");
+  const [yearText, monthText, dayText] = value.split("-");
 
-  const year =
-    Number(yearText);
+  const year = Number(yearText);
 
-  const month =
-    Number(monthText);
+  const month = Number(monthText);
 
-  const day =
-    Number(dayText);
+  const day = Number(dayText);
 
   if (
     !Number.isInteger(year) ||
@@ -154,24 +87,17 @@ function addYearsKeepingMonthAndDay(
     return "";
   }
 
-  const targetYear =
-    year + years;
+  const targetYear = year + years;
 
   /*
    * Cas spécial :
    * 29 février vers une année non bissextile.
    * On utilise le 28 février.
    */
-  if (
-    month === 2 &&
-    day === 29
-  ) {
+  if (month === 2 && day === 29) {
     const leapYear =
       targetYear % 4 === 0 &&
-      (
-        targetYear % 100 !== 0 ||
-        targetYear % 400 === 0
-      );
+      (targetYear % 100 !== 0 || targetYear % 400 === 0);
 
     if (!leapYear) {
       return `${targetYear}-02-28`;
@@ -179,18 +105,9 @@ function addYearsKeepingMonthAndDay(
   }
 
   return [
-    String(targetYear).padStart(
-      4,
-      "0",
-    ),
-    String(month).padStart(
-      2,
-      "0",
-    ),
-    String(day).padStart(
-      2,
-      "0",
-    ),
+    String(targetYear).padStart(4, "0"),
+    String(month).padStart(2, "0"),
+    String(day).padStart(2, "0"),
   ].join("-");
 }
 
@@ -204,356 +121,178 @@ export default function PolicyUploader({
   policyStartDate = null,
   policyEndDate = null,
 }: PolicyUploaderProps) {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const year1InputRef =
-    useRef<HTMLInputElement>(
-      null,
-    );
+  const year1InputRef = useRef<HTMLInputElement>(null);
 
-  const year2InputRef =
-    useRef<HTMLInputElement>(
-      null,
-    );
+  const year2InputRef = useRef<HTMLInputElement>(null);
 
-  const [
-    year1File,
-    setYear1File,
-  ] =
-    useState<File | null>(
-      null,
-    );
+  const [year1File, setYear1File] = useState<File | null>(null);
 
-  const [
-    year2File,
-    setYear2File,
-  ] =
-    useState<File | null>(
-      null,
-    );
+  const [year2File, setYear2File] = useState<File | null>(null);
 
   const automaticStartDate =
     policyStartDate ??
-    (
-      hasKimlik
-        ? kimlikExpirationDate
-        : requestedStartDate
-    ) ??
+    (hasKimlik ? kimlikExpirationDate : requestedStartDate) ??
     "";
 
   const automaticEndDate =
     policyEndDate ??
-    addYearsKeepingMonthAndDay(
-      automaticStartDate,
-      insuranceDurationYears,
-    );
+    addYearsKeepingMonthAndDay(automaticStartDate, insuranceDurationYears);
 
-  const [
-    startDate,
-    setStartDate,
-  ] =
-    useState(
-      automaticStartDate,
-    );
+  const [startDate, setStartDate] = useState(automaticStartDate);
 
-  const [
-    endDate,
-    setEndDate,
-  ] =
-    useState(
-      automaticEndDate,
-    );
+  const [endDate, setEndDate] = useState(automaticEndDate);
 
-  const [
-    draggingYear,
-    setDraggingYear,
-  ] =
-    useState<
-      PolicyYear | null
-    >(null);
+  const [draggingYear, setDraggingYear] = useState<PolicyYear | null>(null);
 
-  const [
-    loading,
-    setLoading,
-  ] =
-    useState(
-      false,
-    );
+  const [loading, setLoading] = useState(false);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] =
-    useState(
-      "",
-    );
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] =
-    useState(
-      "",
-    );
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const requiresTwoPolicies =
-    insuranceDurationYears ===
-    2;
+  const requiresTwoPolicies = insuranceDurationYears === 2;
 
-  const year1AlreadyExists =
-    existingPolicyYears.includes(
-      1,
-    );
+  const year1AlreadyExists = existingPolicyYears.includes(1);
 
-  const year2AlreadyExists =
-    existingPolicyYears.includes(
-      2,
-    );
+  const year2AlreadyExists = existingPolicyYears.includes(2);
 
   const allRequiredExistingPoliciesArePresent =
-    year1AlreadyExists &&
-    (
-      !requiresTwoPolicies ||
-      year2AlreadyExists
-    );
+    year1AlreadyExists && (!requiresTwoPolicies || year2AlreadyExists);
 
   function clearMessages() {
-    setErrorMessage(
-      "",
-    );
+    setErrorMessage("");
 
-    setSuccessMessage(
-      "",
-    );
+    setSuccessMessage("");
   }
 
-  function getInputRef(
-    year:
-      PolicyYear,
-  ) {
-    return year ===
-      1
-      ? year1InputRef
-      : year2InputRef;
+  function getInputRef(year: PolicyYear) {
+    return year === 1 ? year1InputRef : year2InputRef;
   }
 
   function setPolicyFile(
-    year:
-      PolicyYear,
+    year: PolicyYear,
 
-    file:
-      File | null,
+    file: File | null,
   ) {
-    if (
-      year ===
-      1
-    ) {
-      setYear1File(
-        file,
-      );
+    if (year === 1) {
+      setYear1File(file);
 
       return;
     }
 
-    setYear2File(
-      file,
-    );
+    setYear2File(file);
   }
 
   function selectFile(
-    year:
-      PolicyYear,
+    year: PolicyYear,
 
-    selectedFile:
-      File,
+    selectedFile: File,
   ) {
     clearMessages();
 
-    const validationError =
-      validatePdf(
-        selectedFile,
-      );
+    const validationError = validatePdf(selectedFile);
 
-    if (
-      validationError
-    ) {
-      setPolicyFile(
-        year,
-        null,
-      );
+    if (validationError) {
+      setPolicyFile(year, null);
 
-      setErrorMessage(
-        `Police année ${year} : ${validationError}`,
-      );
+      setErrorMessage(`Police année ${year} : ${validationError}`);
 
-      const inputRef =
-        getInputRef(
-          year,
-        );
+      const inputRef = getInputRef(year);
 
-      if (
-        inputRef.current
-      ) {
-        inputRef.current.value =
-          "";
+      if (inputRef.current) {
+        inputRef.current.value = "";
       }
 
       return;
     }
 
-    setPolicyFile(
-      year,
-      selectedFile,
-    );
+    setPolicyFile(year, selectedFile);
   }
 
   function handleFileChange(
-    year:
-      PolicyYear,
+    year: PolicyYear,
 
-    event:
-      ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
   ) {
-    const selectedFile =
-      event.target
-        .files?.[0];
+    const selectedFile = event.target.files?.[0];
 
-    if (
-      !selectedFile
-    ) {
+    if (!selectedFile) {
       return;
     }
 
-    selectFile(
-      year,
-      selectedFile,
-    );
+    selectFile(year, selectedFile);
   }
 
   function handleDragOver(
-    year:
-      PolicyYear,
+    year: PolicyYear,
 
-    event:
-      DragEvent<HTMLDivElement>,
+    event: DragEvent<HTMLDivElement>,
   ) {
     event.preventDefault();
 
-    if (
-      loading
-    ) {
+    if (loading) {
       return;
     }
 
-    setDraggingYear(
-      year,
-    );
+    setDraggingYear(year);
   }
 
-  function handleDragLeave(
-    event:
-      DragEvent<HTMLDivElement>,
-  ) {
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
 
-    setDraggingYear(
-      null,
-    );
+    setDraggingYear(null);
   }
 
   function handleDrop(
-    year:
-      PolicyYear,
+    year: PolicyYear,
 
-    event:
-      DragEvent<HTMLDivElement>,
+    event: DragEvent<HTMLDivElement>,
   ) {
     event.preventDefault();
 
-    setDraggingYear(
-      null,
-    );
+    setDraggingYear(null);
 
-    if (
-      loading
-    ) {
+    if (loading) {
       return;
     }
 
-    const selectedFile =
-      event.dataTransfer
-        .files?.[0];
+    const selectedFile = event.dataTransfer.files?.[0];
 
-    if (
-      !selectedFile
-    ) {
+    if (!selectedFile) {
       return;
     }
 
-    selectFile(
-      year,
-      selectedFile,
-    );
+    selectFile(year, selectedFile);
   }
 
-  function removeFile(
-    year:
-      PolicyYear,
-  ) {
-    setPolicyFile(
-      year,
-      null,
-    );
+  function removeFile(year: PolicyYear) {
+    setPolicyFile(year, null);
 
     clearMessages();
 
-    const inputRef =
-      getInputRef(
-        year,
-      );
+    const inputRef = getInputRef(year);
 
-    if (
-      inputRef.current
-    ) {
-      inputRef.current.value =
-        "";
+    if (inputRef.current) {
+      inputRef.current.value = "";
     }
   }
 
   function validateDates() {
-    if (
-      !startDate ||
-      !endDate
-    ) {
+    if (!startDate || !endDate) {
       return "La date de début et la date de fin de l’assurance sont obligatoires.";
     }
 
-    if (
-      !isValidDate(
-        startDate,
-      ) ||
-      !isValidDate(
-        endDate,
-      )
-    ) {
+    if (!isValidDate(startDate) || !isValidDate(endDate)) {
       return "Les dates de validité sont invalides.";
     }
 
-    const start =
-      new Date(
-        `${startDate}T00:00:00`,
-      );
+    const start = new Date(`${startDate}T00:00:00`);
 
-    const end =
-      new Date(
-        `${endDate}T00:00:00`,
-      );
+    const end = new Date(`${endDate}T00:00:00`);
 
-    if (
-      end.getTime() <
-      start.getTime()
-    ) {
+    if (end.getTime() < start.getTime()) {
       return "La date de fin doit être postérieure à la date de début.";
     }
 
@@ -561,569 +300,390 @@ export default function PolicyUploader({
   }
 
   async function uploadPolicies() {
-  clearMessages();
-
-  /*
-   * ============================
-   * VALIDATION DES DATES
-   * ============================
-   */
-
-  const dateError =
-    validateDates();
-
-  if (dateError) {
-    setErrorMessage(
-      dateError,
-    );
-
-    return;
-  }
-
-  /*
-   * ============================
-   * VALIDATION DES POLICES
-   * ============================
-   */
-
-  const year1IsAvailable =
-    Boolean(
-      year1File,
-    ) ||
-    year1AlreadyExists;
-
-  const year2IsAvailable =
-    Boolean(
-      year2File,
-    ) ||
-    year2AlreadyExists;
-
-  if (
-    !year1IsAvailable
-  ) {
-    setErrorMessage(
-      "La police de l’année 1 est obligatoire.",
-    );
-
-    return;
-  }
-
-  if (
-    requiresTwoPolicies &&
-    !year2IsAvailable
-  ) {
-    setErrorMessage(
-      "La police de l’année 2 est obligatoire pour une assurance de deux ans.",
-    );
-
-    return;
-  }
-
-  /*
-   * La sauvegarde des dates seules
-   * reste possible.
-   */
-
-  const datesChanged =
-    startDate !==
-      (
-        policyStartDate ??
-        ""
-      ) ||
-    endDate !==
-      (
-        policyEndDate ??
-        ""
-      );
-
-  const hasNewFile =
-    Boolean(
-      year1File ||
-      year2File,
-    );
-
-  if (
-    !hasNewFile &&
-    !datesChanged
-  ) {
-    setErrorMessage(
-      "Aucune modification à enregistrer.",
-    );
-
-    return;
-  }
-
-  setLoading(
-    true,
-  );
-
-  /*
-   * Chemins temporaires déjà envoyés
-   * dans Supabase.
-   *
-   * Ils seront adoptés par /policy
-   * lors de la finalisation.
-   */
-  const pendingPaths:
-    string[] = [];
-
-  try {
-    const supabase =
-      createClient();
-
-    type PreparedPolicy = {
-      policyYear:
-        PolicyYear;
-
-      path:
-        string;
-
-      originalFileName:
-        string;
-
-      mimeType:
-        string;
-
-      fileSize:
-        number;
-    };
-
-    const preparedPolicies:
-      PreparedPolicy[] =
-      [];
+    clearMessages();
 
     /*
      * ============================
-     * HELPER D'UPLOAD
+     * VALIDATION DES DATES
      * ============================
      */
 
-    async function prepareAndUploadPolicy(
-      policyYear:
-        PolicyYear,
+    const dateError = validateDates();
 
-      file:
-        File,
-    ): Promise<PreparedPolicy> {
+    if (dateError) {
+      setErrorMessage(dateError);
+
+      return;
+    }
+
+    /*
+     * ============================
+     * VALIDATION DES POLICES
+     * ============================
+     */
+
+    const year1IsAvailable = Boolean(year1File) || year1AlreadyExists;
+
+    const year2IsAvailable = Boolean(year2File) || year2AlreadyExists;
+
+    if (!year1IsAvailable) {
+      setErrorMessage("La police de l’année 1 est obligatoire.");
+
+      return;
+    }
+
+    if (requiresTwoPolicies && !year2IsAvailable) {
+      setErrorMessage(
+        "La police de l’année 2 est obligatoire pour une assurance de deux ans.",
+      );
+
+      return;
+    }
+
+    /*
+     * La sauvegarde des dates seules
+     * reste possible.
+     */
+
+    const datesChanged =
+      startDate !== (policyStartDate ?? "") ||
+      endDate !== (policyEndDate ?? "");
+
+    const hasNewFile = Boolean(year1File || year2File);
+
+    if (!hasNewFile && !datesChanged) {
+      setErrorMessage("Aucune modification à enregistrer.");
+
+      return;
+    }
+
+    setLoading(true);
+
+    /*
+     * Chemins temporaires déjà envoyés
+     * dans Supabase.
+     *
+     * Ils seront adoptés par /policy
+     * lors de la finalisation.
+     */
+    const pendingPaths: string[] = [];
+
+    try {
+      const supabase = createClient();
+
+      type PreparedPolicy = {
+        policyYear: PolicyYear;
+
+        path: string;
+
+        originalFileName: string;
+
+        mimeType: string;
+
+        fileSize: number;
+      };
+
+      const preparedPolicies: PreparedPolicy[] = [];
+
       /*
-       * Revalidation locale.
+       * ============================
+       * HELPER D'UPLOAD
+       * ============================
        */
 
-      const validationError =
-        validatePdf(
-          file,
-        );
+      async function prepareAndUploadPolicy(
+        policyYear: PolicyYear,
 
-      if (
-        validationError
-      ) {
-        throw new Error(
-          `Police année ${policyYear} : ${validationError}`,
-        );
-      }
+        file: File,
+      ): Promise<PreparedPolicy> {
+        /*
+         * Revalidation locale.
+         */
 
-      /*
-       * 1. Demande d'un token signé.
-       */
+        const validationError = validatePdf(file);
 
-      const uploadUrlResponse =
-        await fetch(
+        if (validationError) {
+          throw new Error(`Police année ${policyYear} : ${validationError}`);
+        }
+
+        /*
+         * 1. Demande d'un token signé.
+         */
+
+        const uploadUrlResponse = await fetch(
           `/api/admin/requests/${requestId}/policy-upload-url`,
           {
-            method:
-              "POST",
+            method: "POST",
 
             headers: {
-              "Content-Type":
-                "application/json",
+              "Content-Type": "application/json",
             },
 
-            body:
-              JSON.stringify({
-                policyYear,
+            body: JSON.stringify({
+              policyYear,
 
-                originalFileName:
-                  file.name,
+              originalFileName: file.name,
 
-                mimeType:
-                  file.type ||
-                  "application/pdf",
+              mimeType: file.type || "application/pdf",
 
-                fileSize:
-                  file.size,
-              }),
+              fileSize: file.size,
+            }),
           },
         );
 
-      const uploadUrlData =
-        (await uploadUrlResponse.json()) as {
-          success?:
-            boolean;
+        const uploadUrlData = (await uploadUrlResponse.json()) as {
+          success?: boolean;
 
-          error?:
-            string;
+          error?: string;
 
-          requestId?:
-            string;
+          requestId?: string;
 
-          policyYear?:
-            number;
+          policyYear?: number;
 
-          uploadSessionId?:
-            string;
+          uploadSessionId?: string;
 
-          path?:
-            string;
+          path?: string;
 
-          token?:
-            string;
+          token?: string;
         };
 
-      if (
-        !uploadUrlResponse.ok ||
-        !uploadUrlData.success ||
-        !uploadUrlData.path ||
-        !uploadUrlData.token
-      ) {
-        throw new Error(
-          uploadUrlData.error ||
-            `Impossible de préparer le téléversement de la police année ${policyYear}.`,
-        );
-      }
+        if (
+          !uploadUrlResponse.ok ||
+          !uploadUrlData.success ||
+          !uploadUrlData.path ||
+          !uploadUrlData.token
+        ) {
+          throw new Error(
+            uploadUrlData.error ||
+              `Impossible de préparer le téléversement de la police année ${policyYear}.`,
+          );
+        }
 
-      pendingPaths.push(
-        uploadUrlData.path,
-      );
+        pendingPaths.push(uploadUrlData.path);
 
-      /*
-       * 2. Upload direct navigateur → Supabase.
-       *
-       * Aucun PDF ne passe par Next.js/Vercel.
-       */
+        /*
+         * 2. Upload direct navigateur → Supabase.
+         *
+         * Aucun PDF ne passe par Next.js/Vercel.
+         */
 
-      const {
-        error:
-          uploadError,
-      } =
-        await supabase.storage
-          .from(
-            BUCKET_NAME,
-          )
-          .uploadToSignedUrl(
-            uploadUrlData.path,
-            uploadUrlData.token,
-            file,
-            {
-              contentType:
-                "application/pdf",
+        const { error: uploadError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .uploadToSignedUrl(uploadUrlData.path, uploadUrlData.token, file, {
+            contentType: "application/pdf",
 
-              cacheControl:
-                "3600",
-            },
+            cacheControl: "3600",
+          });
+
+        if (uploadError) {
+          console.error(
+            `Erreur upload direct Supabase police année ${policyYear} :`,
+            uploadError,
           );
 
-      if (
-        uploadError
-      ) {
+          throw new Error(
+            `Téléversement de la police année ${policyYear} impossible : ${uploadError.message}`,
+          );
+        }
+
+        return {
+          policyYear,
+
+          path: uploadUrlData.path,
+
+          originalFileName: file.name,
+
+          mimeType: "application/pdf",
+
+          fileSize: file.size,
+        };
+      }
+
+      /*
+       * ============================
+       * POLICE ANNÉE 1
+       * ============================
+       */
+
+      if (year1File) {
+        const preparedYear1 = await prepareAndUploadPolicy(1, year1File);
+
+        preparedPolicies.push(preparedYear1);
+      }
+
+      /*
+       * ============================
+       * POLICE ANNÉE 2
+       * ============================
+       */
+
+      if (requiresTwoPolicies && year2File) {
+        const preparedYear2 = await prepareAndUploadPolicy(2, year2File);
+
+        preparedPolicies.push(preparedYear2);
+      }
+
+      /*
+       * ============================
+       * FINALISATION JSON
+       * ============================
+       *
+       * Aucun fichier n'est présent dans cette requête.
+       */
+
+      const year1Prepared =
+        preparedPolicies.find((policy) => policy.policyYear === 1) ?? null;
+
+      const year2Prepared =
+        preparedPolicies.find((policy) => policy.policyYear === 2) ?? null;
+
+      const response = await fetch(`/api/admin/requests/${requestId}/policy`, {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          policyStartDate: startDate,
+
+          policyEndDate: endDate,
+
+          policyYear1: year1Prepared
+            ? {
+                path: year1Prepared.path,
+
+                originalFileName: year1Prepared.originalFileName,
+
+                mimeType: year1Prepared.mimeType,
+
+                fileSize: year1Prepared.fileSize,
+              }
+            : null,
+
+          policyYear2: year2Prepared
+            ? {
+                path: year2Prepared.path,
+
+                originalFileName: year2Prepared.originalFileName,
+
+                mimeType: year2Prepared.mimeType,
+
+                fileSize: year2Prepared.fileSize,
+              }
+            : null,
+        }),
+      });
+
+      const contentType = response.headers.get("content-type") ?? "";
+
+      if (!contentType.includes("application/json")) {
+        const responseText = await response.text();
+
         console.error(
-          `Erreur upload direct Supabase police année ${policyYear} :`,
-          uploadError,
+          "Réponse non JSON reçue :",
+          response.status,
+          responseText,
         );
 
         throw new Error(
-          `Téléversement de la police année ${policyYear} impossible : ${uploadError.message}`,
+          `La route de téléversement a renvoyé une erreur (${response.status}).`,
         );
       }
 
-      return {
-        policyYear,
+      const result = (await response.json()) as {
+        success?: boolean;
 
-        path:
-          uploadUrlData.path,
+        completed?: boolean;
 
-        originalFileName:
-          file.name,
+        status?: string;
 
-        mimeType:
-          "application/pdf",
+        uploadedYears?: number[];
 
-        fileSize:
-          file.size,
-      };
-    }
+        existingYears?: number[];
 
-    /*
-     * ============================
-     * POLICE ANNÉE 1
-     * ============================
-     */
+        policyStartDate?: string;
 
-    if (
-      year1File
-    ) {
-      const preparedYear1 =
-        await prepareAndUploadPolicy(
-          1,
-          year1File,
-        );
+        policyEndDate?: string;
 
-      preparedPolicies.push(
-        preparedYear1,
-      );
-    }
-
-    /*
-     * ============================
-     * POLICE ANNÉE 2
-     * ============================
-     */
-
-    if (
-      requiresTwoPolicies &&
-      year2File
-    ) {
-      const preparedYear2 =
-        await prepareAndUploadPolicy(
-          2,
-          year2File,
-        );
-
-      preparedPolicies.push(
-        preparedYear2,
-      );
-    }
-
-    /*
-     * ============================
-     * FINALISATION JSON
-     * ============================
-     *
-     * Aucun fichier n'est présent dans cette requête.
-     */
-
-    const year1Prepared =
-      preparedPolicies.find(
-        (policy) =>
-          policy.policyYear ===
-          1,
-      ) ??
-      null;
-
-    const year2Prepared =
-      preparedPolicies.find(
-        (policy) =>
-          policy.policyYear ===
-          2,
-      ) ??
-      null;
-
-    const response =
-      await fetch(
-        `/api/admin/requests/${requestId}/policy`,
-        {
-          method:
-            "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body:
-            JSON.stringify({
-              policyStartDate:
-                startDate,
-
-              policyEndDate:
-                endDate,
-
-              policyYear1:
-                year1Prepared
-                  ? {
-                      path:
-                        year1Prepared.path,
-
-                      originalFileName:
-                        year1Prepared.originalFileName,
-
-                      mimeType:
-                        year1Prepared.mimeType,
-
-                      fileSize:
-                        year1Prepared.fileSize,
-                    }
-                  : null,
-
-              policyYear2:
-                year2Prepared
-                  ? {
-                      path:
-                        year2Prepared.path,
-
-                      originalFileName:
-                        year2Prepared.originalFileName,
-
-                      mimeType:
-                        year2Prepared.mimeType,
-
-                      fileSize:
-                        year2Prepared.fileSize,
-                    }
-                  : null,
-            }),
-        },
-      );
-
-    const contentType =
-      response.headers.get(
-        "content-type",
-      ) ??
-      "";
-
-    if (
-      !contentType.includes(
-        "application/json",
-      )
-    ) {
-      const responseText =
-        await response.text();
-
-      console.error(
-        "Réponse non JSON reçue :",
-        response.status,
-        responseText,
-      );
-
-      throw new Error(
-        `La route de téléversement a renvoyé une erreur (${response.status}).`,
-      );
-    }
-
-    const result =
-      (await response.json()) as {
-        success?:
-          boolean;
-
-        completed?:
-          boolean;
-
-        status?:
-          string;
-
-        uploadedYears?:
-          number[];
-
-        existingYears?:
-          number[];
-
-        policyStartDate?:
-          string;
-
-        policyEndDate?:
-          string;
-
-        error?:
-          string;
+        error?: string;
       };
 
-    if (
-      !response.ok ||
-      !result.success
-    ) {
-      throw new Error(
-        result.error ||
-          "Impossible d’enregistrer les informations de la police.",
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error ||
+            "Impossible d’enregistrer les informations de la police.",
+        );
+      }
+
+      /*
+       * Les chemins ne sont plus temporaires :
+       * le serveur les a adoptés.
+       */
+
+      pendingPaths.length = 0;
+
+      /*
+       * ============================
+       * NETTOYAGE DES INPUTS
+       * ============================
+       */
+
+      setYear1File(null);
+
+      setYear2File(null);
+
+      if (year1InputRef.current) {
+        year1InputRef.current.value = "";
+      }
+
+      if (year2InputRef.current) {
+        year2InputRef.current.value = "";
+      }
+
+      /*
+       * ============================
+       * MESSAGE DE SUCCÈS
+       * ============================
+       */
+
+      if (result.completed) {
+        setSuccessMessage(
+          requiresTwoPolicies
+            ? "Les polices et leurs dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client."
+            : "La police et ses dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client.",
+        );
+      } else {
+        setSuccessMessage("Les informations ont été enregistrées avec succès.");
+      }
+
+      router.refresh();
+    } catch (error) {
+      /*
+       * À ce stade les fichiers éventuels sont dans
+       * pending/admin/policy/...
+       *
+       * La route serveur de finalisation que nous
+       * allons installer ensuite assurera également
+       * son propre nettoyage/rollback.
+       */
+
+      if (pendingPaths.length > 0) {
+        console.error(
+          "Police(s) téléversée(s) mais non finalisée(s) :",
+          pendingPaths,
+        );
+      }
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Une erreur inattendue est survenue.",
       );
+    } finally {
+      setLoading(false);
     }
-
-    /*
-     * Les chemins ne sont plus temporaires :
-     * le serveur les a adoptés.
-     */
-
-    pendingPaths.length =
-      0;
-
-    /*
-     * ============================
-     * NETTOYAGE DES INPUTS
-     * ============================
-     */
-
-    setYear1File(
-      null,
-    );
-
-    setYear2File(
-      null,
-    );
-
-    if (
-      year1InputRef.current
-    ) {
-      year1InputRef.current.value =
-        "";
-    }
-
-    if (
-      year2InputRef.current
-    ) {
-      year2InputRef.current.value =
-        "";
-    }
-
-    /*
-     * ============================
-     * MESSAGE DE SUCCÈS
-     * ============================
-     */
-
-    if (
-      result.completed
-    ) {
-      setSuccessMessage(
-        requiresTwoPolicies
-          ? "Les polices et leurs dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client."
-          : "La police et ses dates de validité ont été enregistrées. L’assurance est maintenant disponible pour le client.",
-      );
-    } else {
-      setSuccessMessage(
-        "Les informations ont été enregistrées avec succès.",
-      );
-    }
-
-    router.refresh();
-  } catch (error) {
-    /*
-     * À ce stade les fichiers éventuels sont dans
-     * pending/admin/policy/...
-     *
-     * La route serveur de finalisation que nous
-     * allons installer ensuite assurera également
-     * son propre nettoyage/rollback.
-     */
-
-    if (
-      pendingPaths.length >
-      0
-    ) {
-      console.error(
-        "Police(s) téléversée(s) mais non finalisée(s) :",
-        pendingPaths,
-      );
-    }
-
-    setErrorMessage(
-      error instanceof Error
-        ? error.message
-        : "Une erreur inattendue est survenue.",
-    );
-  } finally {
-    setLoading(
-      false,
-    );
   }
-}
 
   return (
     <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
@@ -1135,7 +695,8 @@ export default function PolicyUploader({
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Déposez la police définitive. Les dates de validité sont préremplies automatiquement à partir des informations du dossier.
+          Déposez la police définitive. Les dates de validité sont préremplies
+          automatiquement à partir des informations du dossier.
         </p>
       </div>
 
@@ -1143,12 +704,11 @@ export default function PolicyUploader({
 
       <div className="mt-6 min-w-0 rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4 sm:p-5">
         <div>
-          <h3 className="font-semibold text-[#102B20]">
-            Période de validité
-          </h3>
+          <h3 className="font-semibold text-[#102B20]">Période de validité</h3>
 
           <p className="mt-1 text-sm leading-6 text-slate-500">
-            Ces dates seront utilisées pour gérer automatiquement les futurs renouvellements.
+            Ces dates seront utilisées pour gérer automatiquement les futurs
+            renouvellements.
           </p>
         </div>
 
@@ -1158,24 +718,15 @@ export default function PolicyUploader({
               Date de début
             </span>
 
-            <span className="ml-1 text-red-500">
-              *
-            </span>
+            <span className="ml-1 text-red-500">*</span>
 
             <input
               type="date"
-              value={
-                startDate
-              }
-              onChange={(
-                event,
-              ) => {
-                const nextStartDate =
-                  event.target.value;
+              value={startDate}
+              onChange={(event) => {
+                const nextStartDate = event.target.value;
 
-                setStartDate(
-                  nextStartDate,
-                );
+                setStartDate(nextStartDate);
 
                 setEndDate(
                   addYearsKeepingMonthAndDay(
@@ -1186,9 +737,7 @@ export default function PolicyUploader({
 
                 clearMessages();
               }}
-              disabled={
-                loading
-              }
+              disabled={loading}
               className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             />
 
@@ -1204,49 +753,33 @@ export default function PolicyUploader({
               Date de fin
             </span>
 
-            <span className="ml-1 text-red-500">
-              *
-            </span>
+            <span className="ml-1 text-red-500">*</span>
 
             <input
               type="date"
-              value={
-                endDate
-              }
-              min={
-                startDate ||
-                undefined
-              }
-              onChange={(
-                event,
-              ) => {
-                setEndDate(
-                  event.target.value,
-                );
+              value={endDate}
+              min={startDate || undefined}
+              onChange={(event) => {
+                setEndDate(event.target.value);
 
                 clearMessages();
               }}
-              disabled={
-                loading
-              }
+              disabled={loading}
               className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-500">
-              Calculée automatiquement en ajoutant{" "}
-              {insuranceDurationYears} an
-              {insuranceDurationYears === 2
-                ? "s"
-                : ""}{" "}
-              à la date de début, en conservant le jour et le mois.
+              Calculée automatiquement en ajoutant {insuranceDurationYears} an
+              {insuranceDurationYears === 2 ? "s" : ""} à la date de début, en
+              conservant le jour et le mois.
             </p>
           </label>
         </div>
 
-        {policyStartDate &&
-          policyEndDate && (
+        {policyStartDate && policyEndDate && (
           <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm text-[#0B5D3B]">
-            ✓ Une période de validité est déjà enregistrée. Vous pouvez la corriger si nécessaire.
+            ✓ Une période de validité est déjà enregistrée. Vous pouvez la
+            corriger si nécessaire.
           </div>
         )}
       </div>
@@ -1268,7 +801,8 @@ export default function PolicyUploader({
           </p>
 
           <p className="mt-2 text-sm leading-6 text-[#31513B]">
-            Vous pouvez modifier uniquement les dates ou remplacer un PDF existant.
+            Vous pouvez modifier uniquement les dates ou remplacer un PDF
+            existant.
           </p>
         </div>
       )}
@@ -1277,112 +811,32 @@ export default function PolicyUploader({
 
       <div className="mt-6 space-y-6">
         <PolicyFileField
-          year={
-            1
-          }
-          file={
-            year1File
-          }
-          inputRef={
-            year1InputRef
-          }
-          isDragging={
-            draggingYear ===
-            1
-          }
-          alreadyExists={
-            year1AlreadyExists
-          }
-          loading={
-            loading
-          }
-          onFileChange={(
-            event,
-          ) =>
-            handleFileChange(
-              1,
-              event,
-            )
-          }
-          onDragOver={(
-            event,
-          ) =>
-            handleDragOver(
-              1,
-              event,
-            )
-          }
-          onDragLeave={
-            handleDragLeave
-          }
-          onDrop={(
-            event,
-          ) =>
-            handleDrop(
-              1,
-              event,
-            )
-          }
-          onRemove={() =>
-            removeFile(
-              1,
-            )
-          }
+          year={1}
+          file={year1File}
+          inputRef={year1InputRef}
+          isDragging={draggingYear === 1}
+          alreadyExists={year1AlreadyExists}
+          loading={loading}
+          onFileChange={(event) => handleFileChange(1, event)}
+          onDragOver={(event) => handleDragOver(1, event)}
+          onDragLeave={handleDragLeave}
+          onDrop={(event) => handleDrop(1, event)}
+          onRemove={() => removeFile(1)}
         />
 
         {requiresTwoPolicies && (
           <PolicyFileField
-            year={
-              2
-            }
-            file={
-              year2File
-            }
-            inputRef={
-              year2InputRef
-            }
-            isDragging={
-              draggingYear ===
-              2
-            }
-            alreadyExists={
-              year2AlreadyExists
-            }
-            loading={
-              loading
-            }
-            onFileChange={(
-              event,
-            ) =>
-              handleFileChange(
-                2,
-                event,
-              )
-            }
-            onDragOver={(
-              event,
-            ) =>
-              handleDragOver(
-                2,
-                event,
-              )
-            }
-            onDragLeave={
-              handleDragLeave
-            }
-            onDrop={(
-              event,
-            ) =>
-              handleDrop(
-                2,
-                event,
-              )
-            }
-            onRemove={() =>
-              removeFile(
-                2,
-              )
-            }
+            year={2}
+            file={year2File}
+            inputRef={year2InputRef}
+            isDragging={draggingYear === 2}
+            alreadyExists={year2AlreadyExists}
+            loading={loading}
+            onFileChange={(event) => handleFileChange(2, event)}
+            onDragOver={(event) => handleDragOver(2, event)}
+            onDragLeave={handleDragLeave}
+            onDrop={(event) => handleDrop(2, event)}
+            onRemove={() => removeFile(2)}
           />
         )}
       </div>
@@ -1390,20 +844,22 @@ export default function PolicyUploader({
       {/* ERREUR */}
 
       {errorMessage && (
-        <div className="mt-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-          {
-            errorMessage
-          }
+        <div
+          className="mt-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
+          role="alert"
+        >
+          {errorMessage}
         </div>
       )}
 
       {/* SUCCÈS */}
 
       {successMessage && (
-        <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
-          {
-            successMessage
-          }
+        <div
+          className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700"
+          role="status"
+        >
+          {successMessage}
         </div>
       )}
 
@@ -1411,12 +867,8 @@ export default function PolicyUploader({
 
       <button
         type="button"
-        onClick={
-          uploadPolicies
-        }
-        disabled={
-          loading
-        }
+        onClick={uploadPolicies}
+        disabled={loading}
         className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         {loading
@@ -1429,53 +881,35 @@ export default function PolicyUploader({
       </button>
 
       <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-        Les dates sont calculées automatiquement, mais peuvent être corrigées si la police définitive indique une période différente.
+        Les dates sont calculées automatiquement, mais peuvent être corrigées si
+        la police définitive indique une période différente.
       </p>
     </section>
   );
 }
 
 type PolicyFileFieldProps = {
-  year:
-    PolicyYear;
+  year: PolicyYear;
 
-  file:
-    File | null;
+  file: File | null;
 
-  inputRef:
-    React.RefObject<HTMLInputElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
 
-  isDragging:
-    boolean;
+  isDragging: boolean;
 
-  alreadyExists:
-    boolean;
+  alreadyExists: boolean;
 
-  loading:
-    boolean;
+  loading: boolean;
 
-  onFileChange: (
-    event:
-      ChangeEvent<HTMLInputElement>,
-  ) => void;
+  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
 
-  onDragOver: (
-    event:
-      DragEvent<HTMLDivElement>,
-  ) => void;
+  onDragOver: (event: DragEvent<HTMLDivElement>) => void;
 
-  onDragLeave: (
-    event:
-      DragEvent<HTMLDivElement>,
-  ) => void;
+  onDragLeave: (event: DragEvent<HTMLDivElement>) => void;
 
-  onDrop: (
-    event:
-      DragEvent<HTMLDivElement>,
-  ) => void;
+  onDrop: (event: DragEvent<HTMLDivElement>) => void;
 
-  onRemove:
-    () => void;
+  onRemove: () => void;
 };
 
 function PolicyFileField({
@@ -1495,10 +929,7 @@ function PolicyFileField({
     <article className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
       <div>
         <h3 className="text-lg font-semibold text-[#102B20]">
-          Police — Année{" "}
-          {
-            year
-          }
+          Police — Année {year}
         </h3>
 
         <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -1510,69 +941,40 @@ function PolicyFileField({
 
       {alreadyExists && (
         <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]">
-          ✓ PDF année{" "}
-          {
-            year
-          }{" "}
-          enregistré
+          ✓ PDF année {year} enregistré
         </div>
       )}
 
       {!file ? (
         <div
           role="button"
-          tabIndex={
-            0
-          }
+          tabIndex={0}
           onClick={() => {
-            if (
-              !loading
-            ) {
+            if (!loading) {
               inputRef.current?.click();
             }
           }}
-          onKeyDown={(
-            event,
-          ) => {
-            if (
-              loading
-            ) {
+          onKeyDown={(event) => {
+            if (loading) {
               return;
             }
 
-            if (
-              event.key ===
-                "Enter" ||
-              event.key ===
-                " "
-            ) {
+            if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
 
               inputRef.current?.click();
             }
           }}
-          onDragOver={
-            onDragOver
-          }
-          onDragLeave={
-            onDragLeave
-          }
-          onDrop={
-            onDrop
-          }
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
           className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-8 text-center transition ${
             isDragging
               ? "border-[#0B5D3B] bg-[#F3F8F2]"
               : "border-slate-200 bg-white hover:border-[#0B5D3B] hover:bg-[#F3F8F2]"
-          } ${
-            loading
-              ? "cursor-not-allowed opacity-60"
-              : ""
-          }`}
+          } ${loading ? "cursor-not-allowed opacity-60" : ""}`}
         >
-          <span className="text-4xl">
-            📄
-          </span>
+          <span className="text-4xl">📄</span>
 
           <p className="mt-3 font-semibold text-[#0B5D3B]">
             {alreadyExists
@@ -1589,17 +991,11 @@ function PolicyFileField({
           </p>
 
           <input
-            ref={
-              inputRef
-            }
+            ref={inputRef}
             type="file"
             accept=".pdf,application/pdf"
-            onChange={
-              onFileChange
-            }
-            disabled={
-              loading
-            }
+            onChange={onFileChange}
+            disabled={loading}
             className="hidden"
           />
         </div>
@@ -1612,26 +1008,18 @@ function PolicyFileField({
               </p>
 
               <p className="mt-1 truncate text-sm font-medium text-slate-800">
-                {
-                  file.name
-                }
+                {file.name}
               </p>
 
               <p className="mt-1 text-xs text-slate-500">
-                {formatFileSize(
-                  file.size,
-                )}
+                {formatFileSize(file.size)}
               </p>
             </div>
 
             <button
               type="button"
-              onClick={
-                onRemove
-              }
-              disabled={
-                loading
-              }
+              onClick={onRemove}
+              disabled={loading}
               className="shrink-0 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Retirer

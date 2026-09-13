@@ -1,8 +1,13 @@
 "use client";
+import Image from "next/image";
+
+import Link from "next/link";
+
+import { useLanguage } from "@/lib/useLanguage";
 
 import {
   FormEvent,
-  useEffect,
+  useEffect, useCallback,
   useRef,
   useState,
 } from "react";
@@ -889,9 +894,7 @@ export default function SuiviClient({
     language,
     setLanguage,
   ] =
-    useState<Language>(
-      "fr",
-    );
+    useLanguage();
 
   const t =
     translations[
@@ -982,119 +985,15 @@ export default function SuiviClient({
       .length >
       0;
 
-  useEffect(() => {
-    function readSavedLanguage() {
-      const saved =
-        window.localStorage.getItem(
-          "if-sigorta-language",
-        );
 
-      if (
-        saved === "fr" ||
-        saved === "en" ||
-        saved === "tr"
-      ) {
-        setLanguage(
-          saved,
-        );
-      }
-    }
 
-    readSavedLanguage();
+  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
 
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language?: Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail
-          ?.language;
-
-      if (
-        nextLanguage ===
-          "fr" ||
-        nextLanguage ===
-          "en" ||
-        nextLanguage ===
-          "tr"
-      ) {
-        setLanguage(
-          nextLanguage,
-        );
-
-        return;
-      }
-
-      readSavedLanguage();
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    window.addEventListener(
-      "storage",
-      readSavedLanguage,
-    );
-
-    window.addEventListener(
-      "focus",
-      readSavedLanguage,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-
-      window.removeEventListener(
-        "storage",
-        readSavedLanguage,
-      );
-
-      window.removeEventListener(
-        "focus",
-        readSavedLanguage,
-      );
-    };
-  }, []);
-
-  function changeLanguage(
-    nextLanguage: Language,
-  ) {
-    setLanguage(
-      nextLanguage,
-    );
-
-    window.localStorage.setItem(
-      "if-sigorta-language",
-      nextLanguage,
-    );
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "if-sigorta-language-change",
-        {
-          detail: {
-            language:
-              nextLanguage,
-          },
-        },
-      ),
-    );
-  }
-
-  async function searchTracking(
+  const searchTracking = useCallback(async (
     code: string,
     country: string,
     phone: string,
-  ) {
+  ) => {
     const cleanedCode =
       code
         .trim()
@@ -1201,30 +1100,17 @@ export default function SuiviClient({
     } finally {
       setLoading(false);
     }
-  }
+  },[t.missingCode,t.missingPhone,t.trackingError,t.incompleteResponse,t.genericError]);
 
-  useEffect(() => {
-    if (
-      !hasTrackingData ||
-      automaticSearchStarted.current
-    ) {
-      return;
-    }
-
-    automaticSearchStarted.current =
-      true;
-
-    void searchTracking(
-      initialCode,
-      initialCountry,
-      initialPhone,
-    );
-  }, [
-    hasTrackingData,
-    initialCode,
-    initialCountry,
-    initialPhone,
-  ]);
+  useEffect(()=>{
+ if(automaticSearchStarted.current)return;
+ let code=initialCode,country=initialCountry,phone=initialPhone;
+ try {const raw=window.sessionStorage.getItem("if-sigorta-tracking");if(!code&&!phone&&raw){const saved=JSON.parse(raw);if(saved.expiresAt>Date.now()&&typeof saved.code==="string"&&typeof saved.phone==="string"&&typeof saved.country==="string"){code=saved.code;country=saved.country;phone=saved.phone;}}window.sessionStorage.removeItem("if-sigorta-tracking");} catch {}
+ if(!code.trim()||!phone.trim())return;
+ automaticSearchStarted.current=true;
+ if(window.location.search)window.history.replaceState(window.history.state,"","/suivi");
+ void searchTracking(code,country,phone);
+ },[initialCode,initialCountry,initialPhone,searchTracking]);
 
   function handleSubmit(
     event:
@@ -1582,17 +1468,17 @@ export default function SuiviClient({
     <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
-          <a
+          <Link
             href="/"
             className="flex min-w-0 shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <img
+            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto object-contain object-left sm:h-[82px]"
             />
-          </a>
+          </Link>
 
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <label
@@ -1627,14 +1513,14 @@ export default function SuiviClient({
               </option>
             </select>
 
-            <a
+            <Link
               href="/"
               className="hidden text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:inline"
             >
               {
                 t.backHome
               }
-            </a>
+            </Link>
           </div>
         </div>
       </div>

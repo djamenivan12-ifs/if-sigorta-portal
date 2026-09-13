@@ -1,3 +1,8 @@
+import { PROGRESS_ACTIONS } from "@/lib/dashboard/model";
+import { getMinutesBetween, getLastProgress } from "@/lib/admin/progress";
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -19,10 +24,7 @@ type RequestRow = {
   assigned_at: string | null;
   assigned_agent_id: string | null;
 
-  calculated_price:
-    | number
-    | string
-    | null;
+  calculated_price: number | string | null;
 
   client:
     | {
@@ -43,27 +45,12 @@ type ActivityRow = {
 };
 
 const ACTIVE_STATUSES = [
-  "waiting_payment",
   "payment_review",
   "payment_confirmed",
   "policy_preparation",
 ];
 
-const COMPLETED_STATUSES = [
-  "policy_available",
-];
-
-const PROGRESS_ACTIONS = [
-  "request_created",
-  "payment_uploaded",
-  "payment_confirmed",
-  "policy_preparation_started",
-  "policy_uploaded_year_1",
-  "policy_uploaded_year_2",
-  "policy_replaced_year_1",
-  "policy_replaced_year_2",
-  "whatsapp_sent",
-];
+const COMPLETED_STATUSES = ["policy_available"];
 
 const statusLabels: Record<
   string,
@@ -74,258 +61,135 @@ const statusLabels: Record<
 > = {
   waiting_payment: {
     label: "Paiement attendu",
-    className:
-      "bg-amber-100 text-amber-800",
+    className: "bg-amber-100 text-amber-800",
   },
 
   payment_review: {
     label: "Paiement à vérifier",
-    className:
-      "bg-orange-100 text-orange-800",
+    className: "bg-orange-100 text-orange-800",
   },
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className:
-      "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
-    className:
-      "border border-amber-200 bg-amber-50 text-amber-700",
+    className: "border border-amber-200 bg-amber-50 text-amber-700",
   },
 
   policy_available: {
     label: "Assurance disponible",
-    className:
-      "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
+    className: "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
   },
 
   payment_rejected: {
     label: "Paiement refusé",
-    className:
-      "bg-red-100 text-red-800",
+    className: "bg-red-100 text-red-800",
   },
 
   cancelled: {
     label: "Dossier annulé",
-    className:
-      "bg-slate-200 text-slate-800",
+    className: "bg-slate-200 text-slate-800",
   },
 };
 
-function formatDate(
-  value: string,
-) {
-  const date =
-    new Date(value);
+function formatDate(value: string) {
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function getMinutesBetween(
-  startValue: string,
-  endValue: string,
-) {
-  const start =
-    new Date(startValue);
+// Durations are shared with the agent detail view; invalid timestamps stay unknown.
 
-  const end =
-    new Date(endValue);
-
-  if (
-    Number.isNaN(
-      start.getTime(),
-    ) ||
-    Number.isNaN(
-      end.getTime(),
-    )
-  ) {
-    return 0;
-  }
-
-  const difference =
-    end.getTime() -
-    start.getTime();
-
-  if (
-    difference <= 0
-  ) {
-    return 0;
-  }
-
-  return Math.floor(
-    difference / 60000,
-  );
-}
-
-function formatDuration(
-  minutes: number | null,
-) {
-  if (
-    minutes === null
-  ) {
+function formatDuration(minutes: number | null) {
+  if (minutes === null) {
     return "—";
   }
 
-  if (
-    minutes < 1
-  ) {
+  if (minutes < 1) {
     return "moins d’une minute";
   }
 
-  if (
-    minutes < 60
-  ) {
+  if (minutes < 60) {
     return `${minutes} min`;
   }
 
-  const hours =
-    Math.floor(
-      minutes / 60,
-    );
+  const hours = Math.floor(minutes / 60);
 
-  const remainingMinutes =
-    minutes % 60;
+  const remainingMinutes = minutes % 60;
 
-  if (
-    remainingMinutes === 0
-  ) {
+  if (remainingMinutes === 0) {
     return `${hours} h`;
   }
 
   return `${hours} h ${remainingMinutes} min`;
 }
 
-function getClient(
-  relation:
-    RequestRow["client"],
-) {
-  if (
-    Array.isArray(
-      relation,
-    )
-  ) {
-    return (
-      relation[0] ??
-      null
-    );
+function getClient(relation: RequestRow["client"]) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
 
   return relation;
 }
 
-export default async function AgentDetailsPage({
-  params,
-}: PageProps) {
-  await requireRole([
-    "admin",
-  ]);
+export default async function AgentDetailsPage({ params }: PageProps) {
+  await requireRole(["admin"]);
 
-  const {
-    id,
-  } =
-    await params;
+  const { id } = await params;
 
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
   /*
    * Agent.
    */
-  const {
-    data: agentData,
-    error: agentError,
-  } =
-    await supabase.auth.admin.getUserById(
-      id,
-    );
+  const { data: agentData, error: agentError } =
+    await supabase.auth.admin.getUserById(id);
 
-  if (
-    agentError ||
-    !agentData.user
-  ) {
+  if (agentError || !agentData.user) {
     notFound();
   }
 
-  const agent =
-    agentData.user;
+  const agent = agentData.user;
 
-  const role =
-    agent.app_metadata?.role;
+  const role = agent.app_metadata?.role;
 
-  if (
-    role !== "agent" &&
-    role !== "admin"
-  ) {
+  if (role !== "agent" && role !== "admin") {
     notFound();
   }
 
-  const firstName =
-    agent.user_metadata
-      ?.first_name
-      ?.toString()
-      .trim() ??
-    "";
+  const firstName = agent.user_metadata?.first_name?.toString().trim() ?? "";
 
-  const lastName =
-    agent.user_metadata
-      ?.last_name
-      ?.toString()
-      .trim() ??
-    "";
+  const lastName = agent.user_metadata?.last_name?.toString().trim() ?? "";
 
   const agentName =
     `${firstName} ${lastName}`.trim() ||
-    agent.user_metadata
-      ?.name
-      ?.toString()
-      .trim() ||
+    agent.user_metadata?.name?.toString().trim() ||
     agent.email ||
     "Agent";
-  const bannedUntil =
-  agent.banned_until
-    ? new Date(
-        agent.banned_until,
-      )
-    : null;
+  const bannedUntil = agent.banned_until ? new Date(agent.banned_until) : null;
 
-const agentIsDisabled =
-  bannedUntil !== null &&
-  !Number.isNaN(
-    bannedUntil.getTime(),
-  ) &&
-  bannedUntil.getTime() >
-    Date.now();
+  const agentIsDisabled =
+    bannedUntil !== null &&
+    !Number.isNaN(bannedUntil.getTime()) &&
+    bannedUntil.getTime() > new Date().getTime();
 
   /*
    * Dossiers attribués.
    */
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await supabase
-      .from(
-        "insurance_requests",
-      )
+  const { data: requestsData, error: requestsError } = await readAll(
+    supabase
+      .from("insurance_requests")
       .select(
         `
           id,
@@ -342,56 +206,30 @@ const agentIsDisabled =
           )
         `,
       )
-      .eq(
-        "assigned_agent_id",
-        id,
-      )
-      .order(
-        "created_at",
-        {
-          ascending:
-            false,
-        },
-      );
+      .eq("assigned_agent_id", id)
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
-  if (
-    requestsError
-  ) {
-    throw new Error(
-      requestsError.message,
-    );
+  if (requestsError) {
+    throw new Error(requestsError.message);
   }
 
-  const requests =
-    (requestsData ??
-      []) as unknown as RequestRow[];
+  const requests = (requestsData ?? []) as unknown as RequestRow[];
 
   /*
    * Historique de progression.
    */
-  const requestIds =
-    requests.map(
-      (request) =>
-        request.id,
-    );
+  const requestIds = requests.map((request) => request.id);
 
-  let activities:
-    ActivityRow[] = [];
+  let activities: ActivityRow[] = [];
 
-  if (
-    requestIds.length >
-    0
-  ) {
-    const {
-      data:
-        activitiesData,
-      error:
-        activitiesError,
-    } =
-      await supabase
-        .from(
-          "activity_logs",
-        )
+  if (requestIds.length > 0) {
+    const { data: activitiesData, error: activitiesError } = await readAll(
+      supabase
+        .from("activity_logs")
         .select(
           `
             request_id,
@@ -399,237 +237,130 @@ const agentIsDisabled =
             created_at
           `,
         )
-        .in(
-          "request_id",
-          requestIds,
-        )
-        .in(
-          "action",
-          PROGRESS_ACTIONS,
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              false,
-          },
-        );
+        .in("request_id", requestIds)
+        .in("action", PROGRESS_ACTIONS)
+        .order("created_at", {
+          ascending: false,
+        })
+        .order("id"),
+    );
 
-    if (
-      activitiesError
-    ) {
-      throw new Error(
-        activitiesError.message,
-      );
+    if (activitiesError) {
+      throw new Error(activitiesError.message);
     }
 
-    activities =
-      (activitiesData ??
-        []) as ActivityRow[];
+    activities = (activitiesData ?? []) as ActivityRow[];
   }
 
-  const lastProgressByRequest =
-    new Map<
-      string,
-      string
-    >();
+  const now = new Date().toISOString();
+  const lastProgressByRequest = new Map<string, string>();
 
-  const whatsappSentRequests =
-    new Set<string>();
-
-  for (
-    const activity of
-    activities
-  ) {
+  for (const activity of activities) {
     if (
-      !lastProgressByRequest.has(
-        activity.request_id,
-      )
+      Number.isFinite(Date.parse(activity.created_at)) &&
+      Date.parse(activity.created_at) <= Date.parse(now) &&
+      (!lastProgressByRequest.has(activity.request_id) ||
+        Date.parse(activity.created_at) >
+          Date.parse(lastProgressByRequest.get(activity.request_id)!))
     ) {
-      lastProgressByRequest.set(
-        activity.request_id,
-        activity.created_at,
-      );
-    }
-
-    if (
-      activity.action ===
-      "whatsapp_sent"
-    ) {
-      whatsappSentRequests.add(
-        activity.request_id,
-      );
+      lastProgressByRequest.set(activity.request_id, activity.created_at);
     }
   }
 
   /*
    * Statistiques.
    */
-  const total =
-    requests.length;
+  const total = requests.length;
 
-  const active =
-    requests.filter(
-      (request) =>
-        ACTIVE_STATUSES.includes(
-          request.status,
-        ),
-    ).length;
+  const active = requests.filter((request) =>
+    ACTIVE_STATUSES.includes(request.status),
+  ).length;
 
-  const completed =
-    requests.filter(
-      (request) =>
-        COMPLETED_STATUSES.includes(
-          request.status,
-        ) ||
-        whatsappSentRequests.has(
-          request.id,
-        ),
-    ).length;
-
-  const now =
-    new Date().toISOString();
+  const completed = requests.filter((request) =>
+    COMPLETED_STATUSES.includes(request.status),
+  ).length;
 
   let watchCount = 0;
   let lateCount = 0;
   let criticalCount = 0;
 
-  for (
-    const request of
-    requests
-  ) {
-
+  for (const request of requests) {
     /*
      * Dossier terminé :
      * pas de retard.
      */
-    if (
-      whatsappSentRequests.has(
-        request.id,
-      )
-    ) {
+    if (COMPLETED_STATUSES.includes(request.status)) {
       continue;
     }
 
-    if (
-      !ACTIVE_STATUSES.includes(
-        request.status,
-      ) &&
-      request.status !==
-        "policy_available"
-    ) {
+    if (!ACTIVE_STATUSES.includes(request.status)) {
       continue;
     }
 
-    const lastProgressAt =
-      lastProgressByRequest.get(
-        request.id,
-      ) ??
-      request.assigned_at ??
-      request.created_at;
+    const lastProgressAt = getLastProgress(request, lastProgressByRequest, now);
 
-    const minutes =
-      getMinutesBetween(
-        lastProgressAt,
-        now,
-      );
+    const minutes = getMinutesBetween(lastProgressAt, now);
 
-    if (
-      minutes >= 30
-    ) {
+    if (minutes >= 30) {
       criticalCount += 1;
-    } else if (
-      minutes >= 15
-    ) {
+    } else if (minutes >= 15) {
       lateCount += 1;
-    } else if (
-      minutes >= 5
-    ) {
+    } else if (minutes >= 5) {
       watchCount += 1;
     }
   }
 
-  const delayedTotal =
-    watchCount +
-    lateCount +
-    criticalCount;
+  const delayedTotal = watchCount + lateCount + criticalCount;
 
   /*
    * Temps moyen de prise en charge.
    */
-  const claimTimes =
-    requests
-      .filter(
-        (request) =>
-          Boolean(
-            request.assigned_at,
-          ),
-      )
-      .map(
-        (request) =>
-          getMinutesBetween(
-            request.created_at,
-            request.assigned_at!,
-          ),
-      );
+  const claimTimes = requests
+    .filter((request) => Boolean(request.assigned_at))
+    .map((request) =>
+      getMinutesBetween(request.created_at, request.assigned_at!),
+    )
+    .filter(Number.isFinite);
 
   const averageClaimMinutes =
-    claimTimes.length >
-    0
+    claimTimes.length > 0
       ? Math.round(
           claimTimes.reduce(
-            (
-              totalValue,
-              currentValue,
-            ) =>
-              totalValue +
-              currentValue,
+            (totalValue, currentValue) => totalValue + currentValue,
             0,
-          ) /
-            claimTimes.length,
+          ) / claimTimes.length,
         )
       : null;
 
   /*
    * Taux de finalisation.
    */
-  const completionRate =
-    total > 0
-      ? (
-          completed /
-          total
-        ) *
-        100
-      : 0;
+  const completionRate = total > 0 ? (completed / total) * 100 : 0;
 
   /*
    * Valeur totale des dossiers.
    */
-  const totalRevenue =
-    requests.reduce(
-      (
-        totalValue,
-        request,
-      ) =>
-        totalValue +
-        Number(
-          request.calculated_price ??
-            0,
-        ),
-      0,
-    );
+  const totalRevenue = requests.reduce(
+    (totalValue, request) => totalValue + Number(request.calculated_price ?? 0),
+    0,
+  );
 
   /*
    * Dossiers récents.
    */
-  const recentRequests =
-    requests.slice(
-      0,
-      25,
-    );
+  const recentRequests = requests.slice(0, 25);
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Agents"
+      href="/admin/agents"
+      detail={true}
+      sections={[
+        { id: "section-1", label: "Informations de l’utilisateur" },
+        { id: "section-2", label: "Retards de l’agent" },
+        { id: "section-3", label: "Dossiers de l’agent" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Link
@@ -664,42 +395,39 @@ const agentIsDisabled =
             </div>
 
             <span className="inline-flex w-fit max-w-full rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1.5 text-[11px] font-semibold text-[#0B5D3B] sm:px-4 sm:py-2 sm:text-sm">
-              {role ===
-              "admin"
-                ? "Administrateur"
-                : "Agent"}
+              {role === "admin" ? "Administrateur" : "Agent"}
             </span>
           </div>
         </header>
 
-<section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
-  <div className="mb-4 sm:mb-6">
-    <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
-      Gestion du compte
-    </p>
+        <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
+          <div className="mb-4 sm:mb-6">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              Gestion du compte
+            </p>
 
-    <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
-      Informations de l’utilisateur
-    </h2>
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
+              Informations de l’utilisateur
+            </h2>
 
-    <p className="mt-2 text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
-      Modifiez les informations, le rôle, le mot de passe ou l’état du compte.
-    </p>
-  </div>
+            <p className="mt-2 text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
+              Modifiez les informations, le rôle, le mot de passe ou l’état du
+              compte.
+            </p>
+          </div>
 
-  <AgentForm
-    agentId={agent.id}
-    initialFirstName={firstName}
-    initialLastName={lastName}
-    initialEmail={
-      agent.email ?? ""
-    }
-    initialRole={role}
-    initialDisabled={
-      agentIsDisabled
-    }
-  />
-</section>
+          <AgentForm
+            agentId={agent.id}
+            initialFirstName={firstName}
+            initialLastName={lastName}
+            initialEmail={agent.email ?? ""}
+            initialRole={role}
+            initialDisabled={agentIsDisabled}
+          />
+        </section>
 
         {/* Statistiques générales */}
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 xl:grid-cols-4">
@@ -743,12 +471,16 @@ const agentIsDisabled =
               Priorités
             </p>
 
-            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-2"
+            >
               Retards de l’agent
             </h2>
 
             <p className="mt-2 text-sm text-slate-500">
-              Calculés à partir de la dernière progression réelle enregistrée dans l’historique.
+              Calculés à partir de la dernière progression réelle enregistrée
+              dans l’historique.
             </p>
           </div>
 
@@ -778,8 +510,7 @@ const agentIsDisabled =
             />
           </div>
 
-          {delayedTotal ===
-            0 && (
+          {delayedTotal === 0 && (
             <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
               ✓ Aucun dossier nécessitant une attention particulière.
             </div>
@@ -790,33 +521,23 @@ const agentIsDisabled =
         <section className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-3">
           <MetricCard
             label="Prise en charge moyenne"
-            value={formatDuration(
-              averageClaimMinutes,
-            )}
+            value={formatDuration(averageClaimMinutes)}
             description="Temps moyen entre la création d’un dossier et son attribution."
           />
 
           <MetricCard
             label="Taux de finalisation"
-            value={`${completionRate.toLocaleString(
-              "fr-FR",
-              {
-                maximumFractionDigits:
-                  1,
-              },
-            )} %`}
+            value={`${completionRate.toLocaleString("fr-FR", {
+              maximumFractionDigits: 1,
+            })} %`}
             description="Part des dossiers actuellement finalisés."
           />
 
           <MetricCard
             label="Valeur des dossiers"
-            value={`${totalRevenue.toLocaleString(
-              "fr-FR",
-              {
-                maximumFractionDigits:
-                  2,
-              },
-            )} TL`}
+            value={`${totalRevenue.toLocaleString("fr-FR", {
+              maximumFractionDigits: 2,
+            })} TL`}
             description="Montant cumulé des dossiers attribués à cet agent."
           />
         </section>
@@ -825,7 +546,10 @@ const agentIsDisabled =
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
-              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+              <h2
+                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                id="section-3"
+              >
                 Dossiers de l’agent
               </h2>
 
@@ -842,8 +566,7 @@ const agentIsDisabled =
             </Link>
           </div>
 
-          {recentRequests.length ===
-          0 ? (
+          {recentRequests.length === 0 ? (
             <div className="px-4 py-10 text-center sm:p-12">
               <p className="font-semibold text-slate-700">
                 Aucun dossier attribué
@@ -863,22 +586,25 @@ const agentIsDisabled =
                     ? `${client.first_name} ${client.last_name}`.trim()
                     : "Client inconnu";
 
-                  const statusInformation =
-                    statusLabels[request.status] ?? {
-                      label: request.status,
-                      className: "bg-slate-100 text-slate-700",
-                    };
+                  const statusInformation = statusLabels[request.status] ?? {
+                    label: request.status,
+                    className: "bg-slate-100 text-slate-700",
+                  };
 
-                  const lastProgressAt =
-                    lastProgressByRequest.get(request.id) ??
-                    request.assigned_at ??
-                    request.created_at;
+                  const lastProgressAt = getLastProgress(
+                    request,
+                    lastProgressByRequest,
+                    now,
+                  );
 
-                  const minutesWithoutProgress =
-                    getMinutesBetween(lastProgressAt, now);
+                  const minutesWithoutProgress = getMinutesBetween(
+                    lastProgressAt,
+                    now,
+                  );
 
-                  const completedRequest =
-                    whatsappSentRequests.has(request.id);
+                  const completedRequest = COMPLETED_STATUSES.includes(
+                    request.status,
+                  );
 
                   let delayLabel = "Normal";
                   let delayClassName =
@@ -888,9 +614,14 @@ const agentIsDisabled =
                     delayLabel = "Terminé";
                     delayClassName =
                       "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]";
-                  } else if (request.status === "payment_rejected") {
-                    delayLabel = "Priorité élevée";
-                    delayClassName = "bg-red-50 text-red-700";
+                  } else if (!ACTIVE_STATUSES.includes(request.status)) {
+                    delayLabel =
+                      request.status === "waiting_payment"
+                        ? "En attente du client"
+                        : request.status === "payment_rejected"
+                          ? "Paiement refusé"
+                          : "Hors traitement";
+                    delayClassName = "bg-slate-100 text-slate-600";
                   } else if (minutesWithoutProgress >= 30) {
                     delayLabel = "Priorité élevée";
                     delayClassName = "bg-red-50 text-red-700";
@@ -903,10 +634,7 @@ const agentIsDisabled =
                   }
 
                   return (
-                    <article
-                      key={request.id}
-                      className="min-w-0 p-4 sm:p-5"
-                    >
+                    <article key={request.id} className="min-w-0 p-4 sm:p-5">
                       <div className="flex min-w-0 items-start justify-between gap-3">
                         <div className="min-w-0">
                           <Link
@@ -935,11 +663,12 @@ const agentIsDisabled =
                           {delayLabel}
                         </span>
 
-                        {!completedRequest && (
-                          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 sm:text-xs">
-                            {formatDuration(minutesWithoutProgress)}
-                          </span>
-                        )}
+                        {!completedRequest &&
+                          ACTIVE_STATUSES.includes(request.status) && (
+                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 sm:text-xs">
+                              {formatDuration(minutesWithoutProgress)}
+                            </span>
+                          )}
                       </div>
 
                       <dl className="mt-4 grid min-w-0 grid-cols-2 gap-x-4 gap-y-3">
@@ -987,166 +716,111 @@ const agentIsDisabled =
                 })}
               </div>
 
-            <div className="hidden overflow-x-auto lg:block">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-[#FAFCFA]">
-                  <tr>
-                    <TableHeader>
-                      Matricule
-                    </TableHeader>
+              <div className="hidden overflow-x-auto lg:block">
+                <table
+                  className="min-w-full divide-y divide-slate-200"
+                  aria-label="Agents"
+                >
+                  <thead className="bg-[#FAFCFA]">
+                    <tr>
+                      <TableHeader>Matricule</TableHeader>
 
-                    <TableHeader>
-                      Client
-                    </TableHeader>
+                      <TableHeader>Client</TableHeader>
 
-                    <TableHeader>
-                      Montant
-                    </TableHeader>
+                      <TableHeader>Montant</TableHeader>
 
-                    <TableHeader>
-                      Statut
-                    </TableHeader>
+                      <TableHeader>Statut</TableHeader>
 
-                    <TableHeader>
-                      Dernière progression
-                    </TableHeader>
+                      <TableHeader>Dernière progression</TableHeader>
 
-                    <TableHeader>
-                      Délai
-                    </TableHeader>
+                      <TableHeader>Délai</TableHeader>
 
-                    <TableHeader>
-                      Attribution
-                    </TableHeader>
+                      <TableHeader>Attribution</TableHeader>
 
-                    <TableHeader>
-                      Action
-                    </TableHeader>
-                  </tr>
-                </thead>
+                      <TableHeader>Action</TableHeader>
+                    </tr>
+                  </thead>
 
-                <tbody className="divide-y divide-slate-100">
-                  {recentRequests.map(
-                    (request) => {
-                      const client =
-                        getClient(
-                          request.client,
-                        );
+                  <tbody className="divide-y divide-slate-100">
+                    {recentRequests.map((request) => {
+                      const client = getClient(request.client);
 
-                      const clientName =
-                        client
-                          ? `${client.first_name} ${client.last_name}`.trim()
-                          : "Client inconnu";
+                      const clientName = client
+                        ? `${client.first_name} ${client.last_name}`.trim()
+                        : "Client inconnu";
 
-                      const statusInformation =
-                        statusLabels[
-                          request.status
-                        ] ?? {
-                          label:
-                            request.status,
+                      const statusInformation = statusLabels[
+                        request.status
+                      ] ?? {
+                        label: request.status,
 
-                          className:
-                            "bg-slate-100 text-slate-700",
-                        };
+                        className: "bg-slate-100 text-slate-700",
+                      };
 
-                      const lastProgressAt =
-                        lastProgressByRequest.get(
-                          request.id,
-                        ) ??
-                        request.assigned_at ??
-                        request.created_at;
+                      const lastProgressAt = getLastProgress(
+                        request,
+                        lastProgressByRequest,
+                        now,
+                      );
 
-                      const minutesWithoutProgress =
-                        getMinutesBetween(
-                          lastProgressAt,
-                          now,
-                        );
+                      const minutesWithoutProgress = getMinutesBetween(
+                        lastProgressAt,
+                        now,
+                      );
 
-                      const completedRequest =
-                        whatsappSentRequests.has(
-                          request.id,
-                        );
+                      const completedRequest = COMPLETED_STATUSES.includes(
+                        request.status,
+                      );
 
-                      let delayLabel =
-                        "Normal";
+                      let delayLabel = "Normal";
 
                       let delayClassName =
                         "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]";
 
-                      if (
-                        completedRequest
-                      ) {
-                        delayLabel =
-                          "Terminé";
+                      if (completedRequest) {
+                        delayLabel = "Terminé";
 
                         delayClassName =
                           "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]";
-                      } else if (
-                        request.status ===
-                        "payment_rejected"
-                      ) {
+                      } else if (!ACTIVE_STATUSES.includes(request.status)) {
                         delayLabel =
-                          "Priorité élevée";
+                          request.status === "waiting_payment"
+                            ? "En attente du client"
+                            : request.status === "payment_rejected"
+                              ? "Paiement refusé"
+                              : "Hors traitement";
+                        delayClassName = "bg-slate-100 text-slate-600";
+                      } else if (minutesWithoutProgress >= 30) {
+                        delayLabel = "Priorité élevée";
 
-                        delayClassName =
-                          "bg-red-50 text-red-700";
-                      } else if (
-                        minutesWithoutProgress >=
-                        30
-                      ) {
-                        delayLabel =
-                          "Priorité élevée";
+                        delayClassName = "bg-red-50 text-red-700";
+                      } else if (minutesWithoutProgress >= 15) {
+                        delayLabel = "En retard";
 
-                        delayClassName =
-                          "bg-red-50 text-red-700";
-                      } else if (
-                        minutesWithoutProgress >=
-                        15
-                      ) {
-                        delayLabel =
-                          "En retard";
+                        delayClassName = "bg-orange-50 text-orange-700";
+                      } else if (minutesWithoutProgress >= 5) {
+                        delayLabel = "À surveiller";
 
-                        delayClassName =
-                          "bg-orange-50 text-orange-700";
-                      } else if (
-                        minutesWithoutProgress >=
-                        5
-                      ) {
-                        delayLabel =
-                          "À surveiller";
-
-                        delayClassName =
-                          "bg-amber-50 text-amber-700";
+                        delayClassName = "bg-amber-50 text-amber-700";
                       }
 
                       return (
                         <tr
-                          key={
-                            request.id
-                          }
+                          key={request.id}
                           className="transition hover:bg-[#FAFCFA]"
                         >
                           <TableCell>
                             <strong className="text-slate-900">
-                              {
-                                request.request_code
-                              }
+                              {request.request_code}
                             </strong>
                           </TableCell>
 
-                          <TableCell>
-                            {
-                              clientName
-                            }
-                          </TableCell>
+                          <TableCell>{clientName}</TableCell>
 
                           <TableCell>
                             {Number(
-                              request.calculated_price ??
-                                0,
-                            ).toLocaleString(
-                              "fr-FR",
-                            )}{" "}
+                              request.calculated_price ?? 0,
+                            ).toLocaleString("fr-FR")}{" "}
                             TL
                           </TableCell>
 
@@ -1154,43 +828,32 @@ const agentIsDisabled =
                             <span
                               className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${statusInformation.className}`}
                             >
-                              {
-                                statusInformation.label
-                              }
+                              {statusInformation.label}
                             </span>
                           </TableCell>
 
-                          <TableCell>
-                            {formatDate(
-                              lastProgressAt,
-                            )}
-                          </TableCell>
+                          <TableCell>{formatDate(lastProgressAt)}</TableCell>
 
                           <TableCell>
                             <div className="flex flex-col items-start gap-1">
                               <span
                                 className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${delayClassName}`}
                               >
-                                {
-                                  delayLabel
-                                }
+                                {delayLabel}
                               </span>
 
-                              {!completedRequest && (
-                                <span className="text-xs text-slate-400">
-                                  {formatDuration(
-                                    minutesWithoutProgress,
-                                  )}
-                                </span>
-                              )}
+                              {!completedRequest &&
+                                ACTIVE_STATUSES.includes(request.status) && (
+                                  <span className="text-xs text-slate-400">
+                                    {formatDuration(minutesWithoutProgress)}
+                                  </span>
+                                )}
                             </div>
                           </TableCell>
 
                           <TableCell>
                             {request.assigned_at
-                              ? formatDate(
-                                  request.assigned_at,
-                                )
+                              ? formatDate(request.assigned_at)
                               : "—"}
                           </TableCell>
 
@@ -1204,16 +867,15 @@ const agentIsDisabled =
                           </TableCell>
                         </tr>
                       );
-                    },
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </>
           )}
         </section>
       </div>
-    </main>
+    </PageFrame>
   );
 }
 
@@ -1223,11 +885,7 @@ type SummaryCardProps = {
   className: string;
 };
 
-function SummaryCard({
-  label,
-  value,
-  className,
-}: SummaryCardProps) {
+function SummaryCard({ label, value, className }: SummaryCardProps) {
   return (
     <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5">
       <span
@@ -1237,9 +895,7 @@ function SummaryCard({
       </span>
 
       <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
-        {value.toLocaleString(
-          "fr-FR",
-        )}
+        {value.toLocaleString("fr-FR")}
       </p>
     </div>
   );
@@ -1261,15 +917,9 @@ function DelayCard({
   valueClassName,
 }: DelayCardProps) {
   return (
-    <div
-      className={`min-w-0 rounded-xl border p-4 sm:p-5 ${className}`}
-    >
-      <p
-        className={`text-2xl font-bold sm:text-3xl ${valueClassName}`}
-      >
-        {value.toLocaleString(
-          "fr-FR",
-        )}
+    <div className={`min-w-0 rounded-xl border p-4 sm:p-5 ${className}`}>
+      <p className={`text-2xl font-bold sm:text-3xl ${valueClassName}`}>
+        {value.toLocaleString("fr-FR")}
       </p>
 
       <p className="mt-2 text-[13px] font-semibold text-[#102B20] sm:mt-3 sm:text-base">
@@ -1289,11 +939,7 @@ type MetricCardProps = {
   description: string;
 };
 
-function MetricCard({
-  label,
-  value,
-  description,
-}: MetricCardProps) {
+function MetricCard({ label, value, description }: MetricCardProps) {
   return (
     <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-5">
       <p className="text-[12px] font-medium text-slate-500 sm:text-sm">
@@ -1312,13 +958,10 @@ function MetricCard({
 }
 
 type TableContentProps = {
-  children:
-    React.ReactNode;
+  children: React.ReactNode;
 };
 
-function TableHeader({
-  children,
-}: TableContentProps) {
+function TableHeader({ children }: TableContentProps) {
   return (
     <th className="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
       {children}
@@ -1326,9 +969,7 @@ function TableHeader({
   );
 }
 
-function TableCell({
-  children,
-}: TableContentProps) {
+function TableCell({ children }: TableContentProps) {
   return (
     <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-700">
       {children}

@@ -1,4 +1,9 @@
 "use client";
+import Image from "next/image";
+
+import Link from "next/link";
+
+import { useLanguage } from "@/lib/useLanguage";
 
 import {
   FormEvent,
@@ -414,9 +419,7 @@ export default function Etape4Page() {
     language,
     setLanguage,
   ] =
-    useState<Language>(
-      "fr",
-    );
+    useLanguage();
 
   const [
     confirmed,
@@ -446,111 +449,14 @@ export default function Etape4Page() {
   ] =
     useState(true);
 
-  useEffect(() => {
-    function readSavedLanguage() {
-      const savedLanguage =
-        window.localStorage.getItem(
-          "if-sigorta-language",
-        );
 
-      if (
-        savedLanguage === "fr" ||
-        savedLanguage === "en" ||
-        savedLanguage === "tr"
-      ) {
-        setLanguage(
-          savedLanguage,
-        );
-      }
-    }
-
-    readSavedLanguage();
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language?: Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail?.language;
-
-      if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
-      ) {
-        setLanguage(
-          nextLanguage,
-        );
-
-        return;
-      }
-
-      readSavedLanguage();
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    window.addEventListener(
-      "storage",
-      readSavedLanguage,
-    );
-
-    window.addEventListener(
-      "focus",
-      readSavedLanguage,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-
-      window.removeEventListener(
-        "storage",
-        readSavedLanguage,
-      );
-
-      window.removeEventListener(
-        "focus",
-        readSavedLanguage,
-      );
-    };
-  }, []);
 
   const t =
     translations[
       language
     ];
 
-  function changeLanguage(
-    nextLanguage: Language,
-  ) {
-    setLanguage(nextLanguage);
-
-    window.localStorage.setItem(
-      "if-sigorta-language",
-      nextLanguage,
-    );
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "if-sigorta-language-change",
-        {
-          detail: {
-            language: nextLanguage,
-          },
-        },
-      ),
-    );
-  }
+  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
 
   useEffect(() => {
     async function loadAddressNames() {
@@ -795,10 +701,7 @@ export default function Etape4Page() {
     setIsSubmitting(true);
 
     try {
-      console.log(
-  "ADRESSE ENVOYÉE :",
-  requestData.address,
-);
+
       const payload = {
         preferredLanguage:
           language,
@@ -974,7 +877,7 @@ export default function Etape4Page() {
       const result =
         (await response.json()) as {
           success?: boolean;
-          requestId?: string;
+          requestId?: string; calculatedPrice?: number; calculatedAge?: number;
           requestCode?: string;
           status?: string;
           error?: string;
@@ -992,9 +895,8 @@ export default function Etape4Page() {
         );
       }
 
-      updateRequestData({
-        requestId:
-          result.requestId,
+      updateRequestData({ calculatedPrice: result.calculatedPrice ?? requestData.calculatedPrice, calculatedAge: result.calculatedAge ?? requestData.calculatedAge,
+        requestId: result.requestId,
 
         requestCode:
           result.requestCode,
@@ -1108,17 +1010,17 @@ export default function Etape4Page() {
     <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
-          <a
+          <Link
             href="/"
             className="flex shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <img
+            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto max-w-[170px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
             />
-          </a>
+          </Link>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">

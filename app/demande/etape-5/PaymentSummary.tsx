@@ -1,8 +1,9 @@
 "use client";
+import { useLanguage } from "@/lib/useLanguage";
 
-import { useEffect, useState } from "react";
 
-type Language = "fr" | "en" | "tr";
+
+
 
 type PaymentSummaryProps = {
   amount: number | null;
@@ -30,30 +31,9 @@ const translations = {
 };
 
 export default function PaymentSummary({ amount }: PaymentSummaryProps) {
-  const [language, setLanguage] = useState<Language>("fr");
+  const [language] = useLanguage();
 
-  useEffect(() => {
-    const savedLanguage = window.localStorage.getItem("if-sigorta-language");
 
-    if (savedLanguage === "fr" || savedLanguage === "en" || savedLanguage === "tr") {
-      setLanguage(savedLanguage);
-    }
-
-    function handleLanguageChange(event: Event) {
-      const customEvent = event as CustomEvent<{ language: Language }>;
-      const nextLanguage = customEvent.detail?.language;
-
-      if (nextLanguage === "fr" || nextLanguage === "en" || nextLanguage === "tr") {
-        setLanguage(nextLanguage);
-      }
-    }
-
-    window.addEventListener("if-sigorta-language-change", handleLanguageChange);
-
-    return () => {
-      window.removeEventListener("if-sigorta-language-change", handleLanguageChange);
-    };
-  }, []);
 
   const t = translations[language];
 

@@ -1,19 +1,13 @@
 "use client";
+import { useLanguage } from "@/lib/useLanguage";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import {useMemo} from "react";
 
 import {
   countryCodes,
 } from "@/lib/countryCodes";
 
-type Language =
-  | "fr"
-  | "en"
-  | "tr";
+
 
 type PhoneInputProps = {
   countryCode: string;
@@ -70,65 +64,10 @@ export default function PhoneInput({
   onPhoneNumberChange,
   allowedCountryCodes,
 }: PhoneInputProps) {
-  const [
-    language,
-    setLanguage,
-  ] =
-    useState<Language>(
-      "fr",
-    );
+  const [language] =
+    useLanguage();
 
-  useEffect(() => {
-    const savedLanguage =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      savedLanguage === "fr" ||
-      savedLanguage === "en" ||
-      savedLanguage === "tr"
-    ) {
-      setLanguage(
-        savedLanguage,
-      );
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language:
-            Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail?.language;
-
-      if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
-      ) {
-        setLanguage(
-          nextLanguage,
-        );
-      }
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   const t =
     translations[

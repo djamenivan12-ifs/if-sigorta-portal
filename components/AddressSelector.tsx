@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/lib/useLanguage";
 
 import {
   useEffect,
@@ -28,10 +29,7 @@ type AddressSelectorProps = {
   ) => void;
 };
 
-type Language =
-  | "fr"
-  | "en"
-  | "tr";
+
 
 const translations = {
   fr: {
@@ -171,13 +169,8 @@ export default function AddressSelector({
   value,
   onChange,
 }: AddressSelectorProps) {
-  const [
-    language,
-    setLanguage,
-  ] =
-    useState<Language>(
-      "fr",
-    );
+  const [language] =
+    useLanguage();
 
   const [
     provinces,
@@ -227,57 +220,7 @@ export default function AddressSelector({
   ] =
     useState("");
 
-  useEffect(() => {
-    const savedLanguage =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      savedLanguage === "fr" ||
-      savedLanguage === "en" ||
-      savedLanguage === "tr"
-    ) {
-      setLanguage(
-        savedLanguage,
-      );
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language:
-            Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail?.language;
-
-      if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
-      ) {
-        setLanguage(
-          nextLanguage,
-        );
-      }
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   const t =
     translations[
@@ -330,129 +273,42 @@ export default function AddressSelector({
     t.provincesError,
   ]);
 
-  async function selectProvince(
-    provinceId: string,
-  ) {
-    onChange({
-      ...value,
-      provinceId,
-      districtId: "",
-      neighborhoodId:
-        "",
-    });
-
-    setDistricts([]);
-    setNeighborhoods([]);
-
-    if (!provinceId) {
-      return;
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      if (!value.provinceId) { if(active) {setDistricts([]);setLoadingDistricts(false);} return; }
+      setLoadingDistricts(true);
+      setDistricts([]);
+      try {
+        const {data,error}=await createClient().from("districts").select("id, name").eq("province_id",Number(value.provinceId)).order("name");
+        if(!active) return;
+        if(error) setErrorMessage(t.districtsError); else {setDistricts(data ?? []);setErrorMessage("");}
+      } catch {if(active) setErrorMessage(t.districtsError);}
+      finally {if(active) setLoadingDistricts(false);}
     }
-
-    setLoadingDistricts(
-      true,
-    );
-
-    setErrorMessage("");
-
-    const supabase =
-      createClient();
-
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "districts",
-        )
-        .select(
-          "id, name",
-        )
-        .eq(
-          "province_id",
-          Number(
-            provinceId,
-          ),
-        )
-        .order(
-          "name",
-        );
-
-    if (error) {
-      setErrorMessage(
-        t.districtsError,
-      );
-    } else {
-      setDistricts(
-        data ?? [],
-      );
+    void load();
+    return () => {active=false;};
+  }, [value.provinceId,t.districtsError]);
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      if (!value.districtId) { if(active) {setNeighborhoods([]);setLoadingNeighborhoods(false);} return; }
+      setLoadingNeighborhoods(true);
+      setNeighborhoods([]);
+      try {
+        const {data,error}=await createClient().from("neighborhoods").select("id, name").eq("district_id",Number(value.districtId)).order("name");
+        if(!active) return;
+        if(error) setErrorMessage(t.neighborhoodsError); else {setNeighborhoods(data ?? []);setErrorMessage("");}
+      } catch {if(active) setErrorMessage(t.neighborhoodsError);}
+      finally {if(active) setLoadingNeighborhoods(false);}
     }
+    void load();
+    return () => {active=false;};
+  }, [value.districtId,t.neighborhoodsError]);
 
-    setLoadingDistricts(
-      false,
-    );
-  }
+  function selectProvince(provinceId: string) { onChange({...value,provinceId,districtId:"",neighborhoodId:""}); }
 
-  async function selectDistrict(
-    districtId: string,
-  ) {
-    onChange({
-      ...value,
-      districtId,
-      neighborhoodId:
-        "",
-    });
-
-    setNeighborhoods([]);
-
-    if (!districtId) {
-      return;
-    }
-
-    setLoadingNeighborhoods(
-      true,
-    );
-
-    setErrorMessage("");
-
-    const supabase =
-      createClient();
-
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "neighborhoods",
-        )
-        .select(
-          "id, name",
-        )
-        .eq(
-          "district_id",
-          Number(
-            districtId,
-          ),
-        )
-        .order(
-          "name",
-        );
-
-    if (error) {
-      setErrorMessage(
-        t.neighborhoodsError,
-      );
-    } else {
-      setNeighborhoods(
-        data ?? [],
-      );
-    }
-
-    setLoadingNeighborhoods(
-      false,
-    );
-  }
+  function selectDistrict(districtId: string) { onChange({...value,districtId,neighborhoodId:""}); }
 
   return (
     <section>

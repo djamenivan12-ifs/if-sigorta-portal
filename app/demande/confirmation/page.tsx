@@ -1,10 +1,9 @@
 "use client";
+import Image from "next/image";
 
-import {
-  Suspense,
-  useEffect,
-  useState,
-} from "react";
+import { useLanguage } from "@/lib/useLanguage";
+
+import {Suspense} from "react";
 
 import Link from "next/link";
 
@@ -12,10 +11,7 @@ import {
   useSearchParams,
 } from "next/navigation";
 
-type Language =
-  | "fr"
-  | "en"
-  | "tr";
+
 
 const translations = {
   fr: {
@@ -182,65 +178,10 @@ function ConfirmationContent() {
   const searchParams =
     useSearchParams();
 
-  const [
-    language,
-    setLanguage,
-  ] =
-    useState<Language>(
-      "fr",
-    );
+  const [language] =
+    useLanguage();
 
-  useEffect(() => {
-    const savedLanguage =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      savedLanguage === "fr" ||
-      savedLanguage === "en" ||
-      savedLanguage === "tr"
-    ) {
-      setLanguage(
-        savedLanguage,
-      );
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language:
-            Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail?.language;
-
-      if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
-      ) {
-        setLanguage(
-          nextLanguage,
-        );
-      }
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   const t =
     translations[
@@ -278,7 +219,7 @@ function ConfirmationContent() {
             className="flex items-center"
             aria-label="IF Sigorta"
           >
-            <img
+            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto max-w-[180px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
@@ -422,30 +363,10 @@ function StepItem({
 }
 
 function ConfirmationFallback() {
-  const [
-    language,
-    setLanguage,
-  ] =
-    useState<Language>(
-      "fr",
-    );
+  const [language] =
+    useLanguage();
 
-  useEffect(() => {
-    const savedLanguage =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      savedLanguage === "fr" ||
-      savedLanguage === "en" ||
-      savedLanguage === "tr"
-    ) {
-      setLanguage(
-        savedLanguage,
-      );
-    }
-  }, []);
 
   const t =
     translations[

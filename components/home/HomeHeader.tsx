@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/lib/useLanguage";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,10 +9,7 @@ import {
   X,
 } from "lucide-react";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import {useState} from "react";
 
 type Language =
   | "fr"
@@ -85,9 +83,7 @@ export default function HomeHeader() {
     language,
     setLanguage,
   ] =
-    useState<Language>(
-      "fr",
-    );
+    useLanguage();
 
   const [
     menuOpen,
@@ -97,47 +93,9 @@ export default function HomeHeader() {
       false,
     );
 
-  useEffect(() => {
-    const saved =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      saved === "fr" ||
-      saved === "en" ||
-      saved === "tr"
-    ) {
-      setLanguage(
-        saved,
-      );
-    }
-  }, []);
 
-  function changeLanguage(
-    nextLanguage: Language,
-  ) {
-    setLanguage(
-      nextLanguage,
-    );
-
-    window.localStorage.setItem(
-      "if-sigorta-language",
-      nextLanguage,
-    );
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "if-sigorta-language-change",
-        {
-          detail: {
-            language:
-              nextLanguage,
-          },
-        },
-      ),
-    );
-  }
+  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
 
   const t =
     labels[
@@ -147,7 +105,7 @@ export default function HomeHeader() {
   return (
     <header className="absolute inset-x-0 top-0 z-50">
       <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8">
-        <div className="flex h-[82px] items-center justify-between px-1 sm:px-3 lg:px-5">
+        <div className="flex h-[82px] items-center justify-between gap-4 px-1 sm:px-3 lg:px-5">
           {/* LOGO */}
 
           <Link
@@ -155,13 +113,13 @@ export default function HomeHeader() {
             aria-label="IF Sigorta"
             className="flex shrink-0 items-center"
           >
-            <div className="relative h-[100px] w-[240px] shrink-0 sm:h-[110px] sm:w-[270px] lg:h-[120px] lg:w-[310px]">
+            <div className="relative h-20 w-36 shrink-0 sm:h-24 sm:w-44 lg:w-48">
               <Image
               src="/if-sigorta-logo.png"
               alt="IF Sigorta"
               fill
               priority
-              sizes="310px"
+              sizes="(min-width: 1024px) 192px, (min-width: 640px) 176px, 144px"
               className="object-contain object-left"
              />
           </div>
@@ -169,7 +127,7 @@ export default function HomeHeader() {
 
           {/* NAVIGATION DESKTOP */}
 
-          <nav className="hidden items-center gap-6 xl:flex">
+          <nav className="hidden items-center gap-5 xl:flex">
             <NavLink href="/">
               {
                 t.home
@@ -203,7 +161,7 @@ export default function HomeHeader() {
 
           {/* ACTIONS DESKTOP */}
 
-          <div className="hidden items-center gap-3 xl:flex">
+          <div className="hidden shrink-0 items-center gap-3 xl:flex">
             <div className="flex items-center rounded-xl border border-white/20 bg-black/10 p-1 backdrop-blur-md">
               {(
                 [
@@ -246,7 +204,7 @@ export default function HomeHeader() {
 
             <Link
               href="/demande/etape-1"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#14361F] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#C8F24D]"
+              className="inline-flex min-h-12 whitespace-nowrap items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#14361F] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#C8F24D]"
             >
               {
                 t.cta
@@ -426,7 +384,7 @@ function NavLink({
       href={
         href
       }
-      className="relative py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#B8E83D] after:transition-all hover:after:w-full"
+      className="relative whitespace-nowrap py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#B8E83D] after:transition-all hover:after:w-full"
     >
       {
         children

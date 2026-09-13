@@ -1,3 +1,15 @@
+import { readAll } from "@/lib/supabase/readAll";
+import {
+  paginate,
+  scalar,
+  matchesSearch,
+  type ListParams,
+} from "@/lib/admin/pagination";
+import {
+  ListPagination,
+  ListFilters,
+} from "@/components/admin/pages/ListTools";
+import PageFrame from "@/components/admin/pages/PageFrame";
 import Link from "next/link";
 
 import {
@@ -25,55 +37,37 @@ type PartnerRow = {
   created_at: string;
 };
 
-function formatDate(
-  value: string,
-) {
-  const date =
-    new Date(value);
+function formatDate(value: string) {
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function formatWhatsapp(
-  countryCode: string,
-  number: string,
-) {
+function formatWhatsapp(countryCode: string, number: string) {
   return `${countryCode} ${number}`.trim();
 }
 
-export default async function PartnersPage() {
+export default async function PartnersPage({
+  searchParams = Promise.resolve({}),
+}: { searchParams?: Promise<ListParams> } = {}) {
   /*
    * La gestion des partenaires
    * est réservée aux administrateurs.
    */
-  await requireRole([
-    "admin",
-  ]);
+  await requireRole(["admin"]);
 
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
-  const {
-    data,
-    error,
-  } =
-    await supabase
+  const { data, error } = await readAll(
+    supabase
       .from("partners")
       .select(
         `
@@ -88,35 +82,42 @@ export default async function PartnersPage() {
           created_at
         `,
       )
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        },
-      );
+      .order("created_at", {
+        ascending: false,
+      })
+      .order("id"),
+  );
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
-  const partners =
-    (data ??
-      []) as PartnerRow[];
+  const partners = (data ?? []) as PartnerRow[];
 
-  const activePartners =
-    partners.filter(
-      (partner) =>
-        partner.is_active,
-    ).length;
+  const activePartners = partners.filter((partner) => partner.is_active).length;
 
-  const inactivePartners =
-    partners.length -
-    activePartners;
+  const inactivePartners = partners.length - activePartners;
 
+  const listParams = await searchParams;
+  const listQuery = scalar(listParams.q);
+  const listFilter = scalar(listParams.filter);
+  const filteredRows = partners.filter(
+    (row) =>
+      matchesSearch(
+        [row.code, row.company_name, row.manager_name, row.email],
+        listQuery,
+      ) &&
+      (!listFilter ||
+        (listFilter === "active" ? row.is_active : !row.is_active)),
+  );
+  const listing = paginate(filteredRows, listParams.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Partenaires"
+      href="/admin/partenaires"
+      detail={false}
+      sections={[{ id: "section-1", label: "Partenaires enregistrés" }]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -130,9 +131,8 @@ export default async function PartnersPage() {
               </h1>
 
               <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
-                Gérez les apporteurs d’affaires
-                autorisés à créer et suivre leurs
-                propres dossiers d’assurance.
+                Gérez les apporteurs d’affaires autorisés à créer et suivre
+                leurs propres dossiers d’assurance.
               </p>
             </div>
 
@@ -144,6 +144,16 @@ export default async function PartnersPage() {
             </Link>
           </div>
         </header>
+        <ListFilters
+          base="/admin/partenaires"
+          query={listQuery}
+          selected={listFilter}
+          options={[
+            { value: "active", label: "Actifs" },
+            { value: "inactive", label: "Inactifs" },
+          ]}
+          label="Statut"
+        />
 
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4">
           <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
@@ -152,9 +162,7 @@ export default async function PartnersPage() {
             </p>
 
             <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl">
-              {partners.length.toLocaleString(
-                "fr-FR",
-              )}
+              {partners.length.toLocaleString("fr-FR")}
             </p>
           </div>
 
@@ -164,9 +172,7 @@ export default async function PartnersPage() {
             </p>
 
             <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#0B5D3B] sm:mt-3 sm:text-3xl">
-              {activePartners.toLocaleString(
-                "fr-FR",
-              )}
+              {activePartners.toLocaleString("fr-FR")}
             </p>
           </div>
 
@@ -176,29 +182,27 @@ export default async function PartnersPage() {
             </p>
 
             <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-slate-500 sm:mt-3 sm:text-3xl">
-              {inactivePartners.toLocaleString(
-                "fr-FR",
-              )}
+              {inactivePartners.toLocaleString("fr-FR")}
             </p>
           </div>
         </section>
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
               Partenaires enregistrés
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
               {partners.length} partenaire
-              {partners.length !== 1
-                ? "s"
-                : ""}
+              {partners.length !== 1 ? "s" : ""}
             </p>
           </div>
 
-          {partners.length ===
-          0 ? (
+          {listing.total === 0 ? (
             <div className="px-4 py-10 text-center sm:px-6 sm:py-16">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F3F8F2] text-xl font-black text-[#0B5D3B]">
                 P
@@ -209,8 +213,7 @@ export default async function PartnersPage() {
               </p>
 
               <p className="mt-2 text-sm text-slate-500">
-                Commencez par ajouter votre premier
-                partenaire commercial.
+                Commencez par ajouter votre premier partenaire commercial.
               </p>
 
               <Link
@@ -223,11 +226,8 @@ export default async function PartnersPage() {
           ) : (
             <>
               <div className="divide-y divide-slate-100 lg:hidden">
-                {partners.map((partner) => (
-                  <article
-                    key={partner.id}
-                    className="min-w-0 p-4 sm:p-5"
-                  >
+                {listing.rows.map((partner) => (
+                  <article key={partner.id} className="min-w-0 p-4 sm:p-5">
                     <div className="flex min-w-0 items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
@@ -302,124 +302,97 @@ export default async function PartnersPage() {
               </div>
 
               <div className="hidden lg:block">
-            <TableContainer className="rounded-none border-0 shadow-none">
-              <Table className="min-w-[1250px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      Partenaire
-                    </TableHead>
+                <TableContainer className="rounded-none border-0 shadow-none">
+                  <Table className="min-w-[1250px]" aria-label="Partenaires">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Partenaire</TableHead>
 
-                    <TableHead>
-                      Code
-                    </TableHead>
+                        <TableHead>Code</TableHead>
 
-                    <TableHead>
-                      Responsable
-                    </TableHead>
+                        <TableHead>Responsable</TableHead>
 
-                    <TableHead>
-                      Email
-                    </TableHead>
+                        <TableHead>Email</TableHead>
 
-                    <TableHead>
-                      WhatsApp
-                    </TableHead>
+                        <TableHead>WhatsApp</TableHead>
 
-                    <TableHead>
-                      Statut
-                    </TableHead>
+                        <TableHead>Statut</TableHead>
 
-                    <TableHead>
-                      Créé le
-                    </TableHead>
+                        <TableHead>Créé le</TableHead>
 
-                    <TableHead className="text-right">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {partners.map(
-                    (partner) => (
-                      <TableRow
-                        key={
-                          partner.id
-                        }
-                      >
-                        <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
-                          {
-                            partner.company_name
-                          }
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-700">
-                            {
-                              partner.code
-                            }
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap text-slate-600">
-                          {
-                            partner.manager_name
-                          }
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap text-slate-600">
-                          {
-                            partner.email
-                          }
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap text-slate-600">
-                          {formatWhatsapp(
-                            partner.whatsapp_country_code,
-                            partner.whatsapp_number,
-                          )}
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap">
-                          <span
-                            className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
-                              partner.is_active
-                                ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
-                                : "border-red-200 bg-red-50 text-red-700"
-                            }`}
-                          >
-                            {partner.is_active
-                              ? "Actif"
-                              : "Inactif"}
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap text-slate-600">
-                          {formatDate(
-                            partner.created_at,
-                          )}
-                        </TableCell>
-
-                        <TableCell className="whitespace-nowrap text-right">
-                          <Link
-                            href={`/admin/partenaires/${partner.id}`}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
-                          >
-                            Ouvrir
-                          </Link>
-                        </TableCell>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    </TableHeader>
+
+                    <TableBody>
+                      {listing.rows.map((partner) => (
+                        <TableRow key={partner.id}>
+                          <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
+                            {partner.company_name}
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-700">
+                              {partner.code}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {partner.manager_name}
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {partner.email}
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {formatWhatsapp(
+                              partner.whatsapp_country_code,
+                              partner.whatsapp_number,
+                            )}
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap">
+                            <span
+                              className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
+                                partner.is_active
+                                  ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                                  : "border-red-200 bg-red-50 text-red-700"
+                              }`}
+                            >
+                              {partner.is_active ? "Actif" : "Inactif"}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {formatDate(partner.created_at)}
+                          </TableCell>
+
+                          <TableCell className="whitespace-nowrap text-right">
+                            <Link
+                              href={`/admin/partenaires/${partner.id}`}
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                            >
+                              Ouvrir
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </div>
             </>
           )}
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/partenaires"
+          params={listParams}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }

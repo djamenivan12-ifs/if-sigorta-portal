@@ -1,3 +1,4 @@
+import { verifyWebhookSignature } from "@/lib/security/webhookSignature";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -32,31 +33,12 @@ export async function GET(request: Request) {
   });
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-
-    console.log(
-      "Webhook WhatsApp reçu :",
-      JSON.stringify(body, null, 2),
-    );
-
-    return NextResponse.json({
-      success: true,
-    });
-  } catch (error) {
-    console.error(
-      "Erreur webhook WhatsApp :",
-      error,
-    );
-
-    return NextResponse.json(
-      {
-        success: false,
-      },
-      {
-        status: 500,
-      },
-    );
-  }
+export async function POST(request:Request) {
+  const secret=process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET;
+  if(!secret) return NextResponse.json({success:false},{status:503});
+  const body=await request.text();
+  if(body.length>1024*1024) return NextResponse.json({success:false},{status:413});
+  if(!verifyWebhookSignature(body,request.headers.get("x-hub-signature-256"),secret)) return NextResponse.json({success:false},{status:403});
+  try { JSON.parse(body); return NextResponse.json({success:true}); }
+  catch {return NextResponse.json({success:false},{status:400});}
 }

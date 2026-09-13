@@ -1,3 +1,15 @@
+import {
+  paginate,
+  scalar,
+  matchesSearch,
+  type ListParams,
+} from "@/lib/admin/pagination";
+import {
+  ListPagination,
+  ListFilters,
+} from "@/components/admin/pages/ListTools";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { listAllUsers } from "@/lib/supabase/listAllUsers";
 import Link from "next/link";
 
 import {
@@ -23,134 +35,83 @@ type AgentRow = {
   lastSignInAt: string | null;
 };
 
-function formatDate(
-  value: string | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return "Jamais";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "medium",
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
 
-      timeStyle:
-        "short",
+    timeStyle: "short",
 
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function getDisplayName(
-  agent: AgentRow,
-) {
-  const fullName =
-    `${agent.firstName} ${agent.lastName}`.trim();
+function getDisplayName(agent: AgentRow) {
+  const fullName = `${agent.firstName} ${agent.lastName}`.trim();
 
-  return (
-    fullName ||
-    agent.email
-  );
+  return fullName || agent.email;
 }
 
-export default async function AgentsPage() {
-  await requireRole([
-    "admin",
-  ]);
+export default async function AgentsPage({
+  searchParams = Promise.resolve({}),
+}: { searchParams?: Promise<ListParams> } = {}) {
+  await requireRole(["admin"]);
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
-  const {
-    data,
-    error,
-  } =
-    await serviceClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 100,
-    });
+  const { data, error } = await listAllUsers(serviceClient);
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
-  const agents: AgentRow[] =
-    data.users
-      .filter(
-        (
-          user,
-        ) => {
-          const role =
-            user.app_metadata
-              ?.role;
+  const agents: AgentRow[] = data.users
+    .filter((user) => {
+      const role = user.app_metadata?.role;
 
-          return (
-            role ===
-              "agent" ||
-            role ===
-              "admin"
-          );
-        },
-      )
-      .map(
-        (
-          user,
-        ) => ({
-          id:
-            user.id,
+      return role === "agent" || role === "admin";
+    })
+    .map((user) => ({
+      id: user.id,
 
-          email:
-            user.email ??
-            "Email inconnu",
+      email: user.email ?? "Email inconnu",
 
-          role:
-            user.app_metadata
-              ?.role ??
-            "agent",
+      role: user.app_metadata?.role ?? "agent",
 
-          firstName:
-            user.user_metadata
-              ?.first_name
-              ?.toString()
-              .trim() ??
-            "",
+      firstName: user.user_metadata?.first_name?.toString().trim() ?? "",
 
-          lastName:
-            user.user_metadata
-              ?.last_name
-              ?.toString()
-              .trim() ??
-            "",
+      lastName: user.user_metadata?.last_name?.toString().trim() ?? "",
 
-          createdAt:
-            user.created_at ??
-            null,
+      createdAt: user.created_at ?? null,
 
-          lastSignInAt:
-            user.last_sign_in_at ??
-            null,
-        }),
-      );
+      lastSignInAt: user.last_sign_in_at ?? null,
+    }));
 
+  const listParams = await searchParams;
+  const listQuery = scalar(listParams.q);
+  const listFilter = scalar(listParams.filter);
+  const filteredRows = agents.filter(
+    (row) =>
+      matchesSearch([row.firstName, row.lastName, row.email], listQuery) &&
+      (!listFilter || row.role === listFilter),
+  );
+  const listing = paginate(filteredRows, listParams.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Agents"
+      href="/admin/agents"
+      detail={false}
+      sections={[{ id: "section-1", label: "Utilisateurs internes" }]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -176,21 +137,31 @@ export default async function AgentsPage() {
             </Link>
           </div>
         </header>
+        <ListFilters
+          base="/admin/agents"
+          query={listQuery}
+          selected={listFilter}
+          options={[
+            { value: "admin", label: "Administrateurs" },
+            { value: "agent", label: "Agents" },
+          ]}
+          label="Rôle"
+        />
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="min-w-0">
-                <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+                <h2
+                  className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                  id="section-1"
+                >
                   Utilisateurs internes
                 </h2>
 
                 <p className="mt-1 text-[12px] text-slate-500 sm:text-sm">
                   {agents.length} compte
-                  {agents.length >
-                  1
-                    ? "s"
-                    : ""}
+                  {agents.length > 1 ? "s" : ""}
                 </p>
               </div>
 
@@ -203,8 +174,7 @@ export default async function AgentsPage() {
             </div>
           </div>
 
-          {agents.length ===
-          0 ? (
+          {listing.total === 0 ? (
             <div className="px-4 py-10 text-center sm:px-6 sm:py-16">
               <p className="text-[13px] text-slate-500 sm:text-sm">
                 Aucun agent enregistré.
@@ -213,175 +183,124 @@ export default async function AgentsPage() {
           ) : (
             <>
               <div className="divide-y divide-slate-100 lg:hidden">
-                {agents.map(
-                  (
-                    agent,
-                  ) => (
-                    <article
-                      key={
-                        agent.id
-                      }
-                      className="min-w-0 p-4 sm:p-5"
-                    >
-                      <div className="flex min-w-0 items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
-                            {getDisplayName(
-                              agent,
-                            )}
-                          </p>
+                {listing.rows.map((agent) => (
+                  <article key={agent.id} className="min-w-0 p-4 sm:p-5">
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                          {getDisplayName(agent)}
+                        </p>
 
-                          <p className="mt-1 break-all text-[12px] leading-5 text-slate-500 sm:text-sm">
-                            {
-                              agent.email
-                            }
-                          </p>
-                        </div>
-
-                        <span
-                          className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${
-                            agent.role ===
-                            "admin"
-                              ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
-                              : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
-                          }`}
-                        >
-                          {agent.role ===
-                          "admin"
-                            ? "Administrateur"
-                            : "Agent"}
-                        </span>
+                        <p className="mt-1 break-all text-[12px] leading-5 text-slate-500 sm:text-sm">
+                          {agent.email}
+                        </p>
                       </div>
 
-                      <dl className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                        <div className="min-w-0">
-                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                            Créé le
-                          </dt>
-
-                          <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
-                            {formatDate(
-                              agent.createdAt,
-                            )}
-                          </dd>
-                        </div>
-
-                        <div className="min-w-0">
-                          <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                            Dernière connexion
-                          </dt>
-
-                          <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
-                            {formatDate(
-                              agent.lastSignInAt,
-                            )}
-                          </dd>
-                        </div>
-                      </dl>
-
-                      <Link
-                        href={`/admin/agents/${agent.id}`}
-                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
+                      <span
+                        className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${
+                          agent.role === "admin"
+                            ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                            : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
+                        }`}
                       >
-                        Modifier
-                      </Link>
-                    </article>
-                  ),
-                )}
+                        {agent.role === "admin" ? "Administrateur" : "Agent"}
+                      </span>
+                    </div>
+
+                    <dl className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                      <div className="min-w-0">
+                        <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                          Créé le
+                        </dt>
+
+                        <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
+                          {formatDate(agent.createdAt)}
+                        </dd>
+                      </div>
+
+                      <div className="min-w-0">
+                        <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                          Dernière connexion
+                        </dt>
+
+                        <dd className="mt-1 break-words text-[12px] font-semibold leading-5 text-slate-700 sm:text-sm">
+                          {formatDate(agent.lastSignInAt)}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <Link
+                      href={`/admin/agents/${agent.id}`}
+                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
+                    >
+                      Modifier
+                    </Link>
+                  </article>
+                ))}
               </div>
 
               <div className="hidden lg:block">
                 <TableContainer className="rounded-none border-0 shadow-none">
-                  <Table className="min-w-[1050px]">
+                  <Table className="min-w-[1050px]" aria-label="Agents">
                     <TableHeader>
                       <TableRow>
-                        <TableHead>
-                          Nom
-                        </TableHead>
+                        <TableHead>Nom</TableHead>
 
-                        <TableHead>
-                          Email
-                        </TableHead>
+                        <TableHead>Email</TableHead>
 
-                        <TableHead>
-                          Rôle
-                        </TableHead>
+                        <TableHead>Rôle</TableHead>
 
-                        <TableHead>
-                          Créé le
-                        </TableHead>
+                        <TableHead>Créé le</TableHead>
 
-                        <TableHead>
-                          Dernière connexion
-                        </TableHead>
+                        <TableHead>Dernière connexion</TableHead>
 
-                        <TableHead className="text-right">
-                          Action
-                        </TableHead>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
                     </TableHeader>
 
                     <TableBody>
-                      {agents.map(
-                        (
-                          agent,
-                        ) => (
-                          <TableRow
-                            key={
-                              agent.id
-                            }
-                          >
-                            <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
-                              {getDisplayName(
-                                agent,
-                              )}
-                            </TableCell>
+                      {listing.rows.map((agent) => (
+                        <TableRow key={agent.id}>
+                          <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
+                            {getDisplayName(agent)}
+                          </TableCell>
 
-                            <TableCell className="whitespace-nowrap text-slate-600">
-                              {
-                                agent.email
-                              }
-                            </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {agent.email}
+                          </TableCell>
 
-                            <TableCell className="whitespace-nowrap">
-                              <span
-                                className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
-                                  agent.role ===
-                                  "admin"
-                                    ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
-                                    : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
-                                }`}
-                              >
-                                {agent.role ===
-                                "admin"
-                                  ? "Administrateur"
-                                  : "Agent"}
-                              </span>
-                            </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <span
+                              className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
+                                agent.role === "admin"
+                                  ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                                  : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
+                              }`}
+                            >
+                              {agent.role === "admin"
+                                ? "Administrateur"
+                                : "Agent"}
+                            </span>
+                          </TableCell>
 
-                            <TableCell className="whitespace-nowrap text-slate-600">
-                              {formatDate(
-                                agent.createdAt,
-                              )}
-                            </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {formatDate(agent.createdAt)}
+                          </TableCell>
 
-                            <TableCell className="whitespace-nowrap text-slate-600">
-                              {formatDate(
-                                agent.lastSignInAt,
-                              )}
-                            </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600">
+                            {formatDate(agent.lastSignInAt)}
+                          </TableCell>
 
-                            <TableCell className="whitespace-nowrap text-right">
-                              <Link
-                                href={`/admin/agents/${agent.id}`}
-                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
-                              >
-                                Modifier
-                              </Link>
-                            </TableCell>
-                          </TableRow>
-                        ),
-                      )}
+                          <TableCell className="whitespace-nowrap text-right">
+                            <Link
+                              href={`/admin/agents/${agent.id}`}
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                            >
+                              Modifier
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -390,6 +309,13 @@ export default async function AgentsPage() {
           )}
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/agents"
+          params={listParams}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }

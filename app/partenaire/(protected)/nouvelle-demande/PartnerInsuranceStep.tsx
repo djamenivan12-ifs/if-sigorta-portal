@@ -13,9 +13,7 @@ import type {
 type Props = {
   data: PartnerRequestFormData;
 
-  onChange: (
-    data: PartnerRequestFormData,
-  ) => void;
+  onChange: import("react").Dispatch<import("react").SetStateAction<PartnerRequestFormData>>;
 
   onPrevious: () => void;
   onNext: () => void;
@@ -41,10 +39,10 @@ export default function PartnerInsuranceStep({
   function update(
     values: Partial<PartnerRequestFormData>,
   ) {
-    onChange({
-      ...data,
+    onChange((current) => ({
+          ...current,
       ...values,
-    });
+    }));
   }
 
   useEffect(() => {
@@ -102,8 +100,8 @@ export default function PartnerInsuranceStep({
           typeof result.price !==
             "number"
         ) {
-          onChange({
-            ...data,
+          onChange((current) => ({
+          ...current,
             calculatedAge:
               typeof result.age ===
               "number"
@@ -111,7 +109,7 @@ export default function PartnerInsuranceStep({
                 : null,
 
             calculatedPrice: null,
-          });
+          }));
 
           setPriceError(
             "Aucun tarif partenaire n’est configuré pour cet âge.",
@@ -120,15 +118,13 @@ export default function PartnerInsuranceStep({
           return;
         }
 
-        onChange({
-          ...data,
+        onChange((current) => ({
+          ...current,
 
-          calculatedAge:
-            result.age,
+          calculatedAge: result.age ?? null,
 
-          calculatedPrice:
-            result.price,
-        });
+          calculatedPrice: result.price ?? null,
+        }));
       } catch (error) {
         if (cancelled) {
           return;
@@ -139,11 +135,11 @@ export default function PartnerInsuranceStep({
           error,
         );
 
-        onChange({
-          ...data,
+        onChange((current) => ({
+          ...current,
           calculatedAge: null,
           calculatedPrice: null,
-        });
+        }));
 
         setPriceError(
           error instanceof Error
@@ -165,10 +161,9 @@ export default function PartnerInsuranceStep({
 
     // Le tarif dépend uniquement de
     // la naissance et de la durée.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data.birthDate,
-    data.duration,
+    data.duration, onChange,
   ]);
 
   function changeKimlikStatus(
@@ -251,7 +246,7 @@ export default function PartnerInsuranceStep({
       }
     }
 
-    if (
+    if (priceLoading || priceError ||
       data.calculatedAge === null ||
       data.calculatedPrice === null
     ) {
@@ -262,10 +257,10 @@ export default function PartnerInsuranceStep({
       return;
     }
 
-    onChange({
-      ...data,
+    onChange((current) => ({
+          ...current,
       passportNumber,
-    });
+    }));
 
     onNext();
   }

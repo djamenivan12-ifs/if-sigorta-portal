@@ -9,7 +9,7 @@ const BUCKET_NAME =
 const MAX_FILE_SIZE =
   10 * 1024 * 1024;
 
-type PolicyYear = 1 | 2;
+
 
 type RouteContext = {
   params: Promise<{

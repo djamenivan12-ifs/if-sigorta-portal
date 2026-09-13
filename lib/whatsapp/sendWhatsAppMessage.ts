@@ -121,8 +121,7 @@ export async function sendWhatsAppMessage({
     await fetch(
       `https://graph.facebook.com/v23.0/${phoneNumberId}/messages`,
       {
-        method:
-          "POST",
+        method: "POST", signal: AbortSignal.timeout(15000),
 
         headers: {
           Authorization:
@@ -213,20 +212,9 @@ export async function sendWhatsAppMessage({
   if (!response.ok) {
     console.error(
       "Erreur WhatsApp :",
-      {
-        status:
-          response.status,
-
-        phoneNumber:
-          cleanPhoneNumber,
-
-        language,
-
-        template:
-          templateName,
-
-        result,
-      },
+      {status:
+          response.status,language,template:
+          templateName,errorCode: result.error?.code},
     );
 
     throw new Error(
@@ -241,20 +229,8 @@ export async function sendWhatsAppMessage({
 
   console.log(
     "Notification WhatsApp acceptée par Meta :",
-    {
-      phoneNumber:
-        cleanPhoneNumber,
-
-      matricule:
-        cleanMatricule,
-
-      language,
-
-      template:
-        templateName,
-
-      messageId,
-    },
+    {language,template:
+        templateName,messageId},
   );
 
   return result;
@@ -320,8 +296,7 @@ export async function sendPartnerWhatsAppMessage({
     await fetch(
       `https://graph.facebook.com/v23.0/${phoneNumberId}/messages`,
       {
-        method:
-          "POST",
+        method: "POST", signal: AbortSignal.timeout(15000),
 
         headers: {
           Authorization:
@@ -420,18 +395,9 @@ export async function sendPartnerWhatsAppMessage({
   if (!response.ok) {
     console.error(
       "Erreur WhatsApp partenaire :",
-      {
-        status:
-          response.status,
-
-        phoneNumber:
-          cleanPhoneNumber,
-
-        template:
-          PARTNER_TEMPLATE_NAME,
-
-        result,
-      },
+      {status:
+          response.status,template:
+          PARTNER_TEMPLATE_NAME,errorCode: result.error?.code},
     );
 
     throw new Error(
@@ -446,24 +412,8 @@ export async function sendPartnerWhatsAppMessage({
 
   console.log(
     "Notification WhatsApp partenaire acceptée par Meta :",
-    {
-      phoneNumber:
-        cleanPhoneNumber,
-
-      partnerName:
-        cleanPartnerName,
-
-      clientName:
-        cleanClientName,
-
-      matricule:
-        cleanMatricule,
-
-      template:
-        PARTNER_TEMPLATE_NAME,
-
-      messageId,
-    },
+    {template:
+        PARTNER_TEMPLATE_NAME,messageId},
   );
 
   return result;

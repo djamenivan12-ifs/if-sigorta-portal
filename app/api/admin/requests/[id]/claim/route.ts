@@ -3,16 +3,9 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-const CLAIMABLE_STATUSES = [
-  "waiting_payment",
-  "payment_review",
-  "payment_confirmed",
-  "policy_preparation",
-] as const;
+import { CLAIMABLE_STATUSES } from "@/lib/insurance/requestWorkflow";
 
-type InternalRole =
-  | "agent"
-  | "admin";
+type InternalRole = "agent" | "admin";
 
 export async function POST(
   request: Request,
@@ -28,32 +21,23 @@ export async function POST(
      * 1. UTILISATEUR CONNECTÉ
      * ============================================
      */
-    const sessionClient =
-      await createServerSupabaseClient();
+    const sessionClient = await createServerSupabaseClient();
 
     const {
-      data: {
-        user,
-      },
+      data: { user },
       error: userError,
-    } =
-      await sessionClient.auth.getUser();
+    } = await sessionClient.auth.getUser();
 
-    if (
-      userError ||
-      !user
-    ) {
+    if (userError || !user) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Vous devez être connecté.",
+          error: "Vous devez être connecté.",
         },
         {
           status: 401,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
@@ -68,27 +52,18 @@ export async function POST(
      * prendre directement en charge un dossier
      * non attribué.
      */
-    const role =
-      user.app_metadata
-        ?.role as
-        | InternalRole
-        | undefined;
+    const role = user.app_metadata?.role as InternalRole | undefined;
 
-    if (
-      role !== "agent" &&
-      role !== "admin"
-    ) {
+    if (role !== "agent" && role !== "admin") {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Vous n’êtes pas autorisé à prendre en charge un dossier.",
+          error: "Vous n’êtes pas autorisé à prendre en charge un dossier.",
         },
         {
           status: 403,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
@@ -99,79 +74,58 @@ export async function POST(
      * 3. IDENTIFIANT DU DOSSIER
      * ============================================
      */
-    const {
-      id: requestId,
-    } =
-      await context.params;
+    const { id: requestId } = await context.params;
 
     if (!requestId) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Identifiant du dossier absent.",
+          error: "Identifiant du dossier absent.",
         },
         {
           status: 400,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
     }
 
-    const serviceClient =
-      createServiceClient();
+    const serviceClient = createServiceClient();
 
     /*
      * ============================================
      * 4. DOSSIER
      * ============================================
      */
-    const {
-      data:
-        insuranceRequest,
-      error:
-        requestError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .select(
-          `
+    const { data: insuranceRequest, error: requestError } = await serviceClient
+      .from("insurance_requests")
+      .select(
+        `
             id,
             request_code,
             assigned_agent_id,
             assigned_at,
             status
           `,
-        )
-        .eq(
-          "id",
-          requestId,
-        )
-        .maybeSingle();
+      )
+      .eq("id", requestId)
+      .maybeSingle();
 
     if (requestError) {
-      throw new Error(
-        requestError.message,
-      );
+      throw new Error(requestError.message);
     }
 
     if (!insuranceRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Dossier introuvable.",
+          error: "Dossier introuvable.",
         },
         {
           status: 404,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
@@ -184,8 +138,7 @@ export async function POST(
      */
     if (
       !CLAIMABLE_STATUSES.includes(
-        insuranceRequest.status as
-          (typeof CLAIMABLE_STATUSES)[number],
+        insuranceRequest.status as (typeof CLAIMABLE_STATUSES)[number],
       )
     ) {
       return NextResponse.json(
@@ -197,8 +150,7 @@ export async function POST(
         {
           status: 409,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
@@ -209,45 +161,32 @@ export async function POST(
      * 6. DOSSIER DÉJÀ ATTRIBUÉ
      * ============================================
      */
-    if (
-      insuranceRequest
-        .assigned_agent_id
-    ) {
+    if (insuranceRequest.assigned_agent_id) {
       /*
        * Le dossier appartient déjà
        * à l'utilisateur connecté.
        */
-      if (
-        insuranceRequest
-          .assigned_agent_id ===
-        user.id
-      ) {
+      if (insuranceRequest.assigned_agent_id === user.id) {
         return NextResponse.json(
           {
             success: true,
 
-            alreadyClaimed:
-              true,
+            alreadyClaimed: true,
 
             requestId,
 
-            requestCode:
-              insuranceRequest.request_code,
+            requestCode: insuranceRequest.request_code,
 
-            agentId:
-              user.id,
+            agentId: user.id,
 
-            assignedAt:
-              insuranceRequest.assigned_at,
+            assignedAt: insuranceRequest.assigned_at,
 
-            message:
-              "Ce dossier vous est déjà attribué.",
+            message: "Ce dossier vous est déjà attribué.",
           },
           {
             status: 200,
             headers: {
-              "Cache-Control":
-                "no-store",
+              "Cache-Control": "no-store",
             },
           },
         );
@@ -266,8 +205,7 @@ export async function POST(
         {
           status: 409,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
@@ -284,55 +222,31 @@ export async function POST(
      * Cela évite que deux utilisateurs
      * prennent simultanément le même dossier.
      */
-    const assignedAt =
-      new Date().toISOString();
+    const assignedAt = new Date().toISOString();
 
-    const {
-      data:
-        updatedRequest,
-      error:
-        updateError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .update({
-          assigned_agent_id:
-            user.id,
+    const { data: updatedRequest, error: updateError } = await serviceClient
+      .from("insurance_requests")
+      .update({
+        assigned_agent_id: user.id,
 
-          assigned_at:
-            assignedAt,
-        })
-        .eq(
-          "id",
-          requestId,
-        )
-        .is(
-          "assigned_agent_id",
-          null,
-        )
-        .in(
-          "status",
-          [
-            ...CLAIMABLE_STATUSES,
-          ],
-        )
-        .select(
-          `
+        assigned_at: assignedAt,
+      })
+      .eq("id", requestId)
+      .is("assigned_agent_id", null)
+      .in("status", [...CLAIMABLE_STATUSES])
+      .select(
+        `
             id,
             request_code,
             assigned_agent_id,
             assigned_at,
             status
           `,
-        )
-        .maybeSingle();
+      )
+      .maybeSingle();
 
     if (updateError) {
-      throw new Error(
-        updateError.message,
-      );
+      throw new Error(updateError.message);
     }
 
     /*
@@ -350,8 +264,7 @@ export async function POST(
         {
           status: 409,
           headers: {
-            "Cache-Control":
-              "no-store",
+            "Cache-Control": "no-store",
           },
         },
       );
@@ -362,30 +275,15 @@ export async function POST(
      * 8. NOM DE L'UTILISATEUR
      * ============================================
      */
-    const firstName =
-      user.user_metadata
-        ?.first_name
-        ?.toString()
-        .trim() ??
-      "";
+    const firstName = user.user_metadata?.first_name?.toString().trim() ?? "";
 
-    const lastName =
-      user.user_metadata
-        ?.last_name
-        ?.toString()
-        .trim() ??
-      "";
+    const lastName = user.user_metadata?.last_name?.toString().trim() ?? "";
 
     const userName =
       `${firstName} ${lastName}`.trim() ||
-      user.user_metadata
-        ?.name
-        ?.toString()
-        .trim() ||
+      user.user_metadata?.name?.toString().trim() ||
       user.email ||
-      (role === "admin"
-        ? "Administrateur"
-        : "Agent");
+      (role === "admin" ? "Administrateur" : "Agent");
 
     /*
      * ============================================
@@ -399,27 +297,17 @@ export async function POST(
      * dans l'application et vient
      * lui-même d'effectuer l'action.
      */
-    const {
-      error:
-        activityError,
-    } =
-      await serviceClient
-        .from(
-          "activity_logs",
-        )
-        .insert({
-          request_id:
-            requestId,
+    const { error: activityError } = await serviceClient
+      .from("activity_logs")
+      .insert({
+        request_id: requestId,
 
-          user_id:
-            user.id,
+        user_id: user.id,
 
-          action:
-            "request_claimed",
+        action: "request_claimed",
 
-          description:
-            `Dossier ${insuranceRequest.request_code} pris en charge par ${userName}.`,
-        });
+        description: `Dossier ${insuranceRequest.request_code} pris en charge par ${userName}.`,
+      });
 
     /*
      * Une erreur du journal ne doit jamais
@@ -441,46 +329,35 @@ export async function POST(
       {
         success: true,
 
-        alreadyClaimed:
-          false,
+        alreadyClaimed: false,
 
         requestId,
 
-        requestCode:
-          insuranceRequest.request_code,
+        requestCode: insuranceRequest.request_code,
 
-        status:
-          updatedRequest.status,
+        status: updatedRequest.status,
 
-        agentId:
-          user.id,
+        agentId: user.id,
 
-        agentName:
-          userName,
+        agentName: userName,
 
         role,
 
         assignedAt,
 
-        assignmentEmailSent:
-          false,
+        assignmentEmailSent: false,
 
-        message:
-          "Dossier pris en charge avec succès.",
+        message: "Dossier pris en charge avec succès.",
       },
       {
         status: 200,
         headers: {
-          "Cache-Control":
-            "no-store",
+          "Cache-Control": "no-store",
         },
       },
     );
   } catch (error) {
-    console.error(
-      "Erreur prise en charge du dossier :",
-      error,
-    );
+    console.error("Erreur prise en charge du dossier :", error);
 
     return NextResponse.json(
       {
@@ -494,8 +371,7 @@ export async function POST(
       {
         status: 500,
         headers: {
-          "Cache-Control":
-            "no-store",
+          "Cache-Control": "no-store",
         },
       },
     );

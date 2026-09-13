@@ -1,0 +1,307 @@
+{
+  "insurance_requests": {
+    "required": [
+      "id",
+      "request_code",
+      "client_id",
+      "passport_number",
+      "insurance_duration_years",
+      "calculated_age",
+      "calculated_price",
+      "status",
+      "created_at",
+      "updated_at",
+      "has_kimlik",
+      "preferred_language",
+      "source"
+    ],
+    "properties": {
+      "id": {
+        "format": "uuid"
+      },
+      "request_code": {
+        "format": "text"
+      },
+      "client_id": {
+        "format": "uuid"
+      },
+      "kimlik_number": {
+        "format": "text"
+      },
+      "kimlik_expiration_date": {
+        "format": "date"
+      },
+      "passport_number": {
+        "format": "text"
+      },
+      "insurance_duration_years": {
+        "format": "integer"
+      },
+      "calculated_age": {
+        "format": "integer"
+      },
+      "calculated_price": {
+        "format": "numeric"
+      },
+      "status": {
+        "format": "text"
+      },
+      "created_at": {
+        "format": "timestamp with time zone"
+      },
+      "updated_at": {
+        "format": "timestamp with time zone"
+      },
+      "has_kimlik": {
+        "format": "boolean"
+      },
+      "insurance_start_date": {
+        "format": "date"
+      },
+      "whatsapp_notified_at": {
+        "format": "timestamp with time zone"
+      },
+      "assigned_agent_id": {
+        "format": "uuid"
+      },
+      "assigned_at": {
+        "format": "timestamp with time zone"
+      },
+      "policy_start_date": {
+        "format": "date"
+      },
+      "policy_end_date": {
+        "format": "date"
+      },
+      "preferred_language": {
+        "format": "text"
+      },
+      "source": {
+        "format": "text"
+      },
+      "partner_id": {
+        "format": "uuid"
+      },
+      "insurance_company_id": {
+        "format": "uuid"
+      },
+      "actual_insurance_cost": {
+        "format": "numeric"
+      },
+      "insurance_company_selected_at": {
+        "format": "timestamp with time zone"
+      },
+      "insurance_company_selected_by": {
+        "format": "uuid"
+      },
+      "insurance_cost_rate_id": {
+        "format": "uuid"
+      }
+    }
+  },
+  "payments": {
+    "required": [
+      "id",
+      "request_id",
+      "payment_method",
+      "expected_amount",
+      "status",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "format": "uuid"
+      },
+      "request_id": {
+        "format": "uuid"
+      },
+      "payment_method": {
+        "format": "text"
+      },
+      "expected_amount": {
+        "format": "numeric"
+      },
+      "status": {
+        "format": "text"
+      },
+      "submitted_at": {
+        "format": "timestamp with time zone"
+      },
+      "verified_at": {
+        "format": "timestamp with time zone"
+      },
+      "verified_by": {
+        "format": "uuid"
+      },
+      "rejection_reason": {
+        "format": "text"
+      },
+      "created_at": {
+        "format": "timestamp with time zone"
+      }
+    }
+  },
+  "insurance_companies": {
+    "required": [
+      "id",
+      "name",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "format": "uuid"
+      },
+      "name": {
+        "format": "text"
+      },
+      "is_active": {
+        "format": "boolean"
+      },
+      "created_at": {
+        "format": "timestamp with time zone"
+      },
+      "updated_at": {
+        "format": "timestamp with time zone"
+      }
+    }
+  },
+  "insurance_company_deposits": {
+    "required": [
+      "id",
+      "insurance_company_id",
+      "amount",
+      "deposit_date",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "format": "uuid"
+      },
+      "insurance_company_id": {
+        "format": "uuid"
+      },
+      "amount": {
+        "format": "numeric"
+      },
+      "deposit_date": {
+        "format": "date"
+      },
+      "payment_method": {
+        "format": "text"
+      },
+      "reference": {
+        "format": "text"
+      },
+      "note": {
+        "format": "text"
+      },
+      "created_by": {
+        "format": "uuid"
+      },
+      "created_at": {
+        "format": "timestamp with time zone"
+      },
+      "updated_at": {
+        "format": "timestamp with time zone"
+      }
+    }
+  },
+  "insurance_cost_rates": {
+    "required": [
+      "id",
+      "insurance_company_id",
+      "min_age",
+      "max_age",
+      "duration_years",
+      "real_cost",
+      "effective_from",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "format": "uuid"
+      },
+      "insurance_company_id": {
+        "format": "uuid"
+      },
+      "min_age": {
+        "format": "integer"
+      },
+      "max_age": {
+        "format": "integer"
+      },
+      "duration_years": {
+        "format": "integer"
+      },
+      "real_cost": {
+        "format": "numeric"
+      },
+      "effective_from": {
+        "format": "date"
+      },
+      "is_active": {
+        "format": "boolean"
+      },
+      "created_at": {
+        "format": "timestamp with time zone"
+      },
+      "updated_at": {
+        "format": "timestamp with time zone"
+      }
+    }
+  },
+  "insurance_cost_rate_history": {
+    "required": [
+      "id",
+      "insurance_cost_rate_id",
+      "insurance_company_id",
+      "min_age",
+      "max_age",
+      "duration_years",
+      "real_cost",
+      "effective_from",
+      "is_active",
+      "changed_at"
+    ],
+    "properties": {
+      "id": {
+        "format": "uuid"
+      },
+      "insurance_cost_rate_id": {
+        "format": "uuid"
+      },
+      "insurance_company_id": {
+        "format": "uuid"
+      },
+      "min_age": {
+        "format": "integer"
+      },
+      "max_age": {
+        "format": "integer"
+      },
+      "duration_years": {
+        "format": "integer"
+      },
+      "real_cost": {
+        "format": "numeric"
+      },
+      "effective_from": {
+        "format": "date"
+      },
+      "is_active": {
+        "format": "boolean"
+      },
+      "changed_by": {
+        "format": "uuid"
+      },
+      "changed_at": {
+        "format": "timestamp with time zone"
+      }
+    }
+  }
+}

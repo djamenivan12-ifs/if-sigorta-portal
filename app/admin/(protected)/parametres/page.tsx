@@ -1,3 +1,5 @@
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
 import Link from "next/link";
 
 import BankSettingsForm from "./BankSettingsForm";
@@ -11,12 +13,8 @@ type PriceRangeRow = {
   id: number;
   minimum_age: number;
   maximum_age: number;
-  one_year_price:
-    | number
-    | string;
-  two_year_price:
-    | number
-    | string;
+  one_year_price: number | string;
+  two_year_price: number | string;
   is_active: boolean;
 };
 
@@ -32,12 +30,9 @@ type ContactSettingRow = {
 };
 
 export default async function SettingsPage() {
-  await requireRole([
-    "admin",
-  ]);
+  await requireRole(["admin"]);
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
   /*
    * ============================
@@ -45,14 +40,9 @@ export default async function SettingsPage() {
    * ============================
    */
 
-  const {
-    data: priceRangesData,
-    error: priceRangesError,
-  } =
-    await serviceClient
-      .from(
-        "insurance_price_ranges",
-      )
+  const { data: priceRangesData, error: priceRangesError } = await readAll(
+    serviceClient
+      .from("insurance_price_ranges")
       .select(
         `
           id,
@@ -63,58 +53,33 @@ export default async function SettingsPage() {
           is_active
         `,
       )
-      .order(
-        "minimum_age",
-        {
-          ascending:
-            true,
-        },
-      );
+      .order("minimum_age", {
+        ascending: true,
+      })
+      .order("id"),
+  );
 
-  if (
-    priceRangesError
-  ) {
-    throw new Error(
-      priceRangesError.message,
-    );
+  if (priceRangesError) {
+    throw new Error(priceRangesError.message);
   }
 
-  const ranges =
-    (
-      priceRangesData ??
-      []
-    ).map(
-      (
-        row,
-      ) => {
-        const item =
-          row as PriceRangeRow;
+  const ranges = (priceRangesData ?? []).map((row) => {
+    const item = row as PriceRangeRow;
 
-        return {
-          id:
-            item.id,
+    return {
+      id: item.id,
 
-          minimumAge:
-            item.minimum_age,
+      minimumAge: item.minimum_age,
 
-          maximumAge:
-            item.maximum_age,
+      maximumAge: item.maximum_age,
 
-          oneYearPrice:
-            Number(
-              item.one_year_price,
-            ),
+      oneYearPrice: Number(item.one_year_price),
 
-          twoYearPrice:
-            Number(
-              item.two_year_price,
-            ),
+      twoYearPrice: Number(item.two_year_price),
 
-          isActive:
-            item.is_active,
-        };
-      },
-    );
+      isActive: item.is_active,
+    };
+  });
 
   /*
    * ============================
@@ -122,49 +87,27 @@ export default async function SettingsPage() {
    * ============================
    */
 
-  const {
-    data: bankSettingData,
-    error: bankSettingError,
-  } =
-    await serviceClient
-      .from(
-        "bank_settings",
-      )
-      .select(
-        `
+  const { data: bankSettingData, error: bankSettingError } = await serviceClient
+    .from("bank_settings")
+    .select(
+      `
           beneficiary,
           bank_name,
           iban
         `,
-      )
-      .eq(
-        "is_active",
-        true,
-      )
-      .order(
-        "id",
-        {
-          ascending:
-            true,
-        },
-      )
-      .limit(
-        1,
-      )
-      .maybeSingle();
+    )
+    .eq("is_active", true)
+    .order("id", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle();
 
-  if (
-    bankSettingError
-  ) {
-    throw new Error(
-      bankSettingError.message,
-    );
+  if (bankSettingError) {
+    throw new Error(bankSettingError.message);
   }
 
-  const bankSetting =
-    bankSettingData as
-      | BankSettingRow
-      | null;
+  const bankSetting = bankSettingData as BankSettingRow | null;
 
   /*
    * ============================
@@ -172,51 +115,39 @@ export default async function SettingsPage() {
    * ============================
    */
 
-  const {
-    data: contactSettingData,
-    error: contactSettingError,
-  } =
+  const { data: contactSettingData, error: contactSettingError } =
     await serviceClient
-      .from(
-        "contact_settings",
-      )
+      .from("contact_settings")
       .select(
         `
           whatsapp_country_code,
           whatsapp_number
         `,
       )
-      .eq(
-        "is_active",
-        true,
-      )
-      .order(
-        "id",
-        {
-          ascending:
-            true,
-        },
-      )
-      .limit(
-        1,
-      )
+      .eq("is_active", true)
+      .order("id", {
+        ascending: true,
+      })
+      .limit(1)
       .maybeSingle();
 
-  if (
-    contactSettingError
-  ) {
-    throw new Error(
-      contactSettingError.message,
-    );
+  if (contactSettingError) {
+    throw new Error(contactSettingError.message);
   }
 
-  const contactSetting =
-    contactSettingData as
-      | ContactSettingRow
-      | null;
+  const contactSetting = contactSettingData as ContactSettingRow | null;
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Paramètres"
+      href="/admin/parametres"
+      detail={false}
+      sections={[
+        { id: "section-1", label: "Tarifs d’assurance" },
+        { id: "section-2", label: "Coordonnées bancaires" },
+        { id: "section-3", label: "WhatsApp IF Sigorta" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
@@ -232,9 +163,8 @@ export default async function SettingsPage() {
               </h1>
 
               <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7 lg:text-base">
-                Gérez les tarifs, les coordonnées bancaires,
-                le numéro WhatsApp et les réglages généraux
-                du portail IF Sigorta.
+                Gérez les tarifs, les coordonnées bancaires, le numéro WhatsApp
+                et les réglages généraux du portail IF Sigorta.
               </p>
             </div>
 
@@ -255,22 +185,21 @@ export default async function SettingsPage() {
               Tarification
             </p>
 
-            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
               Tarifs d’assurance
             </h2>
 
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-              Modifiez les tarifs selon l’âge du client et
-              la durée de l’assurance.
+              Modifiez les tarifs selon l’âge du client et la durée de
+              l’assurance.
             </p>
           </div>
 
           <div className="min-w-0">
-            <PriceSettingsForm
-              initialRanges={
-                ranges
-              }
-            />
+            <PriceSettingsForm initialRanges={ranges} />
           </div>
         </section>
 
@@ -282,30 +211,24 @@ export default async function SettingsPage() {
               Paiement
             </p>
 
-            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-2"
+            >
               Coordonnées bancaires
             </h2>
 
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-              Ces informations sont utilisées pour les
-              virements bancaires effectués par les clients.
+              Ces informations sont utilisées pour les virements bancaires
+              effectués par les clients.
             </p>
           </div>
 
           <div className="min-w-0">
             <BankSettingsForm
-              initialBeneficiary={
-                bankSetting?.beneficiary ??
-                ""
-              }
-              initialBankName={
-                bankSetting?.bank_name ??
-                ""
-              }
-              initialIban={
-                bankSetting?.iban ??
-                ""
-              }
+              initialBeneficiary={bankSetting?.beneficiary ?? ""}
+              initialBankName={bankSetting?.bank_name ?? ""}
+              initialIban={bankSetting?.iban ?? ""}
             />
           </div>
         </section>
@@ -318,30 +241,29 @@ export default async function SettingsPage() {
               Contact
             </p>
 
-            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-3"
+            >
               WhatsApp IF Sigorta
             </h2>
 
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-              Numéro public utilisé par les clients pour
-              contacter directement IF Sigorta.
+              Numéro public utilisé par les clients pour contacter directement
+              IF Sigorta.
             </p>
           </div>
 
           <div className="min-w-0">
             <ContactSettingsForm
               initialCountryCode={
-                contactSetting?.whatsapp_country_code ??
-                "+90"
+                contactSetting?.whatsapp_country_code ?? "+90"
               }
-              initialWhatsappNumber={
-                contactSetting?.whatsapp_number ??
-                ""
-              }
+              initialWhatsappNumber={contactSetting?.whatsapp_number ?? ""}
             />
           </div>
         </section>
       </div>
-    </main>
+    </PageFrame>
   );
 }

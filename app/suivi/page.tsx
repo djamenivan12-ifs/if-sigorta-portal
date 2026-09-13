@@ -1,3 +1,4 @@
+export const metadata = { robots: { index: false, follow: false } };
 import SuiviClient from "./SuiviClient";
 
 type SuiviPageProps = {

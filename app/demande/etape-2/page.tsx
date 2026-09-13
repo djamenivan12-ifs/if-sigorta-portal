@@ -1,19 +1,16 @@
 "use client";
+import Image from "next/image";
 
-import {
-  FormEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import Link from "next/link";
+
+import { useLanguage } from "@/lib/useLanguage";
+
+import {FormEvent, useEffect, useState} from "react";
 
 import { useRouter } from "next/navigation";
 
 import { useInsuranceRequest } from "@/context/InsuranceRequestContext";
-import {
-  calculateInsuranceAge,
-  InsuranceDuration,
-} from "@/lib/insurance/calculatePrice";
+import {InsuranceDuration} from "@/lib/insurance/calculatePrice";
 
 type Language = "fr" | "en" | "tr";
 
@@ -217,81 +214,16 @@ export default function Etape2Page() {
   } = useInsuranceRequest();
 
   const [language, setLanguage] =
-    useState<Language>("fr");
+    useLanguage();
 
   const [kimlikError, setKimlikError] =
     useState("");
 
-  useEffect(() => {
-    const savedLanguage =
-      window.localStorage.getItem(
-        "if-sigorta-language",
-      );
 
-    if (
-      savedLanguage === "fr" ||
-      savedLanguage === "en" ||
-      savedLanguage === "tr"
-    ) {
-      setLanguage(savedLanguage);
-    }
-
-    function handleLanguageChange(
-      event: Event,
-    ) {
-      const customEvent =
-        event as CustomEvent<{
-          language: Language;
-        }>;
-
-      const nextLanguage =
-        customEvent.detail?.language;
-
-      if (
-        nextLanguage === "fr" ||
-        nextLanguage === "en" ||
-        nextLanguage === "tr"
-      ) {
-        setLanguage(nextLanguage);
-      }
-    }
-
-    window.addEventListener(
-      "if-sigorta-language-change",
-      handleLanguageChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "if-sigorta-language-change",
-        handleLanguageChange,
-      );
-    };
-  }, []);
 
   const t = translations[language];
 
-  function changeLanguage(
-    nextLanguage: Language,
-  ) {
-    setLanguage(nextLanguage);
-
-    window.localStorage.setItem(
-      "if-sigorta-language",
-      nextLanguage,
-    );
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "if-sigorta-language-change",
-        {
-          detail: {
-            language: nextLanguage,
-          },
-        },
-      ),
-    );
-  }
+  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
 
   const today = new Date()
     .toISOString()
@@ -308,153 +240,32 @@ export default function Etape2Page() {
   const [priceLoading, setPriceLoading] =
     useState(false);
 
-  const calculatedAge = useMemo(() => {
-    if (!requestData.birthDate) {
-      return null;
-    }
 
-    return calculateInsuranceAge(
-      requestData.birthDate,
-    );
-  }, [
-    requestData.birthDate,
-  ]);
 
-  async function loadPrice(
-    duration: InsuranceDuration,
-  ) {
-    if (
-      !requestData.birthDate
-    ) {
-      setPriceResult(null);
-      return;
-    }
 
-    setPriceLoading(true);
-
-    try {
-      const response =
-        await fetch(
-          "/api/insurance/price",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              birthDate:
-                requestData.birthDate,
-
-              duration,
-            }),
-          },
-        );
-
-      const result =
-        (await response.json()) as {
-          age?: number;
-          duration?: InsuranceDuration;
-          price?: number | null;
-          available?: boolean;
-          error?: string;
-        };
-
-      if (!response.ok) {
-        throw new Error(
-          result.error ??
-            "Impossible de calculer le tarif.",
-        );
-      }
-
-      const nextResult = {
-        age:
-          Number(
-            result.age,
-          ),
-
-        duration,
-
-        price:
-          typeof result.price === "number"
-            ? result.price
-            : null,
-
-        available:
-          Boolean(
-            result.available,
-          ),
-      };
-
-      setPriceResult(
-        nextResult,
-      );
-
-      updateRequestData({
-        duration,
-
-        calculatedAge:
-          nextResult.age,
-
-        calculatedPrice:
-          nextResult.price,
-      });
-    } catch (
-      error
-    ) {
-      console.error(
-        "Erreur calcul tarif :",
-        error,
-      );
-
-      setPriceResult(
-        calculatedAge === null
-          ? null
-          : {
-              age:
-                calculatedAge,
-
-              duration,
-
-              price:
-                null,
-
-              available:
-                false,
-            },
-      );
-
-      updateRequestData({
-        duration,
-
-        calculatedAge:
-          calculatedAge,
-
-        calculatedPrice:
-          null,
-      });
-    } finally {
-      setPriceLoading(false);
-    }
-  }
 
   useEffect(() => {
-    if (
-      requestData.birthDate
-    ) {
-      void loadPrice(
-        requestData.duration,
-      );
-    } else {
-      setPriceResult(null);
+    const controller = new AbortController();
+    async function load() {
+      if (!requestData.birthDate) return;
+      setPriceLoading(true);
+      try {
+        const response = await fetch("/api/insurance/price", {method:"POST", signal:controller.signal, headers:{"Content-Type":"application/json"}, body:JSON.stringify({birthDate:requestData.birthDate,duration:requestData.duration})});
+        const result = await response.json();
+        if (!response.ok) throw new Error("Tarif indisponible");
+        if (controller.signal.aborted) return;
+        const next = {age:Number(result.age),duration:requestData.duration,price:typeof result.price === "number" ? result.price : null,available:Boolean(result.available)};
+        setPriceResult(next);
+        updateRequestData({calculatedAge:next.age,calculatedPrice:next.price});
+      } catch {
+        if (controller.signal.aborted) return;
+        setPriceResult(null);
+        updateRequestData({calculatedAge:null,calculatedPrice:null});
+      } finally { if(!controller.signal.aborted) setPriceLoading(false); }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    requestData.birthDate,
-    requestData.duration,
-  ]);
+    void load();
+    return () => controller.abort();
+  }, [requestData.birthDate,requestData.duration,updateRequestData]);
 
   function changeDuration(
     duration: InsuranceDuration,
@@ -463,9 +274,7 @@ export default function Etape2Page() {
       duration,
     });
 
-    void loadPrice(
-      duration,
-    );
+
   }
 
   function changeKimlikStatus(
@@ -521,7 +330,7 @@ export default function Etape2Page() {
   ) {
     event.preventDefault();
 
-    if (
+    if (priceLoading || priceResult?.duration !== requestData.duration ||
       !priceResult ||
       !priceResult.available ||
       priceResult.price === null
@@ -703,17 +512,17 @@ export default function Etape2Page() {
 
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
-          <a
+          <Link
             href="/"
             className="flex shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <img
+            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto max-w-[170px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
             />
-          </a>
+          </Link>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">

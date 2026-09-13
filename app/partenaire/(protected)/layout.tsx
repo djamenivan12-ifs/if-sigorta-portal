@@ -1,3 +1,4 @@
+export const metadata = { robots: { index: false, follow: false } };
 import type {
   ReactNode,
 } from "react";

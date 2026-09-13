@@ -1,16 +1,14 @@
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import PartnerForm from "./PartnerForm";
 import PartnerPriceSettingsForm from "./PartnerPriceSettingsForm";
 
-import {
-  requireRole,
-} from "@/lib/auth/requireRole";
+import { requireRole } from "@/lib/auth/requireRole";
 
-import {
-  createServiceClient,
-} from "@/lib/supabase/service";
+import { createServiceClient } from "@/lib/supabase/service";
 
 type Partner = {
   id: string;
@@ -29,12 +27,8 @@ type PartnerPriceRangeRow = {
   id: number;
   minimum_age: number;
   maximum_age: number;
-  one_year_price:
-    | number
-    | string;
-  two_year_price:
-    | number
-    | string;
+  one_year_price: number | string;
+  two_year_price: number | string;
   is_active: boolean;
 };
 
@@ -44,47 +38,26 @@ type PageProps = {
   }>;
 };
 
-function formatDate(
-  value: string,
-) {
-  const date =
-    new Date(value);
+function formatDate(value: string) {
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle:
-        "medium",
-      timeStyle:
-        "short",
-      timeZone:
-        "Europe/Istanbul",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-export default async function PartnerPage({
-  params,
-}: PageProps) {
-  await requireRole([
-    "admin",
-  ]);
+export default async function PartnerPage({ params }: PageProps) {
+  await requireRole(["admin"]);
 
-  const {
-    id,
-  } =
-    await params;
+  const { id } = await params;
 
-  const supabase =
-    createServiceClient();
+  const supabase = createServiceClient();
 
   /*
    * ============================
@@ -92,16 +65,10 @@ export default async function PartnerPage({
    * ============================
    */
 
-  const {
-    data,
-    error,
-  } =
-    await supabase
-      .from(
-        "partners",
-      )
-      .select(
-        `
+  const { data, error } = await supabase
+    .from("partners")
+    .select(
+      `
           id,
           code,
           company_name,
@@ -113,25 +80,19 @@ export default async function PartnerPage({
           created_at,
           updated_at
         `,
-      )
-      .eq(
-        "id",
-        id,
-      )
-      .maybeSingle();
+    )
+    .eq("id", id)
+    .maybeSingle();
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
   if (!data) {
     notFound();
   }
 
-  const partner =
-    data as Partner;
+  const partner = data as Partner;
 
   /*
    * ============================
@@ -139,40 +100,19 @@ export default async function PartnerPage({
    * ============================
    */
 
-  const {
-    count:
-      dossierCount,
-    error:
-      dossierCountError,
-  } =
-    await supabase
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        "id",
-        {
-          count:
-            "exact",
-          head:
-            true,
-        },
-      )
-      .eq(
-        "partner_id",
-        partner.id,
-      );
+  const { count: dossierCount, error: dossierCountError } = await supabase
+    .from("insurance_requests")
+    .select("id", {
+      count: "exact",
+      head: true,
+    })
+    .eq("partner_id", partner.id);
 
-  if (
-    dossierCountError
-  ) {
-    throw new Error(
-      dossierCountError.message,
-    );
+  if (dossierCountError) {
+    throw new Error(dossierCountError.message);
   }
 
-  const totalDossiers =
-    dossierCount ?? 0;
+  const totalDossiers = dossierCount ?? 0;
 
   /*
    * ============================
@@ -180,16 +120,9 @@ export default async function PartnerPage({
    * ============================
    */
 
-  const {
-    data:
-      priceRangesData,
-    error:
-      priceRangesError,
-  } =
-    await supabase
-      .from(
-        "partner_price_ranges",
-      )
+  const { data: priceRangesData, error: priceRangesError } = await readAll(
+    supabase
+      .from("partner_price_ranges")
       .select(
         `
           id,
@@ -200,72 +133,51 @@ export default async function PartnerPage({
           is_active
         `,
       )
-      .eq(
-        "partner_id",
-        partner.id,
-      )
-      .order(
-        "minimum_age",
-        {
-          ascending:
-            true,
-        },
-      );
+      .eq("partner_id", partner.id)
+      .order("minimum_age", {
+        ascending: true,
+      })
+      .order("id"),
+  );
 
-  if (
-    priceRangesError
-  ) {
-    throw new Error(
-      priceRangesError.message,
-    );
+  if (priceRangesError) {
+    throw new Error(priceRangesError.message);
   }
 
-  const priceRanges =
-    (
-      priceRangesData ??
-      []
-    ).map(
-      (row) => {
-        const item =
-          row as PartnerPriceRangeRow;
+  const priceRanges = (priceRangesData ?? []).map((row) => {
+    const item = row as PartnerPriceRangeRow;
 
-        return {
-          id:
-            item.id,
+    return {
+      id: item.id,
 
-          minimumAge:
-            item.minimum_age,
+      minimumAge: item.minimum_age,
 
-          maximumAge:
-            item.maximum_age,
+      maximumAge: item.maximum_age,
 
-          oneYearPrice:
-            Number(
-              item.one_year_price,
-            ),
+      oneYearPrice: Number(item.one_year_price),
 
-          twoYearPrice:
-            Number(
-              item.two_year_price,
-            ),
+      twoYearPrice: Number(item.two_year_price),
 
-          isActive:
-            item.is_active,
-        };
-      },
-    );
+      isActive: item.is_active,
+    };
+  });
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Partenaires"
+      href="/admin/partenaires"
+      detail={true}
+      sections={[
+        { id: "section-1", label: "Informations du partenaire" },
+        { id: "section-2", label: "Tarifs du partenaire" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-5xl">
         <Link
           href="/admin/partenaires"
           className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
         >
-          <span aria-hidden="true">
-            ←
-          </span>
-
+          <span aria-hidden="true">←</span>
           Retour aux partenaires
         </Link>
 
@@ -274,19 +186,13 @@ export default async function PartnerPage({
             <div className="flex min-w-0 flex-col gap-5 sm:gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F3F8F2] text-lg font-black text-[#0B5D3B] sm:h-14 sm:w-14 sm:rounded-2xl sm:text-xl">
-                  {partner.company_name
-                    .charAt(
-                      0,
-                    )
-                    .toUpperCase()}
+                  {partner.company_name.charAt(0).toUpperCase()}
                 </div>
 
                 <div className="min-w-0">
                   <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
                     <h1 className="break-words text-xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-2xl lg:text-3xl">
-                      {
-                        partner.company_name
-                      }
+                      {partner.company_name}
                     </h1>
 
                     <span
@@ -296,24 +202,17 @@ export default async function PartnerPage({
                           : "border-red-200 bg-red-50 text-red-700"
                       }`}
                     >
-                      {partner.is_active
-                        ? "Actif"
-                        : "Inactif"}
+                      {partner.is_active ? "Actif" : "Inactif"}
                     </span>
                   </div>
 
                   <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 sm:mt-3 sm:gap-3">
                     <span className="inline-flex max-w-full break-all rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-[10px] font-semibold text-slate-700 sm:text-xs">
-                      {
-                        partner.code
-                      }
+                      {partner.code}
                     </span>
 
                     <span className="break-words text-[12px] text-slate-500 sm:text-sm">
-                      Responsable :{" "}
-                      {
-                        partner.manager_name
-                      }
+                      Responsable : {partner.manager_name}
                     </span>
                   </div>
                 </div>
@@ -325,9 +224,7 @@ export default async function PartnerPage({
                 </p>
 
                 <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-2 sm:text-3xl">
-                  {totalDossiers.toLocaleString(
-                    "fr-FR",
-                  )}
+                  {totalDossiers.toLocaleString("fr-FR")}
                 </p>
               </div>
             </div>
@@ -340,9 +237,7 @@ export default async function PartnerPage({
               </p>
 
               <p className="mt-1.5 break-all text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
-                {
-                  partner.email
-                }
+                {partner.email}
               </p>
             </div>
 
@@ -352,12 +247,7 @@ export default async function PartnerPage({
               </p>
 
               <p className="mt-1.5 break-words text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
-                {
-                  partner.whatsapp_country_code
-                }{" "}
-                {
-                  partner.whatsapp_number
-                }
+                {partner.whatsapp_country_code} {partner.whatsapp_number}
               </p>
             </div>
 
@@ -367,9 +257,7 @@ export default async function PartnerPage({
               </p>
 
               <p className="mt-1.5 break-words text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
-                {formatDate(
-                  partner.created_at,
-                )}
+                {formatDate(partner.created_at)}
               </p>
             </div>
 
@@ -379,9 +267,7 @@ export default async function PartnerPage({
               </p>
 
               <p className="mt-1.5 break-words text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
-                {formatDate(
-                  partner.updated_at,
-                )}
+                {formatDate(partner.updated_at)}
               </p>
             </div>
           </div>
@@ -395,47 +281,39 @@ export default async function PartnerPage({
               Informations
             </p>
 
-            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
               Informations du partenaire
             </h2>
 
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-              Modifiez les coordonnées,
-              le responsable et le statut
-              de ce partenaire.
+              Modifiez les coordonnées, le responsable et le statut de ce
+              partenaire.
             </p>
           </div>
 
           <div className="min-w-0">
             <PartnerForm
-            partner={{
-              id:
-                partner.id,
+              partner={{
+                id: partner.id,
 
-              code:
-                partner.code,
+                code: partner.code,
 
-              companyName:
-                partner.company_name,
+                companyName: partner.company_name,
 
-              managerName:
-                partner.manager_name,
+                managerName: partner.manager_name,
 
-              email:
-                partner.email,
+                email: partner.email,
 
-              whatsappCountryCode:
-                partner.whatsapp_country_code,
+                whatsappCountryCode: partner.whatsapp_country_code,
 
-              whatsappNumber:
-                partner.whatsapp_number,
+                whatsappNumber: partner.whatsapp_number,
 
-              isActive:
-                partner.is_active,
-            }}
-            dossierCount={
-              totalDossiers
-            }
+                isActive: partner.is_active,
+              }}
+              dossierCount={totalDossiers}
             />
           </div>
         </section>
@@ -448,36 +326,31 @@ export default async function PartnerPage({
               Tarification
             </p>
 
-            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-2"
+            >
               Tarifs du partenaire
             </h2>
 
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
               Cette grille est propre à{" "}
               <span className="font-semibold text-[#102B20]">
-                {
-                  partner.company_name
-                }
+                {partner.company_name}
               </span>
-              . Les modifications
-              effectuées ici n’affectent
-              ni les tarifs publics ni
-              les autres partenaires.
+              . Les modifications effectuées ici n’affectent ni les tarifs
+              publics ni les autres partenaires.
             </p>
           </div>
 
           <div className="min-w-0">
             <PartnerPriceSettingsForm
-            partnerId={
-              partner.id
-            }
-            initialRanges={
-              priceRanges
-            }
+              partnerId={partner.id}
+              initialRanges={priceRanges}
             />
           </div>
         </section>
       </div>
-    </main>
+    </PageFrame>
   );
 }

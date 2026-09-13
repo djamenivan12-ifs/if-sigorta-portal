@@ -1,3 +1,19 @@
+import {
+  paginate,
+  scalar,
+  matchesSearch,
+  type ListParams,
+} from "@/lib/admin/pagination";
+import {
+  ListPagination,
+  ListFilters,
+} from "@/components/admin/pages/ListTools";
+import { PROGRESS_ACTIONS, daysRemaining } from "@/lib/dashboard/model";
+import { getLastProgress, getMinutesBetween } from "@/lib/admin/progress";
+import { readAll } from "@/lib/supabase/readAll";
+import PageFrame from "@/components/admin/pages/PageFrame";
+import { listAllUsers } from "@/lib/supabase/listAllUsers";
+
 import Link from "next/link";
 
 import ClaimRequestButton from "@/components/admin/requests/ClaimRequestButton";
@@ -24,6 +40,7 @@ type RequestRow = {
   request_code: string;
   status: string;
   created_at: string;
+  assigned_at: string | null;
   assigned_agent_id: string | null;
   client: RequestClientRelation;
 };
@@ -74,10 +91,7 @@ type RenewalRow = {
   request: RenewalRequestRelation;
 };
 
-type NotificationPriority =
-  | "critical"
-  | "high"
-  | "medium";
+type NotificationPriority = "critical" | "high" | "medium";
 
 type RequestNotificationItem = {
   kind: "request";
@@ -114,9 +128,7 @@ type RenewalNotificationItem = {
   priorityClassName: string;
 };
 
-type NotificationItem =
-  | RequestNotificationItem
-  | RenewalNotificationItem;
+type NotificationItem = RequestNotificationItem | RenewalNotificationItem;
 
 /*
  * Les dossiers terminés ou bloqués
@@ -124,35 +136,15 @@ type NotificationItem =
  * la file normale de notifications.
  */
 const ACTION_STATUSES = [
-  "draft",
   "waiting_payment",
   "payment_review",
   "payment_confirmed",
   "policy_preparation",
 ];
 
-const PROGRESS_ACTIONS = [
-  "request_created",
-  "payment_uploaded",
-  "payment_confirmed",
-  "policy_preparation_started",
-  "policy_uploaded_year_1",
-  "policy_uploaded_year_2",
-  "policy_replaced_year_1",
-  "policy_replaced_year_2",
-  "whatsapp_sent",
-  "request_claimed",
-];
+const ACTIVE_RENEWAL_STATUSES = ["pending", "contacted", "interested"];
 
-const ACTIVE_RENEWAL_STATUSES = [
-  "pending",
-  "contacted",
-  "interested",
-];
-
-function unwrapRequestClient(
-  relation: RequestClientRelation,
-) {
+function unwrapRequestClient(relation: RequestClientRelation) {
   if (Array.isArray(relation)) {
     return relation[0] ?? null;
   }
@@ -160,9 +152,7 @@ function unwrapRequestClient(
   return relation;
 }
 
-function unwrapRenewalRequest(
-  relation: RenewalRequestRelation,
-) {
+function unwrapRenewalRequest(relation: RenewalRequestRelation) {
   if (Array.isArray(relation)) {
     return relation[0] ?? null;
   }
@@ -170,9 +160,7 @@ function unwrapRenewalRequest(
   return relation;
 }
 
-function unwrapRenewalClient(
-  relation: RenewalClientRelation,
-) {
+function unwrapRenewalClient(relation: RenewalClientRelation) {
   if (Array.isArray(relation)) {
     return relation[0] ?? null;
   }
@@ -180,152 +168,54 @@ function unwrapRenewalClient(
   return relation;
 }
 
-function formatDateTime(
-  value: string,
-) {
-  const date =
-    new Date(value);
+function formatDateTime(value: string) {
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Europe/Istanbul",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
 }
 
-function formatSimpleDate(
-  value: string,
-) {
-  const date =
-    new Date(
-      `${value}T00:00:00`,
-    );
+function formatSimpleDate(value: string) {
+  const date = new Date(`${value}T00:00:00`);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "fr-FR",
-    {
-      dateStyle: "long",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+  }).format(date);
 }
 
-function getMinutesBetween(
-  startValue: string,
-  endValue: string,
-) {
-  const start =
-    new Date(startValue);
-
-  const end =
-    new Date(endValue);
-
-  if (
-    Number.isNaN(
-      start.getTime(),
-    ) ||
-    Number.isNaN(
-      end.getTime(),
-    )
-  ) {
-    return 0;
-  }
-
-  const difference =
-    end.getTime() -
-    start.getTime();
-
-  if (
-    difference <= 0
-  ) {
-    return 0;
-  }
-
-  return Math.floor(
-    difference /
-      60_000,
+function getDaysRemaining(policyEndDate: string) {
+  return (
+    daysRemaining(policyEndDate, new Date().toISOString()) ??
+    Number.POSITIVE_INFINITY
   );
 }
 
-function getDaysRemaining(
-  policyEndDate: string,
-) {
-  const now =
-    new Date();
-
-  const today =
-    new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-
-  const end =
-    new Date(
-      `${policyEndDate}T00:00:00`,
-    );
-
-  if (
-    Number.isNaN(
-      end.getTime(),
-    )
-  ) {
-    return Number.POSITIVE_INFINITY;
-  }
-
-  return Math.ceil(
-    (
-      end.getTime() -
-      today.getTime()
-    ) /
-      86_400_000,
-  );
-}
-
-function formatDuration(
-  minutes: number,
-) {
-  if (
-    minutes < 1
-  ) {
+function formatDuration(minutes: number) {
+  if (!Number.isFinite(minutes)) return "Date inconnue";
+  if (minutes < 1) {
     return "moins d’une minute";
   }
 
-  if (
-    minutes < 60
-  ) {
+  if (minutes < 60) {
     return `${minutes} min`;
   }
 
-  const hours =
-    Math.floor(
-      minutes / 60,
-    );
+  const hours = Math.floor(minutes / 60);
 
-  const remainingMinutes =
-    minutes % 60;
+  const remainingMinutes = minutes % 60;
 
-  if (
-    remainingMinutes === 0
-  ) {
+  if (remainingMinutes === 0) {
     return `${hours} h`;
   }
 
@@ -333,7 +223,6 @@ function formatDuration(
 }
 
 function getRequestPriority({
-  status,
   assignedAgentId,
   minutesWithoutProgress,
 }: {
@@ -341,132 +230,86 @@ function getRequestPriority({
   assignedAgentId: string | null;
   minutesWithoutProgress: number;
 }) {
-  if (
-    assignedAgentId ===
-    null
-  ) {
-    if (
-      minutesWithoutProgress >=
-      30
-    ) {
+  if (assignedAgentId === null) {
+    if (minutesWithoutProgress >= 30) {
       return {
-        priority:
-          "critical" as const,
+        priority: "critical" as const,
 
-        label:
-          "Priorité élevée",
+        label: "Priorité élevée",
 
-        className:
-          "bg-red-100 text-red-700",
+        className: "bg-red-100 text-red-700",
 
-        title:
-          "Nouvelle demande non prise en charge",
+        title: "Nouvelle demande non prise en charge",
       };
     }
 
-    if (
-      minutesWithoutProgress >=
-      15
-    ) {
+    if (minutesWithoutProgress >= 15) {
       return {
-        priority:
-          "high" as const,
+        priority: "high" as const,
 
-        label:
-          "En retard",
+        label: "En retard",
 
-        className:
-          "bg-orange-100 text-orange-700",
+        className: "bg-orange-100 text-orange-700",
 
-        title:
-          "Nouvelle demande en attente",
+        title: "Nouvelle demande en attente",
       };
     }
 
     return {
-      priority:
-        "medium" as const,
+      priority: "medium" as const,
 
-      label:
-        "Nouvelle demande",
+      label: "Nouvelle demande",
 
-      className:
-        "bg-amber-100 text-amber-700",
+      className: "bg-amber-100 text-amber-700",
 
-      title:
-        "Nouveau dossier disponible",
+      title: "Nouveau dossier disponible",
     };
   }
 
-  if (
-    minutesWithoutProgress >=
-    30
-  ) {
+  if (minutesWithoutProgress >= 30) {
     return {
-      priority:
-        "critical" as const,
+      priority: "critical" as const,
 
-      label:
-        "Priorité élevée",
+      label: "Priorité élevée",
 
-      className:
-        "bg-red-100 text-red-700",
+      className: "bg-red-100 text-red-700",
 
-      title:
-        "Dossier sans progression",
+      title: "Dossier sans progression",
     };
   }
 
-  if (
-    minutesWithoutProgress >=
-    15
-  ) {
+  if (minutesWithoutProgress >= 15) {
     return {
-      priority:
-        "high" as const,
+      priority: "high" as const,
 
-      label:
-        "En retard",
+      label: "En retard",
 
-      className:
-        "bg-orange-100 text-orange-700",
+      className: "bg-orange-100 text-orange-700",
 
-      title:
-        "Dossier en retard",
+      title: "Dossier en retard",
     };
   }
 
-  if (
-    minutesWithoutProgress >=
-    5
-  ) {
+  if (minutesWithoutProgress >= 5) {
     return {
-      priority:
-        "medium" as const,
+      priority: "medium" as const,
 
-      label:
-        "À surveiller",
+      label: "À surveiller",
 
-      className:
-        "bg-amber-100 text-amber-700",
+      className: "bg-amber-100 text-amber-700",
 
-      title:
-        "Dossier à surveiller",
+      title: "Dossier à surveiller",
     };
   }
 
   return {
-    priority:
-      "medium" as const,
+    priority: "medium" as const,
 
-    label:
-      "Pris en charge",
+    label: "Pris en charge",
 
-    className:
-      "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
+    className: "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
 
-    title:
-      "Dossier sous votre responsabilité",
+    title: "Dossier sous votre responsabilité",
   };
 }
 
@@ -477,9 +320,7 @@ function getRequestDescription({
   status: string;
   isUnassigned: boolean;
 }) {
-  if (
-    isUnassigned
-  ) {
+  if (isUnassigned) {
     return "Une nouvelle demande est disponible et peut être prise en charge.";
   }
 
@@ -494,7 +335,7 @@ function getRequestDescription({
       return "Le reçu de paiement doit être vérifié.";
 
     case "payment_confirmed":
-      return "Le paiement est confirmé. Le dossier peut passer à la préparation.";
+      return "Le paiement est confirmé. Sélectionnez l’assureur pour préparer la police.";
 
     case "policy_preparation":
       return "La police d’assurance doit être préparée.";
@@ -504,110 +345,73 @@ function getRequestDescription({
   }
 }
 
-function getRenewalPriority(
-  daysRemaining: number,
-) {
-  if (
-    daysRemaining < 0
-  ) {
+function getRenewalPriority(daysRemaining: number) {
+  if (daysRemaining < 0) {
     return {
-      priority:
-        "critical" as const,
+      priority: "critical" as const,
 
-      label:
-        "Expiré",
+      label: "Expiré",
 
-      className:
-        "bg-red-100 text-red-700",
+      className: "bg-red-100 text-red-700",
 
-      title:
-        "Assurance expirée",
+      title: "Assurance expirée",
     };
   }
 
-  if (
-    daysRemaining <= 7
-  ) {
+  if (daysRemaining <= 7) {
     return {
-      priority:
-        "critical" as const,
+      priority: "critical" as const,
 
-      label:
-        "Contact urgent",
+      label: "Contact urgent",
 
-      className:
-        "bg-red-100 text-red-700",
+      className: "bg-red-100 text-red-700",
 
-      title:
-        "Client à contacter rapidement",
+      title: "Client à contacter rapidement",
     };
   }
 
-  if (
-    daysRemaining <= 15
-  ) {
+  if (daysRemaining <= 15) {
     return {
-      priority:
-        "high" as const,
+      priority: "high" as const,
 
-      label:
-        "Relance conseillée",
+      label: "Relance conseillée",
 
-      className:
-        "bg-orange-100 text-orange-700",
+      className: "bg-orange-100 text-orange-700",
 
-      title:
-        "Relance renouvellement",
+      title: "Relance renouvellement",
     };
   }
 
-  if (
-    daysRemaining <= 30
-  ) {
+  if (daysRemaining <= 30) {
     return {
-      priority:
-        "medium" as const,
+      priority: "medium" as const,
 
-      label:
-        "À contacter",
+      label: "À contacter",
 
-      className:
-        "bg-amber-100 text-amber-700",
+      className: "bg-amber-100 text-amber-700",
 
-      title:
-        "Renouvellement bientôt disponible",
+      title: "Renouvellement bientôt disponible",
     };
   }
 
   return null;
 }
 
-function getRenewalDescription(
-  daysRemaining: number,
-) {
-  if (
-    daysRemaining < 0
-  ) {
-    const days =
-      Math.abs(
-        daysRemaining,
-      );
+function getRenewalDescription(daysRemaining: number) {
+  if (daysRemaining < 0) {
+    const days = Math.abs(daysRemaining);
 
     return `L’assurance est expirée depuis ${days} jour${days !== 1 ? "s" : ""}. Contactez le client pour lui proposer de faire une nouvelle demande de renouvellement.`;
   }
 
-  if (
-    daysRemaining === 0
-  ) {
+  if (daysRemaining === 0) {
     return "L’assurance expire aujourd’hui. Contactez le client pour lui proposer de renouveler.";
   }
 
   return `L’assurance expire dans ${daysRemaining} jour${daysRemaining !== 1 ? "s" : ""}. Le client peut être contacté afin de lui proposer un renouvellement.`;
 }
 
-function getPriorityWeight(
-  priority: NotificationPriority,
-) {
+function getPriorityWeight(priority: NotificationPriority) {
   switch (priority) {
     case "critical":
       return 3;
@@ -620,63 +424,41 @@ function getPriorityWeight(
   }
 }
 
-function getInternalUserName(
-  user: {
-    id: string;
-    email?: string;
-    user_metadata?: Record<
-      string,
-      unknown
-    >;
-  },
-) {
+function getInternalUserName(user: {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+}) {
   const firstName =
-    typeof user.user_metadata
-      ?.first_name ===
-    "string"
+    typeof user.user_metadata?.first_name === "string"
       ? user.user_metadata.first_name.trim()
       : "";
 
   const lastName =
-    typeof user.user_metadata
-      ?.last_name ===
-    "string"
+    typeof user.user_metadata?.last_name === "string"
       ? user.user_metadata.last_name.trim()
       : "";
 
-  const fullName =
-    `${firstName} ${lastName}`.trim();
+  const fullName = `${firstName} ${lastName}`.trim();
 
   if (fullName) {
     return fullName;
   }
 
   const name =
-    typeof user.user_metadata
-      ?.name ===
-    "string"
+    typeof user.user_metadata?.name === "string"
       ? user.user_metadata.name.trim()
       : "";
 
-  return (
-    name ||
-    user.email ||
-    "Agent"
-  );
+  return name || user.email || "Agent";
 }
 
-export default async function NotificationsPage() {
-  const {
-    user,
-    role,
-  } =
-    await requireRole([
-      "agent",
-      "admin",
-    ]);
+export default async function NotificationsPage({
+  searchParams = Promise.resolve({}),
+}: { searchParams?: Promise<ListParams> } = {}) {
+  const { user, role } = await requireRole(["agent", "admin"]);
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
   /*
    * ============================
@@ -688,52 +470,23 @@ export default async function NotificationsPage() {
    * responsable d'un dossier.
    */
 
-  const {
-    data: internalUsersData,
-    error: internalUsersError,
-  } =
-    await serviceClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
+  const { data: internalUsersData, error: internalUsersError } =
+    await listAllUsers(serviceClient);
 
-  if (
-    internalUsersError
-  ) {
-    throw new Error(
-      internalUsersError.message,
-    );
+  if (internalUsersError) {
+    throw new Error(internalUsersError.message);
   }
 
-  const internalUserNames =
-    new Map<
-      string,
-      string
-    >();
+  const internalUserNames = new Map<string, string>();
 
-  for (
-    const internalUser of
-    internalUsersData.users
-  ) {
-    const internalRole =
-      internalUser.app_metadata
-        ?.role;
+  for (const internalUser of internalUsersData.users) {
+    const internalRole = internalUser.app_metadata?.role;
 
-    if (
-      internalRole !==
-        "agent" &&
-      internalRole !==
-        "admin"
-    ) {
+    if (internalRole !== "agent" && internalRole !== "admin") {
       continue;
     }
 
-    internalUserNames.set(
-      internalUser.id,
-      getInternalUserName(
-        internalUser,
-      ),
-    );
+    internalUserNames.set(internalUser.id, getInternalUserName(internalUser));
   }
 
   /*
@@ -742,18 +495,16 @@ export default async function NotificationsPage() {
    * ============================
    */
 
-  let requestQuery =
-    serviceClient
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
+  let requestQuery = serviceClient
+    .from("insurance_requests")
+    .select(
+      `
           id,
           request_code,
           status,
-          created_at,
-          assigned_agent_id,
+ created_at,
+ assigned_at,
+ assigned_agent_id,
 
           client:clients (
             id,
@@ -761,11 +512,8 @@ export default async function NotificationsPage() {
             last_name
           )
         `,
-      )
-      .in(
-        "status",
-        ACTION_STATUSES,
-      );
+    )
+    .in("status", ACTION_STATUSES);
 
   /*
    * AGENT :
@@ -779,60 +527,34 @@ export default async function NotificationsPage() {
    * - voit tout
    */
 
-  if (
-    role ===
-    "agent"
-  ) {
-    requestQuery =
-      requestQuery.or(
-        `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
-      );
+  if (role === "agent") {
+    requestQuery = requestQuery.or(
+      `assigned_agent_id.eq.${user.id},assigned_agent_id.is.null`,
+    );
   }
 
-  const {
-    data: requestsData,
-    error: requestsError,
-  } =
-    await requestQuery.order(
-      "created_at",
-      {
+  const { data: requestsData, error: requestsError } = await readAll(
+    requestQuery
+      .order("created_at", {
         ascending: false,
-      },
-    );
+      })
+      .order("id"),
+  );
 
-  if (
-    requestsError
-  ) {
-    throw new Error(
-      requestsError.message,
-    );
+  if (requestsError) {
+    throw new Error(requestsError.message);
   }
 
-  const requests =
-    (requestsData ??
-      []) as unknown as RequestRow[];
+  const requests = (requestsData ?? []) as unknown as RequestRow[];
 
-  const requestIds =
-    requests.map(
-      (request) =>
-        request.id,
-    );
+  const requestIds = requests.map((request) => request.id);
 
-  let activities:
-    ActivityRow[] = [];
+  let activities: ActivityRow[] = [];
 
-  if (
-    requestIds.length >
-    0
-  ) {
-    const {
-      data: activitiesData,
-      error: activitiesError,
-    } =
-      await serviceClient
-        .from(
-          "activity_logs",
-        )
+  if (requestIds.length > 0) {
+    const { data: activitiesData, error: activitiesError } = await readAll(
+      serviceClient
+        .from("activity_logs")
         .select(
           `
             request_id,
@@ -840,174 +562,94 @@ export default async function NotificationsPage() {
             created_at
           `,
         )
-        .in(
-          "request_id",
-          requestIds,
-        )
-        .in(
-          "action",
-          PROGRESS_ACTIONS,
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          },
-        );
+        .in("request_id", requestIds)
+        .in("action", PROGRESS_ACTIONS)
+        .order("created_at", {
+          ascending: false,
+        })
+        .order("id"),
+    );
 
-    if (
-      activitiesError
-    ) {
-      throw new Error(
-        activitiesError.message,
-      );
+    if (activitiesError) {
+      throw new Error(activitiesError.message);
     }
 
-    activities =
-      (activitiesData ??
-        []) as ActivityRow[];
+    activities = (activitiesData ?? []) as ActivityRow[];
   }
 
-  const lastProgressByRequest =
-    new Map<
-      string,
-      string
-    >();
+  const lastProgressByRequest = new Map<string, string>();
 
-  const completedRequests =
-    new Set<string>();
-
-  for (
-    const activity of
-    activities
-  ) {
-    if (
-      !lastProgressByRequest.has(
-        activity.request_id,
-      )
-    ) {
-      lastProgressByRequest.set(
-        activity.request_id,
-        activity.created_at,
-      );
-    }
-
-    if (
-      activity.action ===
-      "whatsapp_sent"
-    ) {
-      completedRequests.add(
-        activity.request_id,
-      );
+  for (const activity of activities) {
+    if (!lastProgressByRequest.has(activity.request_id)) {
+      lastProgressByRequest.set(activity.request_id, activity.created_at);
     }
   }
 
-  const now =
-    new Date().toISOString();
+  const now = new Date().toISOString();
 
-  const notifications:
-    NotificationItem[] =
-    [];
+  const notifications: NotificationItem[] = [];
 
-  for (
-    const request of
-    requests
-  ) {
+  for (const request of requests) {
     if (
-      completedRequests.has(
-        request.id,
-      )
-    ) {
+      request.status === "waiting_payment" &&
+      request.assigned_agent_id !== null
+    )
       continue;
-    }
 
-    const client =
-      unwrapRequestClient(
-        request.client,
-      );
+    const client = unwrapRequestClient(request.client);
 
-    const lastProgressAt =
-      lastProgressByRequest.get(
-        request.id,
-      ) ??
-      request.created_at;
+    const lastProgressAt = getLastProgress(request, lastProgressByRequest, now);
 
-    const minutesWithoutProgress =
-      getMinutesBetween(
-        lastProgressAt,
-        now,
-      );
+    const minutesWithoutProgress = getMinutesBetween(lastProgressAt, now);
 
-    const priorityInfo =
-      getRequestPriority({
-        status:
-          request.status,
+    const priorityInfo = getRequestPriority({
+      status: request.status,
 
-        assignedAgentId:
-          request.assigned_agent_id,
+      assignedAgentId: request.assigned_agent_id,
 
-        minutesWithoutProgress,
-      });
+      minutesWithoutProgress,
+    });
 
-    const isUnassigned =
-      request.assigned_agent_id ===
-      null;
+    const isUnassigned = request.assigned_agent_id === null;
 
     notifications.push({
-      kind:
-        "request",
+      kind: "request",
 
-      key:
-        `request-${request.id}`,
+      key: `request-${request.id}`,
 
-      requestId:
-        request.id,
+      requestId: request.id,
 
-      requestCode:
-        request.request_code,
+      requestCode: request.request_code,
 
-      clientName:
-        client
-          ? `${client.first_name} ${client.last_name}`.trim()
-          : "Client inconnu",
+      clientName: client
+        ? `${client.first_name} ${client.last_name}`.trim()
+        : "Client inconnu",
 
-      title:
-        priorityInfo.title,
+      title: priorityInfo.title,
 
-      description:
-        getRequestDescription({
-          status:
-            request.status,
+      description: getRequestDescription({
+        status: request.status,
 
-          isUnassigned,
-        }),
+        isUnassigned,
+      }),
 
-      createdAt:
-        request.created_at,
+      createdAt: request.created_at,
 
       minutesWithoutProgress,
 
-      priority:
-        priorityInfo.priority,
+      priority: priorityInfo.priority,
 
-      priorityLabel:
-        priorityInfo.label,
+      priorityLabel: priorityInfo.label,
 
-      priorityClassName:
-        priorityInfo.className,
+      priorityClassName: priorityInfo.className,
 
       isUnassigned,
 
-      assignedAgentId:
-        request.assigned_agent_id,
+      assignedAgentId: request.assigned_agent_id,
 
-      assignedAgentName:
-        request.assigned_agent_id
-          ? internalUserNames.get(
-              request.assigned_agent_id,
-            ) ??
-            "Agent"
-          : null,
+      assignedAgentName: request.assigned_agent_id
+        ? (internalUserNames.get(request.assigned_agent_id) ?? "Agent")
+        : null,
     });
   }
 
@@ -1017,14 +659,9 @@ export default async function NotificationsPage() {
    * ============================
    */
 
-  const {
-    data: renewalsData,
-    error: renewalsError,
-  } =
-    await serviceClient
-      .from(
-        "insurance_renewals",
-      )
+  const { data: renewalsData, error: renewalsError } = await readAll(
+    serviceClient
+      .from("insurance_renewals")
       .select(
         `
           id,
@@ -1044,39 +681,22 @@ export default async function NotificationsPage() {
     whatsapp_number
   )
 )
-          )
-        `,
+`,
       )
-      .in(
-        "status",
-        ACTIVE_RENEWAL_STATUSES,
-      );
+      .in("status", ACTIVE_RENEWAL_STATUSES)
+      .order("id"),
+  );
 
-  if (
-    renewalsError
-  ) {
-    throw new Error(
-      renewalsError.message,
-    );
+  if (renewalsError) {
+    throw new Error(renewalsError.message);
   }
 
-  const renewals =
-    (renewalsData ??
-      []) as unknown as RenewalRow[];
+  const renewals = (renewalsData ?? []) as unknown as RenewalRow[];
 
-  for (
-    const renewal of
-    renewals
-  ) {
-    const request =
-      unwrapRenewalRequest(
-        renewal.request,
-      );
+  for (const renewal of renewals) {
+    const request = unwrapRenewalRequest(renewal.request);
 
-    if (
-      !request
-        ?.policy_end_date
-    ) {
+    if (!request?.policy_end_date) {
       continue;
     }
 
@@ -1090,87 +710,57 @@ export default async function NotificationsPage() {
      */
 
     if (
-      role ===
-        "agent" &&
-      request.assigned_agent_id !==
-        user.id &&
-      request.assigned_agent_id !==
-        null
+      role === "agent" &&
+      request.assigned_agent_id !== user.id &&
+      request.assigned_agent_id !== null
     ) {
       continue;
     }
 
-    const daysRemaining =
-      getDaysRemaining(
-        request.policy_end_date,
-      );
+    const daysRemaining = getDaysRemaining(request.policy_end_date);
 
-    const priorityInfo =
-      getRenewalPriority(
-        daysRemaining,
-      );
+    const priorityInfo = getRenewalPriority(daysRemaining);
 
-    if (
-      !priorityInfo
-    ) {
+    if (!priorityInfo) {
       continue;
     }
 
-    const client =
-      unwrapRenewalClient(
-        request.client,
-      );
+    const client = unwrapRenewalClient(request.client);
 
-    const whatsapp =
-      client
-        ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
-        : "";
+    const whatsapp = client
+      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`.trim()
+      : "";
 
     notifications.push({
-      kind:
-        "renewal",
+      kind: "renewal",
 
-      key:
-        `renewal-${renewal.id}`,
+      key: `renewal-${renewal.id}`,
 
-      requestId:
-        request.id,
+      requestId: request.id,
 
-      requestCode:
-        request.request_code,
+      requestCode: request.request_code,
 
-      clientId:
-        client?.id ??
-        "",
+      clientId: client?.id ?? "",
 
-      clientName:
-        client
-          ? `${client.first_name} ${client.last_name}`.trim()
-          : "Client inconnu",
+      clientName: client
+        ? `${client.first_name} ${client.last_name}`.trim()
+        : "Client inconnu",
 
       whatsapp,
 
-      title:
-        priorityInfo.title,
+      title: priorityInfo.title,
 
-      description:
-        getRenewalDescription(
-          daysRemaining,
-        ),
+      description: getRenewalDescription(daysRemaining),
 
-      policyEndDate:
-        request.policy_end_date,
+      policyEndDate: request.policy_end_date,
 
       daysRemaining,
 
-      priority:
-        priorityInfo.priority,
+      priority: priorityInfo.priority,
 
-      priorityLabel:
-        priorityInfo.label,
+      priorityLabel: priorityInfo.label,
 
-      priorityClassName:
-        priorityInfo.className,
+      priorityClassName: priorityInfo.className,
     });
   }
 
@@ -1178,91 +768,61 @@ export default async function NotificationsPage() {
    * Plus urgent en premier.
    */
 
-  notifications.sort(
-    (
-      first,
-      second,
-    ) => {
-      const priorityDifference =
-        getPriorityWeight(
-          second.priority,
-        ) -
-        getPriorityWeight(
-          first.priority,
-        );
+  notifications.sort((first, second) => {
+    const priorityDifference =
+      getPriorityWeight(second.priority) - getPriorityWeight(first.priority);
 
-      if (
-        priorityDifference !==
-        0
-      ) {
-        return priorityDifference;
-      }
+    if (priorityDifference !== 0) {
+      return priorityDifference;
+    }
 
-      if (
-        first.kind ===
-          "renewal" &&
-        second.kind ===
-          "renewal"
-      ) {
-        return (
-          first.daysRemaining -
-          second.daysRemaining
-        );
-      }
+    if (first.kind === "renewal" && second.kind === "renewal") {
+      return first.daysRemaining - second.daysRemaining;
+    }
 
-      if (
-        first.kind ===
-          "request" &&
-        second.kind ===
-          "request"
-      ) {
-        return (
-          second.minutesWithoutProgress -
-          first.minutesWithoutProgress
-        );
-      }
+    if (first.kind === "request" && second.kind === "request") {
+      return second.minutesWithoutProgress - first.minutesWithoutProgress;
+    }
 
-      return 0;
-    },
+    return 0;
+  });
+
+  const criticalCount = notifications.filter(
+    (item) => item.priority === "critical",
+  ).length;
+
+  const lateCount = notifications.filter(
+    (item) => item.priority === "high",
+  ).length;
+
+  const watchCount = notifications.filter(
+    (item) => item.priority === "medium",
+  ).length;
+
+  const requestCount = notifications.filter(
+    (item) => item.kind === "request",
+  ).length;
+
+  const renewalCount = notifications.filter(
+    (item) => item.kind === "renewal",
+  ).length;
+
+  const listParams = await searchParams;
+  const listQuery = scalar(listParams.q);
+  const listFilter = scalar(listParams.filter);
+  const filteredRows = notifications.filter(
+    (row) =>
+      matchesSearch([row.clientName, row.requestCode, row.title], listQuery) &&
+      (!listFilter || row.kind === listFilter),
   );
-
-  const criticalCount =
-    notifications.filter(
-      (item) =>
-        item.priority ===
-        "critical",
-    ).length;
-
-  const lateCount =
-    notifications.filter(
-      (item) =>
-        item.priority ===
-        "high",
-    ).length;
-
-  const watchCount =
-    notifications.filter(
-      (item) =>
-        item.priority ===
-        "medium",
-    ).length;
-
-  const requestCount =
-    notifications.filter(
-      (item) =>
-        item.kind ===
-        "request",
-    ).length;
-
-  const renewalCount =
-    notifications.filter(
-      (item) =>
-        item.kind ===
-        "renewal",
-    ).length;
-
+  const listing = paginate(filteredRows, listParams.page);
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Notifications"
+      href="/admin/notifications"
+      detail={false}
+      sections={[{ id: "section-1", label: "À traiter" }]}
+    >
       <NotificationsRealtimeSync />
 
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
@@ -1290,53 +850,55 @@ export default async function NotificationsPage() {
             </Link>
           </div>
         </header>
+        <ListFilters
+          base="/admin/notifications"
+          query={listQuery}
+          selected={listFilter}
+          options={[
+            { value: "request", label: "Dossiers" },
+            { value: "renewal", label: "Renouvellements" },
+          ]}
+          label="Type"
+        />
 
         <section className="mt-4 grid min-w-0 grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
           <SummaryCard
             label="Total"
-            value={
-              notifications.length
-            }
+            value={notifications.length}
             className="bg-[#F3F8F2] text-[#0B5D3B]"
           />
 
           <SummaryCard
             label="Dossiers"
-            value={
-              requestCount
-            }
+            value={requestCount}
             className="bg-[#EEF6EC] text-[#31513B]"
           />
 
           <SummaryCard
             label="Renouvellements"
-            value={
-              renewalCount
-            }
+            value={renewalCount}
             className="bg-[#F1F6EA] text-[#49613E]"
           />
 
           <SummaryCard
             label="À surveiller / retard"
-            value={
-              watchCount +
-              lateCount
-            }
+            value={watchCount + lateCount}
             className="bg-amber-50 text-amber-700"
           />
 
           <SummaryCard
             label="Priorité élevée"
-            value={
-              criticalCount
-            }
+            value={criticalCount}
             className="bg-red-50 text-red-700"
           />
         </section>
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 p-4 sm:p-6">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+            <h2
+              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              id="section-1"
+            >
               À traiter
             </h2>
 
@@ -1345,222 +907,159 @@ export default async function NotificationsPage() {
             </p>
           </div>
 
-          {notifications.length ===
-          0 ? (
+          {listing.total === 0 ? (
             <div className="px-4 py-10 text-center sm:p-12">
-              <div className="text-4xl">
-                ✅
-              </div>
+              <div className="text-4xl">✅</div>
 
-              <h3 className="mt-4 font-bold text-slate-900">
-                Tout est à jour
-              </h3>
+              <h3 className="mt-4 font-bold text-slate-900">Tout est à jour</h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                Aucun dossier ou renouvellement ne nécessite actuellement votre attention.
+                Aucun dossier ou renouvellement ne nécessite actuellement votre
+                attention.
               </p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {notifications.map(
-                (
-                  notification,
-                ) => (
-                  <article
-                    key={
-                      notification.key
-                    }
-                    className="min-w-0 p-4 transition hover:bg-[#FAFCFA] sm:p-6"
-                  >
-                    <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${notification.priorityClassName}`}
-                          >
-                            {
-                              notification.priorityLabel
-                            }
-                          </span>
+              {listing.rows.map((notification) => (
+                <article
+                  key={notification.key}
+                  className="min-w-0 p-4 transition hover:bg-[#FAFCFA] sm:p-6"
+                >
+                  <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${notification.priorityClassName}`}
+                        >
+                          {notification.priorityLabel}
+                        </span>
 
-                          <span
-                            className={
-                              notification.kind ===
-                              "renewal"
-                                ? "rounded-full bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs"
-                                : "rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700 sm:px-3 sm:text-xs"
-                            }
-                          >
-                            {notification.kind ===
-                            "renewal"
-                              ? "Renouvellement"
-                              : "Dossier"}
-                          </span>
-
-                          {notification.kind ===
-                            "request" &&
-                            notification.isUnassigned && (
-                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 sm:px-3 sm:text-xs">
-                                Non attribué
-                              </span>
-                            )}
-
-                          {notification.kind ===
-                            "request" &&
-                            role ===
-                              "admin" &&
-                            !notification.isUnassigned &&
-                            notification.assignedAgentName && (
-                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
-                                Pris en charge par{" "}
-                                {
-                                  notification.assignedAgentName
-                                }
-                              </span>
-                            )}
-
-                          {notification.kind ===
-                            "request" &&
-                            role ===
-                              "agent" &&
-                            notification.assignedAgentId ===
-                              user.id && (
-                              <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
-                                Pris en charge par vous
-                              </span>
-                            )}
-
-                          <span className="break-all text-[12px] font-black text-[#0B5D3B] sm:text-sm">
-                            {
-                              notification.requestCode
-                            }
-                          </span>
-                        </div>
-
-                        <h3 className="mt-3 text-[15px] font-semibold leading-5 text-[#102B20] sm:text-base">
-                          {
-                            notification.title
+                        <span
+                          className={
+                            notification.kind === "renewal"
+                              ? "rounded-full bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs"
+                              : "rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700 sm:px-3 sm:text-xs"
                           }
-                        </h3>
+                        >
+                          {notification.kind === "renewal"
+                            ? "Renouvellement"
+                            : "Dossier"}
+                        </span>
 
-                        <p className="mt-1 break-words text-[13px] font-medium text-slate-700 sm:text-sm">
-                          {
-                            notification.clientName
-                          }
-                        </p>
-
-                        <p className="mt-2 max-w-2xl break-words text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
-                          {
-                            notification.description
-                          }
-                        </p>
-
-                        {notification.kind ===
-                        "request" ? (
-                          <div className="mt-3 flex min-w-0 flex-col gap-1.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-xs">
-                            <span>
-                              Sans progression :{" "}
-                              <strong className="text-slate-700">
-                                {formatDuration(
-                                  notification.minutesWithoutProgress,
-                                )}
-                              </strong>
-                            </span>
-
-                            <span>
-                              Créé :{" "}
-                              <strong className="text-slate-700">
-                                {formatDateTime(
-                                  notification.createdAt,
-                                )}
-                              </strong>
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="mt-3 flex min-w-0 flex-col gap-1.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-xs">
-                            <span>
-                              Fin de police :{" "}
-                              <strong className="text-slate-700">
-                                {formatSimpleDate(
-                                  notification.policyEndDate,
-                                )}
-                              </strong>
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-56">
-                        {notification.kind ===
-                          "request" &&
+                        {notification.kind === "request" &&
                           notification.isUnassigned && (
-                            <ClaimRequestButton
-                              requestId={
-                                notification.requestId
-                              }
-                              assignedAgentId={
-                                null
-                              }
-                              currentUserId={
-                                user.id
-                              }
-                              currentUserRole={
-                                role
-                              }
-                            />
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 sm:px-3 sm:text-xs">
+                              Non attribué
+                            </span>
                           )}
 
-                        {notification.kind ===
-                          "renewal" &&
-                          notification.whatsapp && (
-                            <RenewalWhatsappButton
-                              renewalId={
-                                notification.key.replace(
-                                  "renewal-",
-                                  "",
-                                )
-                              }
-                              whatsapp={
-                                notification.whatsapp
-                              }
-                              message={`Bonjour ${notification.clientName},
+                        {notification.kind === "request" &&
+                          role === "admin" &&
+                          !notification.isUnassigned &&
+                          notification.assignedAgentName && (
+                            <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
+                              Pris en charge par{" "}
+                              {notification.assignedAgentName}
+                            </span>
+                          )}
+
+                        {notification.kind === "request" &&
+                          role === "agent" &&
+                          notification.assignedAgentId === user.id && (
+                            <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
+                              Pris en charge par vous
+                            </span>
+                          )}
+
+                        <span className="break-all text-[12px] font-black text-[#0B5D3B] sm:text-sm">
+                          {notification.requestCode}
+                        </span>
+                      </div>
+
+                      <h3 className="mt-3 text-[15px] font-semibold leading-5 text-[#102B20] sm:text-base">
+                        {notification.title}
+                      </h3>
+
+                      <p className="mt-1 break-words text-[13px] font-medium text-slate-700 sm:text-sm">
+                        {notification.clientName}
+                      </p>
+
+                      <p className="mt-2 max-w-2xl break-words text-[12px] leading-5 text-slate-500 sm:text-sm sm:leading-6">
+                        {notification.description}
+                      </p>
+
+                      {notification.kind === "request" ? (
+                        <div className="mt-3 flex min-w-0 flex-col gap-1.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-xs">
+                          <span>
+                            Sans progression :{" "}
+                            <strong className="text-slate-700">
+                              {formatDuration(
+                                notification.minutesWithoutProgress,
+                              )}
+                            </strong>
+                          </span>
+
+                          <span>
+                            Créé :{" "}
+                            <strong className="text-slate-700">
+                              {formatDateTime(notification.createdAt)}
+                            </strong>
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="mt-3 flex min-w-0 flex-col gap-1.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-xs">
+                          <span>
+                            Fin de police :{" "}
+                            <strong className="text-slate-700">
+                              {formatSimpleDate(notification.policyEndDate)}
+                            </strong>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-56">
+                      {notification.kind === "request" &&
+                        notification.isUnassigned && (
+                          <ClaimRequestButton
+                            requestId={notification.requestId}
+                            assignedAgentId={null}
+                            currentUserId={user.id}
+                            currentUserRole={role}
+                          />
+                        )}
+
+                      {notification.kind === "renewal" &&
+                        notification.whatsapp && (
+                          <RenewalWhatsappButton
+                            renewalId={notification.key.replace("renewal-", "")}
+                            whatsapp={notification.whatsapp}
+                            message={`Bonjour ${notification.clientName},
 
 Votre assurance IF Sigorta arrive bientôt à expiration.
 
 Date d'expiration : ${
-                                notification.policyEndDate
-                                  ? new Intl.DateTimeFormat(
-                                      "fr-FR",
-                                      {
-                                        dateStyle:
-                                          "long",
-                                      },
-                                    ).format(
-                                      new Date(
-                                        `${notification.policyEndDate}T00:00:00`,
-                                      ),
-                                    )
-                                  : "Date non disponible"
-                              }.
+                              notification.policyEndDate
+                                ? new Intl.DateTimeFormat("fr-FR", {
+                                    dateStyle: "long",
+                                  }).format(
+                                    new Date(
+                                      `${notification.policyEndDate}T00:00:00`,
+                                    ),
+                                  )
+                                : "Date non disponible"
+                            }.
 
 ${
   notification.daysRemaining > 0
     ? `Il vous reste ${notification.daysRemaining} jour${
-        notification.daysRemaining !== 1
-          ? "s"
-          : ""
+        notification.daysRemaining !== 1 ? "s" : ""
       } avant l'expiration.`
     : notification.daysRemaining === 0
       ? "Votre assurance expire aujourd'hui."
       : `Votre assurance est expirée depuis ${Math.abs(
           notification.daysRemaining,
-        )} jour${
-          Math.abs(
-            notification.daysRemaining,
-          ) !== 1
-            ? "s"
-            : ""
-        }.`
+        )} jour${Math.abs(notification.daysRemaining) !== 1 ? "s" : ""}.`
 }
 
 Vous pouvez dès maintenant effectuer une nouvelle demande de renouvellement :
@@ -1570,46 +1069,50 @@ ${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/demande/etape-1
 Après votre demande, vous pourrez effectuer le paiement et envoyer votre justificatif directement depuis la plateforme.
 
 IF Sigorta`}
-                            />
-                          )}
+                          />
+                        )}
 
-                        {notification.kind ===
-                          "renewal" &&
-                          notification.clientId && (
-                            <Link
-                              href={`/admin/clients/${notification.clientId}`}
-                              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:min-h-11 sm:px-5 sm:text-sm"
-                            >
-                              Voir le client
-                            </Link>
-                          )}
+                      {notification.kind === "renewal" &&
+                        notification.clientId && (
+                          <Link
+                            href={`/admin/clients/${notification.clientId}`}
+                            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:min-h-11 sm:px-5 sm:text-sm"
+                          >
+                            Voir le client
+                          </Link>
+                        )}
 
+                      <Link
+                        href={`/admin/dossiers/${notification.requestId}`}
+                        className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:px-5 sm:text-sm"
+                      >
+                        Ouvrir le dossier →
+                      </Link>
+
+                      {notification.kind === "renewal" && (
                         <Link
-                          href={`/admin/dossiers/${notification.requestId}`}
-                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:px-5 sm:text-sm"
+                          href="/admin/renouvellements"
+                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:px-5 sm:text-sm"
                         >
-                          Ouvrir le dossier →
+                          Renouvellements
                         </Link>
-
-                        {notification.kind ===
-                          "renewal" && (
-                            <Link
-                              href="/admin/renouvellements"
-                              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:px-5 sm:text-sm"
-                            >
-                              Renouvellements
-                            </Link>
-                          )}
-                      </div>
+                      )}
                     </div>
-                  </article>
-                ),
-              )}
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </section>
       </div>
-    </main>
+      <div className="mx-auto max-w-[1500px]">
+        <ListPagination
+          base="/admin/notifications"
+          params={listParams}
+          summary={listing}
+        />
+      </div>
+    </PageFrame>
   );
 }
 
@@ -1619,25 +1122,17 @@ type SummaryCardProps = {
   className: string;
 };
 
-function SummaryCard({
-  label,
-  value,
-  className,
-}: SummaryCardProps) {
+function SummaryCard({ label, value, className }: SummaryCardProps) {
   return (
     <div className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 sm:rounded-[1.5rem] sm:p-5">
       <div
         className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold leading-4 sm:px-3 sm:text-xs ${className}`}
       >
-        {
-          label
-        }
+        {label}
       </div>
 
       <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
-        {value.toLocaleString(
-          "fr-FR",
-        )}
+        {value.toLocaleString("fr-FR")}
       </p>
     </div>
   );

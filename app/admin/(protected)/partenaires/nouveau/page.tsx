@@ -1,9 +1,7 @@
 "use client";
+import PageFrame from "@/components/admin/pages/PageFrame";
 
-import {
-  FormEvent,
-  useState,
-} from "react";
+import { FormEvent, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -129,81 +127,41 @@ const PARTNER_COUNTRIES = [
 ] as const;
 
 export default function NouveauPartenairePage() {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [
-    companyName,
-    setCompanyName,
-  ] = useState("");
+  const [companyName, setCompanyName] = useState("");
 
-  const [
-    managerName,
-    setManagerName,
-  ] = useState("");
+  const [managerName, setManagerName] = useState("");
 
-  const [
-    email,
-    setEmail,
-  ] = useState("");
+  const [email, setEmail] = useState("");
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [
-    whatsappCountryCode,
-    setWhatsappCountryCode,
-  ] = useState("+90");
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState("+90");
 
-  const [
-    whatsappNumber,
-    setWhatsappNumber,
-  ] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setErrorMessage("");
     setSuccessMessage("");
 
-    const cleanedCompanyName =
-      companyName.trim();
+    const cleanedCompanyName = companyName.trim();
 
-    const cleanedManagerName =
-      managerName.trim();
+    const cleanedManagerName = managerName.trim();
 
-    const cleanedEmail =
-      email
-        .trim()
-        .toLowerCase();
+    const cleanedEmail = email.trim().toLowerCase();
 
-    const cleanedCountryCode =
-      whatsappCountryCode.trim();
+    const cleanedCountryCode = whatsappCountryCode.trim();
 
-    const cleanedNumber =
-      whatsappNumber.replace(
-        /\D/g,
-        "",
-      );
+    const cleanedNumber = whatsappNumber.replace(/\D/g, "");
 
     if (
       !cleanedCompanyName ||
@@ -213,19 +171,13 @@ export default function NouveauPartenairePage() {
       !cleanedCountryCode ||
       !cleanedNumber
     ) {
-      setErrorMessage(
-        "Tous les champs sont obligatoires.",
-      );
+      setErrorMessage("Tous les champs sont obligatoires.");
 
       return;
     }
 
-    if (
-      password.length < 8
-    ) {
-      setErrorMessage(
-        "Le mot de passe doit contenir au moins 8 caractères.",
-      );
+    if (password.length < 8) {
+      setErrorMessage("Le mot de passe doit contenir au moins 8 caractères.");
 
       return;
     }
@@ -233,50 +185,32 @@ export default function NouveauPartenairePage() {
     setLoading(true);
 
     try {
-      const response =
-        await fetch(
-          "/api/admin/partners",
-          {
-            method: "POST",
+      const response = await fetch("/api/admin/partners", {
+        method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-            body:
-              JSON.stringify({
-                companyName:
-                  cleanedCompanyName,
+        body: JSON.stringify({
+          companyName: cleanedCompanyName,
 
-                managerName:
-                  cleanedManagerName,
+          managerName: cleanedManagerName,
 
-                email:
-                  cleanedEmail,
+          email: cleanedEmail,
 
-                password,
+          password,
 
-                whatsappCountryCode:
-                  cleanedCountryCode,
+          whatsappCountryCode: cleanedCountryCode,
 
-                whatsappNumber:
-                  cleanedNumber,
-              }),
-          },
-        );
+          whatsappNumber: cleanedNumber,
+        }),
+      });
 
-      const result =
-        (await response.json()) as ApiResponse;
+      const result = (await response.json()) as ApiResponse;
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
-        throw new Error(
-          result.error ||
-            "Le partenaire n’a pas pu être créé.",
-        );
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Le partenaire n’a pas pu être créé.");
       }
 
       setSuccessMessage(
@@ -309,16 +243,22 @@ export default function NouveauPartenairePage() {
     "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-12 sm:px-4 sm:text-sm";
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+    <PageFrame
+      section="Partenaires"
+      href="/admin/partenaires"
+      detail={true}
+      sections={[
+        { id: "section-1", label: "Informations générales" },
+        { id: "section-2", label: "Accès à l’espace partenaire" },
+        { id: "section-3", label: "Coordonnées du partenaire" },
+      ]}
+    >
       <div className="mx-auto w-full min-w-0 max-w-4xl">
         <Link
           href="/admin/partenaires"
           className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
         >
-          <span aria-hidden="true">
-            ←
-          </span>
-
+          <span aria-hidden="true">←</span>
           Retour aux partenaires
         </Link>
 
@@ -339,26 +279,24 @@ export default function NouveauPartenairePage() {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:mt-3 sm:text-sm sm:leading-7">
-                  Enregistrez un nouvel apporteur
-                  d’affaires IF Sigorta et créez
-                  son accès sécurisé à l’espace
-                  partenaire.
+                  Enregistrez un nouvel apporteur d’affaires IF Sigorta et créez
+                  son accès sécurisé à l’espace partenaire.
                 </p>
               </div>
             </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="min-w-0 p-4 sm:p-6 lg:p-8"
-          >
+          <form onSubmit={handleSubmit} className="min-w-0 p-4 sm:p-6 lg:p-8">
             <div>
               <div className="mb-4 min-w-0 sm:mb-5">
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
                   Partenaire
                 </p>
 
-                <h2 className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg">
+                <h2
+                  className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg"
+                  id="section-1"
+                >
                   Informations générales
                 </h2>
               </div>
@@ -377,15 +315,14 @@ export default function NouveauPartenairePage() {
                     type="text"
                     value={companyName}
                     onChange={(event) => {
-                      setCompanyName(
-                        event.target.value,
-                      );
+                      setCompanyName(event.target.value);
 
                       setErrorMessage("");
                     }}
                     placeholder="Ex. EasyLearn"
                     required
                     className={inputClassName}
+                    aria-label="Ex. EasyLearn"
                   />
                 </div>
 
@@ -402,15 +339,14 @@ export default function NouveauPartenairePage() {
                     type="text"
                     value={managerName}
                     onChange={(event) => {
-                      setManagerName(
-                        event.target.value,
-                      );
+                      setManagerName(event.target.value);
 
                       setErrorMessage("");
                     }}
                     placeholder="Nom complet"
                     required
                     className={inputClassName}
+                    aria-label="Nom complet"
                   />
                 </div>
               </div>
@@ -422,15 +358,16 @@ export default function NouveauPartenairePage() {
                   Connexion
                 </p>
 
-                <h2 className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg">
+                <h2
+                  className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg"
+                  id="section-2"
+                >
                   Accès à l’espace partenaire
                 </h2>
 
                 <p className="mt-2 text-[13px] leading-6 text-slate-500 sm:text-sm">
-                  L’adresse e-mail et le mot de
-                  passe ci-dessous permettront au
-                  partenaire de se connecter à son
-                  espace.
+                  L’adresse e-mail et le mot de passe ci-dessous permettront au
+                  partenaire de se connecter à son espace.
                 </p>
               </div>
 
@@ -448,9 +385,7 @@ export default function NouveauPartenairePage() {
                     type="email"
                     value={email}
                     onChange={(event) => {
-                      setEmail(
-                        event.target.value,
-                      );
+                      setEmail(event.target.value);
 
                       setErrorMessage("");
                     }}
@@ -458,6 +393,7 @@ export default function NouveauPartenairePage() {
                     placeholder="exemple@email.com"
                     required
                     className={inputClassName}
+                    aria-label="exemple@email.com"
                   />
                 </div>
 
@@ -474,9 +410,7 @@ export default function NouveauPartenairePage() {
                     type="password"
                     value={password}
                     onChange={(event) => {
-                      setPassword(
-                        event.target.value,
-                      );
+                      setPassword(event.target.value);
 
                       setErrorMessage("");
                     }}
@@ -485,12 +419,12 @@ export default function NouveauPartenairePage() {
                     minLength={8}
                     required
                     className={inputClassName}
+                    aria-label="8 caractères minimum"
                   />
 
                   <p className="mt-2 text-xs leading-5 text-slate-400">
-                    Minimum 8 caractères. Communiquez
-                    ce mot de passe au partenaire de
-                    manière sécurisée.
+                    Minimum 8 caractères. Communiquez ce mot de passe au
+                    partenaire de manière sécurisée.
                   </p>
                 </div>
               </div>
@@ -502,7 +436,10 @@ export default function NouveauPartenairePage() {
                   Contact
                 </p>
 
-                <h2 className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg">
+                <h2
+                  className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg"
+                  id="section-3"
+                >
                   Coordonnées du partenaire
                 </h2>
               </div>
@@ -520,31 +457,18 @@ export default function NouveauPartenairePage() {
                     id="whatsappCountryCode"
                     value={whatsappCountryCode}
                     onChange={(event) => {
-                      setWhatsappCountryCode(
-                        event.target.value,
-                      );
+                      setWhatsappCountryCode(event.target.value);
 
                       setErrorMessage("");
                     }}
                     required
                     className={inputClassName}
                   >
-                    {PARTNER_COUNTRIES.map(
-                      (country) => (
-                        <option
-                          key={
-                            country.code
-                          }
-                          value={
-                            country.code
-                          }
-                        >
-                          {country.flag}{" "}
-                          {country.name} (
-                          {country.code})
-                        </option>
-                      ),
-                    )}
+                    {PARTNER_COUNTRIES.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.flag} {country.name} ({country.code})
+                      </option>
+                    ))}
                   </select>
 
                   <input
@@ -553,9 +477,7 @@ export default function NouveauPartenairePage() {
                     inputMode="tel"
                     value={whatsappNumber}
                     onChange={(event) => {
-                      setWhatsappNumber(
-                        event.target.value,
-                      );
+                      setWhatsappNumber(event.target.value);
 
                       setErrorMessage("");
                     }}
@@ -563,37 +485,40 @@ export default function NouveauPartenairePage() {
                     autoComplete="tel"
                     required
                     className={inputClassName}
+                    aria-label="5XXXXXXXXX"
                   />
                 </div>
 
                 <p className="mt-2 text-xs leading-5 text-slate-400">
-                  Sélectionnez le pays puis
-                  saisissez le numéro WhatsApp
-                  sans l’indicatif international.
+                  Sélectionnez le pays puis saisissez le numéro WhatsApp sans
+                  l’indicatif international.
                 </p>
               </div>
             </div>
 
             <div className="mt-6 min-w-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4 sm:mt-8 sm:rounded-2xl sm:p-5">
-              <p className="font-semibold text-[#102B20]">
-                Code partenaire
-              </p>
+              <p className="font-semibold text-[#102B20]">Code partenaire</p>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Le code partenaire sera généré
-                automatiquement lors de la création
-                du partenaire.
+                Le code partenaire sera généré automatiquement lors de la
+                création du partenaire.
               </p>
             </div>
 
             {errorMessage && (
-              <div className="mt-5 min-w-0 break-words rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-[13px] leading-6 text-red-700 sm:mt-6 sm:px-4 sm:text-sm">
+              <div
+                className="mt-5 min-w-0 break-words rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-[13px] leading-6 text-red-700 sm:mt-6 sm:px-4 sm:text-sm"
+                role="alert"
+              >
                 {errorMessage}
               </div>
             )}
 
             {successMessage && (
-              <div className="mt-5 min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[13px] font-semibold text-[#0B5D3B] sm:mt-6 sm:px-4 sm:text-sm">
+              <div
+                className="mt-5 min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[13px] font-semibold text-[#0B5D3B] sm:mt-6 sm:px-4 sm:text-sm"
+                role="status"
+              >
                 {successMessage}
               </div>
             )}
@@ -611,14 +536,12 @@ export default function NouveauPartenairePage() {
                 disabled={loading}
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
-                {loading
-                  ? "Création..."
-                  : "Créer le partenaire"}
+                {loading ? "Création..." : "Créer le partenaire"}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </main>
+    </PageFrame>
   );
 }

@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  FormEvent,
-  useState,
-} from "react";
+import { FormEvent, useState } from "react";
 
 import Link from "next/link";
-import {
-  useRouter,
-} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type Partner = {
   id: string;
@@ -148,85 +143,35 @@ export default function PartnerForm({
   partner,
   dossierCount,
 }: PartnerFormProps) {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [
-    companyName,
-    setCompanyName,
-  ] = useState(
-    partner.companyName,
-  );
+  const [companyName, setCompanyName] = useState(partner.companyName);
 
-  const [
-    managerName,
-    setManagerName,
-  ] = useState(
-    partner.managerName,
-  );
+  const [managerName, setManagerName] = useState(partner.managerName);
 
-  const [
-    email,
-    setEmail,
-  ] = useState(
-    partner.email,
-  );
+  const [email, setEmail] = useState(partner.email);
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [
-    confirmPassword,
-    setConfirmPassword,
-  ] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [
-    whatsappCountryCode,
-    setWhatsappCountryCode,
-  ] = useState(
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState(
     partner.whatsappCountryCode,
   );
 
-  const [
-    whatsappNumber,
-    setWhatsappNumber,
-  ] = useState(
-    partner.whatsappNumber,
-  );
+  const [whatsappNumber, setWhatsappNumber] = useState(partner.whatsappNumber);
 
-  const [
-    isActive,
-    setIsActive,
-  ] = useState(
-    partner.isActive,
-  );
+  const [isActive, setIsActive] = useState(partner.isActive);
 
-  const [
-    saving,
-    setSaving,
-  ] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [
-    changingStatus,
-    setChangingStatus,
-  ] = useState(false);
+  const [changingStatus, setChangingStatus] = useState(false);
 
-  const [
-    deleting,
-    setDeleting,
-  ] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const inputClassName =
     "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
@@ -236,29 +181,18 @@ export default function PartnerForm({
     setSuccessMessage("");
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     clearMessages();
 
-    const cleanedCompanyName =
-      companyName.trim();
+    const cleanedCompanyName = companyName.trim();
 
-    const cleanedManagerName =
-      managerName.trim();
+    const cleanedManagerName = managerName.trim();
 
-    const cleanedEmail =
-      email
-        .trim()
-        .toLowerCase();
+    const cleanedEmail = email.trim().toLowerCase();
 
-    const cleanedNumber =
-      whatsappNumber.replace(
-        /\D/g,
-        "",
-      );
+    const cleanedNumber = whatsappNumber.replace(/\D/g, "");
 
     if (
       !cleanedCompanyName ||
@@ -267,17 +201,12 @@ export default function PartnerForm({
       !whatsappCountryCode ||
       !cleanedNumber
     ) {
-      setErrorMessage(
-        "Tous les champs sont obligatoires.",
-      );
+      setErrorMessage("Tous les champs sont obligatoires.");
 
       return;
     }
 
-    if (
-      password &&
-      password.length < 8
-    ) {
+    if (password && password.length < 8) {
       setErrorMessage(
         "Le nouveau mot de passe doit contenir au moins 8 caractères.",
       );
@@ -285,13 +214,8 @@ export default function PartnerForm({
       return;
     }
 
-    if (
-      password !==
-      confirmPassword
-    ) {
-      setErrorMessage(
-        "Les deux mots de passe ne correspondent pas.",
-      );
+    if (password !== confirmPassword) {
+      setErrorMessage("Les deux mots de passe ne correspondent pas.");
 
       return;
     }
@@ -299,68 +223,43 @@ export default function PartnerForm({
     setSaving(true);
 
     try {
-      const response =
-        await fetch(
-          `/api/admin/partners/${partner.id}`,
-          {
-            method: "PATCH",
+      const response = await fetch(`/api/admin/partners/${partner.id}`, {
+        method: "PATCH",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-            body:
-              JSON.stringify({
-                companyName:
-                  cleanedCompanyName,
+        body: JSON.stringify({
+          companyName: cleanedCompanyName,
 
-                managerName:
-                  cleanedManagerName,
+          managerName: cleanedManagerName,
 
-                email:
-                  cleanedEmail,
+          email: cleanedEmail,
 
-                password:
-                  password ||
-                  undefined,
+          password: password || undefined,
 
-                whatsappCountryCode,
+          whatsappCountryCode,
 
-                whatsappNumber:
-                  cleanedNumber,
-              }),
-          },
-        );
+          whatsappNumber: cleanedNumber,
+        }),
+      });
 
-      const result =
-        (await response.json()) as ApiResponse;
+      const result = (await response.json()) as ApiResponse;
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
+      if (!response.ok || !result.success) {
         throw new Error(
-          result.error ||
-            "Les modifications n’ont pas pu être enregistrées.",
+          result.error || "Les modifications n’ont pas pu être enregistrées.",
         );
       }
 
-      setCompanyName(
-        cleanedCompanyName,
-      );
+      setCompanyName(cleanedCompanyName);
 
-      setManagerName(
-        cleanedManagerName,
-      );
+      setManagerName(cleanedManagerName);
 
-      setEmail(
-        cleanedEmail,
-      );
+      setEmail(cleanedEmail);
 
-      setWhatsappNumber(
-        cleanedNumber,
-      );
+      setWhatsappNumber(cleanedNumber);
 
       setPassword("");
       setConfirmPassword("");
@@ -389,44 +288,29 @@ export default function PartnerForm({
     setChangingStatus(true);
 
     try {
-      const response =
-        await fetch(
-          `/api/admin/partners/${partner.id}`,
-          {
-            method: "PATCH",
+      const response = await fetch(`/api/admin/partners/${partner.id}`, {
+        method: "PATCH",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-            body:
-              JSON.stringify({
-                isActive:
-                  !isActive,
-              }),
-          },
-        );
+        body: JSON.stringify({
+          isActive: !isActive,
+        }),
+      });
 
-      const result =
-        (await response.json()) as ApiResponse;
+      const result = (await response.json()) as ApiResponse;
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
+      if (!response.ok || !result.success) {
         throw new Error(
-          result.error ||
-            "Le statut du partenaire n’a pas pu être modifié.",
+          result.error || "Le statut du partenaire n’a pas pu être modifié.",
         );
       }
 
-      const nextStatus =
-        !isActive;
+      const nextStatus = !isActive;
 
-      setIsActive(
-        nextStatus,
-      );
+      setIsActive(nextStatus);
 
       setSuccessMessage(
         nextStatus
@@ -449,9 +333,7 @@ export default function PartnerForm({
   async function handleDelete() {
     clearMessages();
 
-    if (
-      dossierCount > 0
-    ) {
+    if (dossierCount > 0) {
       setErrorMessage(
         "Ce partenaire possède déjà des dossiers. Désactivez-le afin de conserver l’historique.",
       );
@@ -459,10 +341,9 @@ export default function PartnerForm({
       return;
     }
 
-    const confirmed =
-      window.confirm(
-        `Supprimer définitivement ${partner.companyName} ? Cette action supprimera également son compte de connexion.`,
-      );
+    const confirmed = window.confirm(
+      `Supprimer définitivement ${partner.companyName} ? Cette action supprimera également son compte de connexion.`,
+    );
 
     if (!confirmed) {
       return;
@@ -471,30 +352,19 @@ export default function PartnerForm({
     setDeleting(true);
 
     try {
-      const response =
-        await fetch(
-          `/api/admin/partners/${partner.id}`,
-          {
-            method: "DELETE",
-          },
-        );
+      const response = await fetch(`/api/admin/partners/${partner.id}`, {
+        method: "DELETE",
+      });
 
-      const result =
-        (await response.json()) as ApiResponse;
+      const result = (await response.json()) as ApiResponse;
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
+      if (!response.ok || !result.success) {
         throw new Error(
-          result.error ||
-            "Le partenaire n’a pas pu être supprimé.",
+          result.error || "Le partenaire n’a pas pu être supprimé.",
         );
       }
 
-      router.push(
-        "/admin/partenaires",
-      );
+      router.push("/admin/partenaires");
 
       router.refresh();
     } catch (error) {
@@ -521,15 +391,12 @@ export default function PartnerForm({
           </h2>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Modifiez les informations commerciales,
-            les coordonnées et les accès du partenaire.
+            Modifiez les informations commerciales, les coordonnées et les accès
+            du partenaire.
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 sm:p-8"
-        >
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8">
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label
@@ -544,9 +411,7 @@ export default function PartnerForm({
                 type="text"
                 value={companyName}
                 onChange={(event) => {
-                  setCompanyName(
-                    event.target.value,
-                  );
+                  setCompanyName(event.target.value);
 
                   clearMessages();
                 }}
@@ -568,9 +433,7 @@ export default function PartnerForm({
                 type="text"
                 value={managerName}
                 onChange={(event) => {
-                  setManagerName(
-                    event.target.value,
-                  );
+                  setManagerName(event.target.value);
 
                   clearMessages();
                 }}
@@ -593,9 +456,7 @@ export default function PartnerForm({
               type="email"
               value={email}
               onChange={(event) => {
-                setEmail(
-                  event.target.value,
-                );
+                setEmail(event.target.value);
 
                 clearMessages();
               }}
@@ -605,8 +466,8 @@ export default function PartnerForm({
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-400">
-              Cette adresse sert également
-              d’identifiant de connexion du partenaire.
+              Cette adresse sert également d’identifiant de connexion du
+              partenaire.
             </p>
           </div>
 
@@ -621,8 +482,7 @@ export default function PartnerForm({
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Laissez les deux champs vides
-                si vous ne souhaitez pas modifier
+                Laissez les deux champs vides si vous ne souhaitez pas modifier
                 le mot de passe du partenaire.
               </p>
             </div>
@@ -641,9 +501,7 @@ export default function PartnerForm({
                   type="password"
                   value={password}
                   onChange={(event) => {
-                    setPassword(
-                      event.target.value,
-                    );
+                    setPassword(event.target.value);
 
                     clearMessages();
                   }}
@@ -666,9 +524,7 @@ export default function PartnerForm({
                   type="password"
                   value={confirmPassword}
                   onChange={(event) => {
-                    setConfirmPassword(
-                      event.target.value,
-                    );
+                    setConfirmPassword(event.target.value);
 
                     clearMessages();
                   }}
@@ -693,31 +549,18 @@ export default function PartnerForm({
                 id="whatsappCountryCode"
                 value={whatsappCountryCode}
                 onChange={(event) => {
-                  setWhatsappCountryCode(
-                    event.target.value,
-                  );
+                  setWhatsappCountryCode(event.target.value);
 
                   clearMessages();
                 }}
                 required
                 className={inputClassName}
               >
-                {PARTNER_COUNTRIES.map(
-                  (country) => (
-                    <option
-                      key={
-                        country.code
-                      }
-                      value={
-                        country.code
-                      }
-                    >
-                      {country.flag}{" "}
-                      {country.name} (
-                      {country.code})
-                    </option>
-                  ),
-                )}
+                {PARTNER_COUNTRIES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.flag} {country.name} ({country.code})
+                  </option>
+                ))}
               </select>
 
               <input
@@ -726,9 +569,7 @@ export default function PartnerForm({
                 inputMode="tel"
                 value={whatsappNumber}
                 onChange={(event) => {
-                  setWhatsappNumber(
-                    event.target.value,
-                  );
+                  setWhatsappNumber(event.target.value);
 
                   clearMessages();
                 }}
@@ -739,8 +580,7 @@ export default function PartnerForm({
             </div>
 
             <p className="mt-2 text-xs text-slate-400">
-              Saisissez le numéro sans
-              l’indicatif international.
+              Saisissez le numéro sans l’indicatif international.
             </p>
           </div>
 
@@ -761,19 +601,24 @@ export default function PartnerForm({
             />
 
             <p className="mt-2 text-xs text-slate-400">
-              Le code partenaire est unique
-              et ne peut pas être modifié.
+              Le code partenaire est unique et ne peut pas être modifié.
             </p>
           </div>
 
           {errorMessage && (
-            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+            <div
+              className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
+              role="alert"
+            >
               {errorMessage}
             </div>
           )}
 
           {successMessage && (
-            <div className="mt-6 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]">
+            <div
+              className="mt-6 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]"
+              role="status"
+            >
               {successMessage}
             </div>
           )}
@@ -781,16 +626,10 @@ export default function PartnerForm({
           <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
             <button
               type="submit"
-              disabled={
-                saving ||
-                changingStatus ||
-                deleting
-              }
+              disabled={saving || changingStatus || deleting}
               className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
             >
-              {saving
-                ? "Enregistrement..."
-                : "Enregistrer les modifications"}
+              {saving ? "Enregistrement..." : "Enregistrer les modifications"}
             </button>
           </div>
         </form>
@@ -817,15 +656,11 @@ export default function PartnerForm({
                     : "border-red-200 bg-red-50 text-red-700"
                 }`}
               >
-                {isActive
-                  ? "Actif"
-                  : "Inactif"}
+                {isActive ? "Actif" : "Inactif"}
               </span>
 
               <p className="font-semibold text-[#102B20]">
-                {isActive
-                  ? "Accès autorisé"
-                  : "Accès désactivé"}
+                {isActive ? "Accès autorisé" : "Accès désactivé"}
               </p>
             </div>
 
@@ -838,14 +673,8 @@ export default function PartnerForm({
 
           <button
             type="button"
-            onClick={
-              handleStatusChange
-            }
-            disabled={
-              saving ||
-              changingStatus ||
-              deleting
-            }
+            onClick={handleStatusChange}
+            disabled={saving || changingStatus || deleting}
             className={`inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
               isActive
                 ? "border border-red-200 bg-white text-red-700 hover:bg-red-50"
@@ -887,20 +716,11 @@ export default function PartnerForm({
 
           <button
             type="button"
-            onClick={
-              handleDelete
-            }
-            disabled={
-              dossierCount > 0 ||
-              saving ||
-              changingStatus ||
-              deleting
-            }
+            onClick={handleDelete}
+            disabled={dossierCount > 0 || saving || changingStatus || deleting}
             className="inline-flex min-h-12 items-center justify-center rounded-xl bg-red-600 px-5 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
           >
-            {deleting
-              ? "Suppression..."
-              : "Supprimer définitivement"}
+            {deleting ? "Suppression..." : "Supprimer définitivement"}
           </button>
         </div>
       </section>
@@ -910,10 +730,7 @@ export default function PartnerForm({
           href="/admin/partenaires"
           className="inline-flex items-center gap-2 text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
         >
-          <span aria-hidden="true">
-            ←
-          </span>
-
+          <span aria-hidden="true">←</span>
           Retour aux partenaires
         </Link>
       </div>

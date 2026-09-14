@@ -279,46 +279,161 @@ export default function Dashboard({
         ],
       }));
   } else {
-    headers = [
-      "Modification",
-      "Assureur",
-      "Ancienne tranche",
-      "Durée",
-      "Ancien coût",
-      "Ancien statut",
-      "Auteur",
-    ];
-    rows = data.history
-      .filter(
-        (h) =>
-          (!company || h.insurance_company_id === company) &&
-          (!from || day(h.changed_at) >= from) &&
-          (!to || day(h.changed_at) <= to),
-      )
-      .sort((a, b) => b.changed_at.localeCompare(a.changed_at))
-      .map((h) => ({
+  headers = [
+    "Date",
+    "Origine",
+    "Type",
+    "Assureur",
+    "Dossier",
+    "Description",
+    "Montant",
+    "Auteur",
+  ];
+
+  const historyTypeLabel = {
+    deposit: "Dépôt assureur",
+    payment: "Paiement",
+    policy: "Assurance disponible",
+    rate: "Tarif modifié",
+  } as const;
+
+  rows = data.history
+    .filter(
+      (h) =>
+        (!company ||
+          h.insurance_company_id ===
+            company) &&
+        (!from ||
+          day(h.occurred_at) >=
+            from) &&
+        (!to ||
+          day(h.occurred_at) <=
+            to),
+    )
+    .sort((a, b) =>
+      b.occurred_at.localeCompare(
+        a.occurred_at,
+      ),
+    )
+    .map((h) => {
+      const originLabel =
+        h.origin === "partner"
+          ? `Partenaire — ${
+              h.partner_name ??
+              "Partenaire"
+            }`
+          : h.origin ===
+              "client"
+            ? "Client direct"
+            : "—";
+
+      const amount =
+        h.amount === null
+          ? "—"
+          : `${
+              h.direction === "out"
+                ? "−"
+                : h.direction ===
+                    "in"
+                  ? "+"
+                  : ""
+            }${money(
+              cents(h.amount),
+            )}`;
+
+      const author =
+        h.author_id
+          ? data.authors[
+              h.author_id
+            ] ||
+            "Auteur non disponible"
+          : "Système";
+
+      const typeLabel =
+        h.type === "payment"
+          ? h.origin ===
+            "partner"
+            ? "Paiement partenaire"
+            : "Paiement client"
+          : historyTypeLabel[
+              h.type
+            ];
+
+      return {
         id: h.id,
-        search: `${companyName(h.insurance_company_id)} ${data.authors[h.changed_by ?? ""] ?? ""}`,
+
+        search: [
+          originLabel,
+          h.partner_name ?? "",
+          typeLabel,
+          h.title,
+          h.description,
+          h.request_code ?? "",
+          h.insurance_company_id
+            ? companyName(
+                h.insurance_company_id,
+              )
+            : "",
+          author,
+        ].join(" "),
+
         cells: [
-          new Date(h.changed_at).toLocaleString("fr-FR", { timeZone: "Europe/Istanbul" }),
-          companyName(h.insurance_company_id),
-          `${h.min_age}–${h.max_age} ans`,
-          `${h.duration_years} an(s)`,
-          money(cents(h.real_cost)),
-          badge(h.is_active),
-          data.authors[h.changed_by ?? ""] || "Auteur non disponible",
+          new Date(
+            h.occurred_at,
+          ).toLocaleString(
+            "fr-FR",
+            {
+              timeZone:
+                "Europe/Istanbul",
+            },
+          ),
+
+          originLabel,
+
+          typeLabel,
+
+          h.insurance_company_id
+            ? companyName(
+                h.insurance_company_id,
+              )
+            : "—",
+
+          h.request_code ||
+            "—",
+
+          h.description,
+
+          amount,
+
+          author,
         ],
+
         exportValues: [
-          h.changed_at,
-          companyName(h.insurance_company_id),
-          `${h.min_age}–${h.max_age}`,
-          h.duration_years,
-          h.real_cost,
-          h.is_active,
-          data.authors[h.changed_by ?? ""] || h.changed_by,
+          h.occurred_at,
+
+          originLabel,
+
+          typeLabel,
+
+          h.insurance_company_id
+            ? companyName(
+                h.insurance_company_id,
+              )
+            : "",
+
+          h.request_code ?? "",
+
+          h.description,
+
+          h.amount ?? "",
+
+          h.direction,
+
+          author,
         ],
-      }));
-  }
+      };
+    });
+}
   const filtered = rows.filter((r) =>
       r.search.toLocaleLowerCase("fr").includes(q.trim().toLocaleLowerCase("fr")),
     ),
@@ -630,7 +745,7 @@ export default function Dashboard({
                     {tab === "rates"
                       ? "Une ligne par durée. Les tarifs absents ne sont jamais affichés à zéro."
                       : tab === "history"
-                        ? "Valeurs précédentes conservées lors des modifications."
+                        ? "Journal des dépôts, paiements, polices et modifications tarifaires."
                         : `${filtered.length} ligne(s) · montants en livres turques`}
                   </p>
                 </div>
@@ -774,10 +889,17 @@ export default function Dashboard({
                   Une date ou un coût manquant empêche de présenter un solde complet.
                 </p>
                 <p>
-                  Les tarifs affichent toutes leurs versions, indépendamment de la période.
-                  L’historique est filtré par date de modification. Les exports contiennent toutes
-                  les lignes correspondant à la recherche, pas uniquement la page affichée.
-                </p>
+  L’historique regroupe les dépôts
+  assureurs, les paiements clients directs,
+  les paiements provenant de partenaires,
+  les assurances mises à disposition et
+  les modifications tarifaires. Pour les
+  dossiers partenaires, le nom du partenaire
+  est affiché afin de distinguer clairement
+  leur origine. Les exports contiennent toutes
+  les lignes correspondant à la recherche,
+  pas uniquement la page affichée.
+</p>
               </div>
             </details>
           </>

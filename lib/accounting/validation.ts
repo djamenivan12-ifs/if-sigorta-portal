@@ -12,8 +12,14 @@ export function record(value: unknown): Record<string, unknown> {
     throw new AccountingError("Les données envoyées sont invalides.");
   return value as Record<string, unknown>;
 }
-export function text(value: unknown, label: string, max = 200, optional = false): string | null {
-  if (optional && (value === null || value === undefined || value === "")) return null;
+export function text(
+  value: unknown,
+  label: string,
+  max = 200,
+  optional = false,
+): string | null {
+  if (optional && (value === null || value === undefined || value === ""))
+    return null;
   if (typeof value !== "string" || !value.trim() || value.trim().length > max)
     throw new AccountingError(
       `${label} : saisissez une valeur valide (maximum ${max} caractères).`,
@@ -22,13 +28,17 @@ export function text(value: unknown, label: string, max = 200, optional = false)
 }
 export function uuid(value: unknown) {
   const s = text(value, "Identifiant", 36)!;
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s))
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)
+  )
     throw new AccountingError("Identifiant invalide.");
   return s;
 }
 export function date(value: unknown) {
   if (!isValidDate(value))
-    throw new AccountingError("Saisissez une date réelle au format jour/mois/année.");
+    throw new AccountingError(
+      "Saisissez une date réelle au format jour/mois/année.",
+    );
   return value;
 }
 export function amount(value: unknown, zero = false) {
@@ -39,21 +49,32 @@ export function amount(value: unknown, zero = false) {
     value > 999999999.99 ||
     Math.abs(value * 100 - Math.round(value * 100)) > 0.00001
   )
-    throw new AccountingError("Le montant doit être valide, avec au maximum deux décimales.");
+    throw new AccountingError(
+      "Le montant doit être valide, avec au maximum deux décimales.",
+    );
   return value;
 }
 export function age(value: unknown) {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0 || value > 10000)
+  if (
+    typeof value !== "number" ||
+    !Number.isSafeInteger(value) ||
+    value < 0 ||
+    value > 10000
+  )
     throw new AccountingError("L’âge doit être un entier positif.");
   return value;
 }
 export function bool(value: unknown) {
-  if (typeof value !== "boolean") throw new AccountingError("Le statut est invalide.");
+  if (typeof value !== "boolean")
+    throw new AccountingError("Le statut est invalide.");
   return value;
 }
 export function version(value: unknown) {
   if (typeof value !== "string" || !Number.isFinite(new Date(value).getTime()))
-    throw new AccountingError("Rechargez la page avant de modifier cette ligne.", 409);
+    throw new AccountingError(
+      "Rechargez la page avant de modifier cette ligne.",
+      409,
+    );
   return value;
 }
 export function rateBody(value: unknown) {
@@ -61,7 +82,9 @@ export function rateBody(value: unknown) {
     minAge = age(b.minAge),
     maxAge = age(b.maxAge);
   if (maxAge < minAge)
-    throw new AccountingError("L’âge maximum doit être supérieur ou égal à l’âge minimum.");
+    throw new AccountingError(
+      "L’âge maximum doit être supérieur ou égal à l’âge minimum.",
+    );
   return {
     minAge,
     maxAge,
@@ -91,7 +114,9 @@ export function ratesBody(value: unknown) {
     .sort((a, b) => a.minAge - b.minAge);
   for (let i = 1; i < rows.length; i++)
     if (rows[i].minAge <= rows[i - 1].maxAge)
-      throw new AccountingError("Les tranches d’âge ne doivent pas se chevaucher.");
+      throw new AccountingError(
+        "Les tranches d’âge ne doivent pas se chevaucher.",
+      );
   return {
     insuranceCompanyId: uuid(b.insuranceCompanyId),
     effectiveFrom: date(b.effectiveFrom),
@@ -110,4 +135,20 @@ export function depositBody(value: unknown) {
     note: text(b.note, "Note", 1000, true),
     operationId: uuid(b.operationId),
   };
+}
+
+export function withdrawalBody(value: unknown) {
+  const b = record(value);
+  return {
+    insuranceCompanyId: uuid(b.insuranceCompanyId),
+    amount: amount(b.amount),
+    withdrawalDate: date(b.withdrawalDate),
+    reason: text(b.reason, "Motif", 1000),
+    reference: text(b.reference, "Référence", 200, true),
+    operationId: uuid(b.operationId),
+  };
+}
+export function cancelWithdrawalBody(value: unknown) {
+  const b = record(value);
+  return { id: uuid(b.id), operationId: uuid(b.operationId) };
 }

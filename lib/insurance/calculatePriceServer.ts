@@ -1,33 +1,31 @@
+import {
+  skylineNationalityRate,
+  isCongoBrazzaville,
+  nationalityAmounts,
+} from "./nationalityRates";
+import { day } from "@/lib/accounting/model";
 import { calculateInsuranceAge } from "@/lib/validation/date";
 export { calculateInsuranceAge } from "@/lib/validation/date";
-import {
-  createServiceClient,
-} from "@/lib/supabase/service";
+import { createServiceClient } from "@/lib/supabase/service";
 
-export type InsuranceDuration =
-  | 1
-  | 2;
+export type InsuranceDuration = 1 | 2;
 
 export type ServerPriceCalculationResult = {
   age: number;
   duration: InsuranceDuration;
   price: number | null;
   available: boolean;
+  nationalityRateId?: string;
+  insuranceCompanyId?: string;
 };
 
 type PriceRangeRow = {
   minimum_age: number;
   maximum_age: number;
-  one_year_price:
-    | number
-    | string;
-  two_year_price:
-    | number
-    | string;
+  one_year_price: number | string;
+  two_year_price: number | string;
   is_active: boolean;
 };
-
-
 
 function getPriceFromRange(
   priceRange: PriceRangeRow,
@@ -35,19 +33,10 @@ function getPriceFromRange(
 ): number | null {
   const price =
     duration === 1
-      ? Number(
-          priceRange.one_year_price,
-        )
-      : Number(
-          priceRange.two_year_price,
-        );
+      ? Number(priceRange.one_year_price)
+      : Number(priceRange.two_year_price);
 
-  if (
-    !Number.isFinite(
-      price,
-    ) ||
-    price <= 0
-  ) {
+  if (!Number.isFinite(price) || price <= 0) {
     return null;
   }
 
@@ -58,67 +47,55 @@ export async function calculateInsurancePriceServer(
   birthDate: string,
   duration: InsuranceDuration,
   issueDate: Date = new Date(),
+  nationality: string = "",
 ): Promise<ServerPriceCalculationResult | null> {
-  const age =
-    calculateInsuranceAge(
-      birthDate,
-      issueDate,
-    );
+  const age = calculateInsuranceAge(birthDate, issueDate);
 
-  if (
-    age === null
-  ) {
+  if (age === null) {
     return null;
   }
 
-  const serviceClient =
-    createServiceClient();
+  if (
+    isCongoBrazzaville(nationality) &&
+    day(issueDate.toISOString()) >= "2026-09-17"
+  ) {
+    const rate = await skylineNationalityRate(age, nationality, issueDate);
+    if (!rate) return { age, duration, price: null, available: false };
+    const { price } = nationalityAmounts(rate, duration);
+    return {
+      age,
+      duration,
+      price,
+      available: Number.isFinite(price) && price > 0,
+      nationalityRateId: rate.id,
+      insuranceCompanyId: rate.insurance_company_id,
+    };
+  }
 
-  const {
-    data,
-    error,
-  } =
-    await serviceClient
-      .from(
-        "insurance_price_ranges",
-      )
-      .select(
-        `
+  const serviceClient = createServiceClient();
+
+  const { data, error } = await serviceClient
+    .from("insurance_price_ranges")
+    .select(
+      `
           minimum_age,
           maximum_age,
           one_year_price,
           two_year_price,
           is_active
         `,
-      )
-      .eq(
-        "is_active",
-        true,
-      )
-      .lte(
-        "minimum_age",
-        age,
-      )
-      .gte(
-        "maximum_age",
-        age,
-      )
-      .order(
-        "minimum_age",
-        {
-          ascending:
-            true,
-        },
-      )
-      .limit(
-        1,
-      )
-      .maybeSingle();
+    )
+    .eq("is_active", true)
+    .lte("minimum_age", age)
+    .gte("maximum_age", age)
+    .order("minimum_age", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
   if (!data) {
@@ -130,18 +107,13 @@ export async function calculateInsurancePriceServer(
     };
   }
 
-  const price =
-    getPriceFromRange(
-      data as PriceRangeRow,
-      duration,
-    );
+  const price = getPriceFromRange(data as PriceRangeRow, duration);
 
   return {
     age,
     duration,
     price,
-    available:
-      price !== null,
+    available: price !== null,
   };
 }
 
@@ -155,54 +127,33 @@ export async function calculatePartnerInsurancePriceServer(
     return null;
   }
 
-  const age =
-    calculateInsuranceAge(
-      birthDate,
-      issueDate,
-    );
+  const age = calculateInsuranceAge(birthDate, issueDate);
 
-  if (
-    age === null
-  ) {
+  if (age === null) {
     return null;
   }
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
   /*
    * Le partenaire doit exister et être actif.
    * Un partenaire désactivé ne peut donc pas
    * obtenir de nouveau tarif.
    */
-  const {
-    data: partner,
-    error: partnerError,
-  } =
-    await serviceClient
-      .from(
-        "partners",
-      )
-      .select(
-        `
+  const { data: partner, error: partnerError } = await serviceClient
+    .from("partners")
+    .select(
+      `
           id,
           is_active
         `,
-      )
-      .eq(
-        "id",
-        partnerId,
-      )
-      .eq(
-        "is_active",
-        true,
-      )
-      .maybeSingle();
+    )
+    .eq("id", partnerId)
+    .eq("is_active", true)
+    .maybeSingle();
 
   if (partnerError) {
-    throw new Error(
-      partnerError.message,
-    );
+    throw new Error(partnerError.message);
   }
 
   if (!partner) {
@@ -218,55 +169,29 @@ export async function calculatePartnerInsurancePriceServer(
    * Recherche uniquement dans la grille
    * appartenant à CE partenaire.
    */
-  const {
-    data,
-    error,
-  } =
-    await serviceClient
-      .from(
-        "partner_price_ranges",
-      )
-      .select(
-        `
+  const { data, error } = await serviceClient
+    .from("partner_price_ranges")
+    .select(
+      `
           minimum_age,
           maximum_age,
           one_year_price,
           two_year_price,
           is_active
         `,
-      )
-      .eq(
-        "partner_id",
-        partnerId,
-      )
-      .eq(
-        "is_active",
-        true,
-      )
-      .lte(
-        "minimum_age",
-        age,
-      )
-      .gte(
-        "maximum_age",
-        age,
-      )
-      .order(
-        "minimum_age",
-        {
-          ascending:
-            true,
-        },
-      )
-      .limit(
-        1,
-      )
-      .maybeSingle();
+    )
+    .eq("partner_id", partnerId)
+    .eq("is_active", true)
+    .lte("minimum_age", age)
+    .gte("maximum_age", age)
+    .order("minimum_age", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
-    throw new Error(
-      error.message,
-    );
+    throw new Error(error.message);
   }
 
   if (!data) {
@@ -278,17 +203,12 @@ export async function calculatePartnerInsurancePriceServer(
     };
   }
 
-  const price =
-    getPriceFromRange(
-      data as PriceRangeRow,
-      duration,
-    );
+  const price = getPriceFromRange(data as PriceRangeRow, duration);
 
   return {
     age,
     duration,
     price,
-    available:
-      price !== null,
+    available: price !== null,
   };
 }

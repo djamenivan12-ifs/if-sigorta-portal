@@ -5,12 +5,12 @@ import Link from "next/link";
 
 import { useLanguage } from "@/lib/useLanguage";
 
-import {FormEvent, useEffect, useState} from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { useInsuranceRequest } from "@/context/InsuranceRequestContext";
-import {InsuranceDuration} from "@/lib/insurance/calculatePrice";
+import { InsuranceDuration } from "@/lib/insurance/calculatePrice";
 
 type Language = "fr" | "en" | "tr";
 
@@ -38,8 +38,7 @@ const translations = {
     noKimlikInfo:
       "Aucun numéro de Kimlik ne vous sera demandé. Indiquez la date à laquelle vous souhaitez que votre assurance commence.",
     startDate: "Date souhaitée de début de l’assurance",
-    startDateHelp:
-      "Cette date ne peut pas être antérieure à aujourd’hui.",
+    startDateHelp: "Cette date ne peut pas être antérieure à aujourd’hui.",
 
     passportNumber: "Numéro du passeport",
     passportHelp:
@@ -68,10 +67,8 @@ const translations = {
       "Le numéro de Kimlik doit contenir exactement 11 chiffres.",
     priceUnavailableAlert:
       "Le tarif n’est pas disponible automatiquement pour cet âge.",
-    passportRequired:
-      "Le numéro du passeport est obligatoire.",
-    kimlikExpirationRequired:
-      "La date d’expiration du Kimlik est obligatoire.",
+    passportRequired: "Le numéro du passeport est obligatoire.",
+    kimlikExpirationRequired: "La date d’expiration du Kimlik est obligatoire.",
     startDateRequired:
       "La date souhaitée de début de l’assurance est obligatoire.",
     startDatePast:
@@ -101,8 +98,7 @@ const translations = {
     noKimlikInfo:
       "No Kimlik number is required. Enter the date you want your insurance to start.",
     startDate: "Desired insurance start date",
-    startDateHelp:
-      "This date cannot be earlier than today.",
+    startDateHelp: "This date cannot be earlier than today.",
 
     passportNumber: "Passport number",
     passportHelp:
@@ -127,28 +123,21 @@ const translations = {
     previous: "← Previous",
     next: "Next →",
 
-    kimlikLengthError:
-      "The Kimlik number must contain exactly 11 digits.",
+    kimlikLengthError: "The Kimlik number must contain exactly 11 digits.",
     priceUnavailableAlert:
       "The price is not automatically available for this age.",
-    passportRequired:
-      "Passport number is required.",
-    kimlikExpirationRequired:
-      "Kimlik expiration date is required.",
-    startDateRequired:
-      "The desired insurance start date is required.",
-    startDatePast:
-      "The insurance start date cannot be in the past.",
+    passportRequired: "Passport number is required.",
+    kimlikExpirationRequired: "Kimlik expiration date is required.",
+    startDateRequired: "The desired insurance start date is required.",
+    startDatePast: "The insurance start date cannot be in the past.",
   },
 
   tr: {
     backStep1: "← 1. adıma dön",
     step: "5 adımın 2.'si",
     title: "Kimlik bilgileri ve fiyat",
-    description:
-      "Kimlik bilgilerinizi girin ve sigorta süresini seçin.",
-    missingBirthDate:
-      "Doğum tarihiniz eksik. Girmek için 1. adıma dönün.",
+    description: "Kimlik bilgilerinizi girin ve sigorta süresini seçin.",
+    missingBirthDate: "Doğum tarihiniz eksik. Girmek için 1. adıma dönün.",
 
     hasKimlik: "Kimliğiniz var mı?",
     yes: "Evet",
@@ -164,8 +153,7 @@ const translations = {
     noKimlikInfo:
       "Kimlik numarası istenmeyecek. Sigortanızın başlamasını istediğiniz tarihi belirtin.",
     startDate: "İstenen sigorta başlangıç tarihi",
-    startDateHelp:
-      "Bu tarih bugünden önce olamaz.",
+    startDateHelp: "Bu tarih bugünden önce olamaz.",
 
     passportNumber: "Pasaport numarası",
     passportHelp:
@@ -190,59 +178,40 @@ const translations = {
     previous: "← Önceki",
     next: "İleri →",
 
-    kimlikLengthError:
-      "Kimlik numarası tam olarak 11 rakam olmalıdır.",
-    priceUnavailableAlert:
-      "Bu yaş için fiyat otomatik olarak mevcut değil.",
-    passportRequired:
-      "Pasaport numarası zorunludur.",
-    kimlikExpirationRequired:
-      "Kimlik son geçerlilik tarihi zorunludur.",
-    startDateRequired:
-      "İstenen sigorta başlangıç tarihi zorunludur.",
-    startDatePast:
-      "Sigorta başlangıç tarihi geçmişte olamaz.",
+    kimlikLengthError: "Kimlik numarası tam olarak 11 rakam olmalıdır.",
+    priceUnavailableAlert: "Bu yaş için fiyat otomatik olarak mevcut değil.",
+    passportRequired: "Pasaport numarası zorunludur.",
+    kimlikExpirationRequired: "Kimlik son geçerlilik tarihi zorunludur.",
+    startDateRequired: "İstenen sigorta başlangıç tarihi zorunludur.",
+    startDatePast: "Sigorta başlangıç tarihi geçmişte olamaz.",
   },
 };
 
 export default function Etape2Page() {
   const router = useRouter();
 
-  const {
-    requestData,
-    updateRequestData,
-  } = useInsuranceRequest();
+  const { requestData, updateRequestData } = useInsuranceRequest();
 
-  const [language, setLanguage] =
-    useLanguage();
+  const [language, setLanguage] = useLanguage();
 
-  const [kimlikError, setKimlikError] =
-    useState("");
-
-
+  const [kimlikError, setKimlikError] = useState("");
 
   const t = translations[language];
 
-  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
+  function changeLanguage(nextLanguage: Language) {
+    setLanguage(nextLanguage);
+  }
 
-  const today = new Date()
-    .toISOString()
-    .split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
 
-  const [priceResult, setPriceResult] =
-    useState<{
-      age: number;
-      duration: InsuranceDuration;
-      price: number | null;
-      available: boolean;
-    } | null>(null);
+  const [priceResult, setPriceResult] = useState<{
+    age: number;
+    duration: InsuranceDuration;
+    price: number | null;
+    available: boolean;
+  } | null>(null);
 
-  const [priceLoading, setPriceLoading] =
-    useState(false);
-
-
-
-
+  const [priceLoading, setPriceLoading] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -250,36 +219,54 @@ export default function Etape2Page() {
       if (!requestData.birthDate) return;
       setPriceLoading(true);
       try {
-        const response = await fetch("/api/insurance/price", {method:"POST", signal:controller.signal, headers:{"Content-Type":"application/json"}, body:JSON.stringify({birthDate:requestData.birthDate,duration:requestData.duration})});
+        const response = await fetch("/api/insurance/price", {
+          method: "POST",
+          signal: controller.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            birthDate: requestData.birthDate,
+            duration: requestData.duration,
+            nationality: requestData.nationality,
+          }),
+        });
         const result = await response.json();
         if (!response.ok) throw new Error("Tarif indisponible");
         if (controller.signal.aborted) return;
-        const next = {age:Number(result.age),duration:requestData.duration,price:typeof result.price === "number" ? result.price : null,available:Boolean(result.available)};
+        const next = {
+          age: Number(result.age),
+          duration: requestData.duration,
+          price: typeof result.price === "number" ? result.price : null,
+          available: Boolean(result.available),
+        };
         setPriceResult(next);
-        updateRequestData({calculatedAge:next.age,calculatedPrice:next.price});
+        updateRequestData({
+          calculatedAge: next.age,
+          calculatedPrice: next.price,
+        });
       } catch {
         if (controller.signal.aborted) return;
         setPriceResult(null);
-        updateRequestData({calculatedAge:null,calculatedPrice:null});
-      } finally { if(!controller.signal.aborted) setPriceLoading(false); }
+        updateRequestData({ calculatedAge: null, calculatedPrice: null });
+      } finally {
+        if (!controller.signal.aborted) setPriceLoading(false);
+      }
     }
     void load();
     return () => controller.abort();
-  }, [requestData.birthDate,requestData.duration,updateRequestData]);
+  }, [
+    requestData.birthDate,
+    requestData.duration,
+    requestData.nationality,
+    updateRequestData,
+  ]);
 
-  function changeDuration(
-    duration: InsuranceDuration,
-  ) {
+  function changeDuration(duration: InsuranceDuration) {
     updateRequestData({
       duration,
     });
-
-
   }
 
-  function changeKimlikStatus(
-    hasKimlik: boolean,
-  ) {
+  function changeKimlikStatus(hasKimlik: boolean) {
     setKimlikError("");
 
     if (hasKimlik) {
@@ -300,176 +287,107 @@ export default function Etape2Page() {
     });
   }
 
-  function handleKimlikChange(
-    value: string,
-  ) {
-    const cleanedValue = value
-      .replace(/\D/g, "")
-      .slice(0, 11);
+  function handleKimlikChange(value: string) {
+    const cleanedValue = value.replace(/\D/g, "").slice(0, 11);
 
     updateRequestData({
-      kimlikNumber:
-        cleanedValue,
+      kimlikNumber: cleanedValue,
     });
 
-    if (
-      cleanedValue.length > 0 &&
-      cleanedValue.length !== 11
-    ) {
-      setKimlikError(
-        t.kimlikLengthError,
-      );
+    if (cleanedValue.length > 0 && cleanedValue.length !== 11) {
+      setKimlikError(t.kimlikLengthError);
     } else {
       setKimlikError("");
     }
   }
 
-  function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (priceLoading || priceResult?.duration !== requestData.duration ||
+    if (
+      priceLoading ||
+      priceResult?.duration !== requestData.duration ||
       !priceResult ||
       !priceResult.available ||
       priceResult.price === null
     ) {
-      alert(
-        t.priceUnavailableAlert,
-      );
+      alert(t.priceUnavailableAlert);
 
       return;
     }
 
-    const formData =
-      new FormData(
-        event.currentTarget,
-      );
+    const formData = new FormData(event.currentTarget);
 
     const passportNumber =
-      formData
-        .get("passportNumber")
-        ?.toString()
-        .trim()
-        .toUpperCase() ?? "";
+      formData.get("passportNumber")?.toString().trim().toUpperCase() ?? "";
 
     const kimlikExpirationDate =
-      formData
-        .get(
-          "kimlikExpirationDate",
-        )
-        ?.toString() ?? "";
+      formData.get("kimlikExpirationDate")?.toString() ?? "";
 
     const insuranceStartDate =
-      formData
-        .get(
-          "insuranceStartDate",
-        )
-        ?.toString() ?? "";
+      formData.get("insuranceStartDate")?.toString() ?? "";
 
     if (!passportNumber) {
-      alert(
-        t.passportRequired,
-      );
+      alert(t.passportRequired);
 
       return;
     }
 
-    if (
-      requestData.hasKimlik
-    ) {
-      if (
-        !/^\d{11}$/.test(
-          requestData.kimlikNumber,
-        )
-      ) {
-        setKimlikError(
-          t.kimlikLengthError,
-        );
+    if (requestData.hasKimlik) {
+      if (!/^\d{11}$/.test(requestData.kimlikNumber)) {
+        setKimlikError(t.kimlikLengthError);
 
         return;
       }
 
-      if (
-        !kimlikExpirationDate
-      ) {
-        alert(
-          t.kimlikExpirationRequired,
-        );
+      if (!kimlikExpirationDate) {
+        alert(t.kimlikExpirationRequired);
 
         return;
       }
     }
 
-    if (
-      !requestData.hasKimlik &&
-      !insuranceStartDate
-    ) {
-      alert(
-        t.startDateRequired,
-      );
+    if (!requestData.hasKimlik && !insuranceStartDate) {
+      alert(t.startDateRequired);
 
       return;
     }
 
-    if (
-      !requestData.hasKimlik &&
-      insuranceStartDate < today
-    ) {
-      alert(
-        t.startDatePast,
-      );
+    if (!requestData.hasKimlik && insuranceStartDate < today) {
+      alert(t.startDatePast);
 
       return;
     }
 
     updateRequestData({
-      hasKimlik:
-        requestData.hasKimlik,
+      hasKimlik: requestData.hasKimlik,
 
-      kimlikNumber:
-        requestData.hasKimlik
-          ? requestData.kimlikNumber
-          : "",
+      kimlikNumber: requestData.hasKimlik ? requestData.kimlikNumber : "",
 
-      kimlikExpirationDate:
-        requestData.hasKimlik
-          ? kimlikExpirationDate
-          : "",
+      kimlikExpirationDate: requestData.hasKimlik ? kimlikExpirationDate : "",
 
-      insuranceStartDate:
-        requestData.hasKimlik
-          ? ""
-          : insuranceStartDate,
+      insuranceStartDate: requestData.hasKimlik ? "" : insuranceStartDate,
 
       passportNumber,
 
-      duration:
-        requestData.duration,
+      duration: requestData.duration,
 
-      calculatedAge:
-        priceResult.age,
+      calculatedAge: priceResult.age,
 
-      calculatedPrice:
-        priceResult.price,
+      calculatedPrice: priceResult.price,
     });
 
-    router.push(
-      "/demande/etape-3",
-    );
+    router.push("/demande/etape-3");
   }
 
   const inputClassName =
     "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
 
-  const kimlikInputClassName =
-    kimlikError
-      ? "w-full rounded-2xl border border-red-400 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-100"
-      : inputClassName;
+  const kimlikInputClassName = kimlikError
+    ? "w-full rounded-2xl border border-red-400 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-100"
+    : inputClassName;
 
-  const fieldLabelClassName =
-    "mb-2 block text-sm font-semibold text-slate-700";
+  const fieldLabelClassName = "mb-2 block text-sm font-semibold text-slate-700";
 
   const formEyebrow =
     language === "fr"
@@ -517,7 +435,10 @@ export default function Etape2Page() {
             className="flex shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
+            <Image
+              width={2938}
+              height={2463}
+              sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto max-w-[170px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
@@ -526,19 +447,11 @@ export default function Etape2Page() {
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
-              {(
-                [
-                  "fr",
-                  "en",
-                  "tr",
-                ] as Language[]
-              ).map((item) => (
+              {(["fr", "en", "tr"] as Language[]).map((item) => (
                 <button
                   key={item}
                   type="button"
-                  onClick={() =>
-                    changeLanguage(item)
-                  }
+                  onClick={() => changeLanguage(item)}
                   className={[
                     "rounded-lg px-2 py-1.5 text-[10px] font-black uppercase transition sm:px-3 sm:text-[11px]",
                     language === item
@@ -553,11 +466,7 @@ export default function Etape2Page() {
 
             <button
               type="button"
-              onClick={() =>
-                router.push(
-                  "/demande/etape-1",
-                )
-              }
+              onClick={() => router.push("/demande/etape-1")}
               className="hidden text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:block"
             >
               {t.backStep1}
@@ -662,11 +571,7 @@ export default function Etape2Page() {
                 <div className="grid min-w-0 gap-3 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      changeKimlikStatus(
-                        true,
-                      )
-                    }
+                    onClick={() => changeKimlikStatus(true)}
                     className={`rounded-2xl border px-5 py-5 text-left transition ${
                       requestData.hasKimlik
                         ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
@@ -684,11 +589,7 @@ export default function Etape2Page() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      changeKimlikStatus(
-                        false,
-                      )
-                    }
+                    onClick={() => changeKimlikStatus(false)}
                     className={`rounded-2xl border px-5 py-5 text-left transition ${
                       !requestData.hasKimlik
                         ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
@@ -729,19 +630,11 @@ export default function Etape2Page() {
                           maxLength={11}
                           value={requestData.kimlikNumber}
                           onChange={(event) =>
-                            handleKimlikChange(
-                              event.target.value,
-                            )
+                            handleKimlikChange(event.target.value)
                           }
-                          aria-invalid={
-                            kimlikError
-                              ? "true"
-                              : "false"
-                          }
+                          aria-invalid={kimlikError ? "true" : "false"}
                           aria-describedby={
-                            kimlikError
-                              ? "kimlik-error"
-                              : "kimlik-help"
+                            kimlikError ? "kimlik-error" : "kimlik-help"
                           }
                           required
                           className={kimlikInputClassName}
@@ -764,8 +657,7 @@ export default function Etape2Page() {
                         )}
 
                         <p className="mt-1 text-xs text-slate-400">
-                          {requestData.kimlikNumber.length}/11{" "}
-                          {t.digits}
+                          {requestData.kimlikNumber.length}/11 {t.digits}
                         </p>
                       </div>
 
@@ -781,9 +673,7 @@ export default function Etape2Page() {
                           id="kimlikExpirationDate"
                           name="kimlikExpirationDate"
                           type="date"
-                          defaultValue={
-                            requestData.kimlikExpirationDate
-                          }
+                          defaultValue={requestData.kimlikExpirationDate}
                           required
                           className={inputClassName}
                         />
@@ -808,9 +698,7 @@ export default function Etape2Page() {
                           name="insuranceStartDate"
                           type="date"
                           min={today}
-                          defaultValue={
-                            requestData.insuranceStartDate
-                          }
+                          defaultValue={requestData.insuranceStartDate}
                           required
                           className={inputClassName}
                         />
@@ -862,12 +750,9 @@ export default function Etape2Page() {
                 <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      changeDuration(1)
-                    }
+                    onClick={() => changeDuration(1)}
                     className={`rounded-2xl border px-5 py-5 text-left transition ${
-                      requestData.duration ===
-                      1
+                      requestData.duration === 1
                         ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
                         : "border-slate-200 bg-white hover:border-slate-300"
                     }`}
@@ -883,12 +768,9 @@ export default function Etape2Page() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      changeDuration(2)
-                    }
+                    onClick={() => changeDuration(2)}
                     className={`rounded-2xl border px-5 py-5 text-left transition ${
-                      requestData.duration ===
-                      2
+                      requestData.duration === 2
                         ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
                         : "border-slate-200 bg-white hover:border-slate-300"
                     }`}
@@ -923,10 +805,7 @@ export default function Etape2Page() {
 
                         <p className="mt-2 text-2xl font-semibold text-slate-900">
                           {priceResult.age}{" "}
-                          {priceResult.age >
-                          1
-                            ? t.years
-                            : t.year}
+                          {priceResult.age > 1 ? t.years : t.year}
                         </p>
                       </div>
 
@@ -937,18 +816,13 @@ export default function Etape2Page() {
 
                         <p className="mt-2 text-2xl font-semibold text-slate-900">
                           {priceResult.duration}{" "}
-                          {priceResult.duration ===
-                          2
-                            ? t.years
-                            : t.year}
+                          {priceResult.duration === 2 ? t.years : t.year}
                         </p>
                       </div>
                     </div>
 
                     <div className="border-t border-[#DCE9DD] bg-white px-5 py-5 sm:px-6">
-                      {priceResult.available &&
-                      priceResult.price !==
-                        null ? (
+                      {priceResult.available && priceResult.price !== null ? (
                         <>
                           <p className="text-sm font-medium text-slate-500">
                             {t.totalPrice}
@@ -956,17 +830,13 @@ export default function Etape2Page() {
 
                           <p className="mt-1 text-4xl font-semibold tracking-[-0.04em] text-[#0B5D3B]">
                             {priceResult.price.toLocaleString(
-                              language ===
-                                "en"
+                              language === "en"
                                 ? "en-US"
-                                : language ===
-                                    "tr"
+                                : language === "tr"
                                   ? "tr-TR"
                                   : "fr-FR",
                             )}{" "}
-                            <span className="text-2xl">
-                              TL
-                            </span>
+                            <span className="text-2xl">TL</span>
                           </p>
                         </>
                       ) : (
@@ -984,11 +854,7 @@ export default function Etape2Page() {
               <div className="flex min-w-0 flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      "/demande/etape-1",
-                    )
-                  }
+                  onClick={() => router.push("/demande/etape-1")}
                   className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
                 >
                   {t.previous}
@@ -1000,8 +866,7 @@ export default function Etape2Page() {
                     priceLoading ||
                     !priceResult ||
                     !priceResult.available ||
-                    priceResult.price ===
-                      null
+                    priceResult.price === null
                   }
                   className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                 >

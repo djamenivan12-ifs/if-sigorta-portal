@@ -214,3 +214,13 @@ test("accounting loader: every table is read past a simulated API row cap", asyn
   assert.equal(r.deposits.length, 2);
   assert.ok(Object.values(hits).every((n) => n === 3));
 });
+
+test("withdrawals reduce only the selected insurer balance and preserve historical cancellations",()=>{
+  const data = empty(); data.loadedAt="2026-09-20";
+  data.deposits=[{id:"d",insurance_company_id:"a",amount:1000,deposit_date:"2026-09-01"}];
+  data.requests=[req("r",510)];
+  data.withdrawals=[{id:"w",insurance_company_id:"a",amount:100.25,withdrawal_date:"2026-09-17",cancelled_at:"2026-09-19T12:00:00Z"},{id:"other",insurance_company_id:"b",amount:10,withdrawal_date:"2026-09-17",cancelled_at:null}];
+  assert.equal(accounting(data,{...all,company:"a",to:"2026-09-18"}).balance,38975);
+  assert.equal(accounting(data,{...all,company:"a"}).balance,49000);
+  assert.equal(accounting(data,{...all,company:"a",to:"2026-09-16"}).balance,49000);
+});

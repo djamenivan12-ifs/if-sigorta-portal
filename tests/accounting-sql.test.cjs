@@ -3,17 +3,25 @@ const { btree_gist } = require("@electric-sql/pglite/contrib/btree_gist");
 const fs = require("fs"),
   assert = require("node:assert/strict");
 const schema = JSON.parse(
-  fs.readFileSync(require("path").join(__dirname, "fixtures/accounting-schema.json"), "utf8"),
+  fs.readFileSync(
+    require("path").join(__dirname, "fixtures/accounting-schema.json"),
+    "utf8",
+  ),
 );
 const migration = fs.readFileSync(
-  require("path").join(__dirname, "../supabase/migrations/202609130001_accounting_integrity.sql"),
+  require("path").join(
+    __dirname,
+    "../supabase/migrations/202609130001_accounting_integrity.sql",
+  ),
   "utf8",
 );
 const results = [];
 const actor = "10000000-0000-4000-8000-000000000001";
 async function setup() {
   const db = new PGlite({ extensions: { btree_gist } });
-  await db.exec("create role anon; create role authenticated; create role service_role;");
+  await db.exec(
+    "create role anon; create role authenticated; create role service_role;",
+  );
   for (const [table, def] of Object.entries(schema)) {
     const cols = Object.entries(def.properties).map(
       ([name, v]) =>
@@ -26,14 +34,27 @@ async function setup() {
 (async () => {
   const db = await setup();
   await db.exec(migration);
-  results.push("Migration complète exécutée sur PostgreSQL isolé avec les types du schéma distant");
+  await db.exec(
+    "insert into insurance_companies(name,is_active) values('Skyline Sigorta',true)",
+  );
+  await db.exec(
+    fs.readFileSync(
+      require("path").join(
+        __dirname,
+        "../supabase/migrations/202609170001_withdrawals_skyline.sql",
+      ),
+      "utf8",
+    ),
+  );
+  results.push(
+    "Migration complète exécutée sur PostgreSQL isolé avec les types du schéma distant",
+  );
   const call = async (action, payload) =>
     (
-      await db.query("select public.accounting_write($1,$2::jsonb,$3::uuid) as result", [
-        action,
-        JSON.stringify(payload),
-        actor,
-      ])
+      await db.query(
+        "select public.accounting_write($1,$2::jsonb,$3::uuid) as result",
+        [action, JSON.stringify(payload), actor],
+      )
     ).rows[0].result;
   const c = await call("create_company", {
     name: "Test",
@@ -52,11 +73,20 @@ async function setup() {
     d2 = await call("deposit", base);
   assert.equal(d1.deposit.id, d2.deposit.id);
   assert.equal(
-    (await db.query("select count(*)::int as n from insurance_company_deposits")).rows[0].n,
+    (
+      await db.query(
+        "select count(*)::int as n from insurance_company_deposits",
+      )
+    ).rows[0].n,
     1,
   );
-  results.push("Répéter un dépôt restitue le même identifiant sans seconde insertion");
-  await assert.rejects(call("deposit", { ...base, amount: 200 }), (e) => e.code === "40001");
+  results.push(
+    "Répéter un dépôt restitue le même identifiant sans seconde insertion",
+  );
+  await assert.rejects(
+    call("deposit", { ...base, amount: 200 }),
+    (e) => e.code === "40001",
+  );
   results.push("Réutiliser une opération avec un autre montant est refusé");
   await call("create_rates", {
     insuranceCompanyId: id,
@@ -77,10 +107,13 @@ async function setup() {
     (e) => e.code === "23P01",
   );
   assert.equal(
-    (await db.query("select count(*)::int as n from insurance_cost_rates")).rows[0].n,
+    (await db.query("select count(*)::int as n from insurance_cost_rates"))
+      .rows[0].n,
     2,
   );
-  results.push("Chevauchement refusé et tout le lot annulé, y compris les lignes précédentes");
+  results.push(
+    "Chevauchement refusé et tout le lot annulé, y compris les lignes précédentes",
+  );
   let rate = (
     await db.query(
       "select *,updated_at::text as version from insurance_cost_rates where duration_years=1",
@@ -103,7 +136,11 @@ async function setup() {
   results.push("Modification et désactivation historisées avec le bon auteur");
   await assert.rejects(call("update_rate", update), (e) => e.code === "40001");
   assert.equal(
-    (await db.query("select count(*)::int as n from insurance_cost_rate_history")).rows[0].n,
+    (
+      await db.query(
+        "select count(*)::int as n from insurance_cost_rate_history",
+      )
+    ).rows[0].n,
     1,
   );
   results.push("Version périmée refusée sans fausse ligne d’historique");
@@ -121,18 +158,24 @@ async function setup() {
     [id, "2026-09-13"],
   );
   rate = (
-    await db.query("select *,updated_at::text as version from insurance_cost_rates where id=$1", [
-      rate.id,
-    ])
+    await db.query(
+      "select *,updated_at::text as version from insurance_cost_rates where id=$1",
+      [rate.id],
+    )
   ).rows[0];
-  await call("update_rate", { ...update, version: rate.version, isActive: true });
+  await call("update_rate", {
+    ...update,
+    version: rate.version,
+    isActive: true,
+  });
   const other = (
     await db.query(
       "select *,updated_at::text as version from insurance_cost_rates where min_age=21",
     )
   ).rows[0];
-  const before = (await db.query("select count(*)::int as n from insurance_cost_rate_history"))
-    .rows[0].n;
+  const before = (
+    await db.query("select count(*)::int as n from insurance_cost_rate_history")
+  ).rows[0].n;
   await assert.rejects(
     call("update_rate", {
       id: other.id,
@@ -146,10 +189,16 @@ async function setup() {
     (e) => e.code === "23P01",
   );
   assert.equal(
-    (await db.query("select count(*)::int as n from insurance_cost_rate_history")).rows[0].n,
+    (
+      await db.query(
+        "select count(*)::int as n from insurance_cost_rate_history",
+      )
+    ).rows[0].n,
     before,
   );
-  results.push("Réactivation avec chevauchement refusée et historique annulé atomiquement");
+  results.push(
+    "Réactivation avec chevauchement refusée et historique annulé atomiquement",
+  );
   await db.exec("set role anon");
   await assert.rejects(
     call("deposit", { ...base, operationId: crypto.randomUUID() }),
@@ -158,10 +207,155 @@ async function setup() {
   await db.exec("reset role");
   results.push("RPC inaccessible au rôle anonyme");
   await assert.rejects(
-    call("create_company", { name: " test ", isActive: true, operationId: crypto.randomUUID() }),
+    call("create_company", {
+      name: " test ",
+      isActive: true,
+      operationId: crypto.randomUUID(),
+    }),
     (e) => e.code === "23505",
   );
   results.push("Noms assureurs normalisés protégés en base");
+
+  const withdrawal = {
+    insuranceCompanyId: id,
+    amount: 30.25,
+    withdrawalDate: "2026-09-17",
+    reason: "Retrait de test",
+    operationId: crypto.randomUUID(),
+  };
+  const w = await call("withdrawal", withdrawal);
+  assert.equal(
+    (await call("withdrawal", withdrawal)).withdrawal.id,
+    w.withdrawal.id,
+  );
+  await assert.rejects(
+    call("withdrawal", {
+      ...withdrawal,
+      amount: 90,
+      operationId: crypto.randomUUID(),
+    }),
+    (e) => e.code === "P0001",
+  );
+  const cancelled = await call("cancel_withdrawal", {
+    id: w.withdrawal.id,
+    operationId: crypto.randomUUID(),
+  });
+  assert.ok(cancelled.withdrawal.cancelled_at);
+  assert.equal(
+    (
+      await call("cancel_withdrawal", {
+        id: w.withdrawal.id,
+        operationId: crypto.randomUUID(),
+      })
+    ).withdrawal.cancelled_at,
+    cancelled.withdrawal.cancelled_at,
+  );
+  await assert.rejects(
+    call("withdrawal", {
+      ...withdrawal,
+      withdrawalDate: "2999-01-01",
+      operationId: crypto.randomUUID(),
+    }),
+    (e) => e.code === "22023",
+  );
+  const grid = (
+    await db.query("select * from insurance_nationality_rates order by min_age")
+  ).rows;
+  assert.equal(grid.length, 5);
+  assert.equal(Number(grid[4].one_year_cost), 722.5);
+  assert.equal(Number(grid[4].one_year_price), 850);
+  await assert.rejects(
+    db.exec("update insurance_nationality_rates set one_year_cost=999"),
+    (e) => e.code === "22023",
+  );
+
+  const rateCG = grid[2];
+  const fields = {};
+  for (const name of schema.insurance_requests.required) {
+    const kind = schema.insurance_requests.properties[name].format;
+    fields[name] =
+      kind === "uuid"
+        ? crypto.randomUUID()
+        : kind === "boolean"
+          ? false
+          : kind === "integer"
+            ? 1
+            : kind === "numeric"
+              ? 650
+              : kind === "timestamp with time zone"
+                ? "2026-09-17T12:00:00Z"
+                : "test";
+  }
+  Object.assign(fields, {
+    insurance_company_id: rateCG.insurance_company_id,
+    calculated_age: 30,
+    insurance_duration_years: 1,
+    actual_insurance_cost: 510,
+    status: "policy_preparation",
+    insurance_company_selected_at: "2026-09-17T12:00:00Z",
+    nationality_rate_id: rateCG.id,
+    quote_nationality: "Congo",
+  });
+  const names = Object.keys(fields),
+    params = Object.values(fields);
+  await db.query(
+    "insert into insurance_requests(" +
+      names.join(",") +
+      ") values(" +
+      names.map((_, i) => "$" + (i + 1)).join(",") +
+      ")",
+    params,
+  );
+  await assert.rejects(
+    db.query(
+      "update insurance_requests set actual_insurance_cost=650 where id=$1",
+      [fields.id],
+    ),
+    (e) => e.code === "22023",
+  );
+  await assert.rejects(
+    db.query("update insurance_requests set calculated_price=510 where id=$1", [
+      fields.id,
+    ]),
+    (e) => e.code === "22023",
+  );
+  await call("deposit", {
+    insuranceCompanyId: rateCG.insurance_company_id,
+    amount: 600,
+    depositDate: "2026-09-17",
+    operationId: crypto.randomUUID(),
+  });
+  await assert.rejects(
+    call("withdrawal", {
+      ...withdrawal,
+      insuranceCompanyId: rateCG.insurance_company_id,
+      amount: 100,
+      operationId: crypto.randomUUID(),
+    }),
+    (e) => e.code === "P0001",
+  );
+  await call("withdrawal", {
+    ...withdrawal,
+    insuranceCompanyId: rateCG.insurance_company_id,
+    amount: 90,
+    operationId: crypto.randomUUID(),
+  });
+  results.push(
+    "Coût 510 et prix client 650 vérifiés indépendamment en base, réservations de police prises en compte dans le disponible",
+  );
+  await db.exec("set role anon");
+  await assert.rejects(
+    db.exec("select * from insurance_company_withdrawals"),
+    (e) => e.code === "42501",
+  );
+  await assert.rejects(
+    call("withdrawal", { ...withdrawal, operationId: crypto.randomUUID() }),
+    (e) => e.code === "42501",
+  );
+  await db.exec("reset role");
+  results.push(
+    "Retraits et annulations idempotents, dépassement et dates futures refusés, grille Skyline exacte et immuable, accès anonyme interdit",
+  );
   await db.close();
   const bad = await setup();
   await bad.exec(

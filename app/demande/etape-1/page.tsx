@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { useLanguage } from "@/lib/useLanguage";
 
-import {FormEvent} from "react";
+import { FormEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -13,10 +13,7 @@ import AddressSelector from "@/components/AddressSelector";
 import PhoneInput from "@/components/PhoneInput";
 import { useInsuranceRequest } from "@/context/InsuranceRequestContext";
 
-type Language =
-  | "fr"
-  | "en"
-  | "tr";
+type Language = "fr" | "en" | "tr";
 
 const translations = {
   fr: {
@@ -39,8 +36,7 @@ const translations = {
     cancel: "Annuler",
     next: "Suivant →",
 
-    genderError:
-      "Veuillez sélectionner le sexe.",
+    genderError: "Veuillez sélectionner le sexe.",
     requiredError:
       "Veuillez remplir toutes les informations personnelles obligatoires.",
   },
@@ -65,18 +61,15 @@ const translations = {
     cancel: "Cancel",
     next: "Next →",
 
-    genderError:
-      "Please select your gender.",
-    requiredError:
-      "Please complete all required personal information.",
+    genderError: "Please select your gender.",
+    requiredError: "Please complete all required personal information.",
   },
 
   tr: {
     backHome: "← Ana sayfaya dön",
     step: "5 adımın 1.'si",
     title: "Kişisel bilgiler",
-    description:
-      "Bilgilerinizi resmi belgelerinizde göründüğü şekilde girin.",
+    description: "Bilgilerinizi resmi belgelerinizde göründüğü şekilde girin.",
 
     lastName: "Soyad",
     firstName: "Ad",
@@ -91,57 +84,101 @@ const translations = {
     cancel: "İptal",
     next: "İleri →",
 
-    genderError:
-      "Lütfen cinsiyet seçin.",
-    requiredError:
-      "Lütfen zorunlu kişisel bilgilerin tamamını doldurun.",
+    genderError: "Lütfen cinsiyet seçin.",
+    requiredError: "Lütfen zorunlu kişisel bilgilerin tamamını doldurun.",
   },
 };
 
-function toUpperCaseValue(
-  value: string,
-): string {
-  return value.toLocaleUpperCase(
-    "tr-TR",
-  );
+function toUpperCaseValue(value: string): string {
+  return value.toLocaleUpperCase("tr-TR");
 }
 const countries = [
-  { value: "Afghanistan", fr: "Afghanistan", en: "Afghanistan", tr: "Afganistan" },
-  { value: "Afrique du Sud", fr: "Afrique du Sud", en: "South Africa", tr: "Güney Afrika" },
+  {
+    value: "Afghanistan",
+    fr: "Afghanistan",
+    en: "Afghanistan",
+    tr: "Afganistan",
+  },
+  {
+    value: "Afrique du Sud",
+    fr: "Afrique du Sud",
+    en: "South Africa",
+    tr: "Güney Afrika",
+  },
   { value: "Albanie", fr: "Albanie", en: "Albania", tr: "Arnavutluk" },
   { value: "Algérie", fr: "Algérie", en: "Algeria", tr: "Cezayir" },
   { value: "Allemagne", fr: "Allemagne", en: "Germany", tr: "Almanya" },
   { value: "Angola", fr: "Angola", en: "Angola", tr: "Angola" },
-  { value: "Arabie saoudite", fr: "Arabie saoudite", en: "Saudi Arabia", tr: "Suudi Arabistan" },
+  {
+    value: "Arabie saoudite",
+    fr: "Arabie saoudite",
+    en: "Saudi Arabia",
+    tr: "Suudi Arabistan",
+  },
   { value: "Argentine", fr: "Argentine", en: "Argentina", tr: "Arjantin" },
   { value: "Arménie", fr: "Arménie", en: "Armenia", tr: "Ermenistan" },
   { value: "Australie", fr: "Australie", en: "Australia", tr: "Avustralya" },
   { value: "Autriche", fr: "Autriche", en: "Austria", tr: "Avusturya" },
-  { value: "Azerbaïdjan", fr: "Azerbaïdjan", en: "Azerbaijan", tr: "Azerbaycan" },
+  {
+    value: "Azerbaïdjan",
+    fr: "Azerbaïdjan",
+    en: "Azerbaijan",
+    tr: "Azerbaycan",
+  },
   { value: "Bahreïn", fr: "Bahreïn", en: "Bahrain", tr: "Bahreyn" },
   { value: "Bangladesh", fr: "Bangladesh", en: "Bangladesh", tr: "Bangladeş" },
   { value: "Belgique", fr: "Belgique", en: "Belgium", tr: "Belçika" },
   { value: "Bénin", fr: "Bénin", en: "Benin", tr: "Benin" },
   { value: "Bolivie", fr: "Bolivie", en: "Bolivia", tr: "Bolivya" },
-  { value: "Bosnie-Herzégovine", fr: "Bosnie-Herzégovine", en: "Bosnia and Herzegovina", tr: "Bosna-Hersek" },
+  {
+    value: "Bosnie-Herzégovine",
+    fr: "Bosnie-Herzégovine",
+    en: "Bosnia and Herzegovina",
+    tr: "Bosna-Hersek",
+  },
   { value: "Botswana", fr: "Botswana", en: "Botswana", tr: "Botsvana" },
   { value: "Brésil", fr: "Brésil", en: "Brazil", tr: "Brezilya" },
   { value: "Bulgarie", fr: "Bulgarie", en: "Bulgaria", tr: "Bulgaristan" },
-  { value: "Burkina Faso", fr: "Burkina Faso", en: "Burkina Faso", tr: "Burkina Faso" },
+  {
+    value: "Burkina Faso",
+    fr: "Burkina Faso",
+    en: "Burkina Faso",
+    tr: "Burkina Faso",
+  },
   { value: "Burundi", fr: "Burundi", en: "Burundi", tr: "Burundi" },
 
   { value: "Cameroun", fr: "Cameroun", en: "Cameroon", tr: "Kamerun" },
   { value: "Canada", fr: "Canada", en: "Canada", tr: "Kanada" },
-  { value: "Cap-Vert", fr: "Cap-Vert", en: "Cape Verde", tr: "Yeşil Burun Adaları" },
+  {
+    value: "Cap-Vert",
+    fr: "Cap-Vert",
+    en: "Cape Verde",
+    tr: "Yeşil Burun Adaları",
+  },
   { value: "Chili", fr: "Chili", en: "Chile", tr: "Şili" },
   { value: "Chine", fr: "Chine", en: "China", tr: "Çin" },
   { value: "Chypre", fr: "Chypre", en: "Cyprus", tr: "Kıbrıs" },
   { value: "Colombie", fr: "Colombie", en: "Colombia", tr: "Kolombiya" },
   { value: "Comores", fr: "Comores", en: "Comoros", tr: "Komorlar" },
-  { value: "Congo", fr: "Congo", en: "Congo", tr: "Kongo" },
-  { value: "Corée du Sud", fr: "Corée du Sud", en: "South Korea", tr: "Güney Kore" },
+  {
+    value: "Congo",
+    fr: "Congo-Brazzaville",
+    en: "Republic of the Congo (Brazzaville)",
+    tr: "Kongo Cumhuriyeti (Brazzaville)",
+  },
+  {
+    value: "Corée du Sud",
+    fr: "Corée du Sud",
+    en: "South Korea",
+    tr: "Güney Kore",
+  },
   { value: "Costa Rica", fr: "Costa Rica", en: "Costa Rica", tr: "Kosta Rika" },
-  { value: "Côte d’Ivoire", fr: "Côte d’Ivoire", en: "Ivory Coast", tr: "Fildişi Sahili" },
+  {
+    value: "Côte d’Ivoire",
+    fr: "Côte d’Ivoire",
+    en: "Ivory Coast",
+    tr: "Fildişi Sahili",
+  },
   { value: "Croatie", fr: "Croatie", en: "Croatia", tr: "Hırvatistan" },
   { value: "Cuba", fr: "Cuba", en: "Cuba", tr: "Küba" },
 
@@ -149,13 +186,23 @@ const countries = [
   { value: "Djibouti", fr: "Djibouti", en: "Djibouti", tr: "Cibuti" },
 
   { value: "Égypte", fr: "Égypte", en: "Egypt", tr: "Mısır" },
-  { value: "Émirats arabes unis", fr: "Émirats arabes unis", en: "United Arab Emirates", tr: "Birleşik Arap Emirlikleri" },
+  {
+    value: "Émirats arabes unis",
+    fr: "Émirats arabes unis",
+    en: "United Arab Emirates",
+    tr: "Birleşik Arap Emirlikleri",
+  },
   { value: "Équateur", fr: "Équateur", en: "Ecuador", tr: "Ekvador" },
   { value: "Érythrée", fr: "Érythrée", en: "Eritrea", tr: "Eritre" },
   { value: "Espagne", fr: "Espagne", en: "Spain", tr: "İspanya" },
   { value: "Estonie", fr: "Estonie", en: "Estonia", tr: "Estonya" },
   { value: "Eswatini", fr: "Eswatini", en: "Eswatini", tr: "Esvatini" },
-  { value: "États-Unis", fr: "États-Unis", en: "United States", tr: "Amerika Birleşik Devletleri" },
+  {
+    value: "États-Unis",
+    fr: "États-Unis",
+    en: "United States",
+    tr: "Amerika Birleşik Devletleri",
+  },
   { value: "Éthiopie", fr: "Éthiopie", en: "Ethiopia", tr: "Etiyopya" },
 
   { value: "Finlande", fr: "Finlande", en: "Finland", tr: "Finlandiya" },
@@ -167,8 +214,18 @@ const countries = [
   { value: "Ghana", fr: "Ghana", en: "Ghana", tr: "Gana" },
   { value: "Grèce", fr: "Grèce", en: "Greece", tr: "Yunanistan" },
   { value: "Guinée", fr: "Guinée", en: "Guinea", tr: "Gine" },
-  { value: "Guinée-Bissau", fr: "Guinée-Bissau", en: "Guinea-Bissau", tr: "Gine-Bissau" },
-  { value: "Guinée équatoriale", fr: "Guinée équatoriale", en: "Equatorial Guinea", tr: "Ekvator Ginesi" },
+  {
+    value: "Guinée-Bissau",
+    fr: "Guinée-Bissau",
+    en: "Guinea-Bissau",
+    tr: "Gine-Bissau",
+  },
+  {
+    value: "Guinée équatoriale",
+    fr: "Guinée équatoriale",
+    en: "Equatorial Guinea",
+    tr: "Ekvator Ginesi",
+  },
 
   { value: "Haïti", fr: "Haïti", en: "Haiti", tr: "Haiti" },
   { value: "Hongrie", fr: "Hongrie", en: "Hungary", tr: "Macaristan" },
@@ -187,7 +244,12 @@ const countries = [
 
   { value: "Kazakhstan", fr: "Kazakhstan", en: "Kazakhstan", tr: "Kazakistan" },
   { value: "Kenya", fr: "Kenya", en: "Kenya", tr: "Kenya" },
-  { value: "Kirghizistan", fr: "Kirghizistan", en: "Kyrgyzstan", tr: "Kırgızistan" },
+  {
+    value: "Kirghizistan",
+    fr: "Kirghizistan",
+    en: "Kyrgyzstan",
+    tr: "Kırgızistan",
+  },
   { value: "Koweït", fr: "Koweït", en: "Kuwait", tr: "Kuveyt" },
 
   { value: "Liban", fr: "Liban", en: "Lebanon", tr: "Lübnan" },
@@ -214,11 +276,21 @@ const countries = [
   { value: "Niger", fr: "Niger", en: "Niger", tr: "Nijer" },
   { value: "Nigeria", fr: "Nigeria", en: "Nigeria", tr: "Nijerya" },
   { value: "Norvège", fr: "Norvège", en: "Norway", tr: "Norveç" },
-  { value: "Nouvelle-Zélande", fr: "Nouvelle-Zélande", en: "New Zealand", tr: "Yeni Zelanda" },
+  {
+    value: "Nouvelle-Zélande",
+    fr: "Nouvelle-Zélande",
+    en: "New Zealand",
+    tr: "Yeni Zelanda",
+  },
 
   { value: "Oman", fr: "Oman", en: "Oman", tr: "Umman" },
   { value: "Ouganda", fr: "Ouganda", en: "Uganda", tr: "Uganda" },
-  { value: "Ouzbékistan", fr: "Ouzbékistan", en: "Uzbekistan", tr: "Özbekistan" },
+  {
+    value: "Ouzbékistan",
+    fr: "Ouzbékistan",
+    en: "Uzbekistan",
+    tr: "Özbekistan",
+  },
 
   { value: "Pakistan", fr: "Pakistan", en: "Pakistan", tr: "Pakistan" },
   { value: "Palestine", fr: "Palestine", en: "Palestine", tr: "Filistin" },
@@ -226,42 +298,92 @@ const countries = [
   { value: "Paraguay", fr: "Paraguay", en: "Paraguay", tr: "Paraguay" },
   { value: "Pays-Bas", fr: "Pays-Bas", en: "Netherlands", tr: "Hollanda" },
   { value: "Pérou", fr: "Pérou", en: "Peru", tr: "Peru" },
-  { value: "Philippines", fr: "Philippines", en: "Philippines", tr: "Filipinler" },
+  {
+    value: "Philippines",
+    fr: "Philippines",
+    en: "Philippines",
+    tr: "Filipinler",
+  },
   { value: "Pologne", fr: "Pologne", en: "Poland", tr: "Polonya" },
   { value: "Portugal", fr: "Portugal", en: "Portugal", tr: "Portekiz" },
 
   { value: "Qatar", fr: "Qatar", en: "Qatar", tr: "Katar" },
 
-  { value: "République centrafricaine", fr: "République centrafricaine", en: "Central African Republic", tr: "Orta Afrika Cumhuriyeti" },
-  { value: "République démocratique du Congo", fr: "République démocratique du Congo", en: "Democratic Republic of the Congo", tr: "Kongo Demokratik Cumhuriyeti" },
-  { value: "République dominicaine", fr: "République dominicaine", en: "Dominican Republic", tr: "Dominik Cumhuriyeti" },
-  { value: "République tchèque", fr: "République tchèque", en: "Czech Republic", tr: "Çekya" },
+  {
+    value: "République centrafricaine",
+    fr: "République centrafricaine",
+    en: "Central African Republic",
+    tr: "Orta Afrika Cumhuriyeti",
+  },
+  {
+    value: "République démocratique du Congo",
+    fr: "République démocratique du Congo",
+    en: "Democratic Republic of the Congo",
+    tr: "Kongo Demokratik Cumhuriyeti",
+  },
+  {
+    value: "République dominicaine",
+    fr: "République dominicaine",
+    en: "Dominican Republic",
+    tr: "Dominik Cumhuriyeti",
+  },
+  {
+    value: "République tchèque",
+    fr: "République tchèque",
+    en: "Czech Republic",
+    tr: "Çekya",
+  },
   { value: "Roumanie", fr: "Roumanie", en: "Romania", tr: "Romanya" },
-  { value: "Royaume-Uni", fr: "Royaume-Uni", en: "United Kingdom", tr: "Birleşik Krallık" },
+  {
+    value: "Royaume-Uni",
+    fr: "Royaume-Uni",
+    en: "United Kingdom",
+    tr: "Birleşik Krallık",
+  },
   { value: "Russie", fr: "Russie", en: "Russia", tr: "Rusya" },
   { value: "Rwanda", fr: "Rwanda", en: "Rwanda", tr: "Ruanda" },
 
   { value: "Sénégal", fr: "Sénégal", en: "Senegal", tr: "Senegal" },
   { value: "Serbie", fr: "Serbie", en: "Serbia", tr: "Sırbistan" },
-  { value: "Sierra Leone", fr: "Sierra Leone", en: "Sierra Leone", tr: "Sierra Leone" },
+  {
+    value: "Sierra Leone",
+    fr: "Sierra Leone",
+    en: "Sierra Leone",
+    tr: "Sierra Leone",
+  },
   { value: "Singapour", fr: "Singapour", en: "Singapore", tr: "Singapur" },
   { value: "Slovaquie", fr: "Slovaquie", en: "Slovakia", tr: "Slovakya" },
   { value: "Slovénie", fr: "Slovénie", en: "Slovenia", tr: "Slovenya" },
   { value: "Somalie", fr: "Somalie", en: "Somalia", tr: "Somali" },
   { value: "Soudan", fr: "Soudan", en: "Sudan", tr: "Sudan" },
-  { value: "Soudan du Sud", fr: "Soudan du Sud", en: "South Sudan", tr: "Güney Sudan" },
+  {
+    value: "Soudan du Sud",
+    fr: "Soudan du Sud",
+    en: "South Sudan",
+    tr: "Güney Sudan",
+  },
   { value: "Sri Lanka", fr: "Sri Lanka", en: "Sri Lanka", tr: "Sri Lanka" },
   { value: "Suède", fr: "Suède", en: "Sweden", tr: "İsveç" },
   { value: "Suisse", fr: "Suisse", en: "Switzerland", tr: "İsviçre" },
   { value: "Syrie", fr: "Syrie", en: "Syria", tr: "Suriye" },
 
-  { value: "Tadjikistan", fr: "Tadjikistan", en: "Tajikistan", tr: "Tacikistan" },
+  {
+    value: "Tadjikistan",
+    fr: "Tadjikistan",
+    en: "Tajikistan",
+    tr: "Tacikistan",
+  },
   { value: "Tanzanie", fr: "Tanzanie", en: "Tanzania", tr: "Tanzanya" },
   { value: "Tchad", fr: "Tchad", en: "Chad", tr: "Çad" },
   { value: "Thaïlande", fr: "Thaïlande", en: "Thailand", tr: "Tayland" },
   { value: "Togo", fr: "Togo", en: "Togo", tr: "Togo" },
   { value: "Tunisie", fr: "Tunisie", en: "Tunisia", tr: "Tunus" },
-  { value: "Turkménistan", fr: "Turkménistan", en: "Turkmenistan", tr: "Türkmenistan" },
+  {
+    value: "Turkménistan",
+    fr: "Turkménistan",
+    en: "Turkmenistan",
+    tr: "Türkmenistan",
+  },
   { value: "Türkiye", fr: "Turquie", en: "Türkiye", tr: "Türkiye" },
 
   { value: "Ukraine", fr: "Ukraine", en: "Ukraine", tr: "Ukrayna" },
@@ -276,102 +398,49 @@ const countries = [
   { value: "Zimbabwe", fr: "Zimbabwe", en: "Zimbabwe", tr: "Zimbabve" },
 ];
 export default function Etape1Page() {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const {
-    requestData,
-    updateRequestData,
-  } =
-    useInsuranceRequest();
+  const { requestData, updateRequestData } = useInsuranceRequest();
 
-  const [
-    language,
-    setLanguage,
-  ] =
-    useLanguage();
+  const [language, setLanguage] = useLanguage();
 
+  const t = translations[language];
 
+  function changeLanguage(nextLanguage: Language) {
+    setLanguage(nextLanguage);
+  }
 
-  const t =
-    translations[
-      language
-    ];
-
-  function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
-
-  function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const formData =
-      new FormData(
-        event.currentTarget,
-      );
+    const formData = new FormData(event.currentTarget);
 
-    const lastName =
-      toUpperCaseValue(
-        formData
-          .get("lastName")
-          ?.toString()
-          .trim() ?? "",
-      );
+    const lastName = toUpperCaseValue(
+      formData.get("lastName")?.toString().trim() ?? "",
+    );
 
-    const firstName =
-      toUpperCaseValue(
-        formData
-          .get("firstName")
-          ?.toString()
-          .trim() ?? "",
-      );
+    const firstName = toUpperCaseValue(
+      formData.get("firstName")?.toString().trim() ?? "",
+    );
 
-    const fatherName =
-      toUpperCaseValue(
-        formData
-          .get("fatherName")
-          ?.toString()
-          .trim() ?? "",
-      );
+    const fatherName = toUpperCaseValue(
+      formData.get("fatherName")?.toString().trim() ?? "",
+    );
 
-    const birthDate =
-      formData
-        .get("birthDate")
-        ?.toString() ?? "";
+    const birthDate = formData.get("birthDate")?.toString() ?? "";
 
-    const rawGender =
-      formData.get(
-        "gender",
-      );
+    const rawGender = formData.get("gender");
 
-    if (
-      rawGender !== "male" &&
-      rawGender !== "female"
-    ) {
-      alert(
-        t.genderError,
-      );
+    if (rawGender !== "male" && rawGender !== "female") {
+      alert(t.genderError);
 
       return;
     }
 
-    const nationality =
-      formData
-        .get("nationality")
-        ?.toString()
-        .trim() ?? "";
+    const nationality = formData.get("nationality")?.toString().trim() ?? "";
 
-    if (
-      !lastName ||
-      !firstName ||
-      !fatherName ||
-      !birthDate ||
-      !nationality
-    ) {
-      alert(
-        t.requiredError,
-      );
+    if (!lastName || !firstName || !fatherName || !birthDate || !nationality) {
+      alert(t.requiredError);
 
       return;
     }
@@ -381,21 +450,17 @@ export default function Etape1Page() {
       firstName,
       fatherName,
       birthDate,
-      gender:
-        rawGender,
+      gender: rawGender,
       nationality,
     });
 
-    router.push(
-      "/demande/etape-2",
-    );
+    router.push("/demande/etape-2");
   }
 
   const inputClassName =
     "w-full min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
 
-  const fieldLabelClassName =
-    "mb-2 block text-sm font-semibold text-slate-700";
+  const fieldLabelClassName = "mb-2 block text-sm font-semibold text-slate-700";
 
   const formEyebrow =
     language === "fr"
@@ -442,7 +507,10 @@ export default function Etape1Page() {
             className="flex shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
+            <Image
+              width={2938}
+              height={2463}
+              sizes="(max-width: 640px) 180px, 300px"
               src="/if-sigorta-logo-light.png"
               alt="IF Sigorta"
               className="h-[58px] w-auto max-w-[170px] object-contain object-left sm:h-[72px] sm:max-w-none lg:h-[82px]"
@@ -451,43 +519,22 @@ export default function Etape1Page() {
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
-              {(
-                [
-                  "fr",
-                  "en",
-                  "tr",
-                ] as Language[]
-              ).map(
-                (
-                  item,
-                ) => (
-                  <button
-                    key={
-                      item
-                    }
-                    type="button"
-                    onClick={() =>
-                      changeLanguage(
-                        item,
-                      )
-                    }
-                    className={[
-                      "rounded-lg px-2 py-1.5 text-[10px] font-black uppercase transition sm:px-3 sm:text-[11px]",
+              {(["fr", "en", "tr"] as Language[]).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => changeLanguage(item)}
+                  className={[
+                    "rounded-lg px-2 py-1.5 text-[10px] font-black uppercase transition sm:px-3 sm:text-[11px]",
 
-                      language ===
-                      item
-                        ? "bg-white text-[#0B5D3B] shadow-sm"
-                        : "text-slate-400 hover:text-slate-700",
-                    ].join(
-                      " ",
-                    )}
-                  >
-                    {
-                      item
-                    }
-                  </button>
-                ),
-              )}
+                    language === item
+                      ? "bg-white text-[#0B5D3B] shadow-sm"
+                      : "text-slate-400 hover:text-slate-700",
+                  ].join(" ")}
+                >
+                  {item}
+                </button>
+              ))}
             </div>
 
             <Link
@@ -585,10 +632,7 @@ export default function Etape1Page() {
               <section>
                 <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-2">
                   <div>
-                    <label
-                      htmlFor="firstName"
-                      className={fieldLabelClassName}
-                    >
+                    <label htmlFor="firstName" className={fieldLabelClassName}>
                       {t.firstName}
                     </label>
 
@@ -599,10 +643,7 @@ export default function Etape1Page() {
                       value={requestData.firstName ?? ""}
                       onChange={(event) =>
                         updateRequestData({
-                          firstName:
-                            toUpperCaseValue(
-                              event.target.value,
-                            ),
+                          firstName: toUpperCaseValue(event.target.value),
                         })
                       }
                       required
@@ -612,10 +653,7 @@ export default function Etape1Page() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="lastName"
-                      className={fieldLabelClassName}
-                    >
+                    <label htmlFor="lastName" className={fieldLabelClassName}>
                       {t.lastName}
                     </label>
 
@@ -626,10 +664,7 @@ export default function Etape1Page() {
                       value={requestData.lastName ?? ""}
                       onChange={(event) =>
                         updateRequestData({
-                          lastName:
-                            toUpperCaseValue(
-                              event.target.value,
-                            ),
+                          lastName: toUpperCaseValue(event.target.value),
                         })
                       }
                       required
@@ -639,10 +674,7 @@ export default function Etape1Page() {
                   </div>
 
                   <div className="lg:col-span-2">
-                    <label
-                      htmlFor="fatherName"
-                      className={fieldLabelClassName}
-                    >
+                    <label htmlFor="fatherName" className={fieldLabelClassName}>
                       {t.fatherName}
                     </label>
 
@@ -653,10 +685,7 @@ export default function Etape1Page() {
                       value={requestData.fatherName ?? ""}
                       onChange={(event) =>
                         updateRequestData({
-                          fatherName:
-                            toUpperCaseValue(
-                              event.target.value,
-                            ),
+                          fatherName: toUpperCaseValue(event.target.value),
                         })
                       }
                       required
@@ -665,10 +694,7 @@ export default function Etape1Page() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="birthDate"
-                      className={fieldLabelClassName}
-                    >
+                    <label htmlFor="birthDate" className={fieldLabelClassName}>
                       {t.birthDate}
                     </label>
 
@@ -683,10 +709,7 @@ export default function Etape1Page() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="gender"
-                      className={fieldLabelClassName}
-                    >
+                    <label htmlFor="gender" className={fieldLabelClassName}>
                       {t.gender}
                     </label>
 
@@ -697,20 +720,13 @@ export default function Etape1Page() {
                       required
                       className={inputClassName}
                     >
-                      <option
-                        value=""
-                        disabled
-                      >
+                      <option value="" disabled>
                         {t.select}
                       </option>
 
-                      <option value="male">
-                        {t.male}
-                      </option>
+                      <option value="male">{t.male}</option>
 
-                      <option value="female">
-                        {t.female}
-                      </option>
+                      <option value="female">{t.female}</option>
                     </select>
                   </div>
 
@@ -728,17 +744,13 @@ export default function Etape1Page() {
                       value={requestData.nationality ?? ""}
                       onChange={(event) =>
                         updateRequestData({
-                          nationality:
-                            event.target.value,
+                          nationality: event.target.value,
                         })
                       }
                       required
                       className={inputClassName}
                     >
-                      <option
-                        value=""
-                        disabled
-                      >
+                      <option value="" disabled>
                         {language === "fr"
                           ? "Sélectionner un pays"
                           : language === "en"
@@ -747,10 +759,7 @@ export default function Etape1Page() {
                       </option>
 
                       {countries.map((country) => (
-                        <option
-                          key={country.value}
-                          value={country.value}
-                        >
+                        <option key={country.value} value={country.value}>
                           {country[language]}
                         </option>
                       ))}
@@ -763,24 +772,16 @@ export default function Etape1Page() {
 
               <section className="border-t border-slate-100 pt-8">
                 <PhoneInput
-                  countryCode={
-                    requestData.whatsappCountryCode ??
-                    "+90"
-                  }
-                  phoneNumber={
-                    requestData.whatsappNumber ??
-                    ""
-                  }
+                  countryCode={requestData.whatsappCountryCode ?? "+90"}
+                  phoneNumber={requestData.whatsappNumber ?? ""}
                   onCountryCodeChange={(value) =>
                     updateRequestData({
-                      whatsappCountryCode:
-                        value,
+                      whatsappCountryCode: value,
                     })
                   }
                   onPhoneNumberChange={(value) =>
                     updateRequestData({
-                      whatsappNumber:
-                        value,
+                      whatsappNumber: value,
                     })
                   }
                 />

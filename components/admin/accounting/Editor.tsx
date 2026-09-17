@@ -3,9 +3,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, LoaderCircle } from "lucide-react";
 import Dialog from "./Dialog";
-import { day, type Company, type Rate } from "@/lib/accounting/model";
-export type EditorMode = "deposit" | "company" | "rates" | "editRate" | "editCompany";
-type Row = { minAge: string; maxAge: string; oneYearCost: string; twoYearCost: string };
+import {
+  day,
+  money,
+  cents,
+  type Company,
+  type Rate,
+} from "@/lib/accounting/model";
+export type EditorMode =
+  "withdrawal" | "deposit" | "company" | "rates" | "editRate" | "editCompany";
+type Row = {
+  minAge: string;
+  maxAge: string;
+  oneYearCost: string;
+  twoYearCost: string;
+};
 type Fields = {
   insuranceCompanyId: string;
   name: string;
@@ -21,7 +33,12 @@ type Fields = {
   realCost: string;
   rows: Row[];
 };
-type Pending = { fields: Fields; body: Record<string, unknown>; endpoint: string; method: string };
+type Pending = {
+  fields: Fields;
+  body: Record<string, unknown>;
+  endpoint: string;
+  method: string;
+};
 const input =
   "mt-1.5 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100";
 export default function Editor({
@@ -31,6 +48,7 @@ export default function Editor({
   rate,
   onClose,
   onSaved,
+  balances = {},
 }: {
   mode: EditorMode;
   companies: Company[];
@@ -38,6 +56,7 @@ export default function Editor({
   rate?: Rate;
   onClose: () => void;
   onSaved?: () => void;
+  balances?: Record<string, number | null>;
 }) {
   const router = useRouter(),
     key = `ifs-accounting-pending-${mode}`;
@@ -70,6 +89,7 @@ export default function Editor({
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const titles = {
+    withdrawal: "Enregistrer un retrait",
     deposit: "Enregistrer un dépôt",
     company: "Ajouter un assureur",
     rates: "Créer une grille tarifaire",
@@ -92,9 +112,24 @@ export default function Editor({
         type={type}
         required={required}
         maxLength={maxLength}
-        min={type === "number" ? "0" : undefined}
+        min={
+          type === "number"
+            ? mode === "withdrawal" && name === "amount"
+              ? "0.01"
+              : "0"
+            : undefined
+        }
+        max={
+          mode === "withdrawal" && name === "depositDate"
+            ? day(new Date().toISOString())
+            : undefined
+        }
         step={
-          type === "number" ? (name === "minAge" || name === "maxAge" ? "1" : "0.01") : undefined
+          type === "number"
+            ? name === "minAge" || name === "maxAge"
+              ? "1"
+              : "0.01"
+            : undefined
         }
         value={fields[name]}
         onChange={(e) => update(name, e.target.value)}
@@ -111,7 +146,16 @@ export default function Editor({
       let body: Record<string, unknown>,
         endpoint: string,
         method = "POST";
-      if (mode === "deposit") {
+      if (mode === "withdrawal") {
+        endpoint = base + "insurance-withdrawals";
+        body = {
+          insuranceCompanyId: fields.insuranceCompanyId,
+          amount: Number(fields.amount),
+          withdrawalDate: fields.depositDate,
+          reason: fields.note,
+          reference: fields.reference || null,
+        };
+      } else if (mode === "deposit") {
         endpoint = base + "insurance-deposits";
         body = {
           insuranceCompanyId: fields.insuranceCompanyId,
@@ -145,7 +189,10 @@ export default function Editor({
           version: rate!.updated_at,
         };
       } else {
-        endpoint = base + "insurance-companies" + (mode === "editCompany" ? "/" + company!.id : "");
+        endpoint =
+          base +
+          "insurance-companies" +
+          (mode === "editCompany" ? "/" + company!.id : "");
         method = mode === "editCompany" ? "PATCH" : "POST";
         body = {
           name: fields.name,
@@ -180,7 +227,9 @@ export default function Editor({
           setPending(null);
           sessionStorage.removeItem(key);
         }
-        throw Error(result.error || "L’enregistrement n’a pas pu être confirmé.");
+        throw Error(
+          result.error || "L’enregistrement n’a pas pu être confirmé.",
+        );
       }
       sessionStorage.removeItem(key);
       router.refresh();
@@ -188,7 +237,9 @@ export default function Editor({
       onClose();
     } catch (e) {
       setError(
-        e instanceof Error ? e.message : "Connexion interrompue. Réessayez la même opération.",
+        e instanceof Error
+          ? e.message
+          : "Connexion interrompue. Réessayez la même opération.",
       );
     } finally {
       setBusy(false);
@@ -206,13 +257,21 @@ export default function Editor({
           </div>
         )}
         {pending && !busy && (
-          <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-            Une opération attend sa confirmation. Réessayez avec les mêmes valeurs pour éviter un
-            double enregistrement.
+          <p
+            role="status"
+            className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
+          >
+            Une opération attend sa confirmation. Réessayez avec les mêmes
+            valeurs pour éviter un double enregistrement.
           </p>
         )}
-        <fieldset disabled={busy || !!pending} className="space-y-5 disabled:opacity-70">
-          {(mode === "deposit" || mode === "rates") && (
+        <fieldset
+          disabled={busy || !!pending}
+          className="space-y-5 disabled:opacity-70"
+        >
+          {(mode === "withdrawal" ||
+            mode === "deposit" ||
+            mode === "rates") && (
             <label className="block text-sm font-medium text-slate-700">
               Assureur
               <select
@@ -235,6 +294,39 @@ export default function Editor({
           )}
           {(mode === "company" || mode === "editCompany") &&
             field("name", "Nom de l’assureur", "text", true, 120)}
+          {mode === "withdrawal" && (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {field("amount", "Montant du retrait (₺)", "number")}
+                {field("depositDate", "Date du retrait", "date")}
+              </div>
+              {field("note", "Motif du retrait", "text", true, 1000)}
+              {field("reference", "Référence", "text", false, 200)}
+              {fields.insuranceCompanyId && (
+                <div className="rounded-xl bg-slate-50 p-4 text-sm">
+                  <p>
+                    Solde disponible après réservations :{" "}
+                    {money(balances[fields.insuranceCompanyId] ?? null)}
+                  </p>
+                  <p>
+                    Disponible après retrait :{" "}
+                    {money(
+                      balances[fields.insuranceCompanyId] == null ||
+                        cents(fields.amount) === null
+                        ? null
+                        : balances[fields.insuranceCompanyId]! -
+                            cents(fields.amount)!,
+                    )}
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-slate-500">
+                Enregistrez une sortie hors coût des polices, pour éviter un
+                double débit. Le solde et la date sont revérifiés à
+                l’enregistrement.
+              </p>
+            </>
+          )}
           {mode === "deposit" && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -254,8 +346,8 @@ export default function Editor({
                 />
               </label>
               <p className="text-xs leading-5 text-slate-500">
-                Enregistrez uniquement une avance effectivement versée à l’assureur. La référence
-                facilite le rapprochement.
+                Enregistrez uniquement une avance effectivement versée à
+                l’assureur. La référence facilite le rapprochement.
               </p>
             </>
           )}
@@ -265,7 +357,10 @@ export default function Editor({
             <>
               <p className="text-sm text-slate-500">
                 {rate?.duration_years} an(s) ·{" "}
-                {companies.find((c) => c.id === rate?.insurance_company_id)?.name}
+                {
+                  companies.find((c) => c.id === rate?.insurance_company_id)
+                    ?.name
+                }
               </p>
               <div className="grid grid-cols-2 gap-4">
                 {field("minAge", "Âge minimum", "number")}
@@ -277,7 +372,10 @@ export default function Editor({
           {mode === "rates" && (
             <div className="space-y-4">
               {fields.rows.map((row, i) => (
-                <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div
+                  key={i}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                >
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-sm font-semibold">Tranche {i + 1}</h3>
                     <button
@@ -333,7 +431,12 @@ export default function Editor({
                 onClick={() =>
                   update("rows", [
                     ...fields.rows,
-                    { minAge: "", maxAge: "", oneYearCost: "", twoYearCost: "" },
+                    {
+                      minAge: "",
+                      maxAge: "",
+                      oneYearCost: "",
+                      twoYearCost: "",
+                    },
                   ])
                 }
                 className="flex items-center gap-2 text-sm font-semibold text-emerald-800"
@@ -342,8 +445,8 @@ export default function Editor({
                 Ajouter une tranche
               </button>
               <p className="text-xs leading-5 text-slate-500">
-                Les champs sont obligatoires. Saisissez explicitement 0 uniquement si l’assurance
-                n’a aucun coût.
+                Les champs sont obligatoires. Saisissez explicitement 0
+                uniquement si l’assurance n’a aucun coût.
               </p>
             </div>
           )}
@@ -374,7 +477,11 @@ export default function Editor({
             className="flex items-center gap-2 rounded-lg bg-emerald-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
           >
             {busy && <LoaderCircle size={16} className="animate-spin" />}
-            {busy ? "Enregistrement…" : pending ? "Réessayer la même opération" : "Enregistrer"}
+            {busy
+              ? "Enregistrement…"
+              : pending
+                ? "Réessayer la même opération"
+                : "Enregistrer"}
           </button>
         </footer>
       </form>

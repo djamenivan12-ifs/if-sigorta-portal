@@ -1,23 +1,16 @@
 "use client";
 
-import {
-  FormEvent,
-  useState,
-} from "react";
+import { FormEvent, useState } from "react";
 
 import AddressSelector from "@/components/AddressSelector";
 import PhoneInput from "@/components/PhoneInput";
 
-import type {
-  PartnerRequestFormData,
-} from "./partnerRequestTypes";
+import type { PartnerRequestFormData } from "./partnerRequestTypes";
 
 type PartnerClientStepProps = {
   data: PartnerRequestFormData;
 
-  onChange: (
-    data: PartnerRequestFormData,
-  ) => void;
+  onChange: (data: PartnerRequestFormData) => void;
 
   onNext: () => void;
 };
@@ -63,6 +56,8 @@ const nationalities = [
   "Chinoise",
   "Comorienne",
   "Congolaise",
+  "Congolaise (Congo-Brazzaville)",
+  "Congolaise (RDC)",
   "Ivoirienne",
   "Djiboutienne",
   "Égyptienne",
@@ -101,12 +96,8 @@ const nationalities = [
   "Zimbabwéenne",
 ];
 
-function uppercaseName(
-  value: string,
-) {
-  return value.toLocaleUpperCase(
-    "fr-FR",
-  );
+function uppercaseName(value: string) {
+  return value.toLocaleUpperCase("fr-FR");
 }
 
 export default function PartnerClientStep({
@@ -114,17 +105,9 @@ export default function PartnerClientStep({
   onChange,
   onNext,
 }: PartnerClientStepProps) {
-  const [
-    error,
-    setError,
-  ] =
-    useState<string | null>(
-      null,
-    );
+  const [error, setError] = useState<string | null>(null);
 
-  function updateField<
-    K extends keyof PartnerRequestFormData,
-  >(
+  function updateField<K extends keyof PartnerRequestFormData>(
     field: K,
     value: PartnerRequestFormData[K],
   ) {
@@ -134,9 +117,7 @@ export default function PartnerClientStep({
     });
   }
 
-  function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError(null);
@@ -146,65 +127,37 @@ export default function PartnerClientStep({
       !data.lastName.trim() ||
       !data.fatherName.trim()
     ) {
-      setError(
-        "Veuillez renseigner le nom, le prénom et le nom du père.",
-      );
+      setError("Veuillez renseigner le nom, le prénom et le nom du père.");
 
       return;
     }
 
-    if (
-      !data.birthDate
-    ) {
-      setError(
-        "Veuillez renseigner la date de naissance.",
-      );
+    if (!data.birthDate) {
+      setError("Veuillez renseigner la date de naissance.");
 
       return;
     }
 
-    if (
-      data.gender !==
-        "male" &&
-      data.gender !==
-        "female"
-    ) {
-      setError(
-        "Veuillez sélectionner le sexe du client.",
-      );
+    if (data.gender !== "male" && data.gender !== "female") {
+      setError("Veuillez sélectionner le sexe du client.");
 
       return;
     }
 
-    if (
-      !data.nationality.trim()
-    ) {
-      setError(
-        "Veuillez sélectionner la nationalité du client.",
-      );
+    if (!data.nationality.trim()) {
+      setError("Veuillez sélectionner la nationalité du client.");
 
       return;
     }
 
-    if (
-      !data.whatsappCountryCode ||
-      !data.whatsappNumber.trim()
-    ) {
-      setError(
-        "Veuillez renseigner le numéro WhatsApp du client.",
-      );
+    if (!data.whatsappCountryCode || !data.whatsappNumber.trim()) {
+      setError("Veuillez renseigner le numéro WhatsApp du client.");
 
       return;
     }
 
-    if (
-      !partnerPhoneCountryCodes.includes(
-        data.whatsappCountryCode,
-      )
-    ) {
-      setError(
-        "L’indicatif WhatsApp sélectionné n’est pas autorisé.",
-      );
+    if (!partnerPhoneCountryCodes.includes(data.whatsappCountryCode)) {
+      setError("L’indicatif WhatsApp sélectionné n’est pas autorisé.");
 
       return;
     }
@@ -221,22 +174,14 @@ export default function PartnerClientStep({
       return;
     }
 
-    if (
-      !data.address.street.trim()
-    ) {
-      setError(
-        "Veuillez renseigner la rue ou l’adresse.",
-      );
+    if (!data.address.street.trim()) {
+      setError("Veuillez renseigner la rue ou l’adresse.");
 
       return;
     }
 
-    if (
-      !data.address.buildingNumber.trim()
-    ) {
-      setError(
-        "Veuillez renseigner le numéro du bâtiment.",
-      );
+    if (!data.address.buildingNumber.trim()) {
+      setError("Veuillez renseigner le numéro du bâtiment.");
 
       return;
     }
@@ -245,12 +190,7 @@ export default function PartnerClientStep({
   }
 
   return (
-    <form
-      onSubmit={
-        handleSubmit
-      }
-      className="min-w-0 space-y-6"
-    >
+    <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
       <div>
         <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
           Étape 1 sur 4
@@ -261,9 +201,8 @@ export default function PartnerClientStep({
         </h2>
 
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-          Renseignez les informations
-          personnelles et l’adresse de
-          la personne à assurer.
+          Renseignez les informations personnelles et l’adresse de la personne à
+          assurer.
         </p>
       </div>
 
@@ -286,18 +225,9 @@ export default function PartnerClientStep({
             id="firstName"
             name="firstName"
             type="text"
-            value={
-              data.firstName
-            }
-            onChange={(
-              event,
-            ) =>
-              updateField(
-                "firstName",
-                uppercaseName(
-                  event.target.value,
-                ),
-              )
+            value={data.firstName}
+            onChange={(event) =>
+              updateField("firstName", uppercaseName(event.target.value))
             }
             required
             autoComplete="given-name"
@@ -317,18 +247,9 @@ export default function PartnerClientStep({
             id="lastName"
             name="lastName"
             type="text"
-            value={
-              data.lastName
-            }
-            onChange={(
-              event,
-            ) =>
-              updateField(
-                "lastName",
-                uppercaseName(
-                  event.target.value,
-                ),
-              )
+            value={data.lastName}
+            onChange={(event) =>
+              updateField("lastName", uppercaseName(event.target.value))
             }
             required
             autoComplete="family-name"
@@ -348,18 +269,9 @@ export default function PartnerClientStep({
             id="fatherName"
             name="fatherName"
             type="text"
-            value={
-              data.fatherName
-            }
-            onChange={(
-              event,
-            ) =>
-              updateField(
-                "fatherName",
-                uppercaseName(
-                  event.target.value,
-                ),
-              )
+            value={data.fatherName}
+            onChange={(event) =>
+              updateField("fatherName", uppercaseName(event.target.value))
             }
             required
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
@@ -378,17 +290,8 @@ export default function PartnerClientStep({
             id="birthDate"
             name="birthDate"
             type="date"
-            value={
-              data.birthDate
-            }
-            onChange={(
-              event,
-            ) =>
-              updateField(
-                "birthDate",
-                event.target.value,
-              )
-            }
+            value={data.birthDate}
+            onChange={(event) => updateField("birthDate", event.target.value)}
             required
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
           />
@@ -405,35 +308,21 @@ export default function PartnerClientStep({
           <select
             id="gender"
             name="gender"
-            value={
-              data.gender
-            }
-            onChange={(
-              event,
-            ) =>
+            value={data.gender}
+            onChange={(event) =>
               updateField(
                 "gender",
-                event.target
-                  .value as
-                  | ""
-                  | "male"
-                  | "female",
+                event.target.value as "" | "male" | "female",
               )
             }
             required
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
           >
-            <option value="">
-              Sélectionner
-            </option>
+            <option value="">Sélectionner</option>
 
-            <option value="male">
-              Homme
-            </option>
+            <option value="male">Homme</option>
 
-            <option value="female">
-              Femme
-            </option>
+            <option value="female">Femme</option>
           </select>
         </div>
 
@@ -448,80 +337,37 @@ export default function PartnerClientStep({
           <select
             id="nationality"
             name="nationality"
-            value={
-              data.nationality
-            }
-            onChange={(
-              event,
-            ) =>
-              updateField(
-                "nationality",
-                event.target.value,
-              )
-            }
+            value={data.nationality}
+            onChange={(event) => updateField("nationality", event.target.value)}
             required
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
           >
-            <option value="">
-              Sélectionner
-            </option>
+            <option value="">Sélectionner</option>
 
-            {nationalities.map(
-              (
-                nationality,
-              ) => (
-                <option
-                  key={
-                    nationality
-                  }
-                  value={
-                    nationality
-                  }
-                >
-                  {nationality}
-                </option>
-              ),
-            )}
+            {nationalities.map((nationality) => (
+              <option key={nationality} value={nationality}>
+                {nationality}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
       <div className="min-w-0 border-t border-slate-200 pt-6">
-        <h3 className="text-lg font-black text-[#102B20]">
-          Contact WhatsApp
-        </h3>
+        <h3 className="text-lg font-black text-[#102B20]">Contact WhatsApp</h3>
 
         <p className="mt-1 mb-4 text-sm leading-6 text-slate-500">
-          Le numéro est enregistré dans
-          le dossier du client.
+          Le numéro est enregistré dans le dossier du client.
         </p>
 
         <PhoneInput
-          countryCode={
-            data.whatsappCountryCode
+          countryCode={data.whatsappCountryCode}
+          phoneNumber={data.whatsappNumber}
+          onCountryCodeChange={(value) =>
+            updateField("whatsappCountryCode", value)
           }
-          phoneNumber={
-            data.whatsappNumber
-          }
-          onCountryCodeChange={(
-            value,
-          ) =>
-            updateField(
-              "whatsappCountryCode",
-              value,
-            )
-          }
-          onPhoneNumberChange={(
-            value,
-          ) =>
-            updateField(
-              "whatsappNumber",
-              value,
-            )
-          }
-          allowedCountryCodes={
-            partnerPhoneCountryCodes
-          }
+          onPhoneNumberChange={(value) => updateField("whatsappNumber", value)}
+          allowedCountryCodes={partnerPhoneCountryCodes}
         />
       </div>
 
@@ -531,23 +377,12 @@ export default function PartnerClientStep({
         </h3>
 
         <p className="mt-1 mb-4 text-sm leading-6 text-slate-500">
-          Sélectionnez l’adresse
-          complète de la personne à
-          assurer.
+          Sélectionnez l’adresse complète de la personne à assurer.
         </p>
 
         <AddressSelector
-          value={
-            data.address
-          }
-          onChange={(
-            address,
-          ) =>
-            updateField(
-              "address",
-              address,
-            )
-          }
+          value={data.address}
+          onChange={(address) => updateField("address", address)}
         />
       </div>
 
@@ -557,10 +392,7 @@ export default function PartnerClientStep({
           className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-6 py-3 font-black text-white transition hover:bg-[#084A2F] focus:outline-none focus:ring-4 focus:ring-[#0B5D3B]/20 sm:w-auto"
         >
           Continuer
-          <span
-            aria-hidden="true"
-            className="ml-2"
-          >
+          <span aria-hidden="true" className="ml-2">
             →
           </span>
         </button>

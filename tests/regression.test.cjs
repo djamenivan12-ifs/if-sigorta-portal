@@ -70,3 +70,7 @@ require('./accounting.test.cjs');
 require('./dashboard.test.cjs');
 
 require('./navigation.test.cjs');
+
+require('./nationality-rates.test.cjs');
+
+require('./migration-compatibility.test.cjs');

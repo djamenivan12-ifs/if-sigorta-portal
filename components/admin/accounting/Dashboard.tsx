@@ -36,11 +36,18 @@ const tabs = [
   ["companies", "Assureurs"],
   ["dossiers", "Dossiers"],
   ["deposits", "Dépôts"],
+  ["withdrawals", "Retraits"],
+  ["nationalityRates", "Tarifs Congo-Brazzaville"],
   ["rates", "Tarifs"],
   ["history", "Historique"],
 ] as const;
 type Tab = (typeof tabs)[number][0];
-type ViewRow = { id: string; cells: React.ReactNode[]; exportValues: unknown[]; search: string };
+type ViewRow = {
+  id: string;
+  cells: React.ReactNode[];
+  exportValues: unknown[];
+  search: string;
+};
 export default function Dashboard({
   data,
   initialCompany = "",
@@ -53,6 +60,9 @@ export default function Dashboard({
   initialEdit?: string;
 }) {
   const router = useRouter();
+  const withdrawalsReady = !data.missingTables?.includes(
+    "insurance_company_withdrawals",
+  );
   const [company, setCompany] = useState(initialCompany),
     [from, setFrom] = useState(""),
     [to, setTo] = useState(""),
@@ -61,12 +71,48 @@ export default function Dashboard({
     [page, setPage] = useState(1),
     [notice, setNotice] = useState(""),
     [showIssues, setShowIssues] = useState(false);
-  const [editor, setEditor] = useState<{ mode: EditorMode; company?: Company; rate?: Rate } | null>(
-    () => {
-      const rate = data.rates.find((r) => r.id === initialEdit);
-      return rate ? { mode: "editRate", rate } : null;
-    },
-  );
+  const [editor, setEditor] = useState<{
+    mode: EditorMode;
+    company?: Company;
+    rate?: Rate;
+  } | null>(() => {
+    const rate = data.rates.find((r) => r.id === initialEdit);
+    return rate ? { mode: "editRate", rate } : null;
+  });
+  const [cancelling, setCancelling] = useState(false);
+  async function cancelWithdrawal(id: string) {
+    if (
+      cancelling ||
+      !window.confirm(
+        "Annuler ce retrait et restituer son montant au solde assureur ? La trace sera conservée.",
+      )
+    )
+      return;
+    setCancelling(true);
+    try {
+      const response = await fetch(
+        "/api/admin/accounting/insurance-withdrawals",
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, operationId: crypto.randomUUID() }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok || !result.success)
+        throw new Error(result.error || "Annulation impossible.");
+      router.refresh();
+      setNotice("Retrait annulé. Le montant a été restitué au solde assureur.");
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Connexion interrompue. Actualisez avant de réessayer.",
+      );
+    } finally {
+      setCancelling(false);
+    }
+  }
   const invalid = !!from && !!to && from > to;
   const filter = useMemo(
     () => ({ from: invalid ? "" : from, to: invalid ? "" : to, company }),
@@ -76,7 +122,9 @@ export default function Dashboard({
   const selectedCompany = data.companies.find((c) => c.id === company),
     companyName = (id: string | null) =>
       data.companies.find((c) => c.id === id)?.name ?? "Assureur non renseigné";
-  const scopedCompanies = data.companies.filter((c) => !company || c.id === company),
+  const scopedCompanies = data.companies.filter(
+      (c) => !company || c.id === company,
+    ),
     companyReports = scopedCompanies.map((c) => ({
       company: c,
       report: accounting(data, { ...filter, company: c.id }),
@@ -87,7 +135,10 @@ export default function Dashboard({
     setQ("");
   };
   const link = (id: string, code: string) => (
-    <Link className="font-semibold text-emerald-900 hover:underline" href={`/admin/dossiers/${id}`}>
+    <Link
+      className="font-semibold text-emerald-900 hover:underline"
+      href={`/admin/dossiers/${id}`}
+    >
       {code}
     </Link>
   );
@@ -120,6 +171,7 @@ export default function Dashboard({
       "Assureur",
       "Dépôts cumulés",
       "Coûts consommés",
+      "Retraits nets cumulés",
       "Solde estimé",
       "CA réalisé",
       "Bénéfice brut",
@@ -140,10 +192,13 @@ export default function Dashboard({
         </div>,
         money(r.cumulativeDeposits),
         money(r.consumed),
+        money(r.cumulativeWithdrawals),
         <span
           key="balance"
           className={
-            r.balance !== null && r.balance < 0 ? "font-bold text-rose-700" : "font-semibold"
+            r.balance !== null && r.balance < 0
+              ? "font-bold text-rose-700"
+              : "font-semibold"
           }
         >
           {money(r.balance)}
@@ -154,8 +209,13 @@ export default function Dashboard({
       ],
       exportValues: [
         c.name,
-        r.cumulativeDeposits === null ? "À compléter" : r.cumulativeDeposits / 100,
+        r.cumulativeDeposits === null
+          ? "À compléter"
+          : r.cumulativeDeposits / 100,
         r.consumed === null ? "À compléter" : r.consumed / 100,
+        r.cumulativeWithdrawals === null
+          ? "À compléter"
+          : r.cumulativeWithdrawals / 100,
         r.balance === null ? "À compléter" : r.balance / 100,
         r.revenue === null ? "À compléter" : r.revenue / 100,
         r.profit === null ? "À compléter" : r.profit / 100,
@@ -203,11 +263,19 @@ export default function Dashboard({
       ],
     }));
   } else if (tab === "deposits") {
-    headers = ["Date", "Assureur", "Montant", "Mode / référence", "Note", "Enregistré par"];
+    headers = [
+      "Date",
+      "Assureur",
+      "Montant",
+      "Mode / référence",
+      "Note",
+      "Enregistré par",
+    ];
     rows = [...report.deposits]
       .sort(
         (a, b) =>
-          b.deposit_date.localeCompare(a.deposit_date) || b.created_at.localeCompare(a.created_at),
+          b.deposit_date.localeCompare(a.deposit_date) ||
+          b.created_at.localeCompare(a.created_at),
       )
       .map((d) => ({
         id: d.id,
@@ -218,7 +286,9 @@ export default function Dashboard({
           <strong key="amount">{money(cents(d.amount))}</strong>,
           <div key="ref">
             {d.payment_method || "—"}
-            <p className="mt-1 text-xs text-slate-500">{d.reference || "Sans référence"}</p>
+            <p className="mt-1 text-xs text-slate-500">
+              {d.reference || "Sans référence"}
+            </p>
           </div>,
           d.note || "—",
           data.authors[d.created_by ?? ""] || "Auteur non disponible",
@@ -230,6 +300,99 @@ export default function Dashboard({
           `${d.payment_method ?? ""} / ${d.reference ?? ""}`,
           d.note,
           data.authors[d.created_by ?? ""] || d.created_by,
+        ],
+      }));
+  } else if (tab === "withdrawals") {
+    headers = [
+      "Date",
+      "Assureur",
+      "Montant",
+      "Motif / référence",
+      "Auteur",
+      "Statut",
+      "Actions",
+    ];
+    rows = [...report.withdrawals]
+      .sort((a, b) => b.withdrawal_date.localeCompare(a.withdrawal_date))
+      .map((w) => ({
+        id: w.id,
+        search:
+          companyName(w.insurance_company_id) +
+          " " +
+          w.reason +
+          " " +
+          (w.reference ?? ""),
+        cells: [
+          dateLabel(w.withdrawal_date),
+          companyName(w.insurance_company_id),
+          money(cents(w.amount)),
+          w.reason + (w.reference ? " · " + w.reference : ""),
+          data.authors[w.created_by] ?? "Auteur non disponible",
+          w.cancelled_at ? "Annulé le " + dateLabel(w.cancelled_at) : "Débité",
+          w.cancelled_at ? (
+            "—"
+          ) : (
+            <button
+              key="cancel"
+              className={control}
+              onClick={() => cancelWithdrawal(w.id)}
+            >
+              Annuler le retrait
+            </button>
+          ),
+        ],
+        exportValues: [
+          w.withdrawal_date,
+          companyName(w.insurance_company_id),
+          w.amount,
+          w.reason,
+          data.authors[w.created_by] ?? w.created_by,
+          w.cancelled_at ? "Annulé" : "Débité",
+          "",
+        ],
+      }));
+  } else if (tab === "nationalityRates") {
+    headers = [
+      "Assureur",
+      "Nationalité",
+      "Tranche d’âge",
+      "Assureur 1 an",
+      "Client 1 an",
+      "Assureur 2 ans",
+      "Client 2 ans",
+      "En vigueur dès le",
+    ];
+    rows = (data.nationalityRates ?? [])
+      .filter((r) => !company || r.insurance_company_id === company)
+      .map((r) => ({
+        id: r.id,
+        search:
+          companyName(r.insurance_company_id) +
+          " Congo-Brazzaville " +
+          r.min_age +
+          " " +
+          r.max_age,
+        cells: [
+          companyName(r.insurance_company_id),
+          "Congo-Brazzaville",
+          r.min_age + "–" + r.max_age + " ans",
+          ...[
+            r.one_year_cost,
+            r.one_year_price,
+            r.two_year_cost,
+            r.two_year_price,
+          ].map((v) => money(cents(v))),
+          dateLabel(r.effective_from),
+        ],
+        exportValues: [
+          companyName(r.insurance_company_id),
+          "Congo-Brazzaville",
+          r.min_age + "–" + r.max_age,
+          r.one_year_cost,
+          r.one_year_price,
+          r.two_year_cost,
+          r.two_year_price,
+          r.effective_from,
         ],
       }));
   } else if (tab === "rates") {
@@ -246,7 +409,9 @@ export default function Dashboard({
       .filter((r) => !company || r.insurance_company_id === company)
       .sort(
         (a, b) =>
-          companyName(a.insurance_company_id).localeCompare(companyName(b.insurance_company_id)) ||
+          companyName(a.insurance_company_id).localeCompare(
+            companyName(b.insurance_company_id),
+          ) ||
           b.effective_from.localeCompare(a.effective_from) ||
           a.min_age - b.min_age ||
           a.duration_years - b.duration_years,
@@ -279,163 +444,120 @@ export default function Dashboard({
         ],
       }));
   } else {
-  headers = [
-    "Date",
-    "Origine",
-    "Type",
-    "Assureur",
-    "Dossier",
-    "Description",
-    "Montant",
-    "Auteur",
-  ];
+    headers = [
+      "Date",
+      "Origine",
+      "Type",
+      "Assureur",
+      "Dossier",
+      "Description",
+      "Montant",
+      "Auteur",
+    ];
 
-  const historyTypeLabel = {
-    deposit: "Dépôt assureur",
-    payment: "Paiement",
-    policy: "Assurance disponible",
-    rate: "Tarif modifié",
-  } as const;
+    const historyTypeLabel = {
+      withdrawal: "Retrait assureur",
+      withdrawal_cancelled: "Retrait annulé",
+      deposit: "Dépôt assureur",
+      payment: "Paiement",
+      policy: "Assurance disponible",
+      rate: "Tarif modifié",
+    } as const;
 
-  rows = data.history
-    .filter(
-      (h) =>
-        (!company ||
-          h.insurance_company_id ===
-            company) &&
-        (!from ||
-          day(h.occurred_at) >=
-            from) &&
-        (!to ||
-          day(h.occurred_at) <=
-            to),
-    )
-    .sort((a, b) =>
-      b.occurred_at.localeCompare(
-        a.occurred_at,
-      ),
-    )
-    .map((h) => {
-      const originLabel =
-        h.origin === "partner"
-          ? `Partenaire — ${
-              h.partner_name ??
-              "Partenaire"
-            }`
-          : h.origin ===
-              "client"
-            ? "Client direct"
-            : "—";
+    rows = data.history
+      .filter(
+        (h) =>
+          (!company || h.insurance_company_id === company) &&
+          (!from || day(h.occurred_at) >= from) &&
+          (!to || day(h.occurred_at) <= to),
+      )
+      .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))
+      .map((h) => {
+        const originLabel =
+          h.origin === "partner"
+            ? `Partenaire — ${h.partner_name ?? "Partenaire"}`
+            : h.origin === "client"
+              ? "Client direct"
+              : "—";
 
-      const amount =
-        h.amount === null
-          ? "—"
-          : `${
-              h.direction === "out"
-                ? "−"
-                : h.direction ===
-                    "in"
-                  ? "+"
-                  : ""
-            }${money(
-              cents(h.amount),
-            )}`;
+        const amount =
+          h.amount === null
+            ? "—"
+            : `${
+                h.direction === "out" ? "−" : h.direction === "in" ? "+" : ""
+              }${money(cents(h.amount))}`;
 
-      const author =
-        h.author_id
-          ? data.authors[
-              h.author_id
-            ] ||
-            "Auteur non disponible"
+        const author = h.author_id
+          ? data.authors[h.author_id] || "Auteur non disponible"
           : "Système";
 
-      const typeLabel =
-        h.type === "payment"
-          ? h.origin ===
-            "partner"
-            ? "Paiement partenaire"
-            : "Paiement client"
-          : historyTypeLabel[
-              h.type
-            ];
+        const typeLabel =
+          h.type === "payment"
+            ? h.origin === "partner"
+              ? "Paiement partenaire"
+              : "Paiement client"
+            : historyTypeLabel[h.type];
 
-      return {
-        id: h.id,
+        return {
+          id: h.id,
 
-        search: [
-          originLabel,
-          h.partner_name ?? "",
-          typeLabel,
-          h.title,
-          h.description,
-          h.request_code ?? "",
-          h.insurance_company_id
-            ? companyName(
-                h.insurance_company_id,
-              )
-            : "",
-          author,
-        ].join(" "),
+          search: [
+            originLabel,
+            h.partner_name ?? "",
+            typeLabel,
+            h.title,
+            h.description,
+            h.request_code ?? "",
+            h.insurance_company_id ? companyName(h.insurance_company_id) : "",
+            author,
+          ].join(" "),
 
-        cells: [
-          new Date(
+          cells: [
+            new Date(h.occurred_at).toLocaleString("fr-FR", {
+              timeZone: "Europe/Istanbul",
+            }),
+
+            originLabel,
+
+            typeLabel,
+
+            h.insurance_company_id ? companyName(h.insurance_company_id) : "—",
+
+            h.request_code || "—",
+
+            h.description,
+
+            amount,
+
+            author,
+          ],
+
+          exportValues: [
             h.occurred_at,
-          ).toLocaleString(
-            "fr-FR",
-            {
-              timeZone:
-                "Europe/Istanbul",
-            },
-          ),
 
-          originLabel,
+            originLabel,
 
-          typeLabel,
+            typeLabel,
 
-          h.insurance_company_id
-            ? companyName(
-                h.insurance_company_id,
-              )
-            : "—",
+            h.insurance_company_id ? companyName(h.insurance_company_id) : "",
 
-          h.request_code ||
-            "—",
+            h.request_code ?? "",
 
-          h.description,
+            h.description,
 
-          amount,
+            h.amount ?? "",
 
-          author,
-        ],
+            h.direction,
 
-        exportValues: [
-          h.occurred_at,
-
-          originLabel,
-
-          typeLabel,
-
-          h.insurance_company_id
-            ? companyName(
-                h.insurance_company_id,
-              )
-            : "",
-
-          h.request_code ?? "",
-
-          h.description,
-
-          h.amount ?? "",
-
-          h.direction,
-
-          author,
-        ],
-      };
-    });
-}
+            author,
+          ],
+        };
+      });
+  }
   const filtered = rows.filter((r) =>
-      r.search.toLocaleLowerCase("fr").includes(q.trim().toLocaleLowerCase("fr")),
+      r.search
+        .toLocaleLowerCase("fr")
+        .includes(q.trim().toLocaleLowerCase("fr")),
     ),
     pages = Math.max(1, Math.ceil(filtered.length / 12)),
     current = Math.min(page, pages),
@@ -486,7 +608,8 @@ export default function Dashboard({
               {selectedCompany ? selectedCompany.name : "Comptabilité"}
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              Une vue claire de vos encaissements, de vos marges et de vos avances.
+              Une vue claire de vos encaissements, de vos marges et de vos
+              avances.
             </p>
             {initialCompany && (
               <Link
@@ -509,14 +632,46 @@ export default function Dashboard({
               Actualiser
             </button>
             <button
-              onClick={() => setEditor({ mode: "deposit", company: selectedCompany })}
+              onClick={() =>
+                setEditor({ mode: "deposit", company: selectedCompany })
+              }
               className="flex min-h-10 items-center gap-2 rounded-lg bg-emerald-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
             >
               <Plus size={17} />
               Enregistrer un dépôt
             </button>
+            <button
+              onClick={() =>
+                setEditor({ mode: "withdrawal", company: selectedCompany })
+              }
+              disabled={!withdrawalsReady}
+              title={
+                withdrawalsReady ? undefined : "Mise à jour de la base requise"
+              }
+              className={`${control} font-semibold text-rose-800 disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              Enregistrer un retrait
+            </button>
           </div>
         </header>
+        {!!data.missingTables?.length && (
+          <p
+            role="alert"
+            className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"
+          >
+            La mise à jour de la base est nécessaire pour activer{" "}
+            {data.missingTables.includes("insurance_company_withdrawals")
+              ? "les retraits assureur"
+              : "les tarifs Skyline Congo-Brazzaville"}
+            {data.missingTables.length > 1
+              ? " et les tarifs Skyline Congo-Brazzaville"
+              : ""}
+            .
+            {!withdrawalsReady &&
+              " Les soldes incluant les retraits restent à compléter jusqu’à cette activation."}
+            {" Les autres données comptables restent consultables."}
+          </p>
+        )}
         {notice && (
           <p
             role="status"
@@ -597,12 +752,15 @@ export default function Dashboard({
         </section>
         {invalid ? (
           <div role="alert" className="rounded-xl bg-rose-50 p-5 text-rose-900">
-            La date de début doit précéder la date de fin. Corrigez la période pour consulter les
-            résultats.
+            La date de début doit précéder la date de fin. Corrigez la période
+            pour consulter les résultats.
           </div>
         ) : (
           <>
-            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicateurs">
+            <section
+              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+              aria-label="Indicateurs"
+            >
               <Kpi
                 title="Encaissements confirmés"
                 value={money(report.collected)}
@@ -644,9 +802,12 @@ export default function Dashboard({
                 >
                   <TriangleAlert size={20} className="shrink-0" />
                   <span>
-                    <strong>{report.anomalies.length} point(s) à rapprocher</strong>
+                    <strong>
+                      {report.anomalies.length} point(s) à rapprocher
+                    </strong>
                     <span className="ml-2 text-amber-800">
-                      Coûts, paiements ou informations incomplets · tous les dossiers de l’assureur
+                      Coûts, paiements ou informations incomplets · tous les
+                      dossiers de l’assureur
                     </span>
                   </span>
                   <span className="ml-auto shrink-0 font-semibold">
@@ -694,40 +855,61 @@ export default function Dashboard({
                       Cumul {to ? dateLabel(to) : "à ce jour"}
                     </span>
                   </div>
-                  <div className="grid gap-5 sm:grid-cols-3">
-                    <Amount label="Avances versées" value={report.cumulativeDeposits} />
-                    <Amount label="− Coûts des polices disponibles" value={report.consumed} />
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Amount
+                      label="Avances versées"
+                      value={report.cumulativeDeposits}
+                    />
+                    <Amount
+                      label="− Coûts des polices disponibles"
+                      value={report.consumed}
+                    />
+                    <Amount
+                      label="− Retraits nets"
+                      value={report.cumulativeWithdrawals}
+                    />
                     <Amount label="= Solde estimé" value={report.balance} />
                   </div>
                   <p className="mt-5 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
-                    Les coûts sont rattachés à la date de sélection de l’assureur. Le solde est
-                    estimatif et ne remplace pas le relevé de la compagnie.
+                    Les coûts sont rattachés à la date de sélection de
+                    l’assureur. Le solde est estimatif et ne remplace pas le
+                    relevé de la compagnie.
                     {to
                       ? " Il porte sur les dossiers actuellement disponibles dont l’assureur était sélectionné à cette date ; ce n’est pas un arrêté historique."
                       : ""}
                   </p>
                 </article>
                 <article className="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-2">
-                  <h2 className="mb-5 text-base font-bold text-slate-950">À suivre</h2>
+                  <h2 className="mb-5 text-base font-bold text-slate-950">
+                    À suivre
+                  </h2>
                   <div className="space-y-4">
                     <div className="flex justify-between gap-3 text-sm">
-                      <span className="text-slate-500">Dépôts sur la période</span>
+                      <span className="text-slate-500">
+                        Dépôts sur la période
+                      </span>
                       <strong>{money(report.depositFlow)}</strong>
                     </div>
                     <div className="flex justify-between gap-3 text-sm">
-                      <span className="text-slate-500">Coûts en préparation, à ce jour</span>
+                      <span className="text-slate-500">
+                        Coûts en préparation, à ce jour
+                      </span>
                       <strong>{money(report.committed)}</strong>
                     </div>
                     <div className="flex justify-between gap-3 text-sm">
-                      <span className="text-slate-500">Polices sans coût renseigné</span>
-                      <strong className={report.missingCosts ? "text-amber-700" : ""}>
+                      <span className="text-slate-500">
+                        Polices sans coût renseigné
+                      </span>
+                      <strong
+                        className={report.missingCosts ? "text-amber-700" : ""}
+                      >
                         {report.missingCosts}
                       </strong>
                     </div>
                   </div>
                   <p className="mt-5 text-xs leading-5 text-slate-500">
-                    Les coûts en préparation sont présentés séparément et ne sont pas déduits une
-                    seconde fois.
+                    Les coûts en préparation sont présentés séparément et ne
+                    sont pas déduits une seconde fois.
                   </p>
                 </article>
               </section>
@@ -745,14 +927,17 @@ export default function Dashboard({
                     {tab === "rates"
                       ? "Une ligne par durée. Les tarifs absents ne sont jamais affichés à zéro."
                       : tab === "history"
-                        ? "Journal des dépôts, paiements, polices et modifications tarifaires."
+                        ? "Journal des dépôts, retraits, annulations, paiements, polices et modifications tarifaires."
                         : `${filtered.length} ligne(s) · montants en livres turques`}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="relative">
                     <span className="sr-only">Rechercher dans la liste</span>
-                    <Search className="absolute left-3 top-3 text-slate-400" size={15} />
+                    <Search
+                      className="absolute left-3 top-3 text-slate-400"
+                      size={15}
+                    />
                     <input
                       value={q}
                       onChange={(e) => {
@@ -763,7 +948,10 @@ export default function Dashboard({
                       className={`${control} w-48 pl-9`}
                     />
                   </label>
-                  <button onClick={download} className={`${control} flex items-center gap-2`}>
+                  <button
+                    onClick={download}
+                    className={`${control} flex items-center gap-2`}
+                  >
                     <Download size={15} />
                     Exporter
                   </button>
@@ -790,7 +978,11 @@ export default function Dashboard({
                       <thead className="bg-slate-50 text-xs font-semibold text-slate-500">
                         <tr>
                           {headers.map((h) => (
-                            <th scope="col" key={h} className="whitespace-nowrap px-5 py-3.5">
+                            <th
+                              scope="col"
+                              key={h}
+                              className="whitespace-nowrap px-5 py-3.5"
+                            >
                               {h}
                             </th>
                           ))}
@@ -800,7 +992,10 @@ export default function Dashboard({
                         {shown.map((r) => (
                           <tr key={r.id} className="hover:bg-slate-50/70">
                             {r.cells.map((cell, i) => (
-                              <td key={i} className="max-w-xs px-5 py-4 align-middle break-words">
+                              <td
+                                key={i}
+                                className="max-w-xs px-5 py-4 align-middle break-words"
+                              >
                                 {cell}
                               </td>
                             ))}
@@ -811,10 +1006,15 @@ export default function Dashboard({
                   </div>
                   <div className="divide-y divide-slate-100 md:hidden">
                     {shown.map((r) => (
-                      <article key={r.id} className="grid grid-cols-2 gap-4 p-5">
+                      <article
+                        key={r.id}
+                        className="grid grid-cols-2 gap-4 p-5"
+                      >
                         {r.cells.map((cell, i) => (
                           <div key={i} className={i === 0 ? "col-span-2" : ""}>
-                            <p className="mb-1 text-xs text-slate-500">{headers[i]}</p>
+                            <p className="mb-1 text-xs text-slate-500">
+                              {headers[i]}
+                            </p>
                             <div className="break-words text-sm">{cell}</div>
                           </div>
                         ))}
@@ -824,10 +1024,16 @@ export default function Dashboard({
                 </>
               ) : (
                 <div className="px-6 py-14 text-center">
-                  <Building2 className="mx-auto mb-3 text-slate-300" size={32} />
-                  <p className="font-semibold text-slate-700">Aucune ligne à afficher</p>
+                  <Building2
+                    className="mx-auto mb-3 text-slate-300"
+                    size={32}
+                  />
+                  <p className="font-semibold text-slate-700">
+                    Aucune ligne à afficher
+                  </p>
                   <p className="mt-2 text-sm text-slate-500">
-                    Modifiez vos filtres ou enregistrez votre première opération.
+                    Modifiez vos filtres ou enregistrez votre première
+                    opération.
                   </p>
                   {tab === "overview" && (
                     <button
@@ -875,47 +1081,64 @@ export default function Dashboard({
               </summary>
               <div className="mt-4 grid gap-4 leading-6 text-slate-500 sm:grid-cols-2">
                 <p>
-                  Les encaissements utilisent les montants attendus des paiements confirmés, à leur
-                  date de confirmation. Vérifiez les écarts éventuels avec les relevés bancaires.
+                  Les encaissements utilisent les montants attendus des
+                  paiements confirmés, à leur date de confirmation. Vérifiez les
+                  écarts éventuels avec les relevés bancaires.
                 </p>
                 <p>
-                  Le CA et le bénéfice portent sur les dossiers actuellement disponibles dont le
-                  paiement est confirmé pendant la période. Le coût enregistré de ces dossiers est
-                  déduit une seule fois. Les frais généraux et remboursements non enregistrés ne
-                  sont pas inclus.
+                  Le CA et le bénéfice portent sur les dossiers actuellement
+                  disponibles dont le paiement est confirmé pendant la période.
+                  Le coût enregistré de ces dossiers est déduit une seule fois.
+                  Les frais généraux et remboursements non enregistrés ne sont
+                  pas inclus.
                 </p>
                 <p>
-                  Les avances utilisent la date du dépôt. Le solde cumulé ignore la date de début.
-                  Une date ou un coût manquant empêche de présenter un solde complet.
+                  Les avances utilisent la date du dépôt. Le solde cumulé ignore
+                  la date de début. Une date ou un coût manquant empêche de
+                  présenter un solde complet.
                 </p>
                 <p>
-  L’historique regroupe les dépôts
-  assureurs, les paiements clients directs,
-  les paiements provenant de partenaires,
-  les assurances mises à disposition et
-  les modifications tarifaires. Pour les
-  dossiers partenaires, le nom du partenaire
-  est affiché afin de distinguer clairement
-  leur origine. Les exports contiennent toutes
-  les lignes correspondant à la recherche,
-  pas uniquement la page affichée.
-</p>
+                  L’historique regroupe les dépôts assureurs, les paiements
+                  clients directs, les paiements provenant de partenaires, les
+                  assurances mises à disposition et les modifications
+                  tarifaires. Pour les dossiers partenaires, le nom du
+                  partenaire est affiché afin de distinguer clairement leur
+                  origine. Les exports contiennent toutes les lignes
+                  correspondant à la recherche, pas uniquement la page affichée.
+                </p>
               </div>
             </details>
           </>
         )}
         <p className="pb-4 text-xs text-slate-400">
           Données actualisées le{" "}
-          {new Date(data.loadedAt).toLocaleString("fr-FR", { timeZone: "Europe/Istanbul" })} · Accès
-          réservé à l’administration
+          {new Date(data.loadedAt).toLocaleString("fr-FR", {
+            timeZone: "Europe/Istanbul",
+          })}{" "}
+          · Accès réservé à l’administration
         </p>
         {editor && (
           <Editor
             key={`${editor.mode}-${editor.rate?.id ?? editor.company?.id ?? ""}`}
             {...editor}
             companies={data.companies}
+            balances={Object.fromEntries(
+              data.companies.map((c) => {
+                const r = accounting(data, { from: "", to: "", company: c.id });
+                return [
+                  c.id,
+                  r.balance === null || r.committed === null
+                    ? null
+                    : r.balance - r.committed,
+                ];
+              }),
+            )}
             onClose={() => setEditor(null)}
-            onSaved={() => setNotice("Enregistrement confirmé. Les données ont été actualisées.")}
+            onSaved={() =>
+              setNotice(
+                "Enregistrement confirmé. Les données ont été actualisées.",
+              )
+            }
           />
         )}
       </div>
@@ -945,8 +1168,12 @@ function Kpi({
         <h2>{title}</h2>
         {icon}
       </div>
-      <p className="mt-4 break-words text-3xl font-bold tracking-tight tabular-nums">{value}</p>
-      <p className={`mt-3 text-xs leading-5 ${dark ? "text-emerald-100/75" : "text-slate-500"}`}>
+      <p className="mt-4 break-words text-3xl font-bold tracking-tight tabular-nums">
+        {value}
+      </p>
+      <p
+        className={`mt-3 text-xs leading-5 ${dark ? "text-emerald-100/75" : "text-slate-500"}`}
+      >
         {caption}
       </p>
     </article>
@@ -956,29 +1183,47 @@ function Amount({ label, value }: { label: string; value: number | null }) {
   return (
     <div>
       <p className="text-xs leading-5 text-slate-500">{label}</p>
-      <p className="mt-2 text-xl font-bold tabular-nums text-slate-900">{money(value)}</p>
+      <p className="mt-2 text-xl font-bold tabular-nums text-slate-900">
+        {money(value)}
+      </p>
     </div>
   );
 }
 
-function Profitability({ dossiers }: { dossiers: ReturnType<typeof accounting>["realized"] }) {
+function Profitability({
+  dossiers,
+}: {
+  dossiers: ReturnType<typeof accounting>["realized"];
+}) {
   function stats(rows: typeof dossiers) {
     const revenue = rows.some((r) => r.revenue === null)
         ? null
         : rows.reduce((s, r) => s + (r.revenue ?? 0), 0),
-      cost = rows.some((r) => r.cost === null) ? null : rows.reduce((s, r) => s + (r.cost ?? 0), 0);
-    return { revenue, cost, profit: revenue === null || cost === null ? null : revenue - cost };
+      cost = rows.some((r) => r.cost === null)
+        ? null
+        : rows.reduce((s, r) => s + (r.cost ?? 0), 0);
+    return {
+      revenue,
+      cost,
+      profit: revenue === null || cost === null ? null : revenue - cost,
+    };
   }
-  const ages = Array.from(new Set(dossiers.map((r) => r.ageGroup))).sort((a, b) =>
-    a.localeCompare(b, "fr", { numeric: true }),
+  const ages = Array.from(new Set(dossiers.map((r) => r.ageGroup))).sort(
+    (a, b) => a.localeCompare(b, "fr", { numeric: true }),
   );
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-6">
-      <h2 className="text-base font-bold text-slate-950">Rentabilité des polices disponibles</h2>
-      <p className="mt-1 text-xs text-slate-500">Dossiers payés sur la période sélectionnée.</p>
+      <h2 className="text-base font-bold text-slate-950">
+        Rentabilité des polices disponibles
+      </h2>
+      <p className="mt-1 text-xs text-slate-500">
+        Dossiers payés sur la période sélectionnée.
+      </p>
       <div className="mt-5 grid gap-5 sm:grid-cols-2">
         {[1, 2].map((duration) => {
-          const rows = dossiers.filter((r) => r.insurance_duration_years === duration),
+          const rows = dossiers.filter(
+              (r) => r.insurance_duration_years === duration,
+            ),
             s = stats(rows);
           return (
             <article key={duration} className="rounded-xl bg-slate-50 p-4">
@@ -1001,25 +1246,34 @@ function Profitability({ dossiers }: { dossiers: ReturnType<typeof accounting>["
           Répartition par âge enregistré
         </summary>
         <p className="mt-2 text-xs text-slate-500">
-          Catégories fixes de dix ans, indépendantes des modifications de tarifs.
+          Catégories fixes de dix ans, indépendantes des modifications de
+          tarifs.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {ages.map((age) => {
             const rows = dossiers.filter((r) => r.ageGroup === age),
               s = stats(rows);
             return (
-              <div key={age} className="rounded-lg border border-slate-200 p-3 text-sm">
+              <div
+                key={age}
+                className="rounded-lg border border-slate-200 p-3 text-sm"
+              >
                 <div className="flex justify-between gap-3">
                   <strong>{age}</strong>
                   <span>{rows.length} dossier(s)</span>
                 </div>
                 <p className="mt-2 text-slate-500">
-                  Bénéfice : <strong className="text-slate-800">{money(s.profit)}</strong>
+                  Bénéfice :{" "}
+                  <strong className="text-slate-800">{money(s.profit)}</strong>
                 </p>
               </div>
             );
           })}
-          {!ages.length && <p className="text-sm text-slate-500">Aucune police sur la période.</p>}
+          {!ages.length && (
+            <p className="text-sm text-slate-500">
+              Aucune police sur la période.
+            </p>
+          )}
         </div>
       </details>
     </section>

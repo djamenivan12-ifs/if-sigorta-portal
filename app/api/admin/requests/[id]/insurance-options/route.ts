@@ -1,14 +1,20 @@
 import {
-  NextResponse,
-} from "next/server";
-
+  hasQuoteSchema,
+  type RequestPricingSnapshot,
+} from "@/lib/insurance/quoteSchema";
+import { isSkyline } from "@/lib/insurance/nationality";
+import { day } from "@/lib/accounting/model";
 import {
-  requireApiRole,
-} from "@/lib/auth/requireApiRole";
+  skylineNationalityRate,
+  isCongoBrazzaville,
+  nationalityAmounts,
+  type NationalityRate,
+} from "@/lib/insurance/nationalityRates";
+import { NextResponse } from "next/server";
 
-import {
-  createServiceClient,
-} from "@/lib/supabase/service";
+import { requireApiRole } from "@/lib/auth/requireApiRole";
+
+import { createServiceClient } from "@/lib/supabase/service";
 
 type RouteContext = {
   params: Promise<{
@@ -17,97 +23,55 @@ type RouteContext = {
 };
 
 function getTurkeyDateString() {
-  const parts =
-    new Intl.DateTimeFormat(
-      "en-GB",
-      {
-        timeZone:
-          "Europe/Istanbul",
-        year:
-          "numeric",
-        month:
-          "2-digit",
-        day:
-          "2-digit",
-      },
-    ).formatToParts(
-      new Date(),
-    );
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
 
-  const year =
-    parts.find(
-      (part) =>
-        part.type === "year",
-    )?.value ?? "";
+  const year = parts.find((part) => part.type === "year")?.value ?? "";
 
-  const month =
-    parts.find(
-      (part) =>
-        part.type === "month",
-    )?.value ?? "";
+  const month = parts.find((part) => part.type === "month")?.value ?? "";
 
-  const day =
-    parts.find(
-      (part) =>
-        part.type === "day",
-    )?.value ?? "";
+  const day = parts.find((part) => part.type === "day")?.value ?? "";
 
   return `${year}-${month}-${day}`;
 }
 
-export async function GET(
-  _request: Request,
-  context: RouteContext,
-) {
+export async function GET(_request: Request, context: RouteContext) {
   try {
-    const apiAuth = await requireApiRole([
-        "agent",
-        "admin",
-      ]);
+    const apiAuth = await requireApiRole(["agent", "admin"]);
     if (!apiAuth.success) return apiAuth.response;
     const { user } = apiAuth;
 
-    const {
-      id,
-    } =
-      await context.params;
+    const { id } = await context.params;
 
-    const serviceClient =
-      createServiceClient();
+    const serviceClient = createServiceClient();
 
-    const {
-      data:
-        insuranceRequest,
-      error:
-        requestError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .select(
-          `
+    const quoteSchemaReady = await hasQuoteSchema(serviceClient);
+    const { data: insuranceRequest, error: requestError } = await serviceClient
+      .from("insurance_requests")
+      .select(
+        `
             id,
             status,
             assigned_agent_id,
             calculated_age,
-            insurance_duration_years
+            insurance_duration_years,
+            created_at,client:clients(nationality)
+            ${quoteSchemaReady ? ",quote_nationality,nationality_rate_id" : ""}
           `,
-        )
-        .eq(
-          "id",
-          id,
-        )
-        .maybeSingle();
+      )
+      .eq("id", id)
+      .maybeSingle()
+      .overrideTypes<RequestPricingSnapshot | null, { merge: false }>();
 
-    if (
-      requestError
-    ) {
+    if (requestError) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            requestError.message,
+          error: requestError.message,
         },
         {
           status: 500,
@@ -115,14 +79,11 @@ export async function GET(
       );
     }
 
-    if (
-      !insuranceRequest
-    ) {
+    if (!insuranceRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Dossier introuvable.",
+          error: "Dossier introuvable.",
         },
         {
           status: 404,
@@ -130,22 +91,13 @@ export async function GET(
       );
     }
 
-    const role =
-      user.app_metadata
-        ?.role;
+    const role = user.app_metadata?.role;
 
-    if (
-      role ===
-        "agent" &&
-      insuranceRequest
-        .assigned_agent_id !==
-        user.id
-    ) {
+    if (role === "agent" && insuranceRequest.assigned_agent_id !== user.id) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Vous ne pouvez pas traiter ce dossier.",
+          error: "Vous ne pouvez pas traiter ce dossier.",
         },
         {
           status: 403,
@@ -153,11 +105,7 @@ export async function GET(
       );
     }
 
-    if (
-      insuranceRequest
-        .status !==
-      "payment_confirmed"
-    ) {
+    if (insuranceRequest.status !== "payment_confirmed") {
       return NextResponse.json(
         {
           success: false,
@@ -170,29 +118,15 @@ export async function GET(
       );
     }
 
-    const age =
-      Number(
-        insuranceRequest
-          .calculated_age,
-      );
+    const age = Number(insuranceRequest.calculated_age);
 
-    const durationYears =
-      Number(
-        insuranceRequest
-          .insurance_duration_years,
-      );
+    const durationYears = Number(insuranceRequest.insurance_duration_years);
 
-    if (
-      !Number.isInteger(
-        age,
-      ) ||
-      age < 0
-    ) {
+    if (!Number.isInteger(age) || age < 0) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "L’âge calculé du client est invalide.",
+          error: "L’âge calculé du client est invalide.",
         },
         {
           status: 400,
@@ -200,15 +134,11 @@ export async function GET(
       );
     }
 
-    if (
-      durationYears !== 1 &&
-      durationYears !== 2
-    ) {
+    if (durationYears !== 1 && durationYears !== 2) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "La durée d’assurance est invalide.",
+          error: "La durée d’assurance est invalide.",
         },
         {
           status: 400,
@@ -216,44 +146,26 @@ export async function GET(
       );
     }
 
-    const today =
-      getTurkeyDateString();
+    const today = getTurkeyDateString();
 
-    const {
-      data: companies,
-      error:
-        companiesError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_companies",
-        )
-        .select(
-          `
+    const { data: companies, error: companiesError } = await serviceClient
+      .from("insurance_companies")
+      .select(
+        `
             id,
             name
           `,
-        )
-        .eq(
-          "is_active",
-          true,
-        )
-        .order(
-          "name",
-          {
-            ascending:
-              true,
-          },
-        );
+      )
+      .eq("is_active", true)
+      .order("name", {
+        ascending: true,
+      });
 
-    if (
-      companiesError
-    ) {
+    if (companiesError) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            companiesError.message,
+          error: companiesError.message,
         },
         {
           status: 500,
@@ -261,34 +173,46 @@ export async function GET(
       );
     }
 
-    if (
-      !companies ||
-      companies.length ===
-        0
-    ) {
+    if (!companies || companies.length === 0) {
       return NextResponse.json({
         success: true,
         insurers: [],
       });
     }
 
-    const companyIds =
-      companies.map(
-        (company) =>
-          company.id,
+    const client = Array.isArray(insuranceRequest.client)
+      ? insuranceRequest.client[0]
+      : insuranceRequest.client;
+    const nationality =
+      insuranceRequest.quote_nationality ?? client?.nationality;
+    let nationalityRate: NationalityRate | null = null;
+    if (insuranceRequest.nationality_rate_id) {
+      const stored = await serviceClient
+        .from("insurance_nationality_rates")
+        .select("*")
+        .eq("id", insuranceRequest.nationality_rate_id)
+        .maybeSingle();
+      if (stored.error || !stored.data)
+        throw new Error("La grille du devis est indisponible.");
+      nationalityRate = stored.data;
+    } else if (
+      insuranceRequest.quote_nationality != null &&
+      isCongoBrazzaville(nationality) &&
+      day(insuranceRequest.created_at) >= "2026-09-17"
+    ) {
+      nationalityRate = await skylineNationalityRate(
+        age,
+        nationality,
+        new Date(insuranceRequest.created_at),
       );
+    }
 
-    const {
-      data: rates,
-      error:
-        ratesError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_cost_rates",
-        )
-        .select(
-          `
+    const companyIds = companies.map((company) => company.id);
+
+    const { data: rates, error: ratesError } = await serviceClient
+      .from("insurance_cost_rates")
+      .select(
+        `
             id,
             insurance_company_id,
             min_age,
@@ -298,54 +222,25 @@ export async function GET(
             effective_from,
             created_at
           `,
-        )
-        .in(
-          "insurance_company_id",
-          companyIds,
-        )
-        .eq(
-          "is_active",
-          true,
-        )
-        .eq(
-          "duration_years",
-          durationYears,
-        )
-        .lte(
-          "min_age",
-          age,
-        )
-        .gte(
-          "max_age",
-          age,
-        )
-        .lte(
-          "effective_from",
-          today,
-        )
-        .order(
-          "effective_from",
-          {
-            ascending:
-              false,
-          },
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              false,
-          },
-        );
+      )
+      .in("insurance_company_id", companyIds)
+      .eq("is_active", true)
+      .eq("duration_years", durationYears)
+      .lte("min_age", age)
+      .gte("max_age", age)
+      .lte("effective_from", today)
+      .order("effective_from", {
+        ascending: false,
+      })
+      .order("created_at", {
+        ascending: false,
+      });
 
-    if (
-      ratesError
-    ) {
+    if (ratesError) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            ratesError.message,
+          error: ratesError.message,
         },
         {
           status: 500,
@@ -353,85 +248,67 @@ export async function GET(
       );
     }
 
-    const latestRateByCompany =
-      new Map<
-        string,
-        {
-          realCost: number;
-          effectiveFrom: string;
-        }
-      >();
+    const latestRateByCompany = new Map<
+      string,
+      {
+        realCost: number;
+        effectiveFrom: string;
+      }
+    >();
 
-    for (
-      const rate of
-        rates ?? []
-    ) {
-      if (
-        latestRateByCompany.has(
-          rate
-            .insurance_company_id,
-        )
-      ) {
+    for (const rate of rates ?? []) {
+      if (latestRateByCompany.has(rate.insurance_company_id)) {
         continue;
       }
 
-      const realCost =
-        Number(
-          rate.real_cost,
-        );
+      const realCost = Number(rate.real_cost);
 
-      if (
-        !Number.isFinite(
-          realCost,
-        ) ||
-        realCost < 0
-      ) {
+      if (!Number.isFinite(realCost) || realCost < 0) {
         continue;
       }
 
-      latestRateByCompany.set(
-        rate
-          .insurance_company_id,
-        {
-          realCost,
+      latestRateByCompany.set(rate.insurance_company_id, {
+        realCost,
 
-          effectiveFrom:
-            rate.effective_from,
-        },
-      );
+        effectiveFrom: rate.effective_from,
+      });
     }
 
-    const insurers =
-      companies
-        .filter(
-          (company) =>
-            latestRateByCompany.has(
-              company.id,
-            ),
-        )
-        .map(
-          (company) => ({
-            id:
-              company.id,
-            name:
-              company.name,
-          }),
-        );
+    if (nationalityRate)
+      latestRateByCompany.set(nationalityRate.insurance_company_id, {
+        realCost: nationalityAmounts(nationalityRate, durationYears as 1 | 2)
+          .cost,
+        effectiveFrom: nationalityRate.effective_from,
+      });
+    const insurers = companies
+      .filter(
+        (company) =>
+          latestRateByCompany.has(company.id) &&
+          (!insuranceRequest.nationality_rate_id ||
+            company.id === nationalityRate?.insurance_company_id) &&
+          !(
+            insuranceRequest.quote_nationality != null &&
+            isCongoBrazzaville(nationality) &&
+            day(insuranceRequest.created_at) >= "2026-09-17" &&
+            isSkyline(company.name) &&
+            !nationalityRate
+          ),
+      )
+      .map((company) => ({
+        id: company.id,
+        name: company.name,
+      }));
 
     return NextResponse.json({
       success: true,
       insurers,
     });
-  } catch (
-    error
-  ) {
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
         error:
-          error instanceof Error
-            ? error.message
-            : "Une erreur est survenue.",
+          error instanceof Error ? error.message : "Une erreur est survenue.",
       },
       {
         status: 500,

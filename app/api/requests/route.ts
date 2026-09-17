@@ -1,35 +1,24 @@
+import { hasQuoteSchema } from "@/lib/insurance/quoteSchema";
 import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
 import { isValidDate } from "@/lib/validation/date";
 import { NextResponse } from "next/server";
 
 import { logActivity } from "@/lib/activity/logActivity";
 import { calculateInsurancePriceServer } from "@/lib/insurance/calculatePriceServer";
-import {
-  consumeRateLimit,
-  getClientIp,
-} from "@/lib/security/rateLimit";
+import { consumeRateLimit, getClientIp } from "@/lib/security/rateLimit";
 import { createServiceClient } from "@/lib/supabase/service";
 
 const BUCKET_NAME = "insurance-documents";
 
-const ALLOWED_FILE_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-];
+const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 
-const MAX_FILE_SIZE =
-  10 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const IP_RATE_LIMIT = 8;
 
-const IP_RATE_LIMIT_WINDOW_SECONDS =
-  10 * 60;
+const IP_RATE_LIMIT_WINDOW_SECONDS = 10 * 60;
 
-type DocumentType =
-  | "passport"
-  | "kimlik_front"
-  | "kimlik_back";
+type DocumentType = "passport" | "kimlik_front" | "kimlik_back";
 
 type RequestPayload = {
   preferredLanguage: "fr" | "en" | "tr";
@@ -91,9 +80,7 @@ type PreparedDocument = {
   fileSize: number;
 };
 
-function rateLimitedResponse(
-  retryAfterSeconds: number,
-) {
+function rateLimitedResponse(retryAfterSeconds: number) {
   return NextResponse.json(
     {
       success: false,
@@ -103,126 +90,78 @@ function rateLimitedResponse(
     {
       status: 429,
       headers: {
-        "Retry-After": String(
-          Math.max(
-            1,
-            retryAfterSeconds,
-          ),
-        ),
-        "Cache-Control":
-          "no-store",
+        "Retry-After": String(Math.max(1, retryAfterSeconds)),
+        "Cache-Control": "no-store",
       },
     },
   );
 }
 
-function isDocumentType(
-  value: unknown,
-): value is DocumentType {
+function isDocumentType(value: unknown): value is DocumentType {
   return (
-    value === "passport" ||
-    value === "kimlik_front" ||
-    value === "kimlik_back"
+    value === "passport" || value === "kimlik_front" || value === "kimlik_back"
   );
 }
 
-function isValidUploadSessionId(
-  value: unknown,
-): value is string {
-  return (
-    typeof value === "string" &&
-    /^[a-f0-9-]{36}$/i.test(
-      value,
-    )
-  );
+function isValidUploadSessionId(value: unknown): value is string {
+  return typeof value === "string" && /^[a-f0-9-]{36}$/i.test(value);
 }
 
 function validateUploadedDocument(
   document: UploadedDocumentPayload,
   uploadSessionId: string,
 ) {
-  if (
-    !isDocumentType(
-      document.documentType,
-    )
-  ) {
-    throw new Error(
-      "Type de document invalide.",
-    );
+  if (!isDocumentType(document.documentType)) {
+    throw new Error("Type de document invalide.");
   }
 
   if (
     !document.originalFileName ||
-    typeof document.originalFileName !==
-      "string"
+    typeof document.originalFileName !== "string"
   ) {
-    throw new Error(
-      "Nom de fichier manquant.",
-    );
+    throw new Error("Nom de fichier manquant.");
   }
 
-  if (
-    !ALLOWED_FILE_TYPES.includes(
-      document.mimeType,
-    )
-  ) {
+  if (!ALLOWED_FILE_TYPES.includes(document.mimeType)) {
     throw new Error(
       `${document.documentType} : format non accepté. Utilisez PDF, JPG, JPEG ou PNG.`,
     );
   }
 
-  if (
-    !Number.isFinite(
-      document.fileSize,
-    ) ||
-    document.fileSize <= 0
-  ) {
+  if (!Number.isFinite(document.fileSize) || document.fileSize <= 0) {
     throw new Error(
       `${document.documentType} : le fichier est vide ou invalide.`,
     );
   }
 
-  if (
-    document.fileSize >
-    MAX_FILE_SIZE
-  ) {
+  if (document.fileSize > MAX_FILE_SIZE) {
     throw new Error(
       `${document.documentType} : le fichier ne doit pas dépasser 10 Mo.`,
     );
   }
 
-  const expectedPrefix =
-    `pending/${uploadSessionId}/${document.documentType}/`;
+  const expectedPrefix = `pending/${uploadSessionId}/${document.documentType}/`;
 
   if (
     !document.storagePath ||
-    !document.storagePath.startsWith(
-      expectedPrefix,
-    )
+    !document.storagePath.startsWith(expectedPrefix)
   ) {
-    throw new Error(
-      "Chemin de document invalide.",
-    );
+    throw new Error("Chemin de document invalide.");
   }
 }
 
-
-
 function getTodayDate(): string {
-  return new Date()
-    .toISOString()
-    .split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function generateRequestCode(): string {
-  const year =
-    new Date().getFullYear();
+  const year = new Date().getFullYear();
 
-  const randomPart =
-    crypto.randomUUID()
-      .replace(/-/g, "")
-      .slice(0, 8)
-      .toUpperCase();
+  const randomPart = crypto
+    .randomUUID()
+    .replace(/-/g, "")
+    .slice(0, 8)
+    .toUpperCase();
 
   return `IF-${year}-${randomPart}`;
 }
@@ -232,58 +171,35 @@ function buildFinalStoragePath(
   document: UploadedDocumentPayload,
 ) {
   const fileName =
-    document.storagePath
-      .split("/")
-      .pop() ||
+    document.storagePath.split("/").pop() ||
     `${Date.now()}-${crypto.randomUUID()}`;
 
   return `${requestId}/${document.documentType}/${fileName}`;
 }
 
-export async function POST(
-  request: Request,
-) {
-  const clientIp =
-    getClientIp(
-      request,
-    );
+export async function POST(request: Request) {
+  const clientIp = getClientIp(request);
 
-  const ipLimit =
-    await consumeRateLimit({
-      namespace:
-        "request-create-ip",
-      identifier:
-        clientIp,
-      limit:
-        IP_RATE_LIMIT,
-      windowSeconds:
-        IP_RATE_LIMIT_WINDOW_SECONDS,
-    });
+  const ipLimit = await consumeRateLimit({
+    namespace: "request-create-ip",
+    identifier: clientIp,
+    limit: IP_RATE_LIMIT,
+    windowSeconds: IP_RATE_LIMIT_WINDOW_SECONDS,
+  });
 
-  if (
-    !ipLimit.allowed
-  ) {
-    return rateLimitedResponse(
-      ipLimit.retryAfterSeconds,
-    );
+  if (!ipLimit.allowed) {
+    return rateLimitedResponse(ipLimit.retryAfterSeconds);
   }
 
-  const serviceClient =
-    createServiceClient();
+  const serviceClient = createServiceClient();
 
-  let createdClientId:
-    | string
-    | null = null;
+  let createdClientId: string | null = null;
 
-  let createdRequestId:
-    | string
-    | null = null;
+  let createdRequestId: string | null = null;
 
-  const pendingStoragePaths:
-    string[] = [];
+  const pendingStoragePaths: string[] = [];
 
-  const movedStoragePaths:
-    string[] = [];
+  const movedStoragePaths: string[] = [];
 
   try {
     /*
@@ -296,28 +212,19 @@ export async function POST(
      * téléversés directement dans
      * Supabase Storage.
      */
-    const body =
-      (await request.json()) as CreateRequestBody;
+    const body = (await request.json()) as CreateRequestBody;
 
-    const payload =
-      body.payload;
+    const payload = body.payload;
 
-    const uploadSessionId =
-      body.uploadSessionId;
+    const uploadSessionId = body.uploadSessionId;
 
-    const documents =
-      Array.isArray(
-        body.documents,
-      )
-        ? body.documents
-        : [];
+    const documents = Array.isArray(body.documents) ? body.documents : [];
 
     if (!payload) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Les données de la demande sont absentes.",
+          error: "Les données de la demande sont absentes.",
         },
         {
           status: 400,
@@ -325,16 +232,11 @@ export async function POST(
       );
     }
 
-    if (
-      !isValidUploadSessionId(
-        uploadSessionId,
-      )
-    ) {
+    if (!isValidUploadSessionId(uploadSessionId)) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "La session de téléversement est invalide.",
+          error: "La session de téléversement est invalide.",
         },
         {
           status: 400,
@@ -342,49 +244,29 @@ export async function POST(
       );
     }
 
-    for (
-      const document of
-      documents
-    ) {
-      validateUploadedDocument(
-        document,
-        uploadSessionId,
-      );
+    for (const document of documents) {
+      validateUploadedDocument(document, uploadSessionId);
 
-      pendingStoragePaths.push(
-        document.storagePath,
-      );
+      pendingStoragePaths.push(document.storagePath);
     }
 
-    const passportDocument =
-      documents.find(
-        (document) =>
-          document.documentType ===
-          "passport",
-      );
+    const passportDocument = documents.find(
+      (document) => document.documentType === "passport",
+    );
 
-    const kimlikFrontDocument =
-      documents.find(
-        (document) =>
-          document.documentType ===
-          "kimlik_front",
-      );
+    const kimlikFrontDocument = documents.find(
+      (document) => document.documentType === "kimlik_front",
+    );
 
-    const kimlikBackDocument =
-      documents.find(
-        (document) =>
-          document.documentType ===
-          "kimlik_back",
-      );
+    const kimlikBackDocument = documents.find(
+      (document) => document.documentType === "kimlik_back",
+    );
 
-    if (
-      !passportDocument
-    ) {
+    if (!passportDocument) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Le passeport est obligatoire.",
+          error: "Le passeport est obligatoire.",
         },
         {
           status: 400,
@@ -392,18 +274,11 @@ export async function POST(
       );
     }
 
-    if (
-      payload.hasKimlik &&
-      (
-        !kimlikFrontDocument ||
-        !kimlikBackDocument
-      )
-    ) {
+    if (payload.hasKimlik && (!kimlikFrontDocument || !kimlikBackDocument)) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Le Kimlik recto et le Kimlik verso sont obligatoires.",
+          error: "Le Kimlik recto et le Kimlik verso sont obligatoires.",
         },
         {
           status: 400,
@@ -417,63 +292,27 @@ export async function POST(
      * ============================
      */
     const preferredLanguage =
-      payload.preferredLanguage ===
-        "en" ||
-      payload.preferredLanguage ===
-        "tr"
+      payload.preferredLanguage === "en" || payload.preferredLanguage === "tr"
         ? payload.preferredLanguage
         : "fr";
 
-    const requestCode =
-      generateRequestCode();
+    const requestCode = generateRequestCode();
 
-    const lastName =
-      payload.lastName
-        ?.trim()
-        .toLocaleUpperCase(
-          "fr-FR",
-        ) ??
-      "";
+    const lastName = payload.lastName?.trim().toLocaleUpperCase("fr-FR") ?? "";
 
     const firstName =
-      payload.firstName
-        ?.trim()
-        .toLocaleUpperCase(
-          "fr-FR",
-        ) ??
-      "";
+      payload.firstName?.trim().toLocaleUpperCase("fr-FR") ?? "";
 
     const fatherName =
-      payload.fatherName
-        ?.trim()
-        .toLocaleUpperCase(
-          "fr-FR",
-        ) ??
-      "";
+      payload.fatherName?.trim().toLocaleUpperCase("fr-FR") ?? "";
 
-    const nationality =
-      payload.nationality
-        ?.trim() ??
-      "";
+    const nationality = payload.nationality?.trim() ?? "";
 
-    const whatsappCountryCode =
-      payload.whatsappCountryCode
-        ?.trim() ??
-      "";
+    const whatsappCountryCode = payload.whatsappCountryCode?.trim() ?? "";
 
-    const whatsappNumber =
-      payload.whatsappNumber
-        ?.replace(
-          /\D/g,
-          "",
-        ) ??
-      "";
+    const whatsappNumber = payload.whatsappNumber?.replace(/\D/g, "") ?? "";
 
-    const passportNumber =
-      payload.passportNumber
-        ?.trim()
-        .toUpperCase() ??
-      "";
+    const passportNumber = payload.passportNumber?.trim().toUpperCase() ?? "";
 
     if (
       !lastName ||
@@ -489,8 +328,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Certaines informations obligatoires sont absentes.",
+          error: "Certaines informations obligatoires sont absentes.",
         },
         {
           status: 400,
@@ -498,17 +336,11 @@ export async function POST(
       );
     }
 
-    if (
-      payload.gender !==
-        "male" &&
-      payload.gender !==
-        "female"
-    ) {
+    if (payload.gender !== "male" && payload.gender !== "female") {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Le sexe renseigné est invalide.",
+          error: "Le sexe renseigné est invalide.",
         },
         {
           status: 400,
@@ -516,15 +348,11 @@ export async function POST(
       );
     }
 
-    if (
-      payload.duration !== 1 &&
-      payload.duration !== 2
-    ) {
+    if (payload.duration !== 1 && payload.duration !== 2) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "La durée de l’assurance est invalide.",
+          error: "La durée de l’assurance est invalide.",
         },
         {
           status: 400,
@@ -536,23 +364,22 @@ export async function POST(
      * Le prix envoyé par le navigateur
      * n'est jamais considéré comme fiable.
      */
-    const serverPriceResult =
-      await calculateInsurancePriceServer(
-        payload.birthDate,
-        payload.duration,
-      );
+    const serverPriceResult = await calculateInsurancePriceServer(
+      payload.birthDate,
+      payload.duration,
+      new Date(),
+      nationality,
+    );
 
     if (
       !serverPriceResult ||
       !serverPriceResult.available ||
-      serverPriceResult.price ===
-        null
+      serverPriceResult.price === null
     ) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Le tarif d’assurance n’est pas disponible pour cet âge.",
+          error: "Le tarif d’assurance n’est pas disponible pour cet âge.",
         },
         {
           status: 400,
@@ -560,22 +387,15 @@ export async function POST(
       );
     }
 
-    const calculatedAge =
-      serverPriceResult.age;
+    const calculatedAge = serverPriceResult.age;
 
-    const calculatedPrice =
-      serverPriceResult.price;
+    const calculatedPrice = serverPriceResult.price;
 
-    if (
-      !isValidDate(
-        payload.birthDate,
-      )
-    ) {
+    if (!isValidDate(payload.birthDate)) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "La date de naissance est invalide.",
+          error: "La date de naissance est invalide.",
         },
         {
           status: 400,
@@ -584,24 +404,16 @@ export async function POST(
     }
 
     if (
-      !payload.address
-        ?.provinceId ||
-      !payload.address
-        ?.districtId ||
-      !payload.address
-        ?.neighborhoodId ||
-      !payload.address
-        ?.street
-        ?.trim() ||
-      !payload.address
-        ?.buildingNumber
-        ?.trim()
+      !payload.address?.provinceId ||
+      !payload.address?.districtId ||
+      !payload.address?.neighborhoodId ||
+      !payload.address?.street?.trim() ||
+      !payload.address?.buildingNumber?.trim()
     ) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "L’adresse complète est obligatoire.",
+          error: "L’adresse complète est obligatoire.",
         },
         {
           status: 400,
@@ -609,27 +421,14 @@ export async function POST(
       );
     }
 
-    if (
-      payload.hasKimlik
-    ) {
-      const kimlikNumber =
-        payload.kimlikNumber
-          ?.replace(
-            /\D/g,
-            "",
-          ) ??
-        "";
+    if (payload.hasKimlik) {
+      const kimlikNumber = payload.kimlikNumber?.replace(/\D/g, "") ?? "";
 
-      if (
-        !/^\d{11}$/.test(
-          kimlikNumber,
-        )
-      ) {
+      if (!/^\d{11}$/.test(kimlikNumber)) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              "Le numéro de Kimlik doit contenir exactement 11 chiffres.",
+            error: "Le numéro de Kimlik doit contenir exactement 11 chiffres.",
           },
           {
             status: 400,
@@ -637,14 +436,11 @@ export async function POST(
         );
       }
 
-      if (
-        !payload.kimlikExpirationDate
-      ) {
+      if (!payload.kimlikExpirationDate) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              "La date d’expiration du Kimlik est obligatoire.",
+            error: "La date d’expiration du Kimlik est obligatoire.",
           },
           {
             status: 400,
@@ -652,16 +448,11 @@ export async function POST(
         );
       }
 
-      if (
-        !isValidDate(
-          payload.kimlikExpirationDate,
-        )
-      ) {
+      if (!isValidDate(payload.kimlikExpirationDate)) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              "La date d’expiration du Kimlik est invalide.",
+            error: "La date d’expiration du Kimlik est invalide.",
           },
           {
             status: 400,
@@ -669,14 +460,11 @@ export async function POST(
         );
       }
     } else {
-      if (
-        !payload.insuranceStartDate
-      ) {
+      if (!payload.insuranceStartDate) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              "La date souhaitée de début de l’assurance est obligatoire.",
+            error: "La date souhaitée de début de l’assurance est obligatoire.",
           },
           {
             status: 400,
@@ -684,16 +472,11 @@ export async function POST(
         );
       }
 
-      if (
-        !isValidDate(
-          payload.insuranceStartDate,
-        )
-      ) {
+      if (!isValidDate(payload.insuranceStartDate)) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              "La date souhaitée de début de l’assurance est invalide.",
+            error: "La date souhaitée de début de l’assurance est invalide.",
           },
           {
             status: 400,
@@ -701,10 +484,7 @@ export async function POST(
         );
       }
 
-      if (
-        payload.insuranceStartDate <
-        getTodayDate()
-      ) {
+      if (payload.insuranceStartDate < getTodayDate()) {
         return NextResponse.json(
           {
             success: false,
@@ -721,39 +501,22 @@ export async function POST(
     /*
      * Vérification du code dossier.
      */
-    const {
-      data:
-        existingRequest,
-      error:
-        existingRequestError,
-    } =
+    const { data: existingRequest, error: existingRequestError } =
       await serviceClient
-        .from(
-          "insurance_requests",
-        )
+        .from("insurance_requests")
         .select("id")
-        .eq(
-          "request_code",
-          requestCode,
-        )
+        .eq("request_code", requestCode)
         .maybeSingle();
 
-    if (
-      existingRequestError
-    ) {
-      throw new Error(
-        existingRequestError.message,
-      );
+    if (existingRequestError) {
+      throw new Error(existingRequestError.message);
     }
 
-    if (
-      existingRequest
-    ) {
+    if (existingRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Ce code de dossier existe déjà. Recommencez la soumission.",
+          error: "Ce code de dossier existe déjà. Recommencez la soumission.",
         },
         {
           status: 409,
@@ -766,93 +529,54 @@ export async function POST(
      * RECHERCHE DU CLIENT EXISTANT
      * ============================
      */
-    const normalizedKimlikNumber =
-      payload.hasKimlik
-        ? payload.kimlikNumber.replace(
-            /\D/g,
-            "",
-          )
-        : "";
+    const normalizedKimlikNumber = payload.hasKimlik
+      ? payload.kimlikNumber.replace(/\D/g, "")
+      : "";
 
-    let existingClientId:
-      | string
-      | null = null;
+    let existingClientId: string | null = null;
 
-    let identityRequestQuery =
-      serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .select(
-          `
+    let identityRequestQuery = serviceClient
+      .from("insurance_requests")
+      .select(
+        `
             id,
             client_id
           `,
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              false,
-          },
-        )
-        .limit(
-          10,
-        );
+      )
+      .order("created_at", {
+        ascending: false,
+      })
+      .limit(10);
 
-    if (
-      payload.hasKimlik &&
-      normalizedKimlikNumber
-    ) {
-      identityRequestQuery =
-        identityRequestQuery.eq(
-          "kimlik_number",
-          normalizedKimlikNumber,
-        );
+    if (payload.hasKimlik && normalizedKimlikNumber) {
+      identityRequestQuery = identityRequestQuery.eq(
+        "kimlik_number",
+        normalizedKimlikNumber,
+      );
     } else {
-      identityRequestQuery =
-        identityRequestQuery.eq(
-          "passport_number",
-          passportNumber,
-        );
+      identityRequestQuery = identityRequestQuery.eq(
+        "passport_number",
+        passportNumber,
+      );
     }
 
-    const {
-      data:
-        identityRequests,
-      error:
-        identityRequestError,
-    } =
+    const { data: identityRequests, error: identityRequestError } =
       await identityRequestQuery;
 
-    if (
-      identityRequestError
-    ) {
+    if (identityRequestError) {
       throw new Error(
         `Recherche du client existant impossible : ${identityRequestError.message}`,
       );
     }
 
-    for (
-      const identityRequest of
-      identityRequests ?? []
-    ) {
-      if (
-        !identityRequest.client_id
-      ) {
+    for (const identityRequest of identityRequests ?? []) {
+      if (!identityRequest.client_id) {
         continue;
       }
 
-      const {
-        data:
-          existingClient,
-        error:
-          existingClientError,
-      } =
+      const { data: existingClient, error: existingClientError } =
         await serviceClient
-          .from(
-            "clients",
-          )
+          .from("clients")
           .select(
             `
               id,
@@ -861,168 +585,89 @@ export async function POST(
               birth_date
             `,
           )
-          .eq(
-            "id",
-            identityRequest.client_id,
-          )
+          .eq("id", identityRequest.client_id)
           .maybeSingle();
 
-      if (
-        existingClientError
-      ) {
-        throw new Error(
-          existingClientError.message,
-        );
+      if (existingClientError) {
+        throw new Error(existingClientError.message);
       }
 
-      if (
-        !existingClient
-      ) {
+      if (!existingClient) {
         continue;
       }
 
       const sameFirstName =
-        (
-          existingClient.first_name ??
-          ""
-        )
-          .trim()
-          .toLocaleUpperCase(
-            "fr-FR",
-          ) ===
+        (existingClient.first_name ?? "").trim().toLocaleUpperCase("fr-FR") ===
         firstName;
 
       const sameLastName =
-        (
-          existingClient.last_name ??
-          ""
-        )
-          .trim()
-          .toLocaleUpperCase(
-            "fr-FR",
-          ) ===
+        (existingClient.last_name ?? "").trim().toLocaleUpperCase("fr-FR") ===
         lastName;
 
-      const sameBirthDate =
-        existingClient.birth_date ===
-        payload.birthDate;
+      const sameBirthDate = existingClient.birth_date === payload.birthDate;
 
-      if (
-        sameFirstName &&
-        sameLastName &&
-        sameBirthDate
-      ) {
-        existingClientId =
-          existingClient.id;
+      if (sameFirstName && sameLastName && sameBirthDate) {
+        existingClientId = existingClient.id;
 
         break;
       }
     }
 
-    let clientId:
-      string;
+    let clientId: string;
 
-    if (
-      existingClientId
-    ) {
+    if (existingClientId) {
       /*
        * Une demande publique ne modifie
        * jamais automatiquement la fiche CRM
        * d'un client existant.
        */
-      clientId =
-        existingClientId;
+      clientId = existingClientId;
     } else {
-      const {
-        data:
-          newClient,
-        error:
-          clientError,
-      } =
-        await serviceClient
-          .from(
-            "clients",
-          )
-          .insert({
-            last_name:
-              lastName,
+      const { data: newClient, error: clientError } = await serviceClient
+        .from("clients")
+        .insert({
+          last_name: lastName,
 
-            first_name:
-              firstName,
+          first_name: firstName,
 
-            father_name:
-              fatherName,
+          father_name: fatherName,
 
-            birth_date:
-              payload.birthDate,
+          birth_date: payload.birthDate,
 
-            gender:
-              payload.gender,
+          gender: payload.gender,
 
-            nationality,
+          nationality,
 
-            whatsapp_country_code:
-              whatsappCountryCode,
+          whatsapp_country_code: whatsappCountryCode,
 
-            whatsapp_number:
-              whatsappNumber,
+          whatsapp_number: whatsappNumber,
 
-            province_id:
-              Number(
-                payload.address
-                  .provinceId,
-              ),
+          province_id: Number(payload.address.provinceId),
 
-            district_id:
-              Number(
-                payload.address
-                  .districtId,
-              ),
+          district_id: Number(payload.address.districtId),
 
-            neighborhood_id:
-              Number(
-                payload.address
-                  .neighborhoodId,
-              ),
+          neighborhood_id: Number(payload.address.neighborhoodId),
 
-            street:
-              payload.address
-                .street
-                .trim(),
+          street: payload.address.street.trim(),
 
-            building_number:
-              payload.address
-                .buildingNumber
-                .trim(),
+          building_number: payload.address.buildingNumber.trim(),
 
-            apartment_number:
-              payload.address
-                .apartmentNumber
-                ?.trim() ||
-              null,
-          })
-          .select(
-            "id",
-          )
-          .single();
+          apartment_number: payload.address.apartmentNumber?.trim() || null,
+        })
+        .select("id")
+        .single();
 
-      if (
-        clientError ||
-        !newClient
-      ) {
+      if (clientError || !newClient) {
         throw new Error(
           `Création du client impossible : ${
-            clientError?.message ??
-            "erreur inconnue"
+            clientError?.message ?? "erreur inconnue"
           }`,
         );
       }
 
-      clientId =
-        newClient.id;
+      clientId = newClient.id;
 
-      createdClientId =
-        newClient.id;
+      createdClientId = newClient.id;
     }
 
     /*
@@ -1030,87 +675,64 @@ export async function POST(
      * CRÉATION DU DOSSIER
      * ============================
      */
-    const {
-      data:
-        insuranceRequest,
-      error:
-        requestError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .insert({
-          request_code:
-            requestCode,
+    const { data: insuranceRequest, error: requestError } = await serviceClient
+      .from("insurance_requests")
+      .insert({
+        ...((await hasQuoteSchema(serviceClient))
+          ? {
+              quote_nationality: nationality,
+              nationality_rate_id: serverPriceResult.nationalityRateId ?? null,
+            }
+          : {}),
+        request_code: requestCode,
 
-          client_id:
-            clientId,
+        client_id: clientId,
 
-          preferred_language:
-            preferredLanguage,
+        preferred_language: preferredLanguage,
 
-          has_kimlik:
-            payload.hasKimlik,
+        has_kimlik: payload.hasKimlik,
 
-          kimlik_number:
-            payload.hasKimlik
-              ? payload.kimlikNumber.replace(
-                  /\D/g,
-                  "",
-                )
-              : null,
+        kimlik_number: payload.hasKimlik
+          ? payload.kimlikNumber.replace(/\D/g, "")
+          : null,
 
-          kimlik_expiration_date:
-            payload.hasKimlik
-              ? payload.kimlikExpirationDate
-              : null,
+        kimlik_expiration_date: payload.hasKimlik
+          ? payload.kimlikExpirationDate
+          : null,
 
-          insurance_start_date:
-            payload.hasKimlik
-              ? null
-              : payload.insuranceStartDate,
+        insurance_start_date: payload.hasKimlik
+          ? null
+          : payload.insuranceStartDate,
 
-          passport_number:
-            passportNumber,
+        passport_number: passportNumber,
 
-          insurance_duration_years:
-            payload.duration,
+        insurance_duration_years: payload.duration,
 
-          calculated_age:
-            calculatedAge,
+        calculated_age: calculatedAge,
 
-          calculated_price:
-            calculatedPrice,
+        calculated_price: calculatedPrice,
 
-          status:
-            "waiting_payment",
+        status: "waiting_payment",
 
-          source:
-            "direct",
-        })
-        .select(
-          `
+        source: "direct",
+      })
+      .select(
+        `
             id,
             request_code
           `,
-        )
-        .single();
+      )
+      .single();
 
-    if (
-      requestError ||
-      !insuranceRequest
-    ) {
+    if (requestError || !insuranceRequest) {
       throw new Error(
         `Création du dossier impossible : ${
-          requestError?.message ??
-          "erreur inconnue"
+          requestError?.message ?? "erreur inconnue"
         }`,
       );
     }
 
-    createdRequestId =
-      insuranceRequest.id;
+    createdRequestId = insuranceRequest.id;
 
     /*
      * ============================
@@ -1119,122 +741,70 @@ export async function POST(
      *
      * pending/session/... -> requestId/...
      */
-    const preparedDocuments:
-      PreparedDocument[] = [];
+    const preparedDocuments: PreparedDocument[] = [];
 
-    for (
-      const document of
-      documents
-    ) {
-      const finalPath =
-        buildFinalStoragePath(
-          insuranceRequest.id,
-          document,
-        );
+    for (const document of documents) {
+      const finalPath = buildFinalStoragePath(insuranceRequest.id, document);
 
-      await verifyStoredDocument(serviceClient, BUCKET_NAME, document.storagePath);
-      const {
-        error:
-          moveError,
-      } =
-        await serviceClient.storage
-          .from(
-            BUCKET_NAME,
-          )
-          .move(
-            document.storagePath,
-            finalPath,
-          );
+      await verifyStoredDocument(
+        serviceClient,
+        BUCKET_NAME,
+        document.storagePath,
+      );
+      const { error: moveError } = await serviceClient.storage
+        .from(BUCKET_NAME)
+        .move(document.storagePath, finalPath);
 
-      if (
-        moveError
-      ) {
+      if (moveError) {
         throw new Error(
           `Déplacement impossible pour ${document.documentType} : ${moveError.message}`,
         );
       }
 
-      movedStoragePaths.push(
-        finalPath,
-      );
+      movedStoragePaths.push(finalPath);
 
-      const pendingIndex =
-        pendingStoragePaths.indexOf(
-          document.storagePath,
-        );
+      const pendingIndex = pendingStoragePaths.indexOf(document.storagePath);
 
-      if (
-        pendingIndex !== -1
-      ) {
-        pendingStoragePaths.splice(
-          pendingIndex,
-          1,
-        );
+      if (pendingIndex !== -1) {
+        pendingStoragePaths.splice(pendingIndex, 1);
       }
 
       preparedDocuments.push({
-        documentType:
-          document.documentType,
+        documentType: document.documentType,
 
-        sourcePath:
-          document.storagePath,
+        sourcePath: document.storagePath,
 
         finalPath,
 
-        originalFileName:
-          document.originalFileName,
+        originalFileName: document.originalFileName,
 
-        mimeType:
-          document.mimeType,
+        mimeType: document.mimeType,
 
-        fileSize:
-          document.fileSize,
+        fileSize: document.fileSize,
       });
     }
 
-    const documentRows =
-      preparedDocuments.map(
-        (
-          document,
-        ) => ({
-          request_id:
-            insuranceRequest.id,
+    const documentRows = preparedDocuments.map((document) => ({
+      request_id: insuranceRequest.id,
 
-          document_type:
-            document.documentType,
+      document_type: document.documentType,
 
-          storage_path:
-            document.finalPath,
+      storage_path: document.finalPath,
 
-          original_file_name:
-            document.originalFileName,
+      original_file_name: document.originalFileName,
 
-          mime_type:
-            document.mimeType,
+      mime_type: document.mimeType,
 
-          file_size:
-            document.fileSize,
+      file_size: document.fileSize,
 
-          uploaded_at:
-            new Date().toISOString(),
-        }),
-      );
+      uploaded_at: new Date().toISOString(),
+    }));
 
-    const {
-      error:
-        documentsError,
-    } =
-      await serviceClient
-        .from(
-          "uploaded_documents",
-        )
-        .insert(
-          documentRows,
-        );
+    const { error: documentsError } = await serviceClient
+      .from("uploaded_documents")
+      .insert(documentRows);
 
-    if (
-      documentsError
-    ) {
+    if (documentsError) {
       throw new Error(
         `Enregistrement des documents impossible : ${documentsError.message}`,
       );
@@ -1245,17 +815,13 @@ export async function POST(
      * création du dossier.
      */
     await logActivity({
-      requestId:
-        insuranceRequest.id,
+      requestId: insuranceRequest.id,
 
-      userId:
-        null,
+      userId: null,
 
-      action:
-        "request_created",
+      action: "request_created",
 
-      description:
-        "Le dossier d’assurance a été créé par le client.",
+      description: "Le dossier d’assurance a été créé par le client.",
     });
 
     /*
@@ -1264,71 +830,35 @@ export async function POST(
      * ============================
      */
     try {
-      const {
-        data:
-          previousRequestsData,
-        error:
-          previousRequestsError,
-      } =
+      const { data: previousRequestsData, error: previousRequestsError } =
         await serviceClient
-          .from(
-            "insurance_requests",
-          )
+          .from("insurance_requests")
           .select(
             `
               id,
               created_at
             `,
           )
-          .eq(
-            "passport_number",
-            passportNumber,
-          )
-          .neq(
-            "id",
-            insuranceRequest.id,
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
-            },
-          );
+          .eq("passport_number", passportNumber)
+          .neq("id", insuranceRequest.id)
+          .order("created_at", {
+            ascending: false,
+          });
 
-      if (
-        previousRequestsError
-      ) {
+      if (previousRequestsError) {
         console.error(
           "Recherche ancien dossier pour renouvellement impossible :",
           previousRequestsError.message,
         );
       } else {
-        const previousRequestIds =
-          (
-            previousRequestsData ??
-            []
-          ).map(
-            (
-              previousRequest,
-            ) =>
-              previousRequest.id,
-          );
+        const previousRequestIds = (previousRequestsData ?? []).map(
+          (previousRequest) => previousRequest.id,
+        );
 
-        if (
-          previousRequestIds.length >
-          0
-        ) {
-          const {
-            data:
-              interestedRenewal,
-            error:
-              interestedRenewalError,
-          } =
+        if (previousRequestIds.length > 0) {
+          const { data: interestedRenewal, error: interestedRenewalError } =
             await serviceClient
-              .from(
-                "insurance_renewals",
-              )
+              .from("insurance_renewals")
               .select(
                 `
                   id,
@@ -1338,94 +868,54 @@ export async function POST(
                   updated_at
                 `,
               )
-              .in(
-                "request_id",
-                previousRequestIds,
-              )
-              .eq(
-                "status",
-                "interested",
-              )
-              .is(
-                "renewed_request_id",
-                null,
-              )
-              .order(
-                "updated_at",
-                {
-                  ascending:
-                    false,
-                },
-              )
-              .limit(
-                1,
-              )
+              .in("request_id", previousRequestIds)
+              .eq("status", "interested")
+              .is("renewed_request_id", null)
+              .order("updated_at", {
+                ascending: false,
+              })
+              .limit(1)
               .maybeSingle();
 
-          if (
-            interestedRenewalError
-          ) {
+          if (interestedRenewalError) {
             console.error(
               "Recherche du renouvellement intéressé impossible :",
               interestedRenewalError.message,
             );
-          } else if (
-            interestedRenewal
-          ) {
-            const renewalCompletedAt =
-              new Date().toISOString();
+          } else if (interestedRenewal) {
+            const renewalCompletedAt = new Date().toISOString();
 
-            const {
-              error:
-                renewalUpdateError,
-            } =
-              await serviceClient
-                .from(
-                  "insurance_renewals",
-                )
-                .update({
-                  renewed_request_id:
-                    insuranceRequest.id,
+            const { error: renewalUpdateError } = await serviceClient
+              .from("insurance_renewals")
+              .update({
+                renewed_request_id: insuranceRequest.id,
 
-                  status:
-                    "completed",
+                status: "completed",
 
-                  updated_at:
-                    renewalCompletedAt,
-                })
-                .eq(
-                  "id",
-                  interestedRenewal.id,
-                );
+                updated_at: renewalCompletedAt,
+              })
+              .eq("id", interestedRenewal.id);
 
-            if (
-              renewalUpdateError
-            ) {
+            if (renewalUpdateError) {
               console.error(
                 "Finalisation automatique du renouvellement impossible :",
                 renewalUpdateError.message,
               );
             } else {
               await logActivity({
-                requestId:
-                  interestedRenewal.request_id,
+                requestId: interestedRenewal.request_id,
 
-                userId:
-                  null,
+                userId: null,
 
-                action:
-                  "renewal_completed",
+                action: "renewal_completed",
 
-                description:
-                  `Le renouvellement a été confirmé par la création du nouveau dossier ${insuranceRequest.request_code}.`,
+                description: `Le renouvellement a été confirmé par la création du nouveau dossier ${insuranceRequest.request_code}.`,
               });
             }
           }
         }
       }
-    } catch (
-      renewalLinkError
-    ) {
+    } catch (renewalLinkError) {
       /*
        * Une erreur de liaison du renouvellement
        * ne doit pas annuler la nouvelle demande.
@@ -1436,75 +926,51 @@ export async function POST(
       );
     }
 
-
     /*
      * Tout est validé :
      * ne rien supprimer dans le catch.
      */
-    movedStoragePaths.length =
-      0;
+    movedStoragePaths.length = 0;
 
-    pendingStoragePaths.length =
-      0;
+    pendingStoragePaths.length = 0;
 
     return NextResponse.json(
       {
-        success: true, calculatedPrice, calculatedAge,
-        requestId:
-          insuranceRequest.id,
+        success: true,
+        calculatedPrice,
+        calculatedAge,
+        requestId: insuranceRequest.id,
 
-        requestCode:
-          insuranceRequest.request_code,
+        requestCode: insuranceRequest.request_code,
 
-        status:
-          "waiting_payment",
+        status: "waiting_payment",
 
-        hasKimlik:
-          payload.hasKimlik,
+        hasKimlik: payload.hasKimlik,
 
-        insuranceStartDate:
-          payload.hasKimlik
-            ? null
-            : payload.insuranceStartDate,
+        insuranceStartDate: payload.hasKimlik
+          ? null
+          : payload.insuranceStartDate,
       },
       {
-        status:
-          201,
+        status: 201,
 
         headers: {
-          "Cache-Control":
-            "no-store",
+          "Cache-Control": "no-store",
         },
       },
     );
   } catch (error) {
-    console.error(
-      "Erreur de création du dossier :",
-      error,
-    );
+    console.error("Erreur de création du dossier :", error);
 
     /*
      * Nettoyage des fichiers déjà déplacés.
      */
-    if (
-      movedStoragePaths.length >
-      0
-    ) {
-      const {
-        error:
-          movedCleanupError,
-      } =
-        await serviceClient.storage
-          .from(
-            BUCKET_NAME,
-          )
-          .remove(
-            movedStoragePaths,
-          );
+    if (movedStoragePaths.length > 0) {
+      const { error: movedCleanupError } = await serviceClient.storage
+        .from(BUCKET_NAME)
+        .remove(movedStoragePaths);
 
-      if (
-        movedCleanupError
-      ) {
+      if (movedCleanupError) {
         console.error(
           "Nettoyage des fichiers déplacés impossible :",
           movedCleanupError,
@@ -1516,25 +982,12 @@ export async function POST(
      * Nettoyage des fichiers qui seraient
      * encore dans pending/.
      */
-    if (
-      pendingStoragePaths.length >
-      0
-    ) {
-      const {
-        error:
-          pendingCleanupError,
-      } =
-        await serviceClient.storage
-          .from(
-            BUCKET_NAME,
-          )
-          .remove(
-            pendingStoragePaths,
-          );
+    if (pendingStoragePaths.length > 0) {
+      const { error: pendingCleanupError } = await serviceClient.storage
+        .from(BUCKET_NAME)
+        .remove(pendingStoragePaths);
 
-      if (
-        pendingCleanupError
-      ) {
+      if (pendingCleanupError) {
         console.error(
           "Nettoyage des fichiers temporaires impossible :",
           pendingCleanupError,
@@ -1542,64 +995,31 @@ export async function POST(
       }
     }
 
-    if (
-      createdRequestId
-    ) {
-      const {
-        error:
-          requestCleanupError,
-      } =
-        await serviceClient
-          .from(
-            "insurance_requests",
-          )
-          .delete()
-          .eq(
-            "id",
-            createdRequestId,
-          );
+    if (createdRequestId) {
+      const { error: requestCleanupError } = await serviceClient
+        .from("insurance_requests")
+        .delete()
+        .eq("id", createdRequestId);
 
-      if (
-        requestCleanupError
-      ) {
-        console.error(
-          "Nettoyage du dossier impossible :",
-          requestCleanupError,
-        );
+      if (requestCleanupError) {
+        console.error("Nettoyage du dossier impossible :", requestCleanupError);
       }
     }
 
-    if (
-      createdClientId
-    ) {
-      const {
-        error:
-          clientCleanupError,
-      } =
-        await serviceClient
-          .from(
-            "clients",
-          )
-          .delete()
-          .eq(
-            "id",
-            createdClientId,
-          );
+    if (createdClientId) {
+      const { error: clientCleanupError } = await serviceClient
+        .from("clients")
+        .delete()
+        .eq("id", createdClientId);
 
-      if (
-        clientCleanupError
-      ) {
-        console.error(
-          "Nettoyage du client impossible :",
-          clientCleanupError,
-        );
+      if (clientCleanupError) {
+        console.error("Nettoyage du client impossible :", clientCleanupError);
       }
     }
 
     return NextResponse.json(
       {
-        success:
-          false,
+        success: false,
 
         error:
           error instanceof Error
@@ -1607,12 +1027,10 @@ export async function POST(
             : "Une erreur inattendue est survenue.",
       },
       {
-        status:
-          500,
+        status: 500,
 
         headers: {
-          "Cache-Control":
-            "no-store",
+          "Cache-Control": "no-store",
         },
       },
     );

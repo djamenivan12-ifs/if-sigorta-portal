@@ -13,12 +13,26 @@ export async function accountingMutation(
   if (!auth.success) return auth.response;
   try {
     const payload = validate(await request.json().catch(() => null));
-    const { data, error } = await createServiceClient().rpc("accounting_write", {
-      p_action: action,
-      p_payload: payload,
-      p_actor: auth.user.id,
-    });
+    const { data, error } = await createServiceClient().rpc(
+      "accounting_write",
+      {
+        p_action: action,
+        p_payload: payload,
+        p_actor: auth.user.id,
+      },
+    );
     if (error) {
+      if (["PGRST202", "PGRST205", "42883", "42P01"].includes(error.code))
+        throw new AccountingError(
+          "La mise à jour de la base comptable doit être appliquée avant cet enregistrement.",
+          503,
+        );
+
+      if (error.code === "P0001")
+        throw new AccountingError(
+          "Solde disponible insuffisant ou données incomplètes. Vérifiez les dépôts, coûts et retraits de cet assureur.",
+          409,
+        );
       if (["23505", "23P01"].includes(error.code))
         throw new AccountingError(
           "Un assureur de ce nom ou une tranche tarifaire correspondante existe déjà. Vérifiez les valeurs.",
@@ -30,9 +44,14 @@ export async function accountingMutation(
           409,
         );
       if (error.code === "P0002")
-        throw new AccountingError("Cette ligne n’existe plus. Actualisez la page.", 404);
+        throw new AccountingError(
+          "Cette ligne n’existe plus. Actualisez la page.",
+          404,
+        );
       if (["22023", "22007", "22008", "23514"].includes(error.code))
-        throw new AccountingError("Vérifiez les valeurs et le statut de l’assureur.");
+        throw new AccountingError(
+          "Vérifiez les valeurs et le statut de l’assureur.",
+        );
       console.error("Accounting write failed", { code: error.code });
       throw new AccountingError(
         "L’enregistrement est temporairement indisponible. Vos saisies sont conservées ; réessayez plus tard.",
@@ -49,7 +68,9 @@ export async function accountingMutation(
       {
         success: false,
         error:
-          error instanceof AccountingError ? error.message : "Impossible d’enregistrer. Réessayez.",
+          error instanceof AccountingError
+            ? error.message
+            : "Impossible d’enregistrer. Réessayez.",
       },
       {
         status: error instanceof AccountingError ? error.status : 500,

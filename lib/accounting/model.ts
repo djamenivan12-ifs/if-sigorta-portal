@@ -31,6 +31,19 @@ export type Deposit = {
   created_at: string;
 };
 
+export type Withdrawal = {
+  id: string;
+  insurance_company_id: string;
+  amount: number | string;
+  withdrawal_date: string;
+  reason: string;
+  reference: string | null;
+  created_by: string;
+  created_at: string;
+  cancelled_at: string | null;
+  cancelled_by: string | null;
+};
+
 export type Dossier = {
   id: string;
   request_code: string;
@@ -57,6 +70,8 @@ export type History = {
   id: string;
 
   type:
+    | "withdrawal"
+    | "withdrawal_cancelled"
     | "deposit"
     | "payment"
     | "policy"
@@ -69,10 +84,7 @@ export type History = {
   request_id: string | null;
   request_code: string | null;
 
-  origin:
-    | "client"
-    | "partner"
-    | null;
+  origin: "client" | "partner" | null;
 
   partner_id: string | null;
   partner_name: string | null;
@@ -82,18 +94,18 @@ export type History = {
 
   amount: number | string | null;
 
-  direction:
-    | "in"
-    | "out"
-    | "neutral";
+  direction: "in" | "out" | "neutral";
 
   author_id: string | null;
 };
 
 export type AccountingData = {
+  missingTables?: string[];
   companies: Company[];
   rates: Rate[];
   deposits: Deposit[];
+  withdrawals?: Withdrawal[];
+  nationalityRates?: import("@/lib/insurance/nationalityRates").NationalityRate[];
   requests: Dossier[];
   payments: Payment[];
   history: History[];
@@ -112,8 +124,7 @@ export function cents(value: unknown): number | null {
     value === null ||
     value === undefined ||
     value === "" ||
-    (typeof value !== "number" &&
-      typeof value !== "string")
+    (typeof value !== "number" && typeof value !== "string")
   ) {
     return null;
   }
@@ -123,9 +134,7 @@ export function cents(value: unknown): number | null {
   if (
     !Number.isFinite(n) ||
     n < 0 ||
-    !Number.isSafeInteger(
-      Math.round(n * 100),
-    )
+    !Number.isSafeInteger(Math.round(n * 100))
   ) {
     return null;
   }
@@ -133,9 +142,7 @@ export function cents(value: unknown): number | null {
   return Math.round(n * 100);
 }
 
-export function money(
-  value: number | null,
-): string {
+export function money(value: number | null): string {
   return value === null
     ? "À compléter"
     : new Intl.NumberFormat("fr-FR", {
@@ -145,9 +152,7 @@ export function money(
       }).format(value / 100);
 }
 
-export function day(
-  value: string | null,
-): string {
+export function day(value: string | null): string {
   if (!value) return "";
 
   if (isValidDate(value)) {
@@ -160,298 +165,199 @@ export function day(
     return "";
   }
 
-  return new Intl.DateTimeFormat(
-    "en-CA",
-    {
-      timeZone: "Europe/Istanbul",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    },
-  ).format(d);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
 
-export function dateLabel(
-  value: string | null,
-): string {
+export function dateLabel(value: string | null): string {
   const d = day(value);
 
-  return d
-    ? d.split("-").reverse().join("/")
-    : "Date manquante";
+  return d ? d.split("-").reverse().join("/") : "Date manquante";
 }
 
-export function inPeriod(
-  value: string | null,
-  f: Filters,
-): boolean {
+export function inPeriod(value: string | null, f: Filters): boolean {
   const d = day(value);
 
   return (
     (!f.from && !f.to) ||
-    (!!d &&
-      (!f.from || d >= f.from) &&
-      (!f.to || d <= f.to))
+    (!!d && (!f.from || d >= f.from) && (!f.to || d <= f.to))
   );
 }
 
-function sum(
-  values: (number | null)[],
-): number | null {
-  if (
-    values.some(
-      (value) => value === null,
-    )
-  ) {
+function sum(values: (number | null)[]): number | null {
+  if (values.some((value) => value === null)) {
     return null;
   }
 
   const total = values.reduce<number>(
-    (accumulator, value) =>
-      accumulator + (value ?? 0),
+    (accumulator, value) => accumulator + (value ?? 0),
     0,
   );
 
-  return Number.isSafeInteger(total)
-    ? total
-    : null;
+  return Number.isSafeInteger(total) ? total : null;
 }
 
-export function accounting(
-  data: AccountingData,
-  f: Filters,
-) {
-  const requests =
-    data.requests.filter(
-      (request) =>
-        !f.company ||
-        request.insurance_company_id ===
-          f.company,
-    );
-
-  const ids = new Set(
-    requests.map(
-      (request) => request.id,
-    ),
+export function accounting(data: AccountingData, f: Filters) {
+  const requests = data.requests.filter(
+    (request) => !f.company || request.insurance_company_id === f.company,
   );
 
-  const payments =
-    data.payments.filter(
-      (payment) =>
-        payment.status === "confirmed" &&
-        (!f.company ||
-          ids.has(payment.request_id)),
-    );
+  const ids = new Set(requests.map((request) => request.id));
 
-  const periodPayments =
-    payments.filter((payment) =>
-      inPeriod(
-        payment.verified_at,
-        f,
-      ),
-    );
+  const payments = data.payments.filter(
+    (payment) =>
+      payment.status === "confirmed" &&
+      (!f.company || ids.has(payment.request_id)),
+  );
 
-  const paid = new Map<
-    string,
-    (number | null)[]
-  >();
+  const periodPayments = payments.filter((payment) =>
+    inPeriod(payment.verified_at, f),
+  );
+
+  const paid = new Map<string, (number | null)[]>();
 
   for (const payment of periodPayments) {
     paid.set(payment.request_id, [
-      ...(paid.get(payment.request_id) ??
-        []),
+      ...(paid.get(payment.request_id) ?? []),
       cents(payment.expected_amount),
     ]);
   }
 
   const dossiers = requests
-    .filter((request) =>
-      paid.has(request.id),
-    )
+    .filter((request) => paid.has(request.id))
     .map((request) => ({
       ...request,
 
-      revenue: sum(
-        paid.get(request.id)!,
-      ),
+      revenue: sum(paid.get(request.id)!),
 
-      cost: cents(
-        request.actual_insurance_cost,
-      ),
+      cost: cents(request.actual_insurance_cost),
 
       ageGroup:
         request.calculated_age === null
           ? "Âge inconnu"
           : `${Math.floor(request.calculated_age / 10) * 10}–${
-              Math.floor(
-                request.calculated_age /
-                  10,
-              ) *
-                10 +
-              9
+              Math.floor(request.calculated_age / 10) * 10 + 9
             } ans`,
     }));
 
-  const realized =
-    dossiers.filter(
-      (request) =>
-        request.status ===
-        "policy_available",
-    );
-
-  const revenue = sum(
-    realized.map(
-      (request) => request.revenue,
-    ),
+  const realized = dossiers.filter(
+    (request) => request.status === "policy_available",
   );
 
-  const cost = sum(
-    realized.map(
-      (request) => request.cost,
-    ),
+  const revenue = sum(realized.map((request) => request.revenue));
+
+  const cost = sum(realized.map((request) => request.cost));
+
+  const deposits = data.deposits.filter(
+    (deposit) => !f.company || deposit.insurance_company_id === f.company,
   );
 
-  const deposits =
-    data.deposits.filter(
-      (deposit) =>
-        !f.company ||
-        deposit.insurance_company_id ===
-          f.company,
-    );
+  const horizon = f.to || day(data.loadedAt);
 
-  const horizon =
-    f.to || day(data.loadedAt);
+  const asOf = (value: string | null) =>
+    !horizon || (!!day(value) && day(value) <= horizon);
 
-  const asOf = (
-    value: string | null,
-  ) =>
-    !horizon ||
-    (!!day(value) &&
-      day(value) <= horizon);
+  const cumulativeDeposits = deposits.filter((deposit) =>
+    asOf(deposit.deposit_date),
+  );
 
-  const cumulativeDeposits =
-    deposits.filter((deposit) =>
-      asOf(deposit.deposit_date),
-    );
+  const consumed = requests.filter(
+    (request) =>
+      request.status === "policy_available" &&
+      asOf(request.insurance_company_selected_at),
+  );
 
-  const consumed =
-    requests.filter(
-      (request) =>
-        request.status ===
-          "policy_available" &&
-        asOf(
-          request.insurance_company_selected_at,
-        ),
-    );
+  const unknownCostDates = horizon
+    ? requests.filter(
+        (request) =>
+          request.status === "policy_available" &&
+          !day(request.insurance_company_selected_at),
+      ).length
+    : 0;
 
-  const unknownCostDates =
-    horizon
-      ? requests.filter(
-          (request) =>
-            request.status ===
-              "policy_available" &&
-            !day(
-              request.insurance_company_selected_at,
-            ),
-        ).length
-      : 0;
-
-  const balanceCost =
-    unknownCostDates
-      ? null
-      : sum(
-          consumed.map((request) =>
-            cents(
-              request.actual_insurance_cost,
-            ),
-          ),
-        );
+  const balanceCost = unknownCostDates
+    ? null
+    : sum(consumed.map((request) => cents(request.actual_insurance_cost)));
 
   const depositTotal = sum(
-    cumulativeDeposits.map(
-      (deposit) =>
-        cents(deposit.amount),
-    ),
+    cumulativeDeposits.map((deposit) => cents(deposit.amount)),
   );
 
-  const periodDeposits =
-    deposits.filter((deposit) =>
-      inPeriod(
-        deposit.deposit_date,
-        f,
-      ),
-    );
+  const withdrawals = (data.withdrawals ?? []).filter(
+    (w) => !f.company || w.insurance_company_id === f.company,
+  );
+  const withdrawalTotal = data.missingTables?.includes(
+    "insurance_company_withdrawals",
+  )
+    ? null
+    : sum(
+        withdrawals
+          .filter(
+            (w) =>
+              asOf(w.withdrawal_date) &&
+              (!w.cancelled_at || !asOf(w.cancelled_at)),
+          )
+          .map((w) => cents(w.amount)),
+      );
+  const periodWithdrawals = withdrawals.filter((w) =>
+    inPeriod(w.withdrawal_date, f),
+  );
+  const periodDeposits = deposits.filter((deposit) =>
+    inPeriod(deposit.deposit_date, f),
+  );
 
   const paidIds = new Set(
     data.payments
-      .filter(
-        (payment) =>
-          payment.status ===
-          "confirmed",
-      )
-      .map(
-        (payment) =>
-          payment.request_id,
-      ),
+      .filter((payment) => payment.status === "confirmed")
+      .map((payment) => payment.request_id),
   );
 
-  const missingCosts =
-    requests.filter(
-      (request) =>
-        request.status ===
-          "policy_available" &&
-        cents(
-          request.actual_insurance_cost,
-        ) === null,
-    );
+  const missingCosts = requests.filter(
+    (request) =>
+      request.status === "policy_available" &&
+      cents(request.actual_insurance_cost) === null,
+  );
 
   const anomalies = [
-    ...missingCosts.map(
-      (request) => ({
-        id: request.id,
-        code: request.request_code,
-        label:
-          "Coût réel manquant",
-        kind: "dossier",
-      }),
-    ),
+    ...missingCosts.map((request) => ({
+      id: request.id,
+      code: request.request_code,
+      label: "Coût réel manquant",
+      kind: "dossier",
+    })),
 
     ...requests
       .filter(
         (request) =>
-          request.status ===
-            "policy_available" &&
-          !paidIds.has(request.id),
+          request.status === "policy_available" && !paidIds.has(request.id),
       )
       .map((request) => ({
         id: request.id,
         code: request.request_code,
-        label:
-          "Police disponible sans paiement confirmé",
+        label: "Police disponible sans paiement confirmé",
         kind: "dossier",
       })),
 
     ...requests
       .filter(
         (request) =>
-          request.status ===
-            "policy_available" &&
+          request.status === "policy_available" &&
           !request.insurance_company_id,
       )
       .map((request) => ({
         id: request.id,
         code: request.request_code,
-        label:
-          "Assureur non renseigné",
+        label: "Assureur non renseigné",
         kind: "dossier",
       })),
 
     ...requests
       .filter(
-        (request) =>
-          request.status ===
-            "cancelled" &&
-          paidIds.has(request.id),
+        (request) => request.status === "cancelled" && paidIds.has(request.id),
       )
       .map((request) => ({
         id: request.id,
@@ -462,170 +368,95 @@ export function accounting(
       })),
 
     ...payments
-      .filter(
-        (payment) =>
-          !day(
-            payment.verified_at,
-          ),
-      )
+      .filter((payment) => !day(payment.verified_at))
       .map((payment) => ({
         id: payment.request_id,
         code:
-          requests.find(
-            (request) =>
-              request.id ===
-              payment.request_id,
-          )?.request_code ??
-          payment.request_id,
-        label:
-          "Date de confirmation manquante",
+          requests.find((request) => request.id === payment.request_id)
+            ?.request_code ?? payment.request_id,
+        label: "Date de confirmation manquante",
         kind: "dossier",
       })),
 
     ...payments
-      .filter(
-        (payment) =>
-          cents(
-            payment.expected_amount,
-          ) === null,
-      )
+      .filter((payment) => cents(payment.expected_amount) === null)
       .map((payment) => ({
         id: payment.request_id,
         code:
-          requests.find(
-            (request) =>
-              request.id ===
-              payment.request_id,
-          )?.request_code ??
-          payment.request_id,
-        label:
-          "Montant du paiement manquant",
+          requests.find((request) => request.id === payment.request_id)
+            ?.request_code ?? payment.request_id,
+        label: "Montant du paiement manquant",
         kind: "dossier",
       })),
 
     ...requests
       .filter(
         (request) =>
-          request.status ===
-            "policy_available" &&
-          !day(
-            request.insurance_company_selected_at,
-          ),
+          request.status === "policy_available" &&
+          !day(request.insurance_company_selected_at),
       )
       .map((request) => ({
         id: request.id,
         code: request.request_code,
-        label:
-          "Date de sélection de l’assureur manquante",
+        label: "Date de sélection de l’assureur manquante",
         kind: "dossier",
       })),
   ];
 
   return {
-    payments:
-      periodPayments,
+    withdrawals: periodWithdrawals,
+    cumulativeWithdrawals: withdrawalTotal,
+    payments: periodPayments,
 
     dossiers,
 
     realized,
 
-    deposits:
-      periodDeposits,
+    deposits: periodDeposits,
 
     anomalies,
 
     collected: sum(
-      periodPayments.map(
-        (payment) =>
-          cents(
-            payment.expected_amount,
-          ),
-      ),
+      periodPayments.map((payment) => cents(payment.expected_amount)),
     ),
 
     revenue,
 
     cost,
 
-    profit:
-      revenue === null ||
-      cost === null
-        ? null
-        : revenue - cost,
+    profit: revenue === null || cost === null ? null : revenue - cost,
 
-    depositFlow: sum(
-      periodDeposits.map(
-        (deposit) =>
-          cents(deposit.amount),
-      ),
-    ),
+    depositFlow: sum(periodDeposits.map((deposit) => cents(deposit.amount))),
 
-    cumulativeDeposits:
-      depositTotal,
+    cumulativeDeposits: depositTotal,
 
-    consumed:
-      balanceCost,
+    consumed: balanceCost,
 
     balance:
-      depositTotal === null ||
-      balanceCost === null
+      depositTotal === null || balanceCost === null || withdrawalTotal === null
         ? null
-        : depositTotal -
-          balanceCost,
+        : depositTotal - balanceCost - withdrawalTotal,
 
     committed: sum(
       requests
-        .filter(
-          (request) =>
-            request.status ===
-            "policy_preparation",
-        )
-        .map((request) =>
-          cents(
-            request.actual_insurance_cost,
-          ),
-        ),
+        .filter((request) => request.status === "policy_preparation")
+        .map((request) => cents(request.actual_insurance_cost)),
     ),
 
-    missingCosts:
-      missingCosts.length,
+    missingCosts: missingCosts.length,
   };
 }
 
-export function csvCell(
-  value: unknown,
-) {
-  let text = String(
-    value ?? "",
-  );
+export function csvCell(value: unknown) {
+  let text = String(value ?? "");
 
-  if (
-    /^[\s]*[=+@-]/.test(text)
-  ) {
+  if (/^[\s]*[=+@-]/.test(text)) {
     text = "'" + text;
   }
 
-  return (
-    '"' +
-    text.replaceAll(
-      '"',
-      '""',
-    ) +
-    '"'
-  );
+  return '"' + text.replaceAll('"', '""') + '"';
 }
 
-export function csv(
-  rows: unknown[][],
-) {
-  return (
-    "\uFEFF" +
-    rows
-      .map((row) =>
-        row
-          .map(csvCell)
-          .join(";"),
-      )
-      .join("\r\n")
-  );
+export function csv(rows: unknown[][]) {
+  return "\uFEFF" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n");
 }

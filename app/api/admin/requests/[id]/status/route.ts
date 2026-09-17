@@ -1,3 +1,15 @@
+import {
+  hasQuoteSchema,
+  type RequestPricingSnapshot,
+} from "@/lib/insurance/quoteSchema";
+import { isSkyline } from "@/lib/insurance/nationality";
+import { day } from "@/lib/accounting/model";
+import {
+  skylineNationalityRate,
+  isCongoBrazzaville,
+  nationalityAmounts,
+  type NationalityRate,
+} from "@/lib/insurance/nationalityRates";
 import { NextResponse } from "next/server";
 
 import { logActivity } from "@/lib/activity/logActivity";
@@ -11,8 +23,7 @@ const ALLOWED_ACTIONS = [
   "cancel_request",
 ] as const;
 
-type AllowedAction =
-  (typeof ALLOWED_ACTIONS)[number];
+type AllowedAction = (typeof ALLOWED_ACTIONS)[number];
 
 type UpdateStatusPayload = {
   action?: AllowedAction;
@@ -26,30 +37,20 @@ type RouteContext = {
   }>;
 };
 
-function isAllowedAction(
-  value: unknown,
-): value is AllowedAction {
+function isAllowedAction(value: unknown): value is AllowedAction {
   return (
     typeof value === "string" &&
-    ALLOWED_ACTIONS.includes(
-      value as AllowedAction,
-    )
+    ALLOWED_ACTIONS.includes(value as AllowedAction)
   );
 }
 
-function jsonResponse(
-  body: Record<string, unknown>,
-  status = 200,
-) {
-  return NextResponse.json(
-    body,
-    {
-      status,
-      headers: {
-        "Cache-Control": "no-store",
-      },
+function jsonResponse(body: Record<string, unknown>, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
     },
-  );
+  });
 }
 
 async function safeLogActivity({
@@ -76,19 +77,12 @@ async function safeLogActivity({
      * rendre incohérente une opération
      * métier déjà terminée.
      */
-    console.error(
-      "Impossible d'enregistrer l'activité :",
-      error,
-    );
+    console.error("Impossible d'enregistrer l'activité :", error);
   }
 }
 
-async function handleStatusUpdate(
-  request: Request,
-  context: RouteContext,
-) {
-  const serviceClient =
-    createServiceClient();
+async function handleStatusUpdate(request: Request, context: RouteContext) {
+  const serviceClient = createServiceClient();
 
   try {
     /*
@@ -97,27 +91,18 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    const sessionClient =
-      await createServerSupabaseClient();
+    const sessionClient = await createServerSupabaseClient();
 
     const {
-      data: {
-        user,
-      },
-      error:
-        userError,
-    } =
-      await sessionClient.auth.getUser();
+      data: { user },
+      error: userError,
+    } = await sessionClient.auth.getUser();
 
-    if (
-      userError ||
-      !user
-    ) {
+    if (userError || !user) {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Vous devez être connecté.",
+          error: "Vous devez être connecté.",
         },
         401,
       );
@@ -129,18 +114,13 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    const role =
-      user.app_metadata?.role;
+    const role = user.app_metadata?.role;
 
-    if (
-      role !== "admin" &&
-      role !== "agent"
-    ) {
+    if (role !== "admin" && role !== "agent") {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Vous n’avez pas l’autorisation d’effectuer cette action.",
+          error: "Vous n’avez pas l’autorisation d’effectuer cette action.",
         },
         403,
       );
@@ -152,17 +132,13 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    const {
-      id,
-    } =
-      await context.params;
+    const { id } = await context.params;
 
     if (!id) {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Identifiant du dossier absent.",
+          error: "Identifiant du dossier absent.",
         },
         400,
       );
@@ -174,54 +150,37 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    let body:
-      UpdateStatusPayload;
+    let body: UpdateStatusPayload;
 
     try {
-      body =
-        (await request.json()) as
-          UpdateStatusPayload;
+      body = (await request.json()) as UpdateStatusPayload;
     } catch {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Les données envoyées sont invalides.",
+          error: "Les données envoyées sont invalides.",
         },
         400,
       );
     }
 
-    if (
-      !isAllowedAction(
-        body.action,
-      )
-    ) {
+    if (!isAllowedAction(body.action)) {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Action invalide.",
+          error: "Action invalide.",
         },
         400,
       );
     }
 
-    const rejectionReason =
-      body.rejectionReason
-        ?.trim() ??
-      "";
+    const rejectionReason = body.rejectionReason?.trim() ?? "";
 
-    if (
-      body.action ===
-        "reject_payment" &&
-      !rejectionReason
-    ) {
+    if (body.action === "reject_payment" && !rejectionReason) {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Le motif du refus est obligatoire.",
+          error: "Le motif du refus est obligatoire.",
         },
         400,
       );
@@ -233,18 +192,11 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    const {
-      data:
-        insuranceRequest,
-      error:
-        requestError,
-    } =
-      await serviceClient
-        .from(
-          "insurance_requests",
-        )
-        .select(
-          `
+    const quoteSchemaReady = await hasQuoteSchema(serviceClient);
+    const { data: insuranceRequest, error: requestError } = await serviceClient
+      .from("insurance_requests")
+      .select(
+        `
             id,
             status,
             assigned_agent_id,
@@ -252,31 +204,24 @@ async function handleStatusUpdate(
             insurance_duration_years,
             insurance_company_id,
             insurance_cost_rate_id,
-            actual_insurance_cost
+            actual_insurance_cost,
+            created_at,client:clients(nationality)
+            ${quoteSchemaReady ? ",quote_nationality,nationality_rate_id" : ""}
           `,
-        )
-        .eq(
-          "id",
-          id,
-        )
-        .maybeSingle();
+      )
+      .eq("id", id)
+      .maybeSingle()
+      .overrideTypes<RequestPricingSnapshot | null, { merge: false }>();
 
-    if (
-      requestError
-    ) {
-      throw new Error(
-        requestError.message,
-      );
+    if (requestError) {
+      throw new Error(requestError.message);
     }
 
-    if (
-      !insuranceRequest
-    ) {
+    if (!insuranceRequest) {
       return jsonResponse(
         {
           success: false,
-          error:
-            "Dossier introuvable.",
+          error: "Dossier introuvable.",
         },
         404,
       );
@@ -293,26 +238,20 @@ async function handleStatusUpdate(
      * L'admin peut intervenir partout.
      */
 
-    if (
-      role === "agent" &&
-      insuranceRequest.assigned_agent_id !==
-        user.id
-    ) {
+    if (role === "agent" && insuranceRequest.assigned_agent_id !== user.id) {
       return jsonResponse(
         {
           success: false,
 
-          error:
-            insuranceRequest.assigned_agent_id
-              ? "Ce dossier est attribué à un autre agent."
-              : "Vous devez d’abord prendre en charge ce dossier.",
+          error: insuranceRequest.assigned_agent_id
+            ? "Ce dossier est attribué à un autre agent."
+            : "Vous devez d’abord prendre en charge ce dossier.",
         },
         403,
       );
     }
 
-    const now =
-      new Date().toISOString();
+    const now = new Date().toISOString();
 
     /*
      * ============================================
@@ -320,19 +259,13 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    if (
-      body.action ===
-      "confirm_payment"
-    ) {
+    if (body.action === "confirm_payment") {
       /*
        * Le paiement ne peut être confirmé
        * que depuis payment_review.
        */
 
-      if (
-        insuranceRequest.status !==
-        "payment_review"
-      ) {
+      if (insuranceRequest.status !== "payment_review") {
         return jsonResponse(
           {
             success: false,
@@ -347,51 +280,32 @@ async function handleStatusUpdate(
        * Recherche du paiement.
        */
 
-      const {
-        data:
-          payment,
-        error:
-          paymentSearchError,
-      } =
-        await serviceClient
-          .from(
-            "payments",
-          )
-          .select(
-            `
+      const { data: payment, error: paymentSearchError } = await serviceClient
+        .from("payments")
+        .select(
+          `
               id,
               status
             `,
-          )
-          .eq(
-            "request_id",
-            id,
-          )
-          .maybeSingle();
+        )
+        .eq("request_id", id)
+        .maybeSingle();
 
-      if (
-        paymentSearchError
-      ) {
-        throw new Error(
-          paymentSearchError.message,
-        );
+      if (paymentSearchError) {
+        throw new Error(paymentSearchError.message);
       }
 
       if (!payment) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Aucun paiement n’est associé à ce dossier.",
+            error: "Aucun paiement n’est associé à ce dossier.",
           },
           404,
         );
       }
 
-      if (
-        payment.status !==
-        "submitted"
-      ) {
+      if (payment.status !== "submitted") {
         return jsonResponse(
           {
             success: false,
@@ -412,47 +326,23 @@ async function handleStatusUpdate(
        * payment_confirmed
        */
 
-      const {
-        data:
-          lockedRequest,
-        error:
-          lockError,
-      } =
-        await serviceClient
-          .from(
-            "insurance_requests",
-          )
-          .update({
-            status:
-              "payment_confirmed",
+      const { data: lockedRequest, error: lockError } = await serviceClient
+        .from("insurance_requests")
+        .update({
+          status: "payment_confirmed",
 
-            updated_at:
-              now,
-          })
-          .eq(
-            "id",
-            id,
-          )
-          .eq(
-            "status",
-            "payment_review",
-          )
-          .select(
-            "id",
-          )
-          .maybeSingle();
+          updated_at: now,
+        })
+        .eq("id", id)
+        .eq("status", "payment_review")
+        .select("id")
+        .maybeSingle();
 
-      if (
-        lockError
-      ) {
-        throw new Error(
-          lockError.message,
-        );
+      if (lockError) {
+        throw new Error(lockError.message);
       }
 
-      if (
-        !lockedRequest
-      ) {
+      if (!lockedRequest) {
         return jsonResponse(
           {
             success: false,
@@ -467,117 +357,60 @@ async function handleStatusUpdate(
        * Mise à jour conditionnelle du paiement.
        */
 
-      const {
-        data:
-          updatedPayment,
-        error:
-          paymentUpdateError,
-      } =
+      const { data: updatedPayment, error: paymentUpdateError } =
         await serviceClient
-          .from(
-            "payments",
-          )
+          .from("payments")
           .update({
-            status:
-              "confirmed",
+            status: "confirmed",
 
-            verified_at:
-              now,
+            verified_at: now,
 
-            verified_by:
-              user.id,
+            verified_by: user.id,
 
-            rejection_reason:
-              null,
+            rejection_reason: null,
           })
-          .eq(
-            "id",
-            payment.id,
-          )
-          .eq(
-            "status",
-            "submitted",
-          )
-          .select(
-            "id",
-          )
+          .eq("id", payment.id)
+          .eq("status", "submitted")
+          .select("id")
           .maybeSingle();
 
-      if (
-        paymentUpdateError
-      ) {
+      if (paymentUpdateError) {
         /*
          * Rollback du verrou.
          */
 
-        const {
-          error:
-            rollbackError,
-        } =
-          await serviceClient
-            .from(
-              "insurance_requests",
-            )
-            .update({
-              status:
-                "payment_review",
+        const { error: rollbackError } = await serviceClient
+          .from("insurance_requests")
+          .update({
+            status: "payment_review",
 
-              updated_at:
-                new Date().toISOString(),
-            })
-            .eq(
-              "id",
-              id,
-            )
-            .eq(
-              "status",
-              "payment_confirmed",
-            );
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id)
+          .eq("status", "payment_confirmed");
 
-        if (
-          rollbackError
-        ) {
+        if (rollbackError) {
           console.error(
             "Rollback payment_confirmed impossible :",
             rollbackError.message,
           );
         }
 
-        throw new Error(
-          paymentUpdateError.message,
-        );
+        throw new Error(paymentUpdateError.message);
       }
 
-      if (
-        !updatedPayment
-      ) {
-        const {
-          error:
-            rollbackError,
-        } =
-          await serviceClient
-            .from(
-              "insurance_requests",
-            )
-            .update({
-              status:
-                "payment_review",
+      if (!updatedPayment) {
+        const { error: rollbackError } = await serviceClient
+          .from("insurance_requests")
+          .update({
+            status: "payment_review",
 
-              updated_at:
-                new Date().toISOString(),
-            })
-            .eq(
-              "id",
-              id,
-            )
-            .eq(
-              "status",
-              "payment_confirmed",
-            );
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id)
+          .eq("status", "payment_confirmed");
 
-        if (
-          rollbackError
-        ) {
+        if (rollbackError) {
           console.error(
             "Rollback payment_confirmed impossible :",
             rollbackError.message,
@@ -587,38 +420,29 @@ async function handleStatusUpdate(
         return jsonResponse(
           {
             success: false,
-            error:
-              "Le paiement a changé entre-temps. Actualisez la page.",
+            error: "Le paiement a changé entre-temps. Actualisez la page.",
           },
           409,
         );
       }
 
       await safeLogActivity({
-        requestId:
-          id,
+        requestId: id,
 
-        userId:
-          user.id,
+        userId: user.id,
 
-        action:
-          "payment_confirmed",
+        action: "payment_confirmed",
 
-        description:
-          "Paiement confirmé par un agent.",
+        description: "Paiement confirmé par un agent.",
       });
 
-      return jsonResponse(
-        {
-          success: true,
+      return jsonResponse({
+        success: true,
 
-          action:
-            body.action,
+        action: body.action,
 
-          status:
-            "payment_confirmed",
-        },
-      );
+        status: "payment_confirmed",
+      });
     }
 
     /*
@@ -627,14 +451,8 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    if (
-      body.action ===
-      "reject_payment"
-    ) {
-      if (
-        insuranceRequest.status !==
-        "payment_review"
-      ) {
+    if (body.action === "reject_payment") {
+      if (insuranceRequest.status !== "payment_review") {
         return jsonResponse(
           {
             success: false,
@@ -645,51 +463,32 @@ async function handleStatusUpdate(
         );
       }
 
-      const {
-        data:
-          payment,
-        error:
-          paymentSearchError,
-      } =
-        await serviceClient
-          .from(
-            "payments",
-          )
-          .select(
-            `
+      const { data: payment, error: paymentSearchError } = await serviceClient
+        .from("payments")
+        .select(
+          `
               id,
               status
             `,
-          )
-          .eq(
-            "request_id",
-            id,
-          )
-          .maybeSingle();
+        )
+        .eq("request_id", id)
+        .maybeSingle();
 
-      if (
-        paymentSearchError
-      ) {
-        throw new Error(
-          paymentSearchError.message,
-        );
+      if (paymentSearchError) {
+        throw new Error(paymentSearchError.message);
       }
 
       if (!payment) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Aucun paiement n’est associé à ce dossier.",
+            error: "Aucun paiement n’est associé à ce dossier.",
           },
           404,
         );
       }
 
-      if (
-        payment.status !==
-        "submitted"
-      ) {
+      if (payment.status !== "submitted") {
         return jsonResponse(
           {
             success: false,
@@ -708,47 +507,23 @@ async function handleStatusUpdate(
        * payment_rejected
        */
 
-      const {
-        data:
-          lockedRequest,
-        error:
-          lockError,
-      } =
-        await serviceClient
-          .from(
-            "insurance_requests",
-          )
-          .update({
-            status:
-              "payment_rejected",
+      const { data: lockedRequest, error: lockError } = await serviceClient
+        .from("insurance_requests")
+        .update({
+          status: "payment_rejected",
 
-            updated_at:
-              now,
-          })
-          .eq(
-            "id",
-            id,
-          )
-          .eq(
-            "status",
-            "payment_review",
-          )
-          .select(
-            "id",
-          )
-          .maybeSingle();
+          updated_at: now,
+        })
+        .eq("id", id)
+        .eq("status", "payment_review")
+        .select("id")
+        .maybeSingle();
 
-      if (
-        lockError
-      ) {
-        throw new Error(
-          lockError.message,
-        );
+      if (lockError) {
+        throw new Error(lockError.message);
       }
 
-      if (
-        !lockedRequest
-      ) {
+      if (!lockedRequest) {
         return jsonResponse(
           {
             success: false,
@@ -759,113 +534,56 @@ async function handleStatusUpdate(
         );
       }
 
-      const {
-        data:
-          updatedPayment,
-        error:
-          paymentUpdateError,
-      } =
+      const { data: updatedPayment, error: paymentUpdateError } =
         await serviceClient
-          .from(
-            "payments",
-          )
+          .from("payments")
           .update({
-            status:
-              "rejected",
+            status: "rejected",
 
-            verified_at:
-              now,
+            verified_at: now,
 
-            verified_by:
-              user.id,
+            verified_by: user.id,
 
-            rejection_reason:
-              rejectionReason,
+            rejection_reason: rejectionReason,
           })
-          .eq(
-            "id",
-            payment.id,
-          )
-          .eq(
-            "status",
-            "submitted",
-          )
-          .select(
-            "id",
-          )
+          .eq("id", payment.id)
+          .eq("status", "submitted")
+          .select("id")
           .maybeSingle();
 
-      if (
-        paymentUpdateError
-      ) {
-        const {
-          error:
-            rollbackError,
-        } =
-          await serviceClient
-            .from(
-              "insurance_requests",
-            )
-            .update({
-              status:
-                "payment_review",
+      if (paymentUpdateError) {
+        const { error: rollbackError } = await serviceClient
+          .from("insurance_requests")
+          .update({
+            status: "payment_review",
 
-              updated_at:
-                new Date().toISOString(),
-            })
-            .eq(
-              "id",
-              id,
-            )
-            .eq(
-              "status",
-              "payment_rejected",
-            );
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id)
+          .eq("status", "payment_rejected");
 
-        if (
-          rollbackError
-        ) {
+        if (rollbackError) {
           console.error(
             "Rollback payment_rejected impossible :",
             rollbackError.message,
           );
         }
 
-        throw new Error(
-          paymentUpdateError.message,
-        );
+        throw new Error(paymentUpdateError.message);
       }
 
-      if (
-        !updatedPayment
-      ) {
-        const {
-          error:
-            rollbackError,
-        } =
-          await serviceClient
-            .from(
-              "insurance_requests",
-            )
-            .update({
-              status:
-                "payment_review",
+      if (!updatedPayment) {
+        const { error: rollbackError } = await serviceClient
+          .from("insurance_requests")
+          .update({
+            status: "payment_review",
 
-              updated_at:
-                new Date().toISOString(),
-            })
-            .eq(
-              "id",
-              id,
-            )
-            .eq(
-              "status",
-              "payment_rejected",
-            );
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id)
+          .eq("status", "payment_rejected");
 
-        if (
-          rollbackError
-        ) {
+        if (rollbackError) {
           console.error(
             "Rollback payment_rejected impossible :",
             rollbackError.message,
@@ -875,38 +593,29 @@ async function handleStatusUpdate(
         return jsonResponse(
           {
             success: false,
-            error:
-              "Le paiement a changé entre-temps. Actualisez la page.",
+            error: "Le paiement a changé entre-temps. Actualisez la page.",
           },
           409,
         );
       }
 
       await safeLogActivity({
-        requestId:
-          id,
+        requestId: id,
 
-        userId:
-          user.id,
+        userId: user.id,
 
-        action:
-          "payment_rejected",
+        action: "payment_rejected",
 
-        description:
-          `Paiement refusé. Motif : ${rejectionReason}`,
+        description: `Paiement refusé. Motif : ${rejectionReason}`,
       });
 
-      return jsonResponse(
-        {
-          success: true,
+      return jsonResponse({
+        success: true,
 
-          action:
-            body.action,
+        action: body.action,
 
-          status:
-            "payment_rejected",
-        },
-      );
+        status: "payment_rejected",
+      });
     }
 
     /*
@@ -915,14 +624,8 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    if (
-      body.action ===
-      "start_policy"
-    ) {
-      if (
-        insuranceRequest.status !==
-        "payment_confirmed"
-      ) {
+    if (body.action === "start_policy") {
+      if (insuranceRequest.status !== "payment_confirmed") {
         return jsonResponse(
           {
             success: false,
@@ -934,75 +637,45 @@ async function handleStatusUpdate(
         );
       }
 
-      const insuranceCompanyId =
-        body.insuranceCompanyId
-          ?.trim() ?? "";
+      const insuranceCompanyId = body.insuranceCompanyId?.trim() ?? "";
 
-      if (
-        !insuranceCompanyId
-      ) {
+      if (!insuranceCompanyId) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Veuillez sélectionner un assureur.",
+            error: "Veuillez sélectionner un assureur.",
           },
           400,
         );
       }
 
-      const age =
-        Number(
-          insuranceRequest
-            .calculated_age,
-        );
+      const age = Number(insuranceRequest.calculated_age);
 
-      const durationYears =
-        Number(
-          insuranceRequest
-            .insurance_duration_years,
-        );
+      const durationYears = Number(insuranceRequest.insurance_duration_years);
 
-      if (
-        !Number.isInteger(
-          age,
-        ) ||
-        age < 0
-      ) {
+      if (!Number.isInteger(age) || age < 0) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "L’âge calculé du client est invalide.",
+            error: "L’âge calculé du client est invalide.",
           },
           400,
         );
       }
 
-      if (
-        durationYears !== 1 &&
-        durationYears !== 2
-      ) {
+      if (durationYears !== 1 && durationYears !== 2) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "La durée d’assurance est invalide.",
+            error: "La durée d’assurance est invalide.",
           },
           400,
         );
       }
 
-      const {
-        data:
-          insuranceCompany,
-        error:
-          insuranceCompanyError,
-      } =
+      const { data: insuranceCompany, error: insuranceCompanyError } =
         await serviceClient
-          .from(
-            "insurance_companies",
-          )
+          .from("insurance_companies")
           .select(
             `
               id,
@@ -1010,97 +683,109 @@ async function handleStatusUpdate(
               is_active
             `,
           )
-          .eq(
-            "id",
-            insuranceCompanyId,
-          )
+          .eq("id", insuranceCompanyId)
           .maybeSingle();
 
-      if (
-        insuranceCompanyError
-      ) {
-        throw new Error(
-          insuranceCompanyError.message,
-        );
+      if (insuranceCompanyError) {
+        throw new Error(insuranceCompanyError.message);
       }
 
-      if (
-        !insuranceCompany
-      ) {
+      if (!insuranceCompany) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Assureur introuvable.",
+            error: "Assureur introuvable.",
           },
           404,
         );
       }
 
-      if (
-        !insuranceCompany.is_active
-      ) {
+      if (!insuranceCompany.is_active) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Cet assureur est actuellement inactif.",
+            error: "Cet assureur est actuellement inactif.",
           },
           409,
         );
       }
 
-      const turkeyDateParts =
-        new Intl.DateTimeFormat(
-          "en-GB",
-          {
-            timeZone:
-              "Europe/Istanbul",
-            year:
-              "numeric",
-            month:
-              "2-digit",
-            day:
-              "2-digit",
-          },
-        ).formatToParts(
-          new Date(),
-        );
+      const turkeyDateParts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Istanbul",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).formatToParts(new Date());
 
       const turkeyYear =
-        turkeyDateParts.find(
-          (part) =>
-            part.type ===
-            "year",
-        )?.value ?? "";
+        turkeyDateParts.find((part) => part.type === "year")?.value ?? "";
 
       const turkeyMonth =
-        turkeyDateParts.find(
-          (part) =>
-            part.type ===
-            "month",
-        )?.value ?? "";
+        turkeyDateParts.find((part) => part.type === "month")?.value ?? "";
 
       const turkeyDay =
-        turkeyDateParts.find(
-          (part) =>
-            part.type ===
-            "day",
-        )?.value ?? "";
+        turkeyDateParts.find((part) => part.type === "day")?.value ?? "";
 
-      const today =
-        `${turkeyYear}-${turkeyMonth}-${turkeyDay}`;
+      const today = `${turkeyYear}-${turkeyMonth}-${turkeyDay}`;
 
-      const {
-        data:
-          matchingRate,
-        error:
-          matchingRateError,
-      } =
+      const client = Array.isArray(insuranceRequest.client)
+        ? insuranceRequest.client[0]
+        : insuranceRequest.client;
+      const nationality =
+        insuranceRequest.quote_nationality ?? client?.nationality;
+      let nationalityRate: NationalityRate | null = null;
+      if (insuranceRequest.nationality_rate_id) {
+        const stored = await serviceClient
+          .from("insurance_nationality_rates")
+          .select("*")
+          .eq("id", insuranceRequest.nationality_rate_id)
+          .maybeSingle();
+        if (stored.error || !stored.data)
+          throw new Error("La grille du devis est indisponible.");
+        nationalityRate = stored.data;
+      } else if (
+        insuranceRequest.quote_nationality != null &&
+        isCongoBrazzaville(nationality) &&
+        day(insuranceRequest.created_at) >= "2026-09-17"
+      ) {
+        nationalityRate = await skylineNationalityRate(
+          age,
+          nationality,
+          new Date(insuranceRequest.created_at),
+        );
+      }
+      if (
+        insuranceRequest.nationality_rate_id &&
+        nationalityRate?.insurance_company_id !== insuranceCompanyId
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error: "Ce devis utilise la grille Skyline. Sélectionnez Skyline.",
+          },
+          409,
+        );
+      }
+      if (
+        insuranceRequest.quote_nationality != null &&
+        isCongoBrazzaville(nationality) &&
+        day(insuranceRequest.created_at) >= "2026-09-17" &&
+        isSkyline(insuranceCompany.name) &&
+        !nationalityRate
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Aucun tarif Skyline Congo-Brazzaville ne correspond à ce dossier.",
+          },
+          409,
+        );
+      }
+
+      const { data: genericRate, error: matchingRateError } =
         await serviceClient
-          .from(
-            "insurance_cost_rates",
-          )
+          .from("insurance_cost_rates")
           .select(
             `
               id,
@@ -1109,60 +794,36 @@ async function handleStatusUpdate(
               created_at
             `,
           )
-          .eq(
-            "insurance_company_id",
-            insuranceCompanyId,
-          )
-          .eq(
-            "is_active",
-            true,
-          )
-          .eq(
-            "duration_years",
-            durationYears,
-          )
-          .lte(
-            "min_age",
-            age,
-          )
-          .gte(
-            "max_age",
-            age,
-          )
-          .lte(
-            "effective_from",
-            today,
-          )
-          .order(
-            "effective_from",
-            {
-              ascending:
-                false,
-            },
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
-            },
-          )
-          .limit(
-            1,
-          )
+          .eq("insurance_company_id", insuranceCompanyId)
+          .eq("is_active", true)
+          .eq("duration_years", durationYears)
+          .lte("min_age", age)
+          .gte("max_age", age)
+          .lte("effective_from", today)
+          .order("effective_from", {
+            ascending: false,
+          })
+          .order("created_at", {
+            ascending: false,
+          })
+          .limit(1)
           .maybeSingle();
 
-      if (
-        matchingRateError
-      ) {
-        throw new Error(
-          matchingRateError.message,
-        );
+      if (matchingRateError) {
+        throw new Error(matchingRateError.message);
       }
 
-      if (
-        !matchingRate
-      ) {
+      const special =
+        nationalityRate?.insurance_company_id === insuranceCompanyId
+          ? nationalityRate
+          : null;
+      const matchingRate = special
+        ? {
+            id: null,
+            real_cost: nationalityAmounts(special, durationYears as 1 | 2).cost,
+          }
+        : genericRate;
+      if (!matchingRate) {
         return jsonResponse(
           {
             success: false,
@@ -1173,23 +834,13 @@ async function handleStatusUpdate(
         );
       }
 
-      const actualInsuranceCost =
-        Number(
-          matchingRate.real_cost,
-        );
+      const actualInsuranceCost = Number(matchingRate.real_cost);
 
-      if (
-        !Number.isFinite(
-          actualInsuranceCost,
-        ) ||
-        actualInsuranceCost <
-          0
-      ) {
+      if (!Number.isFinite(actualInsuranceCost) || actualInsuranceCost < 0) {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Le coût réel configuré pour cet assureur est invalide.",
+            error: "Le coût réel configuré pour cet assureur est invalide.",
           },
           500,
         );
@@ -1208,68 +859,47 @@ async function handleStatusUpdate(
        * côté serveur à partir du tarif actif.
        */
 
-      const {
-        data:
-          updatedRequest,
-        error:
-          updateError,
-      } =
-        await serviceClient
-          .from(
-            "insurance_requests",
-          )
-          .update({
-            insurance_company_id:
-              insuranceCompany.id,
+      const { data: updatedRequest, error: updateError } = await serviceClient
+        .from("insurance_requests")
+        .update({
+          insurance_company_id: insuranceCompany.id,
 
-            insurance_cost_rate_id:
-              matchingRate.id,
+          insurance_cost_rate_id: matchingRate.id,
 
-            actual_insurance_cost:
-              actualInsuranceCost,
+          ...(quoteSchemaReady
+            ? {
+                nationality_rate_id:
+                  special?.id ?? insuranceRequest.nationality_rate_id,
+              }
+            : {}),
+          actual_insurance_cost: actualInsuranceCost,
 
-            insurance_company_selected_at:
-              now,
+          insurance_company_selected_at: now,
 
-            insurance_company_selected_by:
-              user.id,
+          insurance_company_selected_by: user.id,
 
-            status:
-              "policy_preparation",
+          status: "policy_preparation",
 
-            updated_at:
-              now,
-          })
-          .eq(
-            "id",
-            id,
-          )
-          .eq(
-            "status",
-            "payment_confirmed",
-          )
-          .select(
-            `
+          updated_at: now,
+        })
+        .eq("id", id)
+        .eq("status", "payment_confirmed")
+        .select(
+          `
               id,
               status,
               insurance_company_id,
               insurance_cost_rate_id,
               actual_insurance_cost
             `,
-          )
-          .maybeSingle();
+        )
+        .maybeSingle();
 
-      if (
-        updateError
-      ) {
-        throw new Error(
-          updateError.message,
-        );
+      if (updateError) {
+        throw new Error(updateError.message);
       }
 
-      if (
-        !updatedRequest
-      ) {
+      if (!updatedRequest) {
         return jsonResponse(
           {
             success: false,
@@ -1281,37 +911,27 @@ async function handleStatusUpdate(
       }
 
       await safeLogActivity({
-        requestId:
-          id,
+        requestId: id,
 
-        userId:
-          user.id,
+        userId: user.id,
 
-        action:
-          "policy_preparation_started",
+        action: "policy_preparation_started",
 
-        description:
-          `Assureur sélectionné : ${insuranceCompany.name}. Préparation de l’assurance commencée.`,
+        description: `Assureur sélectionné : ${insuranceCompany.name}. Préparation de l’assurance commencée.`,
       });
 
-      return jsonResponse(
-        {
-          success: true,
+      return jsonResponse({
+        success: true,
 
-          action:
-            body.action,
+        action: body.action,
 
-          status:
-            "policy_preparation",
+        status: "policy_preparation",
 
-          insuranceCompany: {
-            id:
-              insuranceCompany.id,
-            name:
-              insuranceCompany.name,
-          },
+        insuranceCompany: {
+          id: insuranceCompany.id,
+          name: insuranceCompany.name,
         },
-      );
+      });
     }
 
     /*
@@ -1320,19 +940,13 @@ async function handleStatusUpdate(
      * ============================================
      */
 
-    if (
-      body.action ===
-      "cancel_request"
-    ) {
+    if (body.action === "cancel_request") {
       /*
        * Une police disponible ne doit
        * plus être annulable ici.
        */
 
-      if (
-        insuranceRequest.status ===
-        "policy_available"
-      ) {
+      if (insuranceRequest.status === "policy_available") {
         return jsonResponse(
           {
             success: false,
@@ -1343,22 +957,17 @@ async function handleStatusUpdate(
         );
       }
 
-      if (
-        insuranceRequest.status ===
-        "cancelled"
-      ) {
+      if (insuranceRequest.status === "cancelled") {
         return jsonResponse(
           {
             success: false,
-            error:
-              "Ce dossier est déjà annulé.",
+            error: "Ce dossier est déjà annulé.",
           },
           409,
         );
       }
 
-      const previousStatus =
-        insuranceRequest.status;
+      const previousStatus = insuranceRequest.status;
 
       /*
        * Mise à jour conditionnelle sur
@@ -1370,47 +979,23 @@ async function handleStatusUpdate(
        * statut.
        */
 
-      const {
-        data:
-          cancelledRequest,
-        error:
-          updateError,
-      } =
-        await serviceClient
-          .from(
-            "insurance_requests",
-          )
-          .update({
-            status:
-              "cancelled",
+      const { data: cancelledRequest, error: updateError } = await serviceClient
+        .from("insurance_requests")
+        .update({
+          status: "cancelled",
 
-            updated_at:
-              now,
-          })
-          .eq(
-            "id",
-            id,
-          )
-          .eq(
-            "status",
-            previousStatus,
-          )
-          .select(
-            "id",
-          )
-          .maybeSingle();
+          updated_at: now,
+        })
+        .eq("id", id)
+        .eq("status", previousStatus)
+        .select("id")
+        .maybeSingle();
 
-      if (
-        updateError
-      ) {
-        throw new Error(
-          updateError.message,
-        );
+      if (updateError) {
+        throw new Error(updateError.message);
       }
 
-      if (
-        !cancelledRequest
-      ) {
+      if (!cancelledRequest) {
         return jsonResponse(
           {
             success: false,
@@ -1422,30 +1007,22 @@ async function handleStatusUpdate(
       }
 
       await safeLogActivity({
-        requestId:
-          id,
+        requestId: id,
 
-        userId:
-          user.id,
+        userId: user.id,
 
-        action:
-          "request_cancelled",
+        action: "request_cancelled",
 
-        description:
-          `Dossier annulé. Statut précédent : ${previousStatus}.`,
+        description: `Dossier annulé. Statut précédent : ${previousStatus}.`,
       });
 
-      return jsonResponse(
-        {
-          success: true,
+      return jsonResponse({
+        success: true,
 
-          action:
-            body.action,
+        action: body.action,
 
-          status:
-            "cancelled",
-        },
-      );
+        status: "cancelled",
+      });
     }
 
     /*
@@ -1456,26 +1033,19 @@ async function handleStatusUpdate(
     return jsonResponse(
       {
         success: false,
-        error:
-          "Action invalide.",
+        error: "Action invalide.",
       },
       400,
     );
-  } catch (
-    error
-  ) {
-    console.error(
-      "Erreur de mise à jour du statut :",
-      error,
-    );
+  } catch (error) {
+    console.error("Erreur de mise à jour du statut :", error);
 
     return jsonResponse(
       {
         success: false,
 
         error:
-          error instanceof
-          Error
+          error instanceof Error
             ? error.message
             : "Une erreur inattendue est survenue.",
       },
@@ -1484,22 +1054,10 @@ async function handleStatusUpdate(
   }
 }
 
-export async function POST(
-  request: Request,
-  context: RouteContext,
-) {
-  return handleStatusUpdate(
-    request,
-    context,
-  );
+export async function POST(request: Request, context: RouteContext) {
+  return handleStatusUpdate(request, context);
 }
 
-export async function PATCH(
-  request: Request,
-  context: RouteContext,
-) {
-  return handleStatusUpdate(
-    request,
-    context,
-  );
+export async function PATCH(request: Request, context: RouteContext) {
+  return handleStatusUpdate(request, context);
 }

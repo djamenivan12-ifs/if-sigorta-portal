@@ -2,6 +2,8 @@
 
 import {
   useState,
+  useRef,
+  useEffect,
 } from "react";
 
 import {
@@ -23,7 +25,12 @@ import type {
 
 type Step = 1 | 2 | 3 | 4;
 
-export default function PartnerRequestForm() {
+export default function PartnerRequestForm({initialDraft,initialVersion,initialSubmissionId}:{initialDraft:Partial<PartnerRequestFormData>|null;initialVersion:number;initialSubmissionId:string}) {
+  const [submissionId]=useState(initialSubmissionId);
+  const draftVersion=useRef(initialVersion);
+  const saveQueue=useRef(Promise.resolve());
+  const warned=useRef(false);
+  const completed=useRef(false);
   const router =
     useRouter();
 
@@ -38,9 +45,21 @@ export default function PartnerRequestForm() {
     setData,
   ] =
     useState<PartnerRequestFormData>(
-      initialPartnerRequestData,
+      {...initialPartnerRequestData,...initialDraft,passportFile:null,kimlikFrontFile:null,kimlikBackFile:null},
     );
 
+  useEffect(()=>{
+    const timer=setTimeout(()=>{
+      if(completed.current)return;
+      const payload=JSON.parse(JSON.stringify({...data,submissionId},(_key,value)=>typeof File!=="undefined"&&value instanceof File?undefined:value));
+      saveQueue.current=saveQueue.current.then(async()=>{
+        if(completed.current)return;
+        const response=await fetch("/api/partner/draft",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({version:draftVersion.current,payload})});
+        const result=await response.json();if(!response.ok||!result.success)throw Error(result.error||"Brouillon non enregistré.");draftVersion.current=result.version;
+      }).catch(()=>{if(!warned.current&&!completed.current){warned.current=true;window.alert("Le brouillon n’a pas pu être enregistré. Gardez cette fenêtre ouverte ; vérifiez votre session ou les autres fenêtres avant de continuer.");}});
+    },700);
+    return ()=>clearTimeout(timer);
+  },[data,submissionId]);
   const progress =
     `${(step / 4) * 100}%`;
 
@@ -61,6 +80,7 @@ export default function PartnerRequestForm() {
     requestId: string;
     requestCode: string;
   }) {
+    completed.current=true;
     router.push(
       `/partenaire/dossiers/${encodeURIComponent(
         requestId,
@@ -147,6 +167,7 @@ export default function PartnerRequestForm() {
 
         {step === 4 && (
           <PartnerReviewStep
+            submissionId={submissionId}
             data={data}
             onPrevious={() =>
               goToStep(3)

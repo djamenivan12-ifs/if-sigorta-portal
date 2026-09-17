@@ -224,9 +224,9 @@ export default async function AgentDetailsPage({ params }: PageProps) {
    */
   const requestIds = requests.map((request) => request.id);
 
-  let activities: ActivityRow[] = [];
+  const activities: ActivityRow[] = [];
 
-  if (requestIds.length > 0) {
+  for (let offset = 0; offset < requestIds.length; offset += 100) {
     const { data: activitiesData, error: activitiesError } = await readAll(
       supabase
         .from("activity_logs")
@@ -237,7 +237,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
             created_at
           `,
         )
-        .in("request_id", requestIds)
+        .in("request_id", requestIds.slice(offset, offset + 100))
         .in("action", PROGRESS_ACTIONS)
         .order("created_at", {
           ascending: false,
@@ -249,7 +249,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
       throw new Error(activitiesError.message);
     }
 
-    activities = (activitiesData ?? []) as ActivityRow[];
+    activities.push(...((activitiesData ?? []) as ActivityRow[]));
   }
 
   const now = new Date().toISOString();

@@ -5,13 +5,15 @@ import type {
 } from "react";
 
 import {
-  useEffect,
+  useRef,
   useState,
 } from "react";
 
 import {
   X,
 } from "lucide-react";
+
+import { useModalFocus } from "@/lib/browser/useModalFocus";
 
 import PartnerHeader from "./PartnerHeader";
 import PartnerSidebar from "./PartnerSidebar";
@@ -36,19 +38,8 @@ export default function PartnerShell({
   ] =
     useState(false);
 
-  useEffect(() => {
-    document.body.style.overflow =
-      mobileMenuOpen
-        ? "hidden"
-        : "";
-
-    return () => {
-      document.body.style.overflow =
-        "";
-    };
-  }, [
-    mobileMenuOpen,
-  ]);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useModalFocus(mobileMenuOpen, menuRef, () => setMobileMenuOpen(false));
 
   return (
     <div className="min-h-screen bg-[#F6F8F5]">
@@ -64,7 +55,7 @@ export default function PartnerShell({
       </div>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[70] lg:hidden">
+        <div ref={menuRef} role="dialog" aria-modal="true" aria-label="Menu partenaire" tabIndex={-1} className="fixed inset-0 z-[70] lg:hidden">
           <button
             type="button"
             aria-label="Fermer le menu"

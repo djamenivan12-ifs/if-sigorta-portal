@@ -1,8 +1,13 @@
 
-import { normalizeActivityAction } from "@/lib/activity/normalizeAction";
+import { readAll } from "@/lib/supabase/readAll";
+import { PROGRESS_ACTIONS } from "@/lib/dashboard/model";
+import { day } from "@/lib/accounting/model";
+import { isValidDate } from "@/lib/validation/date";
+import { getLastProgress } from "@/lib/admin/progress";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export type NotificationLevel =
+  | "unavailable"
   | "none"
   | "watch"
   | "late"
@@ -11,12 +16,14 @@ export type NotificationLevel =
 export type NotificationSummary = {
   count: number;
   level: NotificationLevel;
+  renewalCount?:number;
 };
 
 type RequestRow = {
   id: string;
   status: string;
   created_at: string;
+  assigned_at: string | null;
   assigned_agent_id:
     | string
     | null;
@@ -69,19 +76,6 @@ const ACTIVE_REQUEST_STATUSES = [
   "payment_review",
   "payment_confirmed",
   "policy_preparation",
-];
-
-const PROGRESS_ACTIONS = ["policy_whatsapp_sent","partner_policy_whatsapp_sent",
-  "request_created",
-  "payment_uploaded",
-  "payment_confirmed",
-  "policy_preparation_started",
-  "policy_uploaded_year_1",
-  "policy_uploaded_year_2",
-  "policy_replaced_year_1",
-  "policy_replaced_year_2",
-  "whatsapp_sent",
-  "request_claimed",
 ];
 
 const ACTIVE_RENEWAL_STATUSES = [
@@ -149,39 +143,9 @@ function getMinutesBetween(
   );
 }
 
-function getDaysRemaining(
-  policyEndDate: string,
-) {
-  const now =
-    new Date();
-
-  const today =
-    new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-
-  const endDate =
-    new Date(
-      `${policyEndDate}T00:00:00`,
-    );
-
-  if (
-    Number.isNaN(
-      endDate.getTime(),
-    )
-  ) {
-    return Number.POSITIVE_INFINITY;
-  }
-
-  return Math.ceil(
-    (
-      endDate.getTime() -
-      today.getTime()
-    ) /
-      86_400_000,
-  );
+function getDaysRemaining(policyEndDate: string) {
+  if (!isValidDate(policyEndDate)) return Number.POSITIVE_INFINITY;
+  return Math.round((Date.parse(policyEndDate + "T00:00:00Z") - Date.parse(day(new Date().toISOString()) + "T00:00:00Z")) / 86_400_000);
 }
 
 function getRequestLevel({
@@ -329,6 +293,7 @@ export async function getNotificationSummary({
             id,
             status,
             created_at,
+            assigned_at,
             assigned_agent_id
           `,
         )
@@ -353,7 +318,7 @@ export async function getNotificationSummary({
       error:
         requestsError,
     } =
-      await requestQuery;
+      await readAll(requestQuery.order("id"));
 
     if (
       requestsError
@@ -363,6 +328,8 @@ export async function getNotificationSummary({
         requestsError.message,
       );
     }
+
+    if (requestsError) throw new Error(requestsError.message);
 
     const requests =
       requestsError
@@ -391,64 +358,21 @@ export async function getNotificationSummary({
             request.id,
         );
 
-      const {
-        data:
-          activitiesData,
-        error:
-          activitiesError,
-      } =
-        await supabase
-          .from(
-            "activity_logs",
-          )
-          .select(
-            `
-              request_id,
-              action,
-              created_at
-            `,
-          )
-          .in(
-            "request_id",
-            requestIds,
-          )
-          .in(
-            "action",
-            PROGRESS_ACTIONS,
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
-            },
-          );
-
-      if (
-        activitiesError
-      ) {
-        console.error(
-          "Erreur récupération activity_logs :",
-          activitiesError.message,
-        );
+      const activities: ActivityRow[] = [];
+      for (let offset = 0; offset < requestIds.length; offset += 100) {
+        const result = await readAll(supabase.from("activity_logs")
+          .select("request_id,action,created_at")
+          .in("request_id", requestIds.slice(offset, offset + 100))
+          .in("action", PROGRESS_ACTIONS)
+          .order("created_at", { ascending: false }).order("id"));
+        if (result.error) throw new Error(result.error.message);
+        activities.push(...result.data as ActivityRow[]);
       }
-
-      const activities =
-        activitiesError
-          ? []
-          : (
-              activitiesData ??
-              []
-            ) as ActivityRow[];
-
       const lastProgressByRequest =
         new Map<
           string,
           string
         >();
-
-      const completedRequests =
-        new Set<string>();
 
       for (
         const activity of
@@ -465,14 +389,6 @@ export async function getNotificationSummary({
           );
         }
 
-        if (
-          normalizeActivityAction(activity.action) ===
-          "whatsapp_sent"
-        ) {
-          completedRequests.add(
-            activity.request_id,
-          );
-        }
       }
 
       const now =
@@ -482,19 +398,9 @@ export async function getNotificationSummary({
         const request of
         requests
       ) {
-        if (
-          completedRequests.has(
-            request.id,
-          )
-        ) {
-          continue;
-        }
+        if (request.status === "waiting_payment" && request.assigned_agent_id !== null) continue;
 
-        const lastProgressAt =
-          lastProgressByRequest.get(
-            request.id,
-          ) ??
-          request.created_at;
+        const lastProgressAt = getLastProgress(request, lastProgressByRequest, now);
 
         const minutes =
           getMinutesBetween(
@@ -549,7 +455,7 @@ export async function getNotificationSummary({
       error:
         renewalsError,
     } =
-      await supabase
+      await readAll(supabase
         .from(
           "insurance_renewals",
         )
@@ -568,7 +474,7 @@ export async function getNotificationSummary({
         .in(
           "status",
           ACTIVE_RENEWAL_STATUSES,
-        );
+        ).order("id"));
 
     if (
       renewalsError
@@ -578,6 +484,8 @@ export async function getNotificationSummary({
         renewalsError.message,
       );
     }
+
+    if (renewalsError) throw new Error(renewalsError.message);
 
     const renewals =
       renewalsError
@@ -657,6 +565,7 @@ export async function getNotificationSummary({
 
       level:
         highestLevel,
+      renewalCount:renewalNotificationCount,
     };
   } catch (
     error
@@ -668,7 +577,7 @@ export async function getNotificationSummary({
 
     return {
       count: 0,
-      level: "none",
+      level: "unavailable",
     };
   }
 }

@@ -1,6 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { day } from "@/lib/accounting/model";
-import { isCongoBrazzaville, isSkyline } from "./nationality";
+import { isCongoBrazzaville } from "./nationality";
 export { isCongoBrazzaville } from "./nationality";
 export type NationalityRate = {
   id: string;
@@ -21,13 +21,14 @@ export async function skylineNationalityGrid(
   const db = createServiceClient();
   const { data: companies, error: companyError } = await db
     .from("insurance_companies")
-    .select("id,name,is_active")
-    .eq("is_active", true);
+    .select("id,business_code,is_active")
+    .eq("is_active", true)
+    .eq("business_code","skyline");
   if (companyError)
     throw new Error(
       "Les tarifs Skyline sont indisponibles. Vérifiez que la mise à jour de la base a été appliquée.",
     );
-  const skyline = companies?.filter((c) => isSkyline(c.name));
+  const skyline = companies;
   if (!skyline || skyline.length !== 1) return [];
   const { data, error } = await db
     .from("insurance_nationality_rates")

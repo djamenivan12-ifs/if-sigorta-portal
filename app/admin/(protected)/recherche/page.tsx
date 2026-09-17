@@ -1,3 +1,4 @@
+import {loadRequestPage} from "@/lib/admin/loadRequestPage";
 import PageFrame from "@/components/admin/pages/PageFrame";
 import { listAllUsers } from "@/lib/supabase/listAllUsers";
 import Link from "next/link";
@@ -125,13 +126,9 @@ function unwrapClient(relation: RequestRow["client"]) {
   return relation;
 }
 
-function normalizeText(value: string) {
-  return value.trim().toLocaleLowerCase("fr-FR");
-}
 
-function normalizePhone(value: string) {
-  return value.replace(/\D/g, "");
-}
+
+
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -185,114 +182,7 @@ function createAgentNameMap(agents: AgentOption[]) {
   return new Map(agents.map((agent) => [agent.id, agent.name]));
 }
 
-async function searchRequests({
-  search,
-  currentUserId,
-  role,
-}: {
-  search: string;
-  currentUserId: string;
-
-  role: "admin" | "agent";
-}) {
-  const supabase = createServiceClient();
-
-  let query = supabase
-    .from("insurance_requests")
-    .select(
-      `
-          id,
-          request_code,
-          status,
-          assigned_agent_id,
-          passport_number,
-          kimlik_number,
-          calculated_price,
-          insurance_duration_years,
-          created_at,
-
-          client:clients (
-            first_name,
-            last_name,
-            nationality,
-            whatsapp_country_code,
-            whatsapp_number
-          )
-        `,
-    )
-    .order("created_at", {
-      ascending: false,
-    });
-
-  /*
-   * Agent :
-   * - ses propres dossiers
-   * - dossiers encore non attribués
-   *
-   * Admin :
-   * - tous les dossiers
-   */
-  if (role === "agent") {
-    query = query.or(
-      `assigned_agent_id.eq.${currentUserId},assigned_agent_id.is.null`,
-    );
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const rows = (data ?? []) as unknown as RequestRow[];
-
-  if (!search) {
-    return [];
-  }
-
-  const normalizedSearch = normalizeText(search);
-
-  const normalizedPhoneSearch = normalizePhone(search);
-
-  return rows.filter((request) => {
-    const client = unwrapClient(request.client);
-
-    const firstName = client?.first_name ?? "";
-
-    const lastName = client?.last_name ?? "";
-
-    const fullName = `${firstName} ${lastName}`;
-
-    const reverseFullName = `${lastName} ${firstName}`;
-
-    const nationality = client?.nationality ?? "";
-
-    const whatsapp = client
-      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
-      : "";
-
-    const normalizedWhatsapp = normalizePhone(whatsapp);
-
-    const passport = request.passport_number ?? "";
-
-    const kimlik = request.kimlik_number ?? "";
-
-    return (
-      normalizeText(request.request_code).includes(normalizedSearch) ||
-      normalizeText(firstName).includes(normalizedSearch) ||
-      normalizeText(lastName).includes(normalizedSearch) ||
-      normalizeText(fullName).includes(normalizedSearch) ||
-      normalizeText(reverseFullName).includes(normalizedSearch) ||
-      normalizeText(nationality).includes(normalizedSearch) ||
-      normalizeText(passport).includes(normalizedSearch) ||
-      normalizeText(kimlik).includes(normalizedSearch) ||
-      Boolean(
-        normalizedPhoneSearch &&
-        normalizedWhatsapp.includes(normalizedPhoneSearch),
-      )
-    );
-  });
-}
+async function searchRequests(input:{search:string;currentUserId:string;role:"admin"|"agent";page:number;status?:string;nationality?:string;duration?:string;dateFrom?:string;dateTo?:string;agent?:string;source?:string}){const {currentUserId,role,page,...filters}=input;void role;return loadRequestPage(currentUserId,Object.fromEntries(Object.entries(filters).map(([k,v])=>[k,v??""])),page,true);}
 
 function buildPageUrl({ search, page }: { search: string; page: number }) {
   const params = new URLSearchParams();
@@ -329,6 +219,7 @@ export default async function RecherchePage({
       : 1;
 
   let requests: RequestRow[] = [];
+  let listing:{rows:RequestRow[];total:number;page:number;pages:number;nationalities:string[]}|null=null;
 
   let agents: AgentOption[] = [];
 
@@ -340,6 +231,7 @@ export default async function RecherchePage({
         search,
 
         currentUserId: user.id,
+          page:currentPage,
 
         role,
       }),
@@ -347,7 +239,8 @@ export default async function RecherchePage({
       getAgents(),
     ]);
 
-    requests = requestResult;
+    listing=requestResult;
+    requests = requestResult.rows;
 
     agents = agentsResult;
   } catch (error) {
@@ -359,7 +252,8 @@ export default async function RecherchePage({
 
   const agentNames = createAgentNameMap(agents);
 
-  const totalRequests = requests.length;
+  const totalRequests = listing?.total??0;
+  currentPage=listing?.page??1;
 
   const totalPages = Math.max(1, Math.ceil(totalRequests / ITEMS_PER_PAGE));
 
@@ -371,23 +265,13 @@ export default async function RecherchePage({
 
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
-  const paginatedRequests = requests.slice(startIndex, endIndex);
+  const paginatedRequests = requests;
 
   const firstVisibleItem = totalRequests === 0 ? 0 : startIndex + 1;
 
   const lastVisibleItem = Math.min(endIndex, totalRequests);
 
-  const visiblePages = Array.from(
-    {
-      length: totalPages,
-    },
-    (_, index) => index + 1,
-  ).filter(
-    (pageNumber) =>
-      pageNumber === 1 ||
-      pageNumber === totalPages ||
-      Math.abs(pageNumber - currentPage) <= 2,
-  );
+  const visiblePages=Array.from(new Set([1,totalPages,currentPage-2,currentPage-1,currentPage,currentPage+1,currentPage+2])).filter(page=>page>=1&&page<=totalPages).sort((a,b)=>a-b);
 
   return (
     <PageFrame

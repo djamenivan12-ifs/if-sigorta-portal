@@ -1,0 +1,2 @@
+import {requireRole} from "@/lib/auth/requireRole";import PageFrame from "@/components/admin/pages/PageFrame";
+export default async function ProfilePage(){const {user,role}=await requireRole(["admin","agent"]);return <PageFrame section="Mon profil" href="/admin/profil"><h1 className="text-2xl font-bold text-slate-900">Mon profil</h1><dl className="mt-6 space-y-2 rounded-xl border border-slate-200 bg-white p-6"><dt>Adresse e-mail</dt><dd>{user.email??"—"}</dd><dt>Rôle</dt><dd>{role==="admin"?"Administrateur":"Agent"}</dd></dl></PageFrame>;}

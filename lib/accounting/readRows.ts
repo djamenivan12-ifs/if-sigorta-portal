@@ -2,6 +2,8 @@ import { collectRows } from "@/lib/supabase/collectRows";
 export const extensionTables = [
   "insurance_company_withdrawals",
   "insurance_nationality_rates",
+  "insurer_request_events",
+  "accounting_capture_metadata",
 ] as const;
 export async function readAccountingRows(
   table: string,

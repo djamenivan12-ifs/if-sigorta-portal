@@ -1,7 +1,6 @@
+import {loadRequestPage} from "@/lib/admin/loadRequestPage";
 import { CLAIMABLE_STATUSES } from "@/lib/insurance/requestWorkflow";
-import { readAll } from "@/lib/supabase/readAll";
 import PageFrame from "@/components/admin/pages/PageFrame";
-import { collectRows } from "@/lib/supabase/collectRows";
 import { listAllUsers } from "@/lib/supabase/listAllUsers";
 import Link from "next/link";
 
@@ -82,9 +81,7 @@ type RequestRow = {
     | null;
 };
 
-type ClientNationalityRow = {
-  nationality: string | null;
-};
+
 
 type AgentOption = {
   id: string;
@@ -216,35 +213,11 @@ function formatDate(value: string) {
   }).format(date);
 }
 
-function createStartDate(value: string) {
-  return new Date(`${value}T00:00:00+03:00`);
-}
 
-function createEndDate(value: string) {
-  return new Date(`${value}T23:59:59.999+03:00`);
-}
 
-async function getNationalities() {
-  const supabase = createServiceClient();
 
-  const { data, error } = await readAll(
-    supabase.from("clients").select("nationality").order("id"),
-  );
 
-  if (error) {
-    throw new Error(error.message);
-  }
 
-  const rows = (data ?? []) as ClientNationalityRow[];
-
-  return Array.from(
-    new Set(
-      rows
-        .map((row) => row.nationality?.trim())
-        .filter((value): value is string => Boolean(value)),
-    ),
-  ).sort((first, second) => first.localeCompare(second, "fr-FR"));
-}
 
 async function getAgents() {
   const supabase = createServiceClient();
@@ -285,176 +258,7 @@ function createAgentNameMap(agents: AgentOption[]) {
   return new Map(agents.map((agent) => [agent.id, agent.name]));
 }
 
-async function getRequests({
-  search,
-  status,
-  nationality,
-  duration,
-  dateFrom,
-  dateTo,
-  agent,
-  source,
-  currentUserId,
-  role,
-}: {
-  search: string;
-  status: string;
-  nationality: string;
-  duration: string;
-  dateFrom: string;
-  dateTo: string;
-  agent: string;
-  source: string;
-  currentUserId: string;
-
-  role: "admin" | "agent";
-}) {
-  const supabase = createServiceClient();
-
-  let query = supabase
-    .from("insurance_requests")
-    .select(
-      `
-          id,
-          request_code,
-          status,
-          source,
-          partner_id,
-          assigned_agent_id,
-          passport_number,
-          kimlik_number,
-          calculated_price,
-          insurance_duration_years,
-          created_at,
-
-          partner:partners (
-            code,
-            company_name
-          ),
-
-          client:clients (
-            first_name,
-            last_name,
-            nationality,
-            whatsapp_country_code,
-            whatsapp_number
-          )
-        `,
-    )
-    .order("created_at", {
-      ascending: false,
-    });
-
-  if (role === "agent")
-    query = query.or(
-      `assigned_agent_id.is.null,assigned_agent_id.eq.${currentUserId}`,
-    );
-  if (status) {
-    query = query.eq("status", status);
-  }
-
-  if (source === "direct" || source === "partner") {
-    query = query.eq("source", source);
-  }
-
-  if (duration === "1" || duration === "2") {
-    query = query.eq("insurance_duration_years", Number(duration));
-  }
-
-  if (agent === "me") {
-    query = query.eq("assigned_agent_id", currentUserId);
-  } else if (agent === "unassigned") {
-    query = query.is("assigned_agent_id", null);
-  } else if (agent && role === "admin") {
-    query = query.eq("assigned_agent_id", agent);
-  }
-
-  if (dateFrom) {
-    const startDate = createStartDate(dateFrom);
-
-    if (!Number.isNaN(startDate.getTime())) {
-      query = query.gte("created_at", startDate.toISOString());
-    }
-  }
-
-  if (dateTo) {
-    const endDate = createEndDate(dateTo);
-
-    if (!Number.isNaN(endDate.getTime())) {
-      query = query.lte("created_at", endDate.toISOString());
-    }
-  }
-
-  query = query.order("id");
-  const { data, error } = await collectRows((from, to) =>
-    query.range(from, to),
-  );
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  let rows = (data ?? []) as unknown as RequestRow[];
-
-  if (nationality) {
-    const normalizedNationality = nationality.trim().toLocaleLowerCase("fr-FR");
-
-    rows = rows.filter((request) => {
-      const client = unwrapClient(request.client);
-
-      return (
-        (client?.nationality ?? "").trim().toLocaleLowerCase("fr-FR") ===
-        normalizedNationality
-      );
-    });
-  }
-
-  if (!search) {
-    return rows;
-  }
-
-  const normalizedSearch = search.trim().toLocaleLowerCase("fr-FR");
-
-  const normalizedPhoneSearch = search.replace(/\D/g, "");
-
-  return rows.filter((request) => {
-    const client = unwrapClient(request.client);
-
-    const firstName = client?.first_name ?? "";
-
-    const lastName = client?.last_name ?? "";
-
-    const fullName = `${firstName} ${lastName}`;
-
-    const reverseFullName = `${lastName} ${firstName}`;
-
-    const whatsapp = client
-      ? `${client.whatsapp_country_code ?? ""}${client.whatsapp_number ?? ""}`
-      : "";
-
-    const normalizedWhatsapp = whatsapp.replace(/\D/g, "");
-
-    const passport = request.passport_number ?? "";
-
-    const kimlik = request.kimlik_number ?? "";
-
-    return (
-      request.request_code
-        .toLocaleLowerCase("fr-FR")
-        .includes(normalizedSearch) ||
-      firstName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
-      lastName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
-      fullName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
-      reverseFullName.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
-      passport.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
-      kimlik.toLocaleLowerCase("fr-FR").includes(normalizedSearch) ||
-      Boolean(
-        normalizedPhoneSearch &&
-        normalizedWhatsapp.includes(normalizedPhoneSearch),
-      )
-    );
-  });
-}
+async function getRequests(input:{search:string;currentUserId:string;role:"admin"|"agent";page:number;status?:string;nationality?:string;duration?:string;dateFrom?:string;dateTo?:string;agent?:string;source?:string}){const {currentUserId,role,page,...filters}=input;void role;return loadRequestPage(currentUserId,Object.fromEntries(Object.entries(filters).map(([k,v])=>[k,v??""])),page,false);}
 
 function buildPageUrl({
   page,
@@ -553,6 +357,7 @@ export default async function DossiersPage({
       : 1;
 
   let requests: RequestRow[] = [];
+  let listing:{rows:RequestRow[];total:number;page:number;pages:number;nationalities:string[]}|null=null;
 
   let nationalities: string[] = [];
 
@@ -563,7 +368,7 @@ export default async function DossiersPage({
   let errorMessage = "";
 
   try {
-    const [requestsResult, nationalitiesResult, agentsResult] =
+    const [requestsResult, agentsResult] =
       await Promise.all([
         getRequests({
           search,
@@ -576,18 +381,19 @@ export default async function DossiersPage({
           source,
 
           currentUserId: user.id,
+          page:currentPage,
 
           role,
         }),
 
-        getNationalities(),
 
         getAgents(),
       ]);
 
-    requests = requestsResult;
+    listing=requestsResult;
+    requests = requestsResult.rows;
 
-    nationalities = nationalitiesResult;
+    nationalities = requestsResult.nationalities;
 
     agents = agentsResult;
 
@@ -599,7 +405,8 @@ export default async function DossiersPage({
         : "Les dossiers n’ont pas pu être chargés.";
   }
 
-  const totalRequests = requests.length;
+  const totalRequests = listing?.total??0;
+  currentPage=listing?.page??1;
 
   const totalPages = Math.max(1, Math.ceil(totalRequests / ITEMS_PER_PAGE));
 
@@ -611,23 +418,13 @@ export default async function DossiersPage({
 
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
-  const paginatedRequests = requests.slice(startIndex, endIndex);
+  const paginatedRequests = requests;
 
   const firstVisibleItem = totalRequests === 0 ? 0 : startIndex + 1;
 
   const lastVisibleItem = Math.min(endIndex, totalRequests);
 
-  const visiblePages = Array.from(
-    {
-      length: totalPages,
-    },
-    (_, index) => index + 1,
-  ).filter(
-    (pageNumber) =>
-      pageNumber === 1 ||
-      pageNumber === totalPages ||
-      Math.abs(pageNumber - currentPage) <= 2,
-  );
+  const visiblePages=Array.from(new Set([1,totalPages,currentPage-2,currentPage-1,currentPage,currentPage+1,currentPage+2])).filter(page=>page>=1&&page<=totalPages).sort((a,b)=>a-b);
 
   return (
     <PageFrame
@@ -659,6 +456,8 @@ export default async function DossiersPage({
             <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
               <a
                 href={`/api/admin/exports/dossiers?${new URLSearchParams({
+                  ...(agent ? { agent } : {}),
+                  ...(source ? { source } : {}),
                   ...(search
                     ? {
                         q: search,

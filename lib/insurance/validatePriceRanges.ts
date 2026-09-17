@@ -34,3 +34,24 @@ export function validatePriceRanges(body: unknown): PriceRangesValidation {
     }
     return { success: true, ranges };
 }
+
+/** Keep the untouched baseline to reject stale browser edits. */
+export function validatePriceGridRequest(body: unknown):
+  | { success: true; ranges: PriceRangeInput[]; expectedRanges: PriceRangeInput[] }
+  | { success: false; error: string } {
+  const submission = validatePriceRanges(body);
+  if (!submission.success) return submission;
+  if (!isRecord(body) || !Array.isArray(body.expectedRanges) || body.expectedRanges.length > 10000)
+    return { success: false, error: "Rechargez la grille avant de l’enregistrer." };
+  const expectedRanges: PriceRangeInput[] = [];
+  const ids = new Set<number>();
+  for (let offset = 0; offset < body.expectedRanges.length; offset += 200) {
+    const baseline = validatePriceRanges({ ranges: body.expectedRanges.slice(offset, offset + 200) });
+    if (!baseline.success) return baseline;
+    for (const row of baseline.ranges) {
+      if (row.id === undefined || ids.has(row.id)) return { success: false, error: "La grille initiale est invalide. Rechargez la page." };
+      ids.add(row.id); expectedRanges.push(row);
+    }
+  }
+  return { success: true, ranges: submission.ranges, expectedRanges };
+}

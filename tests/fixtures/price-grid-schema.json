@@ -1,0 +1,110 @@
+{
+  "insurance_price_ranges": {
+    "required": [
+      "id",
+      "minimum_age",
+      "maximum_age",
+      "one_year_price",
+      "two_year_price",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "bigint",
+        "type": "integer"
+      },
+      "minimum_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "maximum_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "one_year_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "two_year_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "is_active": {
+        "default": true,
+        "format": "boolean",
+        "type": "boolean"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "partner_price_ranges": {
+    "required": [
+      "id",
+      "partner_id",
+      "minimum_age",
+      "maximum_age",
+      "one_year_price",
+      "two_year_price",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "bigint",
+        "type": "integer"
+      },
+      "partner_id": {
+        "description": "Note:\nThis is a Foreign Key to `partners.id`.<fk table='partners' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "minimum_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "maximum_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "one_year_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "two_year_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "is_active": {
+        "default": true,
+        "format": "boolean",
+        "type": "boolean"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  }
+}

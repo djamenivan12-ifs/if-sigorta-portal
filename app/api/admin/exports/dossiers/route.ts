@@ -1,4 +1,6 @@
 import ExcelJS from "exceljs";
+import { readAll } from "@/lib/supabase/readAll";
+import { applyRequestScope } from "@/lib/admin/requestScope";
 
 import { createServiceClient } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -183,6 +185,7 @@ export async function GET(request: Request) {
     const dateTo =
       url.searchParams.get("dateTo")?.trim() ?? "";
 
+    const agent = url.searchParams.get("agent")?.trim() ?? "";
     const serviceClient = createServiceClient();
 
     /*
@@ -229,6 +232,8 @@ export async function GET(request: Request) {
      * On accepte uniquement les deux valeurs connues.
      * Toute autre valeur est ignorée.
      */
+    query = applyRequestScope(query, role, user.id, agent);
+
     if (source === "direct" || source === "partner") {
       query = query.eq("source", source);
     }
@@ -266,7 +271,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const { data, error } = await query;
+    const { data, error } = await readAll(query.order("id"));
 
     if (error) {
       throw new Error(error.message);

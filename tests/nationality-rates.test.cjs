@@ -73,7 +73,7 @@ function make(rows = grid) {
         then(resolve, reject) {
           return Promise.resolve({
             data: (table === "insurance_companies"
-              ? [{ id: "sky", name: "Skyline", is_active: true }]
+              ? [{ id: "sky", name: "Skyline renommé", business_code:"skyline", is_active: true }]
               : rows
             ).filter((r) => filters.every((f) => f(r))),
             error: null,

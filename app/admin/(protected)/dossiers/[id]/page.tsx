@@ -1,3 +1,4 @@
+import {requestSnapshot} from "@/lib/clients/requestSnapshot";
 import { readAll } from "@/lib/supabase/readAll";
 import PageFrame from "@/components/admin/pages/PageFrame";
 import { listAllUsers } from "@/lib/supabase/listAllUsers";
@@ -288,6 +289,7 @@ export default async function DossierPage({ params }: PageProps) {
       `
           id,
           request_code,
+ client_snapshot,
           source,
           partner_id,
           status,
@@ -341,6 +343,7 @@ export default async function DossierPage({ params }: PageProps) {
           ),
 
           payment:payments (
+            id,
             status,
             expected_amount,
             submitted_at,
@@ -584,9 +587,9 @@ export default async function DossierPage({ params }: PageProps) {
     signedUrl: `/api/admin/requests/${id}/documents/${document.id}`,
   }));
 
-  const client = Array.isArray(insuranceRequest.client)
+  const client = requestSnapshot(Array.isArray(insuranceRequest.client)
     ? insuranceRequest.client[0]
-    : insuranceRequest.client;
+    : insuranceRequest.client,insuranceRequest.client_snapshot);
 
   const payment = Array.isArray(insuranceRequest.payment)
     ? insuranceRequest.payment[0]
@@ -998,6 +1001,8 @@ export default async function DossierPage({ params }: PageProps) {
                 <RequestActions
                   requestId={insuranceRequest.id}
                   currentStatus={insuranceRequest.status}
+                  paymentId={payment?.id}
+                  paymentSubmittedAt={payment?.submitted_at ?? null}
                 />
 
                 {(insuranceRequest.status === "policy_preparation" ||

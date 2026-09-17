@@ -1,3 +1,4 @@
+import {ListPagination} from "@/components/admin/pages/ListTools";
 import Link from "next/link";
 
 import {
@@ -108,6 +109,7 @@ function formatDate(
     "fr-FR",
     {
       dateStyle: "medium",
+      timeZone:"Europe/Istanbul",
     },
   ).format(date);
 }
@@ -127,13 +129,14 @@ function getClient(
   return client;
 }
 
-export default async function PartnerDossiersPage() {
+export default async function PartnerDossiersPage({searchParams}:{searchParams:Promise<{status?:string;q?:string;page?:string}>}) {
+ const filters=await searchParams;
   /*
    * L'identité du partenaire vient
    * exclusivement de la session
    * authentifiée.
    */
-  const { partner } =
+  const { partner,user } =
     await requirePartner();
 
   const serviceClient =
@@ -148,54 +151,9 @@ export default async function PartnerDossiersPage() {
    * - uniquement ceux du partenaire
    *   actuellement connecté.
    */
-  const {
-    data,
-    error,
-  } =
-    await serviceClient
-      .from(
-        "insurance_requests",
-      )
-      .select(
-        `
-          id,
-          request_code,
-          status,
-          insurance_duration_years,
-          calculated_price,
-          created_at,
-
-          client:clients (
-            first_name,
-            last_name
-          )
-        `,
-      )
-      .eq(
-        "source",
-        "partner",
-      )
-      .eq(
-        "partner_id",
-        partner.id,
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        },
-      );
-
-  if (error) {
-    throw new Error(
-      error.message,
-    );
-  }
-
-  const requests =
-    (data ??
-      []) as RequestRow[];
-
+  const parsed=Number(filters.page);const {data:listing,error}=await serviceClient.rpc("partner_requests_page",{p_partner:partner.id,p_actor:user.id,p_status:filters.status??"",p_q:(filters.q??"").slice(0,200),p_page:Number.isSafeInteger(parsed)&&parsed>0&&parsed<2147483647?parsed:1});
+  if(error)throw Error("Les dossiers ne peuvent pas être chargés.");
+  const requests:RequestRow[]=listing.rows;
   return (
     <div className="mx-auto w-full min-w-0 max-w-[1500px] overflow-x-hidden px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
       <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
@@ -233,8 +191,8 @@ export default async function PartnerDossiersPage() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              {requests.length}{" "}
-              {requests.length === 1
+              {listing.total}{" "}
+              {listing.total === 1
                 ? "dossier"
                 : "dossiers"}
             </p>
@@ -535,6 +493,7 @@ export default async function PartnerDossiersPage() {
           </>
         )}
       </div>
+      <ListPagination base="/partenaire/dossiers" params={filters} summary={listing}/>
     </div>
   );
 }

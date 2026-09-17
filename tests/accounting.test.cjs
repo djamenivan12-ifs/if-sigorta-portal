@@ -188,6 +188,7 @@ test("accounting API: authentication failure prevents any RPC", async () => {
 test("accounting loader: every table is read past a simulated API row cap", async () => {
   const hits = {};
   const db = {
+    auth: { admin: { getUserById: async () => ({ data: { user: null }, error: null }) } },
     from(table) {
       return {
         select() {
@@ -224,3 +225,19 @@ test("withdrawals reduce only the selected insurer balance and preserve historic
   assert.equal(accounting(data,{...all,company:"a"}).balance,49000);
   assert.equal(accounting(data,{...all,company:"a",to:"2026-09-16"}).balance,49000);
 });
+
+for (const table of ["insurer_request_events", "accounting_capture_metadata"]) {
+ test("accounting: absent capture table keeps other data available: " + table, async () => {
+  const { readAccountingRows } = loadTs("lib/accounting/readRows.ts");
+  const result = await readAccountingRows(table, async () => ({ data: null, error: { code: "PGRST205" } }));
+  assert.equal(result.missing, true);
+  const totals = accounting({ ...empty(), requestEvents: [], missingTables: [table], requests: [req("x")], deposits: [{ amount: 1000, deposit_date: "2026-09-01" }] }, all);
+  assert.equal(totals.balance, null);
+  assert.equal(totals.consumed, null);
+  assert.ok(totals.anomalies.some(item => item.code === "Migration 006"));
+ });
+ test("accounting: capture permission failures are not treated as missing tables: " + table, async () => {
+  const { readAccountingRows } = loadTs("lib/accounting/readRows.ts");
+  await assert.rejects(() => readAccountingRows(table, async () => ({ data: null, error: { code: "42501" } })), /temporairement indisponibles/);
+ });
+}

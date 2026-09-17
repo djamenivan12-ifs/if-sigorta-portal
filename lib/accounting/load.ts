@@ -2,7 +2,6 @@ import "server-only";
 
 import { createServiceClient } from "@/lib/supabase/service";
 import { readAccountingRows } from "./readRows";
-import { listAllUsers } from "@/lib/supabase/listAllUsers";
 
 import type { AccountingData, History } from "./model";
 
@@ -29,7 +28,8 @@ export async function loadAccounting(): Promise<AccountingData> {
     policies,
     rateHistory,
     partners,
-    users,
+    requestEvents,
+    captureMetadata,
   ] = await Promise.all([
     rows("insurance_companies", "id,name,is_active,updated_at"),
 
@@ -67,7 +67,8 @@ export async function loadAccounting(): Promise<AccountingData> {
 
     rows("partners", "id,code,company_name,manager_name,is_active"),
 
-    listAllUsers(db),
+    rows("insurer_request_events","id,request_id,captured_at,event_type,snapshot"),
+    rows("accounting_capture_metadata","id,started_at"),
   ]);
 
   /*
@@ -371,6 +372,8 @@ export async function loadAccounting(): Promise<AccountingData> {
       .filter((id): id is string => Boolean(id)),
   );
 
+  const users:{data:{users:import("@supabase/supabase-js").User[]}}={data:{users:[]}};
+  const ids=Array.from(authorIds);for(let offset=0;offset<ids.length;offset+=10){const resolved=await Promise.all(ids.slice(offset,offset+10).map(id=>db.auth.admin.getUserById(id)));for(const result of resolved){if(result.error)throw Error("Les auteurs du journal sont temporairement indisponibles.");if(result.data.user)users.data.users.push(result.data.user);}}
   const authors = Object.fromEntries(
     users.data.users
       .filter((user) => authorIds.has(user.id))
@@ -398,6 +401,8 @@ export async function loadAccounting(): Promise<AccountingData> {
     history,
     authors,
 
+    requestEvents,
+    captureStartedAt:captureMetadata[0]?.started_at,
     loadedAt: new Date().toISOString(),
   } as unknown as AccountingData;
 }

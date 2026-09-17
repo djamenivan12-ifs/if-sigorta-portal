@@ -1,0 +1,2 @@
+import "server-only";import type {createServiceClient} from "@/lib/supabase/service";
+export async function prepareDocumentCopy(db:ReturnType<typeof createServiceClient>,source:string,destination:string,requestId:string){const {error}=await db.rpc("prepare_document_copy",{p_source:source,p_final:destination,p_request:requestId});if(error)throw Error("La préparation du document est indisponible. Vérifiez la mise à jour de la base.");}

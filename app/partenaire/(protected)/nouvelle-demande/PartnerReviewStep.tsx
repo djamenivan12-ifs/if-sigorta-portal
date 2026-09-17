@@ -17,6 +17,7 @@ import type {
 } from "./partnerRequestTypes";
 
 type Props = {
+  submissionId: string;
   data: PartnerRequestFormData;
   onPrevious: () => void;
 
@@ -128,6 +129,7 @@ async function uploadDocumentDirectly({
 }
 
 export default function PartnerReviewStep({
+  submissionId,
   data,
   onPrevious,
   onCreated,
@@ -178,8 +180,7 @@ export default function PartnerReviewStep({
     setSubmitting(true);
 
     try {
-      let uploadSessionId:
-        string | undefined;
+      let uploadSessionId: string | undefined = submissionId;
 
       const documents:
         UploadedPartnerDocument[] =
@@ -319,6 +320,7 @@ export default function PartnerReviewStep({
                   data.duration,
               },
 
+              submissionId,
               uploadSessionId,
               documents,
             }),

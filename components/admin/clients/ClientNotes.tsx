@@ -347,7 +347,7 @@ export default function ClientNotes({
         }
         className="mt-5"
       >
-        <textarea
+        <textarea aria-label="Nouvelle note client"
           value={
             content
           }
@@ -432,7 +432,7 @@ export default function ClientNotes({
                   >
                     {editing ? (
                       <>
-                        <textarea
+                        <textarea aria-label="Modifier la note client"
                           value={
                             editingContent
                           }

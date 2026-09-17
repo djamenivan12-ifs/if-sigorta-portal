@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiRole } from "@/lib/auth/requireApiRole";
 import { createServiceClient } from "@/lib/supabase/service";
-import { validatePriceRanges } from "@/lib/insurance/validatePriceRanges";
+import { validatePriceGridRequest } from "@/lib/insurance/validatePriceRanges";
 import { savePriceRanges, PriceGridError } from "@/lib/insurance/savePriceRanges";
 const headers = { "Cache-Control": "no-store" };
 export async function PUT(request: Request, context: {
@@ -12,7 +12,7 @@ export async function PUT(request: Request, context: {
     const auth = await requireApiRole(["admin"]);
     if (!auth.success)
         return auth.response;
-    const validation = validatePriceRanges(await request.json().catch(() => null));
+    const validation = validatePriceGridRequest(await request.json().catch(() => null));
     if (!validation.success)
         return NextResponse.json({ success: false, error: validation.error }, { status: 400, headers });
     try {
@@ -25,7 +25,7 @@ export async function PUT(request: Request, context: {
             throw new Error("Lecture du partenaire impossible.");
         if (!partner)
             return NextResponse.json({ success: false, error: "Partenaire introuvable." }, { status: 404, headers });
-        const ranges = await savePriceRanges(db, validation.ranges, partnerId);
+        const ranges = await savePriceRanges(db, validation.ranges, partnerId, validation.expectedRanges);
         return NextResponse.json({ success: true, ranges }, { headers });
     }
     catch (error) {

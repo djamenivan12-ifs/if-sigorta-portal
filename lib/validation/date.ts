@@ -8,9 +8,11 @@ export function isValidDate(value: unknown): value is string {
 export function calculateInsuranceAge(birthDate: string, issueDate = new Date()): number | null {
     if (!isValidDate(birthDate) || !Number.isFinite(issueDate.getTime()))
         return null;
-    const today = [issueDate.getFullYear(), String(issueDate.getMonth() + 1).padStart(2, "0"), String(issueDate.getDate()).padStart(2, "0")].join("-");
+    const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(issueDate);
+    const part=(name:string)=>parts.find(p=>p.type===name)!.value;
+    const today=part("year")+"-"+part("month")+"-"+part("day");
     if (birthDate > today)
         return null;
-    const age = issueDate.getFullYear() - Number(birthDate.slice(0, 4));
+    const age = Number(part("year")) - Number(birthDate.slice(0, 4));
     return age >= 0 && age <= 120 ? age : null;
 }

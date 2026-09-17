@@ -260,10 +260,10 @@ export default async function ClientsPage({
    * ============================
    */
 
+  const requestsByClient=new Map<string,RequestRow[]>();
+  for(const request of requests){const rows=requestsByClient.get(request.client_id)??[];rows.push(request);requestsByClient.set(request.client_id,rows);}
   let clientViews: ClientView[] = visibleClients.map((client) => {
-    const clientRequests = requests.filter(
-      (request) => request.client_id === client.id,
-    );
+    const clientRequests = requestsByClient.get(client.id)??[];
 
     const latestRequest = clientRequests[0] ?? null;
 

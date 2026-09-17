@@ -24,12 +24,30 @@ test('price validation rejects malformed payloads and ambiguous scalar values',(
  for(const body of [null,{},[],{ranges:[]},{ranges:[band({isActive:'false'})]},{ranges:[band({id:-1})]},{ranges:[band({oneYearPrice:Infinity})]},{ranges:[band({minimumAge:1.2})]},{ranges:[band({id:1}),band({id:1})]}])assert.equal(validatePriceRanges(body).success,false);
  assert.equal(validatePriceRanges({ranges:[band({maximumAge:999})]}).success,true);
 });
-test('foreign partner price IDs are rejected before mutation',async()=>{const db=database([stored(1,{partner_id:'a'})]);await assert.rejects(savePriceRanges(db,[band({id:2})],'a'),{status:409});assert.deepEqual(db.events,[]);});
-test('direct grid checks overlaps against omitted existing bands',async()=>{const db=database([stored(1)]);await assert.rejects(savePriceRanges(db,[band()]),{status:400});assert.deepEqual(db.events,[]);});
-test('failed partner insertion does not delete previous prices',async()=>{const db=database([stored(1,{partner_id:'a'})],{fail:'insert'});await assert.rejects(savePriceRanges(db,[band()],'a'));assert.deepEqual(db.events,['insert']);assert.equal(db.rows[0].id,1);});
-test('partner replacement saves before deleting and returns IDs for repeat save',async()=>{const db=database([stored(1,{partner_id:'a'}),stored(2,{partner_id:'b'})]);const result=await savePriceRanges(db,[band()],'a');assert.deepEqual(db.events,['insert','delete']);assert.equal(result[0].id,100);await savePriceRanges(db,result,'a');assert.deepEqual(db.events,['insert','delete','update']);assert.deepEqual(db.rows.map(r=>r.id),[2,100]);});
-test('direct save preserves omitted nonoverlapping bands',async()=>{const db=database([stored(1)]);const result=await savePriceRanges(db,[band({minimumAge:21,maximumAge:40})]);assert.deepEqual(result.map(r=>r.id),[1,100]);assert.deepEqual(db.events,['insert']);});
-test('concurrently deleted price is reported as a conflict',async()=>{const db=database([stored(1,{partner_id:'a'})],{missing:true});await assert.rejects(savePriceRanges(db,[band({id:1})],'a'),{status:409});assert.deepEqual(db.events,['update']);});
+test('foreign partner price IDs are rejected before mutation',async()=>{const db=database([stored(1,{partner_id:'a'})]);await assert.rejects(savePriceRanges(db,[band({id:2})],'a',[band({id:1})]),{status:409});assert.deepEqual(db.events,[]);});
+test('direct grid checks overlaps against omitted existing bands',async()=>{const db=database([stored(1)]);await assert.rejects(savePriceRanges(db,[band()],undefined,[band({id:1})]),{status:400});assert.deepEqual(db.events,[]);});
+
+test('price grid sends one transaction with canonical baseline and returns saved IDs',async()=>{
+ const calls=[];const db={rpc:async(name,payload)=>{calls.push({name,payload});return {data:[band({id:101})],error:null}},from(){throw Error('No separate writes permitted')}};
+ const expected=[band({id:2,minimumAge:21,maximumAge:40}),band({id:1})];
+ const result=await savePriceRanges(db,[band()], 'a',expected);
+ assert.equal(calls.length,1);assert.equal(calls[0].name,'save_price_grid');assert.equal(calls[0].payload.p_partner_id,'a');assert.deepEqual(calls[0].payload.p_expected.map(r=>r.id),[1,2]);assert.equal(result[0].id,101);
+});
+test('price grid distinguishes conflict, invalid range and missing migration without unsafe fallback',async()=>{
+ for(const [code,status] of [['40001',409],['P0002',409],['23P01',400],['23514',400],['PGRST202',503],['42883',503]]){
+  let calls=0;const db={rpc:async()=>{calls++;return {data:null,error:{code,message:'test'}}},from(){throw Error('No fallback writes')}};
+  await assert.rejects(savePriceRanges(db,[band()],'a',[]),{status});assert.equal(calls,1);
+ }
+});
+test('price grid rejects malformed transaction response',async()=>assert.rejects(savePriceRanges({rpc:async()=>({data:null,error:null})},[band()],'a',[])));
+test('price grid request requires untouched baseline including IDs',()=>{
+ const {validatePriceGridRequest}=loadTs('lib/insurance/validatePriceRanges.ts');
+ assert.equal(validatePriceGridRequest({ranges:[band()]}).success,false);
+ assert.equal(validatePriceGridRequest({ranges:[band()],expectedRanges:[]}).success,true);
+ assert.equal(validatePriceGridRequest({ranges:[band()],expectedRanges:[band()]}).success,false);
+ assert.equal(validatePriceGridRequest({ranges:[band()],expectedRanges:[band({id:1}),band({id:1})]}).success,false);
+ assert.equal(validatePriceGridRequest({ranges:[band()],expectedRanges:[band({id:1})]}).success,true);
+});
 test('payment state survives dossier progression and cancellation',()=>{for(const stage of ['policy_available','completed','cancelled']){assert.equal(normalizePaymentStatus('confirmed',stage),'confirmed');assert.equal(normalizePaymentStatus('submitted',stage),'review');assert.equal(normalizePaymentStatus('rejected',stage),'rejected');}assert.equal(normalizePaymentStatus(null,'policy_available'),'unknown');assert.equal(normalizePaymentStatus(null,'payment_confirmed'),'confirmed');assert.equal(normalizePaymentStatus('verified'),'confirmed');});
 
 test('payments page retains advanced dossiers and enforces agent scope',async()=>{

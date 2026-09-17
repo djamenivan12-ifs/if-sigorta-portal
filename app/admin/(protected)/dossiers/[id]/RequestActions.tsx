@@ -2,11 +2,15 @@
 
 import { useRouter } from "next/navigation";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+
+import {useModalFocus} from "@/lib/browser/useModalFocus";
 
 type RequestActionsProps = {
   requestId: string;
   currentStatus: string;
+  paymentId?: string;
+  paymentSubmittedAt?: string | null;
 };
 
 type Action =
@@ -31,8 +35,11 @@ type ActionResponse = {
 export default function RequestActions({
   requestId,
   currentStatus,
+  paymentId,
+  paymentSubmittedAt,
 }: RequestActionsProps) {
   const router = useRouter();
+  const operations = useRef<Record<string,string>>({});
 
   const [loadingAction, setLoadingAction] = useState<Action | null>(null);
 
@@ -48,23 +55,8 @@ export default function RequestActions({
 
   const [insurerError, setInsurerError] = useState("");
 
-  useEffect(() => {
-    if (!insurerModalOpen) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && loadingAction !== "start_policy") {
-        setInsurerModalOpen(false);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [insurerModalOpen, loadingAction]);
+  const dialogRef=useRef<HTMLDivElement>(null);
+  useModalFocus(insurerModalOpen,dialogRef,()=>{if(loadingAction!=="start_policy")setInsurerModalOpen(false);});
 
   async function performAction(
     action: Action,
@@ -80,6 +72,9 @@ export default function RequestActions({
     }
 
     try {
+      const decision = action === "confirm_payment" || action === "reject_payment";
+      const operationKey = JSON.stringify([action,paymentId,paymentSubmittedAt,rejectionReason]);
+      if (decision && !operations.current[operationKey]) operations.current[operationKey] = crypto.randomUUID();
       const response = await fetch(`/api/admin/requests/${requestId}/status`, {
         method: "POST",
 
@@ -91,6 +86,7 @@ export default function RequestActions({
           action,
           rejectionReason,
           insuranceCompanyId,
+          ...(decision ? {paymentId,paymentSubmittedAt,operationId:operations.current[operationKey]} : {}),
         }),
       });
 
@@ -320,6 +316,8 @@ export default function RequestActions({
           }}
         >
           <div
+            ref={dialogRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-labelledby="insurer-selection-title"

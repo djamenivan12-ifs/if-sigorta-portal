@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { normalizeIban, isValidIban } from "@/lib/validation/iban";
 
 import {
   requireApiRole,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/supabase/service";
 
 type RequestBody = {
+  expected?: {beneficiary:string;bankName:string;iban:string};
   beneficiary?: string;
   bankName?: string;
   iban?: string;
@@ -50,11 +52,7 @@ export async function PUT(
       body.bankName?.trim() ??
       "";
 
-    const iban =
-      body.iban
-        ?.trim()
-        .toUpperCase() ??
-      "";
+    const iban = normalizeIban(body.iban);
 
     /*
      * ============================================
@@ -93,6 +91,10 @@ export async function PUT(
      * ============================================
      */
 
+    if (!isValidIban(iban)) {
+      return NextResponse.json({ success: false, error: "L’IBAN est invalide. Vérifiez le pays, la longueur et les chiffres de contrôle." }, { status: 400, headers: { "Cache-Control": "no-store" } });
+    }
+
     const serviceClient =
       createServiceClient();
 
@@ -102,124 +104,14 @@ export async function PUT(
      * ============================================
      */
 
-    const {
-      data:
-        currentSetting,
-      error:
-        searchError,
-    } =
-      await serviceClient
-        .from(
-          "bank_settings",
-        )
-        .select(
-          "id",
-        )
-        .eq(
-          "is_active",
-          true,
-        )
-        .order(
-          "id",
-          {
-            ascending:
-              true,
-          },
-        )
-        .limit(
-          1,
-        )
-        .maybeSingle();
-
-    if (searchError) {
-      throw new Error(
-        searchError.message,
-      );
-    }
-
-    const now =
-      new Date().toISOString();
-
-    /*
-     * ============================================
-     * 6. MISE À JOUR
-     * ============================================
-     */
-
-    if (currentSetting) {
-      const {
-        error:
-          updateError,
-      } =
-        await serviceClient
-          .from(
-            "bank_settings",
-          )
-          .update({
-            beneficiary,
-
-            bank_name:
-              bankName,
-
-            iban,
-
-            updated_at:
-              now,
-          })
-          .eq(
-            "id",
-            currentSetting.id,
-          );
-
-      if (updateError) {
-        throw new Error(
-          updateError.message,
-        );
-      }
-    } else {
-      /*
-       * ============================================
-       * 7. CRÉATION SI AUCUN PARAMÈTRE N'EXISTE
-       * ============================================
-       */
-
-      const {
-        error:
-          insertError,
-      } =
-        await serviceClient
-          .from(
-            "bank_settings",
-          )
-          .insert({
-            beneficiary,
-
-            bank_name:
-              bankName,
-
-            iban,
-
-            is_active:
-              true,
-          });
-
-      if (insertError) {
-        throw new Error(
-          insertError.message,
-        );
-      }
-    }
-
-    /*
-     * ============================================
-     * 8. SUCCÈS
-     * ============================================
-     */
-
+    if(!body.expected)return NextResponse.json({success:false,error:"Actualisez les coordonnées avant de les enregistrer."},{status:400});
+    const {data:saved,error:saveError}=await serviceClient.rpc("save_bank_settings",{p_actor:auth.user.id,p_expected:body.expected,p_values:{beneficiary,bankName,iban}});
+    if(saveError)return NextResponse.json({success:false,error:saveError.code==="40001"?"Les coordonnées ont été modifiées. Actualisez avant de réessayer.":"Les coordonnées n’ont pas pu être enregistrées."},{status:saveError.code==="40001"?409:saveError.code==="PGRST202"?503:500});
     return NextResponse.json(
       {
         success:
           true,
+        saved,
       },
       {
         status:

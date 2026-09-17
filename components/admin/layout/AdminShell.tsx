@@ -5,7 +5,7 @@ import type {
 } from "react";
 
 import {
-  useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -19,6 +19,8 @@ import Sidebar from "./Sidebar";
 import type {
   NotificationLevel,
 } from "@/lib/admin/getNotificationSummary";
+
+import {useModalFocus} from "@/lib/browser/useModalFocus";
 
 type AdminShellProps = {
   children: ReactNode;
@@ -55,19 +57,9 @@ export default function AdminShell({
   ] =
     useState(false);
 
-  useEffect(() => {
-    document.body.style.overflow =
-      mobileMenuOpen
-        ? "hidden"
-        : "";
+  const menuRef=useRef<HTMLDivElement>(null);
+  useModalFocus(mobileMenuOpen,menuRef,()=>setMobileMenuOpen(false));
 
-    return () => {
-      document.body.style.overflow =
-        "";
-    };
-  }, [
-    mobileMenuOpen,
-  ]);
 
   return (
     <div className="min-h-screen bg-[#F6F8F5]">
@@ -85,7 +77,7 @@ export default function AdminShell({
       {/* SIDEBAR MOBILE / TABLET */}
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[70] lg:hidden">
+        <div ref={menuRef} role="dialog" aria-modal="true" aria-label="Navigation" tabIndex={-1} className="fixed inset-0 z-[70] lg:hidden">
           <button
             type="button"
             aria-label="Fermer le menu"

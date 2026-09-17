@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-export default function PageError({ reset }: { reset: () => void }) {
+export default function PageError({ reset,dashboardHref="/admin/dashboard" }: { reset: () => void;dashboardHref?:string }) {
   return (
     <section
       role="alert"
@@ -21,7 +21,7 @@ export default function PageError({ reset }: { reset: () => void }) {
           Réessayer
         </button>
         <Link
-          href="/admin/dashboard"
+          href={dashboardHref}
           className="rounded-lg border border-slate-200 px-4 py-3 text-sm"
         >
           Tableau de bord

@@ -1,3 +1,4 @@
+import {requestSnapshot} from "@/lib/clients/requestSnapshot";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -204,6 +205,7 @@ export default async function PartnerDossierPage({
         `
           id,
           request_code,
+ client_snapshot,
           source,
           partner_id,
           status,
@@ -409,13 +411,13 @@ export default async function PartnerDossierPage({
    * ==================================================
    */
 
-  const client =
+  const client = requestSnapshot(
     Array.isArray(
       insuranceRequest.client,
     )
       ? insuranceRequest
           .client[0]
-      : insuranceRequest.client;
+      : insuranceRequest.client,insuranceRequest.client_snapshot);
 
   const province =
     Array.isArray(

@@ -1,8 +1,9 @@
+import { decidePayment, PaymentDecisionError } from "@/lib/insurance/decidePayment";
+import { applyRequestMutationScope } from "@/lib/admin/requestScope";
 import {
   hasQuoteSchema,
   type RequestPricingSnapshot,
 } from "@/lib/insurance/quoteSchema";
-import { isSkyline } from "@/lib/insurance/nationality";
 import { day } from "@/lib/accounting/model";
 import {
   skylineNationalityRate,
@@ -29,6 +30,9 @@ type UpdateStatusPayload = {
   action?: AllowedAction;
   rejectionReason?: string;
   insuranceCompanyId?: string;
+  paymentId?: string;
+  paymentSubmittedAt?: string | null;
+  operationId?: string;
 };
 
 type RouteContext = {
@@ -164,7 +168,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
       );
     }
 
-    if (!isAllowedAction(body.action)) {
+    if (!body || typeof body !== "object" || !isAllowedAction(body.action)) {
       return jsonResponse(
         {
           success: false,
@@ -174,7 +178,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
       );
     }
 
-    const rejectionReason = body.rejectionReason?.trim() ?? "";
+    const rejectionReason = typeof body.rejectionReason === "string" ? body.rejectionReason.trim() : "";
 
     if (body.action === "reject_payment" && !rejectionReason) {
       return jsonResponse(
@@ -191,6 +195,23 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
      * 5. DOSSIER
      * ============================================
      */
+
+    if (body.action === "confirm_payment" || body.action === "reject_payment") {
+      const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const submittedAt = body.paymentSubmittedAt;
+      if (typeof body.paymentId !== "string" || !uuid.test(body.paymentId) ||
+          typeof body.operationId !== "string" || !uuid.test(body.operationId) || !uuid.test(id) ||
+          !(submittedAt === null || (typeof submittedAt === "string" &&
+            /^\d{4}-\d{2}-\d{2}T/.test(submittedAt) && Number.isFinite(Date.parse(submittedAt)))) ||
+          rejectionReason.length > 4000) {
+        return jsonResponse({ success: false, error: "Les informations de paiement ont changé. Rechargez le dossier avant de réessayer." }, 400);
+      }
+      const result = await decidePayment(serviceClient, {
+        requestId:id,paymentId:body.paymentId,submittedAt,action:body.action,
+        reason:rejectionReason,actor:user.id,operationId:body.operationId,
+      });
+      return jsonResponse(result);
+    }
 
     const quoteSchemaReady = await hasQuoteSchema(serviceClient);
     const { data: insuranceRequest, error: requestError } = await serviceClient
@@ -255,371 +276,6 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
 
     /*
      * ============================================
-     * CONFIRMER LE PAIEMENT
-     * ============================================
-     */
-
-    if (body.action === "confirm_payment") {
-      /*
-       * Le paiement ne peut être confirmé
-       * que depuis payment_review.
-       */
-
-      if (insuranceRequest.status !== "payment_review") {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Ce paiement ne peut pas être validé depuis son statut actuel.",
-          },
-          409,
-        );
-      }
-
-      /*
-       * Recherche du paiement.
-       */
-
-      const { data: payment, error: paymentSearchError } = await serviceClient
-        .from("payments")
-        .select(
-          `
-              id,
-              status
-            `,
-        )
-        .eq("request_id", id)
-        .maybeSingle();
-
-      if (paymentSearchError) {
-        throw new Error(paymentSearchError.message);
-      }
-
-      if (!payment) {
-        return jsonResponse(
-          {
-            success: false,
-            error: "Aucun paiement n’est associé à ce dossier.",
-          },
-          404,
-        );
-      }
-
-      if (payment.status !== "submitted") {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Ce paiement a déjà été traité ou n’est plus en attente de vérification.",
-          },
-          409,
-        );
-      }
-
-      /*
-       * VERROU ATOMIQUE.
-       *
-       * Une seule requête peut faire :
-       *
-       * payment_review
-       *      ↓
-       * payment_confirmed
-       */
-
-      const { data: lockedRequest, error: lockError } = await serviceClient
-        .from("insurance_requests")
-        .update({
-          status: "payment_confirmed",
-
-          updated_at: now,
-        })
-        .eq("id", id)
-        .eq("status", "payment_review")
-        .select("id")
-        .maybeSingle();
-
-      if (lockError) {
-        throw new Error(lockError.message);
-      }
-
-      if (!lockedRequest) {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Le statut du dossier a changé entre-temps. Actualisez la page.",
-          },
-          409,
-        );
-      }
-
-      /*
-       * Mise à jour conditionnelle du paiement.
-       */
-
-      const { data: updatedPayment, error: paymentUpdateError } =
-        await serviceClient
-          .from("payments")
-          .update({
-            status: "confirmed",
-
-            verified_at: now,
-
-            verified_by: user.id,
-
-            rejection_reason: null,
-          })
-          .eq("id", payment.id)
-          .eq("status", "submitted")
-          .select("id")
-          .maybeSingle();
-
-      if (paymentUpdateError) {
-        /*
-         * Rollback du verrou.
-         */
-
-        const { error: rollbackError } = await serviceClient
-          .from("insurance_requests")
-          .update({
-            status: "payment_review",
-
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", id)
-          .eq("status", "payment_confirmed");
-
-        if (rollbackError) {
-          console.error(
-            "Rollback payment_confirmed impossible :",
-            rollbackError.message,
-          );
-        }
-
-        throw new Error(paymentUpdateError.message);
-      }
-
-      if (!updatedPayment) {
-        const { error: rollbackError } = await serviceClient
-          .from("insurance_requests")
-          .update({
-            status: "payment_review",
-
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", id)
-          .eq("status", "payment_confirmed");
-
-        if (rollbackError) {
-          console.error(
-            "Rollback payment_confirmed impossible :",
-            rollbackError.message,
-          );
-        }
-
-        return jsonResponse(
-          {
-            success: false,
-            error: "Le paiement a changé entre-temps. Actualisez la page.",
-          },
-          409,
-        );
-      }
-
-      await safeLogActivity({
-        requestId: id,
-
-        userId: user.id,
-
-        action: "payment_confirmed",
-
-        description: "Paiement confirmé par un agent.",
-      });
-
-      return jsonResponse({
-        success: true,
-
-        action: body.action,
-
-        status: "payment_confirmed",
-      });
-    }
-
-    /*
-     * ============================================
-     * REFUSER LE PAIEMENT
-     * ============================================
-     */
-
-    if (body.action === "reject_payment") {
-      if (insuranceRequest.status !== "payment_review") {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Ce paiement ne peut pas être refusé depuis son statut actuel.",
-          },
-          409,
-        );
-      }
-
-      const { data: payment, error: paymentSearchError } = await serviceClient
-        .from("payments")
-        .select(
-          `
-              id,
-              status
-            `,
-        )
-        .eq("request_id", id)
-        .maybeSingle();
-
-      if (paymentSearchError) {
-        throw new Error(paymentSearchError.message);
-      }
-
-      if (!payment) {
-        return jsonResponse(
-          {
-            success: false,
-            error: "Aucun paiement n’est associé à ce dossier.",
-          },
-          404,
-        );
-      }
-
-      if (payment.status !== "submitted") {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Ce paiement a déjà été traité ou n’est plus en attente de vérification.",
-          },
-          409,
-        );
-      }
-
-      /*
-       * VERROU ATOMIQUE :
-       *
-       * payment_review
-       *      ↓
-       * payment_rejected
-       */
-
-      const { data: lockedRequest, error: lockError } = await serviceClient
-        .from("insurance_requests")
-        .update({
-          status: "payment_rejected",
-
-          updated_at: now,
-        })
-        .eq("id", id)
-        .eq("status", "payment_review")
-        .select("id")
-        .maybeSingle();
-
-      if (lockError) {
-        throw new Error(lockError.message);
-      }
-
-      if (!lockedRequest) {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Le statut du dossier a changé entre-temps. Actualisez la page.",
-          },
-          409,
-        );
-      }
-
-      const { data: updatedPayment, error: paymentUpdateError } =
-        await serviceClient
-          .from("payments")
-          .update({
-            status: "rejected",
-
-            verified_at: now,
-
-            verified_by: user.id,
-
-            rejection_reason: rejectionReason,
-          })
-          .eq("id", payment.id)
-          .eq("status", "submitted")
-          .select("id")
-          .maybeSingle();
-
-      if (paymentUpdateError) {
-        const { error: rollbackError } = await serviceClient
-          .from("insurance_requests")
-          .update({
-            status: "payment_review",
-
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", id)
-          .eq("status", "payment_rejected");
-
-        if (rollbackError) {
-          console.error(
-            "Rollback payment_rejected impossible :",
-            rollbackError.message,
-          );
-        }
-
-        throw new Error(paymentUpdateError.message);
-      }
-
-      if (!updatedPayment) {
-        const { error: rollbackError } = await serviceClient
-          .from("insurance_requests")
-          .update({
-            status: "payment_review",
-
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", id)
-          .eq("status", "payment_rejected");
-
-        if (rollbackError) {
-          console.error(
-            "Rollback payment_rejected impossible :",
-            rollbackError.message,
-          );
-        }
-
-        return jsonResponse(
-          {
-            success: false,
-            error: "Le paiement a changé entre-temps. Actualisez la page.",
-          },
-          409,
-        );
-      }
-
-      await safeLogActivity({
-        requestId: id,
-
-        userId: user.id,
-
-        action: "payment_rejected",
-
-        description: `Paiement refusé. Motif : ${rejectionReason}`,
-      });
-
-      return jsonResponse({
-        success: true,
-
-        action: body.action,
-
-        status: "payment_rejected",
-      });
-    }
-
-    /*
-     * ============================================
      * COMMENCER LA PRÉPARATION
      * ============================================
      */
@@ -680,6 +336,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
             `
               id,
               name,
+              business_code,
               is_active
             `,
           )
@@ -770,7 +427,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
         insuranceRequest.quote_nationality != null &&
         isCongoBrazzaville(nationality) &&
         day(insuranceRequest.created_at) >= "2026-09-17" &&
-        isSkyline(insuranceCompany.name) &&
+        (insuranceCompany.business_code === "skyline") &&
         !nationalityRate
       ) {
         return jsonResponse(
@@ -859,7 +516,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
        * côté serveur à partir du tarif actif.
        */
 
-      const { data: updatedRequest, error: updateError } = await serviceClient
+      const { data: updatedRequest, error: updateError } = await applyRequestMutationScope(serviceClient
         .from("insurance_requests")
         .update({
           insurance_company_id: insuranceCompany.id,
@@ -883,7 +540,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
           updated_at: now,
         })
         .eq("id", id)
-        .eq("status", "payment_confirmed")
+        .eq("status", "payment_confirmed"), role, user.id)
         .select(
           `
               id,
@@ -979,7 +636,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
        * statut.
        */
 
-      const { data: cancelledRequest, error: updateError } = await serviceClient
+      const { data: cancelledRequest, error: updateError } = await applyRequestMutationScope(serviceClient
         .from("insurance_requests")
         .update({
           status: "cancelled",
@@ -987,7 +644,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
           updated_at: now,
         })
         .eq("id", id)
-        .eq("status", previousStatus)
+        .eq("status", previousStatus), role, user.id)
         .select("id")
         .maybeSingle();
 
@@ -1038,6 +695,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
       400,
     );
   } catch (error) {
+    if (error instanceof PaymentDecisionError) return jsonResponse({success:false,error:error.message},error.status);
     console.error("Erreur de mise à jour du statut :", error);
 
     return jsonResponse(

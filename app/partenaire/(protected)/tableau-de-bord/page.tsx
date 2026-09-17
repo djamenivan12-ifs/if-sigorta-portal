@@ -397,6 +397,8 @@ export default async function PartnerDashboardPage() {
     );
   }
 
+  if(dashboardError)throw Error("Le tableau de bord est temporairement indisponible.");
+
   const cards = [
     {
       label:
@@ -408,8 +410,7 @@ export default async function PartnerDashboardPage() {
       icon:
         FolderOpen,
 
-      href:
-        "/partenaire/dossiers",
+      href:"/partenaire/dossiers",
     },
 
     {
@@ -422,8 +423,7 @@ export default async function PartnerDashboardPage() {
       icon:
         CreditCard,
 
-      href:
-        "/partenaire/dossiers",
+      href:"/partenaire/dossiers?status=waiting",
     },
 
     {
@@ -436,8 +436,7 @@ export default async function PartnerDashboardPage() {
       icon:
         Clock3,
 
-      href:
-        "/partenaire/dossiers",
+      href:"/partenaire/dossiers?status=review",
     },
 
     {
@@ -450,8 +449,7 @@ export default async function PartnerDashboardPage() {
       icon:
         FileText,
 
-      href:
-        "/partenaire/dossiers",
+      href:"/partenaire/dossiers?status=processing",
     },
 
     {
@@ -464,8 +462,7 @@ export default async function PartnerDashboardPage() {
       icon:
         CircleCheckBig,
 
-      href:
-        "/partenaire/dossiers",
+      href:"/partenaire/dossiers?status=available",
     },
   ];
 

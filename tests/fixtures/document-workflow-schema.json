@@ -1,0 +1,713 @@
+{
+  "insurance_requests": {
+    "required": [
+      "id",
+      "request_code",
+      "client_id",
+      "passport_number",
+      "insurance_duration_years",
+      "calculated_age",
+      "calculated_price",
+      "status",
+      "created_at",
+      "updated_at",
+      "has_kimlik",
+      "preferred_language",
+      "source"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "request_code": {
+        "format": "text",
+        "type": "string"
+      },
+      "client_id": {
+        "description": "Note:\nThis is a Foreign Key to `clients.id`.<fk table='clients' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "kimlik_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "kimlik_expiration_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "passport_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "insurance_duration_years": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "calculated_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "calculated_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "status": {
+        "default": "draft",
+        "format": "text",
+        "type": "string"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "has_kimlik": {
+        "default": true,
+        "format": "boolean",
+        "type": "boolean"
+      },
+      "insurance_start_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "whatsapp_notified_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "assigned_agent_id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "assigned_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "policy_start_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "policy_end_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "preferred_language": {
+        "default": "fr",
+        "format": "text",
+        "type": "string"
+      },
+      "source": {
+        "default": "direct",
+        "format": "text",
+        "type": "string"
+      },
+      "partner_id": {
+        "description": "Note:\nThis is a Foreign Key to `partners.id`.<fk table='partners' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "insurance_company_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_companies.id`.<fk table='insurance_companies' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "actual_insurance_cost": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "insurance_company_selected_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "insurance_company_selected_by": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "insurance_cost_rate_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_cost_rates.id`.<fk table='insurance_cost_rates' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "quote_nationality": {
+        "format": "text",
+        "type": "string"
+      },
+      "nationality_rate_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_nationality_rates.id`.<fk table='insurance_nationality_rates' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "payments": {
+    "required": [
+      "id",
+      "request_id",
+      "payment_method",
+      "expected_amount",
+      "status",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "request_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_requests.id`.<fk table='insurance_requests' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "payment_method": {
+        "format": "text",
+        "type": "string"
+      },
+      "expected_amount": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "status": {
+        "default": "waiting",
+        "format": "text",
+        "type": "string"
+      },
+      "submitted_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "verified_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "verified_by": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "rejection_reason": {
+        "format": "text",
+        "type": "string"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "clients": {
+    "required": [
+      "id",
+      "last_name",
+      "first_name",
+      "father_name",
+      "birth_date",
+      "gender",
+      "nationality",
+      "whatsapp_country_code",
+      "whatsapp_number",
+      "street",
+      "building_number",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "last_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "first_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "father_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "birth_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "gender": {
+        "format": "text",
+        "type": "string"
+      },
+      "nationality": {
+        "format": "text",
+        "type": "string"
+      },
+      "whatsapp_country_code": {
+        "format": "text",
+        "type": "string"
+      },
+      "whatsapp_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "province_id": {
+        "description": "Note:\nThis is a Foreign Key to `provinces.id`.<fk table='provinces' column='id'/>",
+        "format": "bigint",
+        "type": "integer"
+      },
+      "district_id": {
+        "description": "Note:\nThis is a Foreign Key to `districts.id`.<fk table='districts' column='id'/>",
+        "format": "bigint",
+        "type": "integer"
+      },
+      "neighborhood_id": {
+        "description": "Note:\nThis is a Foreign Key to `neighborhoods.id`.<fk table='neighborhoods' column='id'/>",
+        "format": "bigint",
+        "type": "integer"
+      },
+      "street": {
+        "format": "text",
+        "type": "string"
+      },
+      "building_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "apartment_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "partners": {
+    "required": [
+      "id",
+      "code",
+      "company_name",
+      "manager_name",
+      "email",
+      "whatsapp_country_code",
+      "whatsapp_number",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "code": {
+        "format": "text",
+        "type": "string"
+      },
+      "company_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "manager_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "email": {
+        "format": "text",
+        "type": "string"
+      },
+      "whatsapp_country_code": {
+        "format": "text",
+        "type": "string"
+      },
+      "whatsapp_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "is_active": {
+        "default": true,
+        "format": "boolean",
+        "type": "boolean"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "auth_user_id": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "uploaded_documents": {
+    "required": [
+      "id",
+      "request_id",
+      "document_type",
+      "storage_path",
+      "original_file_name",
+      "mime_type",
+      "uploaded_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "request_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_requests.id`.<fk table='insurance_requests' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "document_type": {
+        "format": "text",
+        "type": "string"
+      },
+      "storage_path": {
+        "format": "text",
+        "type": "string"
+      },
+      "original_file_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "mime_type": {
+        "format": "text",
+        "type": "string"
+      },
+      "file_size": {
+        "format": "bigint",
+        "type": "integer"
+      },
+      "uploaded_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "insurance_policies": {
+    "required": [
+      "id",
+      "request_id",
+      "storage_path",
+      "created_at",
+      "policy_year"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "request_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_requests.id`.<fk table='insurance_requests' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "policy_number": {
+        "format": "text",
+        "type": "string"
+      },
+      "issue_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "expiration_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "storage_path": {
+        "format": "text",
+        "type": "string"
+      },
+      "uploaded_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "policy_year": {
+        "format": "integer",
+        "type": "integer"
+      }
+    },
+    "type": "object"
+  },
+  "insurance_renewals": {
+    "required": [
+      "id",
+      "request_id",
+      "client_id",
+      "status",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "request_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_requests.id`.<fk table='insurance_requests' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "client_id": {
+        "description": "Note:\nThis is a Foreign Key to `clients.id`.<fk table='clients' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "status": {
+        "default": "pending",
+        "format": "text",
+        "type": "string"
+      },
+      "reminder_30_sent_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "reminder_15_sent_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "reminder_7_sent_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "contacted_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "renewed_request_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_requests.id`.<fk table='insurance_requests' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "activity_logs": {
+    "required": [
+      "id",
+      "request_id",
+      "action",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "request_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_requests.id`.<fk table='insurance_requests' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "user_id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "action": {
+        "format": "text",
+        "type": "string"
+      },
+      "description": {
+        "format": "text",
+        "type": "string"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "insurance_companies": {
+    "required": [
+      "id",
+      "name",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "name": {
+        "format": "text",
+        "type": "string"
+      },
+      "is_active": {
+        "default": true,
+        "format": "boolean",
+        "type": "boolean"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "insurance_nationality_rates": {
+    "required": [
+      "id",
+      "insurance_company_id",
+      "nationality",
+      "min_age",
+      "max_age",
+      "one_year_cost",
+      "two_year_cost",
+      "one_year_price",
+      "two_year_price",
+      "effective_from"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "insurance_company_id": {
+        "description": "Note:\nThis is a Foreign Key to `insurance_companies.id`.<fk table='insurance_companies' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "nationality": {
+        "format": "text",
+        "type": "string"
+      },
+      "min_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "max_age": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "one_year_cost": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "two_year_cost": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "one_year_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "two_year_price": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "effective_from": {
+        "format": "date",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "bank_settings": {
+    "required": [
+      "id",
+      "beneficiary",
+      "bank_name",
+      "iban",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "id": {
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "bigint",
+        "type": "integer"
+      },
+      "beneficiary": {
+        "format": "text",
+        "type": "string"
+      },
+      "bank_name": {
+        "format": "text",
+        "type": "string"
+      },
+      "iban": {
+        "format": "text",
+        "type": "string"
+      },
+      "is_active": {
+        "default": true,
+        "format": "boolean",
+        "type": "boolean"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "updated_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  }
+}

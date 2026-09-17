@@ -127,6 +127,7 @@ export default function Header({
 
             <input
               type="search"
+              aria-label="Rechercher un dossier ou un client"
               value={
                 desktopSearch
               }
@@ -170,7 +171,9 @@ export default function Header({
               );
             }}
             aria-label={
-              notificationCount > 0
+              notificationLevel === "unavailable"
+                ? "Notifications temporairement indisponibles"
+                : notificationCount > 0
                 ? `${notificationCount} notification${notificationCount > 1 ? "s" : ""}`
                 : "Notifications"
             }
@@ -237,6 +240,7 @@ export default function Header({
 
             <input
               type="search"
+              aria-label="Rechercher un dossier ou un client"
               value={
                 mobileSearch
               }

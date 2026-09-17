@@ -365,6 +365,7 @@ export default function AgentForm({
               <button
                 type="button"
                 role="switch"
+                aria-label="Désactiver l’accès de cet utilisateur"
                 aria-checked={disabled}
                 onClick={() => {
                   setDisabled(!disabled);

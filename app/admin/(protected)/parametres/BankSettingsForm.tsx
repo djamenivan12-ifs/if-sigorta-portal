@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useRef } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -16,6 +16,7 @@ export default function BankSettingsForm({
   initialIban,
 }: BankSettingsFormProps) {
   const router = useRouter();
+  const baseline=useRef({beneficiary:initialBeneficiary,bankName:initialBankName,iban:initialIban});
 
   const [beneficiary, setBeneficiary] = useState(initialBeneficiary);
 
@@ -43,6 +44,7 @@ export default function BankSettingsForm({
         },
 
         body: JSON.stringify({
+          expected:baseline.current,
           beneficiary,
           bankName,
           iban,
@@ -52,12 +54,14 @@ export default function BankSettingsForm({
       const result = (await response.json()) as {
         success?: boolean;
         error?: string;
+        saved?: {beneficiary:string;bankName:string;iban:string};
       };
 
       if (!response.ok || !result.success) {
         throw new Error(result.error || "L’enregistrement a échoué.");
       }
 
+      if(result.saved)baseline.current=result.saved;
       setSuccessMessage("Coordonnées bancaires enregistrées avec succès.");
 
       router.refresh();

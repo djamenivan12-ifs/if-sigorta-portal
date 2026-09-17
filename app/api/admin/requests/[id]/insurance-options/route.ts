@@ -2,7 +2,6 @@ import {
   hasQuoteSchema,
   type RequestPricingSnapshot,
 } from "@/lib/insurance/quoteSchema";
-import { isSkyline } from "@/lib/insurance/nationality";
 import { day } from "@/lib/accounting/model";
 import {
   skylineNationalityRate,
@@ -153,7 +152,8 @@ export async function GET(_request: Request, context: RouteContext) {
       .select(
         `
             id,
-            name
+            name,
+ business_code
           `,
       )
       .eq("is_active", true)
@@ -290,7 +290,7 @@ export async function GET(_request: Request, context: RouteContext) {
             insuranceRequest.quote_nationality != null &&
             isCongoBrazzaville(nationality) &&
             day(insuranceRequest.created_at) >= "2026-09-17" &&
-            isSkyline(company.name) &&
+            (company.business_code === "skyline") &&
             !nationalityRate
           ),
       )

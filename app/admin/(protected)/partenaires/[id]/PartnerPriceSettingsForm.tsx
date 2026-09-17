@@ -25,6 +25,7 @@ export default function PartnerPriceSettingsForm({
   const router = useRouter();
 
   const [ranges, setRanges] = useState<PriceRange[]>(initialRanges);
+  const [expectedRanges, setExpectedRanges] = useState<PriceRange[]>(initialRanges);
 
   const [loading, setLoading] = useState(false);
 
@@ -101,6 +102,7 @@ export default function PartnerPriceSettingsForm({
 
         body: JSON.stringify({
           ranges,
+          expectedRanges,
         }),
       });
 
@@ -114,7 +116,7 @@ export default function PartnerPriceSettingsForm({
         throw new Error(result.error || "L’enregistrement a échoué.");
       }
 
-      if (Array.isArray(result.ranges)) setRanges(result.ranges);
+      if (Array.isArray(result.ranges)) { setRanges(result.ranges); setExpectedRanges(result.ranges); }
       setSuccessMessage("Tarifs du partenaire enregistrés avec succès.");
 
       router.refresh();
@@ -278,6 +280,7 @@ function Field({ label, value, onChange }: FieldProps) {
 
       <input
         type="number"
+        aria-label={label}
         min={0}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}

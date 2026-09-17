@@ -18,7 +18,6 @@ import {
 import { requireRole } from "@/lib/auth/requireRole";
 import { createServiceClient } from "@/lib/supabase/service";
 
-const BUCKET_NAME = "insurance-documents";
 
 type SearchParams = Promise<{
   page?: string;
@@ -61,6 +60,7 @@ type RequestRow = {
 };
 
 type PolicyRow = {
+  id:string;
   request_id: string;
   policy_year: number;
   storage_path: string;
@@ -212,7 +212,7 @@ export default async function PoliciesPage({
     requestsQuery = requestsQuery.eq("assigned_agent_id", user.id);
   }
 
-  const { data: requestsData, error: requestsError } = await requestsQuery;
+  const { data: requestsData, error: requestsError } = await readAll(requestsQuery.order("id"));
 
   if (requestsError) {
     throw new Error(requestsError.message);
@@ -282,6 +282,7 @@ export default async function PoliciesPage({
         .from("insurance_policies")
         .select(
           `
+            id,
             request_id,
             policy_year,
             storage_path
@@ -307,19 +308,7 @@ export default async function PoliciesPage({
    * ============================
    */
 
-  const policiesWithUrls = await Promise.all(
-    policyRows.map(async (policy) => {
-      const { data, error } = await serviceClient.storage
-        .from(BUCKET_NAME)
-        .createSignedUrl(policy.storage_path, 60 * 10);
-
-      return {
-        ...policy,
-
-        signedUrl: error || !data ? null : data.signedUrl,
-      };
-    }),
-  );
+  const policiesWithUrls=policyRows.map(policy=>({...policy,signedUrl:policy.storage_path?"/api/admin/requests/"+encodeURIComponent(policy.request_id)+"/policies/"+encodeURIComponent(policy.id):null}));
 
   /*
    * ============================

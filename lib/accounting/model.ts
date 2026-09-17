@@ -110,6 +110,8 @@ export type AccountingData = {
   payments: Payment[];
   history: History[];
   authors: Record<string, string>;
+  requestEvents?:{request_id:string;captured_at:string;event_type:string;snapshot:Dossier}[];
+  captureStartedAt?:string;
   loadedAt: string;
 };
 
@@ -265,21 +267,24 @@ export function accounting(data: AccountingData, f: Filters) {
     asOf(deposit.deposit_date),
   );
 
-  const consumed = requests.filter(
+  const balanceRequests=data.requestEvents?historicalRequests(data,horizon).filter(request=>!f.company||request.insurance_company_id===f.company):requests;
+  const missingCapture = data.missingTables?.some(table => table === "insurer_request_events" || table === "accounting_capture_metadata") ?? false;
+  const historicalCovered = !missingCapture && (!data.captureStartedAt || horizon >= day(data.captureStartedAt));
+  const consumed = balanceRequests.filter(
     (request) =>
       request.status === "policy_available" &&
       asOf(request.insurance_company_selected_at),
   );
 
   const unknownCostDates = horizon
-    ? requests.filter(
+    ? balanceRequests.filter(
         (request) =>
           request.status === "policy_available" &&
           !day(request.insurance_company_selected_at),
       ).length
     : 0;
 
-  const balanceCost = unknownCostDates
+  const balanceCost = !historicalCovered || unknownCostDates
     ? null
     : sum(consumed.map((request) => cents(request.actual_insurance_cost)));
 
@@ -323,6 +328,7 @@ export function accounting(data: AccountingData, f: Filters) {
   );
 
   const anomalies = [
+    ...(missingCapture ? [{ id: "accounting-capture-missing", code: "Migration 006", label: "Historique comptable non activé : appliquer la migration 202609170006. Solde indisponible.", kind: "configuration" }] : []),
     ...missingCosts.map((request) => ({
       id: request.id,
       code: request.request_code,
@@ -459,4 +465,10 @@ export function csvCell(value: unknown) {
 
 export function csv(rows: unknown[][]) {
   return "\uFEFF" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n");
+}
+
+export function historicalRequests(data:AccountingData,horizon:string):Dossier[]{
+ const latest=new Map<string,{request_id:string;captured_at:string;event_type:string;snapshot:Dossier}>();
+ for(const event of data.requestEvents??[]){if(day(event.captured_at)>horizon)continue;const prior=latest.get(event.request_id);if(!prior||event.captured_at>=prior.captured_at)latest.set(event.request_id,event);}
+ return Array.from(latest.values()).filter(event=>event.event_type!=="delete").map(event=>event.snapshot);
 }

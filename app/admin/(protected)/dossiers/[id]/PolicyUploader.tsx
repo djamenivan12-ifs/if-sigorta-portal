@@ -1,5 +1,6 @@
 "use client";
 
+import {isValidDate} from "@/lib/validation/date";
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
@@ -56,15 +57,6 @@ function validatePdf(file: File): string | null {
   return null;
 }
 
-function isValidDate(value: string) {
-  if (!value) {
-    return false;
-  }
-
-  const date = new Date(`${value}T00:00:00`);
-
-  return !Number.isNaN(date.getTime());
-}
 
 function addYearsKeepingMonthAndDay(value: string, years: 1 | 2) {
   if (!isValidDate(value)) {
@@ -122,6 +114,8 @@ export default function PolicyUploader({
   policyEndDate = null,
 }: PolicyUploaderProps) {
   const router = useRouter();
+  const fileKeys=useRef(new WeakMap<File,string>());
+  const operationKeys=useRef(new Map<string,string>());
 
   const year1InputRef = useRef<HTMLInputElement>(null);
 
@@ -537,6 +531,9 @@ export default function PolicyUploader({
       const year2Prepared =
         preparedPolicies.find((policy) => policy.policyYear === 2) ?? null;
 
+      const fileKey=(file:File|null)=>{if(!file)return "";let key=fileKeys.current.get(file);if(!key){key=crypto.randomUUID();fileKeys.current.set(file,key);}return key;};
+      const key=[startDate,endDate,fileKey(year1File),fileKey(year2File)].join("|");
+      let operationId=operationKeys.current.get(key);if(!operationId){operationId=crypto.randomUUID();operationKeys.current.set(key,operationId);}
       const response = await fetch(`/api/admin/requests/${requestId}/policy`, {
         method: "POST",
 
@@ -545,6 +542,7 @@ export default function PolicyUploader({
         },
 
         body: JSON.stringify({
+          operationId,
           policyStartDate: startDate,
 
           policyEndDate: endDate,

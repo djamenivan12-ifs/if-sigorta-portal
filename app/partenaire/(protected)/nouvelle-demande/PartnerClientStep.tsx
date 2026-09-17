@@ -55,7 +55,6 @@ const nationalities = [
   "Centrafricaine",
   "Chinoise",
   "Comorienne",
-  "Congolaise",
   "Congolaise (Congo-Brazzaville)",
   "Congolaise (RDC)",
   "Ivoirienne",

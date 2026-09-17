@@ -24,10 +24,8 @@ const {normalizeActivityAction}=loadTs('lib/activity/normalizeAction.ts');
 test('Current and legacy WhatsApp event names match',()=>{assert.equal(normalizeActivityAction('partner_policy_whatsapp_sent'),'whatsapp_sent');assert.equal(normalizeActivityAction('policy_whatsapp_failed'),'whatsapp_failed');assert.equal(normalizeActivityAction('request_created'),'request_created');});
 const {NextResponse}=require('next/server');
 function renewalRoute(kind,{role='agent',assigned='agent-a',status='pending',concurrent=false}={}){
- const writes=[];
- const db={from(table){let updating=false;const q={select(){return q;},eq(){return q;},update(value){updating=true;writes.push(value);return q;},insert(){return Promise.resolve({error:null});},maybeSingle(){return Promise.resolve({error:null,data:table==='insurance_requests'?{assigned_agent_id:assigned}:updating?(concurrent?null:{id:'renewal'}):{id:'renewal',request_id:'request',status}});}};return q;}};
- const route=loadTs('app/api/admin/renewals/[id]/'+kind+'/route.ts',{'@/lib/auth/requireApiRole':{requireApiRole:async()=>({success:true,role,user:{id:'agent-a'}})},'@/lib/supabase/service':{createServiceClient:()=>db}});
- return {run:()=>route.POST(new Request('http://localhost'),{params:Promise.resolve({id:'renewal'})}),writes};
+ const writes=[];const db={rpc:async(name,args)=>{assert.equal(name,'update_renewal');assert.equal(args.p_actor,'agent-a');assert.equal(args.p_action,kind);const code=role==='agent'&&assigned&&assigned!=='agent-a'?'42501':concurrent||!['pending','contacted','interested'].includes(status)?'40001':null;if(code)return {data:null,error:{code}};if(status!=='interested')writes.push(args);return {data:{success:true,status},error:null};}};
+ const route=loadTs('app/api/admin/renewals/[id]/'+kind+'/route.ts',{'@/lib/auth/requireApiRole':{requireApiRole:async()=>({success:true,role,user:{id:'agent-a'}})},'@/lib/supabase/service':{createServiceClient:()=>db}});return {run:()=>route.POST(new Request('http://localhost'),{params:Promise.resolve({id:'renewal'})}),writes};
 }
 test('Agent cannot change another agent renewal',async()=>{const r=renewalRoute('contact',{assigned:'agent-b'});assert.equal((await r.run()).status,403);assert.equal(r.writes.length,0);});
 test('Unassigned renewal workflow remains available',async()=>assert.equal((await renewalRoute('contact',{assigned:null}).run()).status,200));
@@ -74,3 +72,9 @@ require('./navigation.test.cjs');
 require('./nationality-rates.test.cjs');
 
 require('./migration-compatibility.test.cjs');
+
+require("./admin-audit.test.cjs");
+
+require("./payment-decisions.test.cjs");
+
+require("./remaining-functional.test.cjs");

@@ -1,9 +1,3 @@
-import {
-  skylineNationalityRate,
-  isCongoBrazzaville,
-  nationalityAmounts,
-} from "./nationalityRates";
-import { day } from "@/lib/accounting/model";
 import { calculateInsuranceAge } from "@/lib/validation/date";
 export { calculateInsuranceAge } from "@/lib/validation/date";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -49,27 +43,12 @@ export async function calculateInsurancePriceServer(
   issueDate: Date = new Date(),
   nationality: string = "",
 ): Promise<ServerPriceCalculationResult | null> {
+  // Retain the argument for existing callers; nationality no longer changes prices.
+  void nationality;
   const age = calculateInsuranceAge(birthDate, issueDate);
 
   if (age === null) {
     return null;
-  }
-
-  if (
-    isCongoBrazzaville(nationality) &&
-    day(issueDate.toISOString()) >= "2026-09-17"
-  ) {
-    const rate = await skylineNationalityRate(age, nationality, issueDate);
-    if (!rate) return { age, duration, price: null, available: false };
-    const { price } = nationalityAmounts(rate, duration);
-    return {
-      age,
-      duration,
-      price,
-      available: Number.isFinite(price) && price > 0,
-      nationalityRateId: rate.id,
-      insuranceCompanyId: rate.insurance_company_id,
-    };
   }
 
   const serviceClient = createServiceClient();

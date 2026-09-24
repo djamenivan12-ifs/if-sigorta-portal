@@ -4,13 +4,6 @@ import {
   hasQuoteSchema,
   type RequestPricingSnapshot,
 } from "@/lib/insurance/quoteSchema";
-import { day } from "@/lib/accounting/model";
-import {
-  skylineNationalityRate,
-  isCongoBrazzaville,
-  nationalityAmounts,
-  type NationalityRate,
-} from "@/lib/insurance/nationalityRates";
 import { NextResponse } from "next/server";
 
 import { logActivity } from "@/lib/activity/logActivity";
@@ -385,62 +378,7 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
 
       const today = `${turkeyYear}-${turkeyMonth}-${turkeyDay}`;
 
-      const client = Array.isArray(insuranceRequest.client)
-        ? insuranceRequest.client[0]
-        : insuranceRequest.client;
-      const nationality =
-        insuranceRequest.quote_nationality ?? client?.nationality;
-      let nationalityRate: NationalityRate | null = null;
-      if (insuranceRequest.nationality_rate_id) {
-        const stored = await serviceClient
-          .from("insurance_nationality_rates")
-          .select("*")
-          .eq("id", insuranceRequest.nationality_rate_id)
-          .maybeSingle();
-        if (stored.error || !stored.data)
-          throw new Error("La grille du devis est indisponible.");
-        nationalityRate = stored.data;
-      } else if (
-        insuranceRequest.quote_nationality != null &&
-        isCongoBrazzaville(nationality) &&
-        day(insuranceRequest.created_at) >= "2026-09-17"
-      ) {
-        nationalityRate = await skylineNationalityRate(
-          age,
-          nationality,
-          new Date(insuranceRequest.created_at),
-        );
-      }
-      if (
-        insuranceRequest.nationality_rate_id &&
-        nationalityRate?.insurance_company_id !== insuranceCompanyId
-      ) {
-        return jsonResponse(
-          {
-            success: false,
-            error: "Ce devis utilise la grille Skyline. Sélectionnez Skyline.",
-          },
-          409,
-        );
-      }
-      if (
-        insuranceRequest.quote_nationality != null &&
-        isCongoBrazzaville(nationality) &&
-        day(insuranceRequest.created_at) >= "2026-09-17" &&
-        (insuranceCompany.business_code === "skyline") &&
-        !nationalityRate
-      ) {
-        return jsonResponse(
-          {
-            success: false,
-            error:
-              "Aucun tarif Skyline Congo-Brazzaville ne correspond à ce dossier.",
-          },
-          409,
-        );
-      }
-
-      const { data: genericRate, error: matchingRateError } =
+      const { data: matchingRate, error: matchingRateError } =
         await serviceClient
           .from("insurance_cost_rates")
           .select(
@@ -470,16 +408,6 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
         throw new Error(matchingRateError.message);
       }
 
-      const special =
-        nationalityRate?.insurance_company_id === insuranceCompanyId
-          ? nationalityRate
-          : null;
-      const matchingRate = special
-        ? {
-            id: null,
-            real_cost: nationalityAmounts(special, durationYears as 1 | 2).cost,
-          }
-        : genericRate;
       if (!matchingRate) {
         return jsonResponse(
           {
@@ -523,12 +451,6 @@ async function handleStatusUpdate(request: Request, context: RouteContext) {
 
           insurance_cost_rate_id: matchingRate.id,
 
-          ...(quoteSchemaReady
-            ? {
-                nationality_rate_id:
-                  special?.id ?? insuranceRequest.nationality_rate_id,
-              }
-            : {}),
           actual_insurance_cost: actualInsuranceCost,
 
           insurance_company_selected_at: now,

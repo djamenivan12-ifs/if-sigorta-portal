@@ -3,7 +3,7 @@ import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
 import { readAccountingRows } from "./readRows";
 
-import type { AccountingData, History } from "./model";
+import { dateLabel, type AccountingData, type History } from "./model";
 
 export async function loadAccounting(): Promise<AccountingData> {
   const db = createServiceClient();
@@ -374,13 +374,13 @@ export async function loadAccounting(): Promise<AccountingData> {
       request_id: String(refund.request_id), request_code: request ? String(request.request_code) : null,
       ...requestOrigin(request), amount: refund.amount as string | number,
     };
-    history.push({...common, id: "refund-" + refund.id, type: "refund", occurred_at: String(refund.refund_date),
-      title: "Remboursement client", description: String(refund.reason) + " · " + String(refund.reference), direction: "out", author_id: String(refund.created_by)});
+    history.push({...common, id: "refund-" + refund.id, type: "refund", occurred_at: String(refund.created_at),
+      title: "Remboursement client", description: "Remboursé le " + dateLabel(String(refund.refund_date)) + " · " + String(refund.reason) + " · " + String(refund.reference), direction: "out", author_id: String(refund.created_by)});
     if (refund.voided_at) history.push({...common, id: "refund-void-" + refund.id, type: "refund_voided", occurred_at: String(refund.voided_at),
       title: "Saisie de remboursement annulée", description: String(refund.void_reason), direction: "neutral", author_id: String(refund.voided_by)});
   }
 
-  history.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
+  history.sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime());
 
   const authorIds = new Set(
     history

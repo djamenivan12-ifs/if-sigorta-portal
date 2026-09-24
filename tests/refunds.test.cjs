@@ -31,3 +31,17 @@ test('Refund API rejects malformed amounts without any write',async()=>{
  const route=loadTs('app/api/admin/accounting/refunds/route.ts',{'@/lib/auth/requireApiRole':{requireApiRole:async()=>({success:true,user:{id:'admin'}})},'@/lib/supabase/service':{createServiceClient(){throw Error('must not access database')}},'next/cache':{revalidatePath(){}}});
  const form=new FormData();form.set('amount','-1');assert.equal((await route.POST(new Request('http://localhost',{method:'POST',body:form}))).status,400);
 });
+
+test('Refund history uses recording time, keeps business date, and sorts newest first',async()=>{
+ const tables={insurance_requests:[{id:'r',request_code:'REF',insurance_company_id:'sky',partner_id:null}],payments:[{id:'p',request_id:'r',status:'confirmed',expected_amount:525,verified_at:'2026-09-24T10:00:00Z'}],client_refunds:[{id:'f',request_id:'r',amount:525,refund_date:'2026-09-23',created_at:'2026-09-24T13:19:47Z',created_by:'admin',reason:'Annulation',reference:'BANK'}]};
+ const db={from(table){const q={select(){return q},order(){return q},range:async(from,to)=>({data:(tables[table]??[]).slice(from,to+1),error:null})};return q},auth:{admin:{getUserById:async()=>({data:{user:{id:'admin',email:'admin@example.test',user_metadata:{}}},error:null})}}};
+ const {loadAccounting}=loadTs('lib/accounting/load.ts',{'@/lib/supabase/service':{createServiceClient:()=>db}});
+ const result=await loadAccounting();
+ assert.equal(result.history[0].type,'refund');
+ assert.equal(result.history[0].occurred_at,'2026-09-24T13:19:47Z');
+ assert.match(result.history[0].description,/23\/09\/2026/);
+ assert.equal(result.history[0].request_code,'REF');
+ assert.equal(result.history[0].amount,525);
+ assert.equal(result.history[0].direction,'out');
+ assert.equal(result.refunds[0].refund_date,'2026-09-23');
+});

@@ -55,11 +55,13 @@ export default function Dashboard({
   initialCompany = "",
   initialTab = "overview",
   initialEdit = "",
+  initialSearch = "",
 }: {
   data: AccountingData;
   initialCompany?: string;
   initialTab?: Tab;
   initialEdit?: string;
+  initialSearch?: string;
 }) {
   const router = useRouter();
   const withdrawalsReady = !data.missingTables?.includes(
@@ -69,7 +71,7 @@ export default function Dashboard({
     [from, setFrom] = useState(""),
     [to, setTo] = useState(""),
     [tab, setTab] = useState<Tab>(initialTab),
-    [q, setQ] = useState(""),
+    [q, setQ] = useState(initialSearch),
     [page, setPage] = useState(1),
     [notice, setNotice] = useState(""),
     [showIssues, setShowIssues] = useState(false);
@@ -477,7 +479,7 @@ export default function Dashboard({
           (!from || day(h.occurred_at) >= from) &&
           (!to || day(h.occurred_at) <= to),
       )
-      .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))
+      .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
       .map((h) => {
         const originLabel =
           h.origin === "partner"
@@ -936,7 +938,7 @@ export default function Dashboard({
                     {tab === "rates"
                       ? "Une ligne par durée. Les tarifs absents ne sont jamais affichés à zéro."
                       : tab === "history"
-                        ? "Journal des dépôts, retraits, annulations, paiements, polices et modifications tarifaires."
+                        ? "Journal des dépôts, retraits, remboursements, annulations, paiements, polices et modifications tarifaires."
                         : `${filtered.length} ligne(s) · montants en livres turques`}
                   </p>
                 </div>

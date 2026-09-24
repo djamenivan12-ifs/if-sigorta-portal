@@ -2,13 +2,6 @@ import {
   hasQuoteSchema,
   type RequestPricingSnapshot,
 } from "@/lib/insurance/quoteSchema";
-import { day } from "@/lib/accounting/model";
-import {
-  skylineNationalityRate,
-  isCongoBrazzaville,
-  nationalityAmounts,
-  type NationalityRate,
-} from "@/lib/insurance/nationalityRates";
 import { NextResponse } from "next/server";
 
 import { requireApiRole } from "@/lib/auth/requireApiRole";
@@ -180,33 +173,6 @@ export async function GET(_request: Request, context: RouteContext) {
       });
     }
 
-    const client = Array.isArray(insuranceRequest.client)
-      ? insuranceRequest.client[0]
-      : insuranceRequest.client;
-    const nationality =
-      insuranceRequest.quote_nationality ?? client?.nationality;
-    let nationalityRate: NationalityRate | null = null;
-    if (insuranceRequest.nationality_rate_id) {
-      const stored = await serviceClient
-        .from("insurance_nationality_rates")
-        .select("*")
-        .eq("id", insuranceRequest.nationality_rate_id)
-        .maybeSingle();
-      if (stored.error || !stored.data)
-        throw new Error("La grille du devis est indisponible.");
-      nationalityRate = stored.data;
-    } else if (
-      insuranceRequest.quote_nationality != null &&
-      isCongoBrazzaville(nationality) &&
-      day(insuranceRequest.created_at) >= "2026-09-17"
-    ) {
-      nationalityRate = await skylineNationalityRate(
-        age,
-        nationality,
-        new Date(insuranceRequest.created_at),
-      );
-    }
-
     const companyIds = companies.map((company) => company.id);
 
     const { data: rates, error: ratesError } = await serviceClient
@@ -274,26 +240,8 @@ export async function GET(_request: Request, context: RouteContext) {
       });
     }
 
-    if (nationalityRate)
-      latestRateByCompany.set(nationalityRate.insurance_company_id, {
-        realCost: nationalityAmounts(nationalityRate, durationYears as 1 | 2)
-          .cost,
-        effectiveFrom: nationalityRate.effective_from,
-      });
     const insurers = companies
-      .filter(
-        (company) =>
-          latestRateByCompany.has(company.id) &&
-          (!insuranceRequest.nationality_rate_id ||
-            company.id === nationalityRate?.insurance_company_id) &&
-          !(
-            insuranceRequest.quote_nationality != null &&
-            isCongoBrazzaville(nationality) &&
-            day(insuranceRequest.created_at) >= "2026-09-17" &&
-            (company.business_code === "skyline") &&
-            !nationalityRate
-          ),
-      )
+      .filter((company) => latestRateByCompany.has(company.id))
       .map((company) => ({
         id: company.id,
         name: company.name,

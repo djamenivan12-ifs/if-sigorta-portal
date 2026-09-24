@@ -37,7 +37,7 @@ const tabs = [
   ["dossiers", "Dossiers"],
   ["deposits", "Dépôts"],
   ["withdrawals", "Retraits"],
-  ["nationalityRates", "Tarifs Congo-Brazzaville"],
+  ["nationalityRates", "Anciens tarifs Congo-Brazzaville"],
   ["rates", "Tarifs"],
   ["history", "Historique"],
 ] as const;
@@ -662,9 +662,9 @@ export default function Dashboard({
             La mise à jour de la base est nécessaire pour activer{" "}
             {data.missingTables.includes("insurance_company_withdrawals")
               ? "les retraits assureur"
-              : "les tarifs Skyline Congo-Brazzaville"}
+              : "l’historique des anciens tarifs Congo-Brazzaville"}
             {data.missingTables.length > 1
-              ? " et les tarifs Skyline Congo-Brazzaville"
+              ? " et l’historique des anciens tarifs Congo-Brazzaville"
               : ""}
             .
             {!withdrawalsReady &&

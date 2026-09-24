@@ -356,6 +356,33 @@ async function setup() {
   results.push(
     "Retraits et annulations idempotents, dépassement et dates futures refusés, grille Skyline exacte et immuable, accès anonyme interdit",
   );
+  // Upgrade existing historical and unassigned Congo dossiers without rewriting them.
+  const pendingId = crypto.randomUUID();
+  await db.query(`insert into insurance_requests (${names.join(",")}) values (${names.map((_, i) => "$" + (i + 1)).join(",")})`,
+    names.map(name => name === "id" ? pendingId : name === "insurance_company_id" || name === "actual_insurance_cost" || name === "insurance_company_selected_at" ? null : name === "status" ? "payment_confirmed" : fields[name]));
+  const guards = fs.readFileSync(require("path").join(__dirname, "../supabase/migrations/202609170007_admin_functional_guards.sql"), "utf8");
+  const functionStart = guards.indexOf("CREATE FUNCTION public.create_nationality_grid");
+  await db.exec(guards.slice(functionStart, guards.indexOf("END $$;", functionStart) + 7));
+  await db.exec("revoke all on function create_nationality_grid(uuid,uuid,date,date,jsonb) from public; grant execute on function create_nationality_grid(uuid,uuid,date,date,jsonb) to service_role;");
+  const beforeRetirement = (await db.query("select * from insurance_requests order by id")).rows;
+  await db.exec(fs.readFileSync(require("path").join(__dirname, "../supabase/migrations/202609240001_retire_nationality_pricing.sql"), "utf8"));
+  assert.deepEqual((await db.query("select * from insurance_requests order by id")).rows, beforeRetirement);
+  assert.equal((await db.query("select has_function_privilege('service_role','create_nationality_grid(uuid,uuid,date,date,jsonb)','execute') as allowed")).rows[0].allowed, false);
+  // Existing frozen cost is preserved while its workflow can still progress.
+  await db.query("update insurance_requests set status='policy_available' where id=$1", [fields.id]);
+  await assert.rejects(db.query("update insurance_requests set actual_insurance_cost=1 where id=$1", [fields.id]), e => e.code === "22023");
+  const standard = (await db.query("select * from insurance_cost_rates where insurance_company_id=$1 and duration_years=1 and min_age<=30 and max_age>=30 and is_active order by effective_from desc,created_at desc limit 1", [id])).rows[0];
+  assert.ok(standard);
+  await assert.rejects(db.query("update insurance_requests set insurance_company_id=$1, insurance_cost_rate_id=$2, actual_insurance_cost=999 where id=$3", [id, standard.id, pendingId]), e => e.code === "22023");
+  await db.query("update insurance_requests set insurance_company_id=$1, insurance_cost_rate_id=$2, actual_insurance_cost=$3, status='policy_preparation' where id=$4", [id, standard.id, standard.real_cost, pendingId]);
+  const pending = (await db.query("select * from insurance_requests where id=$1", [pendingId])).rows[0];
+  assert.equal(pending.insurance_company_id, id);
+  assert.equal(pending.insurance_cost_rate_id, standard.id);
+  assert.equal(Number(pending.actual_insurance_cost), Number(standard.real_cost));
+  assert.equal(pending.nationality_rate_id, rateCG.id); // Original client quote remains historical.
+  await assert.rejects(db.query(`insert into insurance_requests (${names.join(",")}) values (${names.map((_, i) => "$" + (i + 1)).join(",")})`, names.map(name => name === "id" ? crypto.randomUUID() : fields[name])), e => e.code === "22023");
+  await db.query(`insert into insurance_requests (${names.join(",")}) values (${names.map((_, i) => "$" + (i + 1)).join(",")})`, names.map(name => name === "id" ? crypto.randomUUID() : name === "nationality_rate_id" ? null : name === "calculated_price" ? 777 : fields[name]));
+  results.push("Retrait de la règle : nouveaux devis standard, anciens montants conservés, dossiers non assignés au coût standard de tout assureur, anciennes grilles désactivées");
   await db.close();
   const bad = await setup();
   await bad.exec(

@@ -1,4 +1,3 @@
-import { skylineNationalityGrid } from "@/lib/insurance/nationalityRates";
 import { NextResponse } from "next/server";
 
 import {
@@ -82,28 +81,10 @@ export async function POST(request: Request) {
     );
   }
 }
+// Keep an empty response for older clients that request the retired special grid.
 export async function GET() {
-  try {
-    const rates = await skylineNationalityGrid();
-    return NextResponse.json(
-      {
-        insurer: "Skyline",
-        nationality: "CG",
-        currency: "TRY",
-        effectiveFrom: rates[0]?.effective_from ?? null,
-        rows: rates.map((r) => ({
-          minAge: r.min_age,
-          maxAge: r.max_age,
-          oneYearPrice: Number(r.one_year_price),
-          twoYearPrice: Number(r.two_year_price),
-        })),
-      },
-      { headers: { "Cache-Control": "no-store" } },
-    );
-  } catch {
-    return NextResponse.json(
-      { error: "Tarifs temporairement indisponibles." },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
-    );
-  }
+  return NextResponse.json(
+    { currency: "TRY", effectiveFrom: null, rows: [] },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

@@ -23,6 +23,7 @@ export async function loadAccounting(): Promise<AccountingData> {
     deposits,
     withdrawals,
     nationalityRates,
+    refunds,
     requests,
     payments,
     policies,
@@ -48,6 +49,7 @@ export async function loadAccounting(): Promise<AccountingData> {
       "id,insurance_company_id,amount,withdrawal_date,reason,reference,created_by,created_at,cancelled_at,cancelled_by",
     ),
     rows("insurance_nationality_rates", "*"),
+    rows("client_refunds", "*"),
     rows(
       "insurance_requests",
       "id,request_code,partner_id,insurance_company_id,calculated_age,insurance_duration_years,actual_insurance_cost,insurance_company_selected_at,status",
@@ -360,12 +362,26 @@ export async function loadAccounting(): Promise<AccountingData> {
   /*
    * Plus récent en premier.
    */
-  history.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
 
   /*
    * Récupération des noms
    * des administrateurs/auteurs.
    */
+  for (const refund of refunds) {
+    const request = requestsById.get(String(refund.request_id));
+    const common = {
+      insurance_company_id: request?.insurance_company_id ? String(request.insurance_company_id) : null,
+      request_id: String(refund.request_id), request_code: request ? String(request.request_code) : null,
+      ...requestOrigin(request), amount: refund.amount as string | number,
+    };
+    history.push({...common, id: "refund-" + refund.id, type: "refund", occurred_at: String(refund.refund_date),
+      title: "Remboursement client", description: String(refund.reason) + " · " + String(refund.reference), direction: "out", author_id: String(refund.created_by)});
+    if (refund.voided_at) history.push({...common, id: "refund-void-" + refund.id, type: "refund_voided", occurred_at: String(refund.voided_at),
+      title: "Saisie de remboursement annulée", description: String(refund.void_reason), direction: "neutral", author_id: String(refund.voided_by)});
+  }
+
+  history.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
+
   const authorIds = new Set(
     history
       .map((item) => item.author_id)
@@ -396,6 +412,7 @@ export async function loadAccounting(): Promise<AccountingData> {
     deposits,
     withdrawals,
     nationalityRates,
+    refunds,
     requests,
     payments,
     history,

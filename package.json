@@ -9,11 +9,12 @@
     "lint": "eslint",
     "test": "node tests/regression.test.cjs",
     "typecheck": "next typegen && tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm test && npm run test:accounting-db && npm run test:price-grid-db && npm run test:payment-decision-db && npm run test:document-workflow-db",
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:accounting-db && npm run test:price-grid-db && npm run test:payment-decision-db && npm run test:document-workflow-db && npm run test:refunds-db",
     "test:accounting-db": "node tests/accounting-sql.test.cjs",
     "test:price-grid-db": "node tests/price-grid-sql.test.cjs",
     "test:payment-decision-db": "node tests/payment-decision-sql.test.cjs",
-    "test:document-workflow-db": "node tests/document-workflow-sql.test.cjs"
+    "test:document-workflow-db": "node tests/document-workflow-sql.test.cjs",
+    "test:refunds-db": "node tests/refunds-sql.test.cjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

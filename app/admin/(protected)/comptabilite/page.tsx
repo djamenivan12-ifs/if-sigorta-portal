@@ -11,7 +11,7 @@ export default async function Page({
   return (
     <Dashboard
       data={await loadAccounting()}
-      initialTab={params.tab === "rates" ? "rates" : "overview"}
+      initialTab={params.tab === "refunds" ? "refunds" : params.tab === "rates" ? "rates" : "overview"}
       initialEdit={params.edit ?? ""}
     />
   );

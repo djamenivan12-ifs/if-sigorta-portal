@@ -28,6 +28,7 @@ import {
   type Company,
   type Rate,
 } from "@/lib/accounting/model";
+import Refunds from "./Refunds";
 import Editor, { type EditorMode } from "./Editor";
 const control =
   "min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100";
@@ -37,6 +38,7 @@ const tabs = [
   ["dossiers", "Dossiers"],
   ["deposits", "Dépôts"],
   ["withdrawals", "Retraits"],
+  ["refunds", "Remboursements"],
   ["nationalityRates", "Anciens tarifs Congo-Brazzaville"],
   ["rates", "Tarifs"],
   ["history", "Historique"],
@@ -79,6 +81,7 @@ export default function Dashboard({
     const rate = data.rates.find((r) => r.id === initialEdit);
     return rate ? { mode: "editRate", rate } : null;
   });
+  const [refundRequest, setRefundRequest] = useState("");
   const [cancelling, setCancelling] = useState(false);
   async function cancelWithdrawal(id: string) {
     if (
@@ -131,6 +134,7 @@ export default function Dashboard({
     }));
   const changeTab = (value: Tab) => {
     setTab(value);
+    setRefundRequest("");
     setPage(1);
     setQ("");
   };
@@ -456,6 +460,8 @@ export default function Dashboard({
     ];
 
     const historyTypeLabel = {
+      refund: "Remboursement client",
+      refund_voided: "Remboursement annulé",
       withdrawal: "Retrait assureur",
       withdrawal_cancelled: "Retrait annulé",
       deposit: "Dépôt assureur",
@@ -660,12 +666,13 @@ export default function Dashboard({
             className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"
           >
             La mise à jour de la base est nécessaire pour activer{" "}
-            {data.missingTables.includes("insurance_company_withdrawals")
-              ? "les retraits assureur"
-              : "l’historique des anciens tarifs Congo-Brazzaville"}
-            {data.missingTables.length > 1
-              ? " et l’historique des anciens tarifs Congo-Brazzaville"
-              : ""}
+            {data.missingTables.map(table => ({
+              client_refunds: "les remboursements clients",
+              insurance_company_withdrawals: "les retraits assureur",
+              insurance_nationality_rates: "les anciens tarifs",
+              insurer_request_events: "l’historique des dossiers",
+              accounting_capture_metadata: "l’historique comptable",
+            } as Record<string, string>)[table] ?? table).join(", ")}
             .
             {!withdrawalsReady &&
               " Les soldes incluant les retraits restent à compléter jusqu’à cette activation."}
@@ -762,9 +769,9 @@ export default function Dashboard({
               aria-label="Indicateurs"
             >
               <Kpi
-                title="Encaissements confirmés"
-                value={money(report.collected)}
-                caption={`${report.payments.length} paiement(s) · période sélectionnée`}
+                title="Encaissements nets"
+                value={money(report.netCollected)}
+                caption={`${money(report.collected)} reçus · ${money(report.refunded)} remboursés`}
                 icon={<ArrowDownLeft size={20} />}
               />
               <Kpi
@@ -823,6 +830,7 @@ export default function Dashboard({
                       >
                         {link(a.id, a.code)}
                         <span>{a.label}</span>
+                        {data.requests.some(r => r.id === a.id && r.status === "cancelled") && <button className="shrink-0 rounded-lg border border-amber-300 px-3 py-2 text-sm font-semibold" onClick={() => {setTab("refunds"); setRefundRequest(a.id);}}>Gérer le remboursement</button>}
                       </li>
                     ))}
                   </ul>
@@ -915,7 +923,8 @@ export default function Dashboard({
               </section>
             )}
             {tab === "overview" && <Profitability dossiers={report.realized} />}
-            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            {tab === "refunds" && <Refunds key={refundRequest} data={data} filter={filter} requestId={refundRequest} />}
+            {tab !== "refunds" && <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 p-5">
                 <div>
                   <h2 className="text-base font-bold text-slate-950">
@@ -1073,7 +1082,7 @@ export default function Dashboard({
                   </button>
                 </div>
               </footer>
-            </section>
+            </section>}
             <details className="rounded-xl border border-slate-200 bg-white p-5 text-sm">
               <summary className="cursor-pointer font-semibold text-slate-700">
                 <SlidersHorizontal className="mr-2 inline" size={16} />
@@ -1083,14 +1092,16 @@ export default function Dashboard({
                 <p>
                   Les encaissements utilisent les montants attendus des
                   paiements confirmés, à leur date de confirmation. Vérifiez les
-                  écarts éventuels avec les relevés bancaires.
+                  écarts éventuels avec les relevés bancaires. Les encaissements nets déduisent les remboursements enregistrés sur la période.
                 </p>
                 <p>
                   Le CA et le bénéfice portent sur les dossiers actuellement
                   disponibles dont le paiement est confirmé pendant la période.
                   Le coût enregistré de ces dossiers est déduit une seule fois.
-                  Les frais généraux et remboursements non enregistrés ne sont
-                  pas inclus.
+                  Les remboursements enregistrés sont déduits à leur date de
+                  remboursement. Un remboursement d’une vente antérieure ne
+                  déduit pas une seconde fois son coût d’assurance. Les frais
+                  généraux ne sont pas inclus.
                 </p>
                 <p>
                   Les avances utilisent la date du dépôt. Le solde cumulé ignore

@@ -1,5 +1,6 @@
 import { collectRows } from "@/lib/supabase/collectRows";
 export const extensionTables = [
+  "client_refunds",
   "insurance_company_withdrawals",
   "insurance_nationality_rates",
   "insurer_request_events",

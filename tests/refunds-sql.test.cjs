@@ -1,0 +1,54 @@
+const {PGlite}=require('@electric-sql/pglite');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+(async()=>{
+ const db=new PGlite();
+ await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
+ create schema auth; create table auth.users(id uuid primary key,raw_app_meta_data jsonb);
+ create schema storage; create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+ create table public.insurance_requests(id uuid primary key);
+ create table public.payments(id uuid primary key,request_id uuid,expected_amount numeric,status text,verified_at timestamptz);
+ grant usage on schema auth to service_role; grant select on auth.users to service_role; grant all on payments,insurance_requests to service_role;`);
+ await db.exec(fs.readFileSync(path.join(__dirname,'../supabase/migrations/20260924124540_client_refunds.sql'),'utf8'));
+ const admin=crypto.randomUUID(),agent=crypto.randomUUID(),request=crypto.randomUUID(),payment=crypto.randomUUID();
+ await db.query("insert into auth.users values($1,'{\"role\":\"admin\"}'),($2,'{\"role\":\"agent\"}')",[admin,agent]);
+ await db.query('insert into insurance_requests values($1)',[request]);
+ await db.query("insert into payments values($1,$2,525,'confirmed','2026-09-20T12:00:00Z')",[payment,request]);
+ const call=(extra={})=>{
+  const args={actor:admin,id:crypto.randomUUID(),payment,amount:200,date:'2026-09-24',method:'bank_transfer',reason:'Annulation',reference:'REF-1',proof:null,...extra};
+  return db.query('select record_client_refund($1,$2,$3,$4,$5,$6,$7,$8,$9) as r',Object.values(args));
+ };
+ const id=crypto.randomUUID();
+ await db.exec('set role service_role');
+ const first=(await call({id})).rows[0].r;
+ assert.deepEqual((await call({id})).rows[0].r,first);
+ await assert.rejects(call({id,amount:201}),e=>e.code==='40001');
+ await assert.rejects(call({actor:agent}),e=>e.code==='42501');
+ for(const amount of [0,-1,0.001,9999999999])await assert.rejects(call({amount}),e=>e.code==='22023');
+ await assert.rejects(call({date:'2026-09-19'}),e=>e.code==='22023');
+ await assert.rejects(call({date:'2999-01-01'}),e=>e.code==='22023');
+ await assert.rejects(call({proof:'another-user/proof.pdf'}),e=>e.code==='22023');
+ await assert.rejects(call({amount:325.01}),e=>e.code==='P0001');
+ await call({amount:325});
+ await assert.rejects(call({amount:0.01}),e=>e.code==='P0001');
+ assert.equal(Number((await db.query('select sum(amount) as total from client_refunds where voided_at is null')).rows[0].total),525);
+ await assert.rejects(db.query('update payments set expected_amount=600 where id=$1',[payment]),e=>e.code==='22023');
+ await assert.rejects(db.query('update client_refunds set amount=1 where id=$1',[id]),e=>e.code==='22023');
+ const voided=(await db.query('select void_client_refund($1,$2,$3) as r',[admin,id,'Erreur de saisie'])).rows[0].r;
+ assert.ok(voided.voided_at);
+ assert.deepEqual((await db.query('select void_client_refund($1,$2,$3) as r',[admin,id,'Erreur de saisie'])).rows[0].r,voided);
+ await call({amount:200});
+ await assert.rejects(call({amount:1}),e=>e.code==='P0001');
+ assert.equal((await db.query('select count(*)::int as n from client_refunds')).rows[0].n,3);
+ for(const role of ['anon','authenticated']){
+  await db.exec(`reset role; set role ${role}`);
+  await assert.rejects(db.query('select * from client_refunds'),e=>e.code==='42501');
+  await assert.rejects(call(),e=>e.code==='42501');
+ }
+ await db.exec('reset role');
+ const another=crypto.randomUUID();
+ await db.query("insert into payments values($1,$2,100,'submitted','2026-09-20')",[another,request]);
+ await assert.rejects(call({payment:another,amount:1}),e=>e.code==='P0001');
+ const bucket=(await db.query("select * from storage.buckets where id='refund-proofs'")).rows[0];assert.equal(bucket.public,false);
+ await db.close();
+ console.log('Refund SQL: partial/full, caps, retries, role gates, history, void, dates and private proofs passed.');
+})().catch(e=>{console.error(e);process.exitCode=1});

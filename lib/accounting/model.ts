@@ -44,6 +44,14 @@ export type Withdrawal = {
   cancelled_by: string | null;
 };
 
+export type Refund = {
+  id: string; payment_id: string; request_id: string;
+  amount: number | string; refund_date: string; payment_method: string;
+  reason: string; reference: string; proof_path: string | null;
+  created_by: string; created_at: string;
+  voided_at: string | null; voided_by: string | null; void_reason: string | null;
+};
+
 export type Dossier = {
   id: string;
   request_code: string;
@@ -70,6 +78,8 @@ export type History = {
   id: string;
 
   type:
+    | "refund"
+    | "refund_voided"
     | "withdrawal"
     | "withdrawal_cancelled"
     | "deposit"
@@ -105,6 +115,7 @@ export type AccountingData = {
   rates: Rate[];
   deposits: Deposit[];
   withdrawals?: Withdrawal[];
+  refunds?: Refund[];
   nationalityRates?: import("@/lib/insurance/nationalityRates").NationalityRate[];
   requests: Dossier[];
   payments: Payment[];
@@ -229,14 +240,30 @@ export function accounting(data: AccountingData, f: Filters) {
     ]);
   }
 
+  const refundsReady = !data.missingTables?.includes("client_refunds");
+  const refunds = (data.refunds ?? []).filter(r => !f.company || ids.has(r.request_id));
+  const periodRefunds = refunds.filter(r => inPeriod(r.refund_date, f) &&
+    (!r.voided_at || (!!f.to && day(r.voided_at) > f.to)));
+  const refundByRequest = new Map<string, number>();
+  for (const r of periodRefunds) refundByRequest.set(r.request_id, (refundByRequest.get(r.request_id) ?? 0) + (cents(r.amount) ?? 0));
+  const refundTotal = refundsReady ? sum(periodRefunds.map(r => cents(r.amount))) : null;
+  const grossCollected = sum(periodPayments.map(p => cents(p.expected_amount)));
+  const refundBalances = payments.map(payment => {
+    const refunded = sum(refunds.filter(r => r.payment_id === payment.id && !r.voided_at).map(r => cents(r.amount))) ?? 0;
+    const collected = cents(payment.expected_amount);
+    const request = requests.find(r => r.id === payment.request_id);
+    return { payment, request, collected, refunded, remaining: collected === null || !refundsReady ? null : collected - refunded };
+  });
+
   const dossiers = requests
-    .filter((request) => paid.has(request.id))
+    .filter((request) => paid.has(request.id) || refundByRequest.has(request.id))
     .map((request) => ({
       ...request,
 
-      revenue: sum(paid.get(request.id)!),
+      revenue: !refundsReady || sum(paid.get(request.id) ?? []) === null ? null :
+        sum(paid.get(request.id) ?? [])! - (refundByRequest.get(request.id) ?? 0),
 
-      cost: cents(request.actual_insurance_cost),
+      cost: paid.has(request.id) ? cents(request.actual_insurance_cost) : 0,
 
       ageGroup:
         request.calculated_age === null
@@ -328,6 +355,7 @@ export function accounting(data: AccountingData, f: Filters) {
   );
 
   const anomalies = [
+    ...(!refundsReady ? [{ id: "refunds-missing", code: "Remboursements", label: "Gestion des remboursements non activée : encaissements nets indisponibles.", kind: "configuration" }] : []),
     ...(missingCapture ? [{ id: "accounting-capture-missing", code: "Migration 006", label: "Historique comptable non activé : appliquer la migration 202609170006. Solde indisponible.", kind: "configuration" }] : []),
     ...missingCosts.map((request) => ({
       id: request.id,
@@ -363,7 +391,7 @@ export function accounting(data: AccountingData, f: Filters) {
 
     ...requests
       .filter(
-        (request) => request.status === "cancelled" && paidIds.has(request.id),
+        (request) => request.status === "cancelled" && refundBalances.some(b => b.payment.request_id === request.id && (b.remaining === null || b.remaining > 0)),
       )
       .map((request) => ({
         id: request.id,
@@ -410,6 +438,8 @@ export function accounting(data: AccountingData, f: Filters) {
   ];
 
   return {
+    refunds: periodRefunds, refundBalances, refunded: refundTotal,
+    netCollected: grossCollected === null || refundTotal === null ? null : grossCollected - refundTotal,
     withdrawals: periodWithdrawals,
     cumulativeWithdrawals: withdrawalTotal,
     payments: periodPayments,

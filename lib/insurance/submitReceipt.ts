@@ -5,7 +5,7 @@ import {NextResponse} from "next/server";
 import {createServiceClient} from "@/lib/supabase/service";
 import {verifyStoredDocument} from "@/lib/security/verifyStoredDocument";
 import {consumeRateLimit,getClientIp} from "@/lib/security/rateLimit";
-type ReceiptContext={id?:string;partnerId?:string;actorId?:string;reupload?:boolean};
+type ReceiptContext={id?:string;partnerId?:string;actorId?:string;tracking?:boolean};
 const reply=(body:Record<string,unknown>,status=200)=>NextResponse.json(body,{status,headers:{"Cache-Control":"no-store"}});
 const text=(value:unknown)=>typeof value==="string"?value.trim():"";
 export async function submitReceipt(request:Request,context:ReceiptContext){
@@ -23,8 +23,10 @@ export async function submitReceipt(request:Request,context:ReceiptContext){
   const {data:row,error}=await query.maybeSingle();if(error)throw error;if(!row)return reply({success:false,error:"Dossier introuvable."},404);
   const relation=row.client;const client=Array.isArray(relation)?relation[0]:relation;
   if(!context.partnerId&&(text(client?.whatsapp_country_code)!==country||text(client?.whatsapp_number).replace(/\D/g,"")!==phone))return reply({success:false,error:"Les informations ne correspondent pas au dossier."},403);
-  const prefix=context.partnerId?"pending/partner/"+context.partnerId+"/payment/"+row.id+"/":"pending/direct/"+(context.reupload?"payment-reupload":"payment")+"/"+row.id+"/";
-  if(!pending.startsWith(prefix)||pending.includes(".."))return reply({success:false,error:"Chemin du justificatif invalide."},403);
+  const prefixes = context.partnerId
+    ? ["pending/partner/"+context.partnerId+"/payment/"+row.id+"/"]
+    : (context.tracking ? ["payment", "payment-reupload"] : ["payment"]).map(kind => "pending/direct/"+kind+"/"+row.id+"/");
+  if(!prefixes.some(prefix=>pending.startsWith(prefix))||pending.includes(".."))return reply({success:false,error:"Chemin du justificatif invalide."},403);
   // A retry reads the adopted result before touching storage. The pending source remains available until retention cleanup.
   const {data:prior,error:priorError}=await db.from("workflow_operations").select("actor_id,payload,result").eq("request_id",row.id).eq("operation_key","receipt:"+pending).maybeSingle();
   if(priorError)return reply({success:false,error:"La mise à jour de la base est nécessaire pour enregistrer ce paiement."},503);

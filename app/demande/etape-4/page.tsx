@@ -1,4 +1,5 @@
 "use client";
+import { addressError } from "@/lib/insurance/addressValidation";
 import Image from "next/image";
 
 import Link from "next/link";
@@ -562,6 +563,9 @@ export default function Etape4Page() {
       FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
+
+    const invalidAddress = addressError(requestData.address, language);
+    if (!requestData.requestId && invalidAddress) { alert(invalidAddress); router.push("/demande/etape-1"); return; }
 
     if (!confirmed) {
       alert(

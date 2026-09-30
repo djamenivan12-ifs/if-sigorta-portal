@@ -1,3 +1,4 @@
+import { addressError } from "@/lib/insurance/addressValidation";
 import {prepareDocumentCopy} from "@/lib/insurance/prepareDocumentCopy";
 import {day} from "@/lib/accounting/model";
 import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
@@ -222,13 +223,8 @@ export async function POST(request: Request) {
         }
         const calculatedAge = serverPriceResult.age;
         const calculatedPrice = serverPriceResult.price;
-        if (!payload.address?.provinceId ||
-            !payload.address?.districtId ||
-            !payload.address?.neighborhoodId ||
-            !payload.address?.street?.trim() ||
-            !payload.address?.buildingNumber?.trim()) {
-            return jsonError("L’adresse complète est obligatoire.", 400);
-        }
+        const invalidAddress = addressError(payload.address);
+        if (invalidAddress) return jsonError(invalidAddress, 400);
         const provinceId = Number(payload.address.provinceId);
         const districtId = Number(payload.address.districtId);
         const neighborhoodId = Number(payload.address.neighborhoodId);

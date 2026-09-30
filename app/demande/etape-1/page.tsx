@@ -9,6 +9,7 @@ import { FormEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { addressError, addressFromForm } from "@/lib/insurance/addressValidation";
 import AddressSelector from "@/components/AddressSelector";
 import PhoneInput from "@/components/PhoneInput";
 import { useInsuranceRequest } from "@/context/InsuranceRequestContext";
@@ -445,7 +446,12 @@ export default function Etape1Page() {
       return;
     }
 
+    const address = addressFromForm(event.currentTarget, requestData.address);
+    const error = addressError(address, language);
+    if (error) { updateRequestData({ address }); alert(error); document.getElementById("street")?.closest("section")?.scrollIntoView({ block: "center" }); return; }
+
     updateRequestData({
+      address,
       lastName,
       firstName,
       fatherName,
@@ -623,6 +629,9 @@ export default function Etape1Page() {
               </p>
             </div>
 
+            <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+              <Link href="/suivi" className="font-semibold underline">{language === "fr" ? "Déjà un matricule ? Reprendre mon dossier et envoyer mon reçu" : language === "en" ? "Already have a request code? Resume and upload your receipt" : "Başvuru kodunuz var mı? Başvurunuza dönün ve dekont yükleyin"}</Link>
+            </div>
             <form
               onSubmit={handleSubmit}
               className="mt-7 space-y-8 sm:mt-9 sm:space-y-10"

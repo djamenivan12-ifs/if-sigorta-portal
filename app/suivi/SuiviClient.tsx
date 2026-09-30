@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 
+import BankCard from "@/app/demande/etape-5/BankCard";
 import PolicyDownloadButton from "./PolicyDownloadButton";
 
 import { countryCodes } from "@/lib/countryCodes";
@@ -196,16 +197,16 @@ const translations = {
       "PDF, JPG, JPEG ou PNG — 10 Mo maximum.",
 
     sendReceipt:
-      "Envoyer le nouveau justificatif",
+      "Envoyer le justificatif",
 
     sendingReceipt:
       "Envoi en cours...",
 
     receiptSent:
-      "Votre nouveau justificatif a été envoyé. Le paiement est de nouveau en vérification.",
+      "Votre justificatif a été envoyé. Le paiement est en cours de vérification.",
 
     receiptRequired:
-      "Sélectionnez un nouveau justificatif de paiement.",
+      "Sélectionnez un justificatif de paiement.",
 
     receiptTooLarge:
       "Le fichier ne doit pas dépasser 10 Mo.",
@@ -342,16 +343,16 @@ const translations = {
       "PDF, JPG, JPEG or PNG — 10 MB maximum.",
 
     sendReceipt:
-      "Send the new receipt",
+      "Send the receipt",
 
     sendingReceipt:
       "Uploading...",
 
     receiptSent:
-      "Your new receipt has been sent. The payment is under review again.",
+      "Your receipt has been sent. The payment is under review.",
 
     receiptRequired:
-      "Select a new payment receipt.",
+      "Select a payment receipt.",
 
     receiptTooLarge:
       "The file must not exceed 10 MB.",
@@ -488,16 +489,16 @@ const translations = {
       "PDF, JPG, JPEG veya PNG — en fazla 10 MB.",
 
     sendReceipt:
-      "Yeni dekontu gönder",
+      "Dekontu gönder",
 
     sendingReceipt:
       "Gönderiliyor...",
 
     receiptSent:
-      "Yeni dekontunuz gönderildi. Ödemeniz tekrar kontrol ediliyor.",
+      "Dekontunuz gönderildi. Ödemeniz kontrol ediliyor.",
 
     receiptRequired:
-      "Yeni bir ödeme dekontu seçin.",
+      "Bir ödeme dekontu seçin.",
 
     receiptTooLarge:
       "Dosya boyutu 10 MB'ı geçmemelidir.",
@@ -1933,21 +1934,23 @@ export default function SuiviClient({
                     </div>
                   )}
 
-                  {currentStatus ===
-                    "payment_rejected" && (
+                  {(currentStatus === "waiting_payment" || currentStatus === "payment_rejected") && (
                     <div className="min-w-0 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 sm:p-6">
                       <h3 className="text-xl font-semibold text-red-900">
                         {
-                          t.newReceipt
+                          currentStatus === "waiting_payment" ? (language === "fr" ? "Envoyer mon reçu de paiement" : language === "en" ? "Upload my payment receipt" : "Ödeme dekontumu yükle") : t.newReceipt
                         }
                       </h3>
 
                       <p className="mt-2 text-sm leading-6 text-red-700">
                         {
-                          t.rejectedHelp
+                          currentStatus === "waiting_payment"
+                            ? (language === "fr" ? "Votre dossier est enregistré. Effectuez le virement puis envoyez votre reçu ici, avec le même matricule. Si le virement est déjà fait, envoyez simplement le reçu." : language === "en" ? "Your request is saved. Make the transfer and upload your receipt here using the same code. If you have already paid, just upload the receipt." : "Başvurunuz kayıtlı. Havale yapıp aynı başvuru koduyla dekontunuzu buradan yükleyin. Ödeme yaptıysanız yalnızca dekont yükleyin.")
+                            : t.rejectedHelp
                         }
                       </p>
 
+                      {currentStatus === "waiting_payment" && <BankCard requestCode={result.request.requestCode} />}
                       <form
                         onSubmit={
                           handleReceiptUpload

@@ -80,3 +80,5 @@ require("./payment-decisions.test.cjs");
 require("./remaining-functional.test.cjs");
 
 require('./refunds.test.cjs');
+
+require("./request-resume.test.cjs");

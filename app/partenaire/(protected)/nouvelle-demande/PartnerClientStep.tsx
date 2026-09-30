@@ -1,4 +1,5 @@
 "use client";
+import { addressError, addressFromForm } from "@/lib/insurance/addressValidation";
 
 import { FormEvent, useState } from "react";
 
@@ -161,29 +162,10 @@ export default function PartnerClientStep({
       return;
     }
 
-    if (
-      !data.address.provinceId ||
-      !data.address.districtId ||
-      !data.address.neighborhoodId
-    ) {
-      setError(
-        "Veuillez sélectionner la province, le district et le quartier.",
-      );
-
-      return;
-    }
-
-    if (!data.address.street.trim()) {
-      setError("Veuillez renseigner la rue ou l’adresse.");
-
-      return;
-    }
-
-    if (!data.address.buildingNumber.trim()) {
-      setError("Veuillez renseigner le numéro du bâtiment.");
-
-      return;
-    }
+    const address = addressFromForm(event.currentTarget, data.address);
+    const error = addressError(address);
+    onChange({ ...data, address });
+    if (error) { setError(error); return; }
 
     onNext();
   }

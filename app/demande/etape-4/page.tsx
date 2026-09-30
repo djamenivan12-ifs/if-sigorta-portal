@@ -410,7 +410,6 @@ export default function Etape4Page() {
 
   const {
     requestData,
-    pendingCancellation,
     updateRequestData,
     clearPendingCancellation,
   } =
@@ -575,98 +574,8 @@ export default function Etape4Page() {
       return;
     }
 
-    if (
-      pendingCancellation
-    ) {
-      setIsSubmitting(
-        true,
-      );
-
-      try {
-        const cancelResponse =
-          await fetch(
-            `/api/requests/${encodeURIComponent(
-              pendingCancellation.requestId,
-            )}/cancel`,
-            {
-              method:
-                "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  requestCode:
-                    pendingCancellation.requestCode,
-
-                  whatsappCountryCode:
-                    pendingCancellation.whatsappCountryCode,
-
-                  whatsappNumber:
-                    pendingCancellation.whatsappNumber,
-                }),
-            },
-          );
-
-        const cancelContentType =
-          cancelResponse.headers.get(
-            "content-type",
-          ) ?? "";
-
-        if (
-          !cancelContentType.includes(
-            "application/json",
-          )
-        ) {
-          throw new Error(
-            `Erreur lors de l'annulation de l'ancien dossier (${cancelResponse.status}).`,
-          );
-        }
-
-        const cancelResult =
-          (await cancelResponse.json()) as {
-            success?: boolean;
-            error?: string;
-          };
-
-        if (
-          !cancelResponse.ok ||
-          !cancelResult.success
-        ) {
-          throw new Error(
-            cancelResult.error ||
-              "L'ancien dossier n'a pas pu être annulé.",
-          );
-        }
-
-        clearPendingCancellation();
-      } catch (error) {
-        console.error(
-          "Erreur annulation ancien dossier :",
-          error,
-        );
-
-        alert(
-          error instanceof Error
-            ? error.message
-            : "Impossible d'annuler l'ancien dossier.",
-        );
-
-        setIsSubmitting(
-          false,
-        );
-
-        return;
-      }
-
-      setIsSubmitting(
-        false,
-      );
-    }
-
+    // Check/reuse the existing dossier before any cancellation: a repeated submission
+    // must never cancel the original merely because its documents were selected again.
     if (
       requestData.requestId &&
       requestData.requestCode
@@ -881,6 +790,7 @@ export default function Etape4Page() {
       const result =
         (await response.json()) as {
           success?: boolean;
+          reused?: boolean;
           requestId?: string; calculatedPrice?: number; calculatedAge?: number;
           requestCode?: string;
           status?: string;
@@ -899,6 +809,7 @@ export default function Etape4Page() {
         );
       }
 
+      clearPendingCancellation();
       updateRequestData({ calculatedPrice: result.calculatedPrice ?? requestData.calculatedPrice, calculatedAge: result.calculatedAge ?? requestData.calculatedAge,
         requestId: result.requestId,
 
@@ -906,9 +817,18 @@ export default function Etape4Page() {
           result.requestCode,
       });
 
-      router.push(
-        "/demande/etape-5",
-      );
+      if (result.reused) {
+        // Keep contact details out of the URL; the tracking screen consumes this once.
+        try {
+          window.sessionStorage.setItem("if-sigorta-tracking", JSON.stringify({
+            code: result.requestCode, duplicate: true, country: requestData.whatsappCountryCode,
+            phone: requestData.whatsappNumber, expiresAt: Date.now() + 10 * 60 * 1000,
+          }));
+        } catch { /* Tracking still accepts the matricule and WhatsApp manually. */ }
+        router.replace("/suivi");
+      } else {
+        router.push("/demande/etape-5");
+      }
     } catch (error) {
       console.error(
         "Erreur création dossier :",

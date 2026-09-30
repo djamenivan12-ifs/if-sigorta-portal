@@ -990,6 +990,8 @@ export default function SuiviClient({
 
   function changeLanguage(nextLanguage:Language) {setLanguage(nextLanguage);}
 
+  const [duplicateDetected, setDuplicateDetected] = useState(false);
+
   const searchTracking = useCallback(async (
     code: string,
     country: string,
@@ -1106,7 +1108,7 @@ export default function SuiviClient({
   useEffect(()=>{
  if(automaticSearchStarted.current)return;
  let code=initialCode,country=initialCountry,phone=initialPhone;
- try {const raw=window.sessionStorage.getItem("if-sigorta-tracking");if(!code&&!phone&&raw){const saved=JSON.parse(raw);if(saved.expiresAt>Date.now()&&typeof saved.code==="string"&&typeof saved.phone==="string"&&typeof saved.country==="string"){code=saved.code;country=saved.country;phone=saved.phone;}}window.sessionStorage.removeItem("if-sigorta-tracking");} catch {}
+ try {const raw=window.sessionStorage.getItem("if-sigorta-tracking");if(!code&&!phone&&raw){const saved=JSON.parse(raw);if(saved.expiresAt>Date.now()&&typeof saved.code==="string"&&typeof saved.phone==="string"&&typeof saved.country==="string"){code=saved.code;country=saved.country;phone=saved.phone;queueMicrotask(() => setDuplicateDetected(saved.duplicate === true));}}window.sessionStorage.removeItem("if-sigorta-tracking");} catch {}
  if(!code.trim()||!phone.trim())return;
  automaticSearchStarted.current=true;
  if(window.location.search)window.history.replaceState(window.history.state,"","/suivi");
@@ -1119,6 +1121,7 @@ export default function SuiviClient({
   ) {
     event.preventDefault();
 
+    setDuplicateDetected(false);
     void searchTracking(
       requestCode,
       whatsappCountryCode,
@@ -1851,6 +1854,8 @@ export default function SuiviClient({
                       }`}
                     />
                   </div>
+
+                  {duplicateDetected && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{language === "fr" ? "Une demande identique a déjà été créée dans les 10 dernières minutes. Vous avez été redirigé vers ce dossier : conservez ce matricule et envoyez votre reçu ci-dessous si le paiement est encore attendu." : language === "en" ? "An identical request was created in the last 10 minutes. You have been redirected to that request. Keep this code and upload your receipt below if payment is still pending." : "Son 10 dakika içinde aynı bilgilerle bir başvuru oluşturuldu. Bu başvuruya yönlendirildiniz. Aynı kodu kullanın; ödeme bekleniyorsa dekontunuzu aşağıdan yükleyin."}</p>}
 
                   {result.payment && (
                     <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">

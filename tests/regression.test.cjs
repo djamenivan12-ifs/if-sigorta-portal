@@ -82,3 +82,5 @@ require("./remaining-functional.test.cjs");
 require('./refunds.test.cjs');
 
 require("./request-resume.test.cjs");
+
+require("./direct-request-api.test.cjs");

@@ -1,3 +1,4 @@
+import { prepareDocumentCopy } from "@/lib/insurance/prepareDocumentCopy";
 import { addressError } from "@/lib/insurance/addressValidation";
 import { hasQuoteSchema } from "@/lib/insurance/quoteSchema";
 import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
@@ -194,13 +195,8 @@ export async function POST(request: Request) {
 
   const serviceClient = createServiceClient();
 
-  let createdClientId: string | null = null;
+  // Files remain private and are cleaned by retention if the RPC result is uncertain.
 
-  let createdRequestId: string | null = null;
-
-  const pendingStoragePaths: string[] = [];
-
-  const movedStoragePaths: string[] = [];
 
   try {
     /*
@@ -248,7 +244,6 @@ export async function POST(request: Request) {
     for (const document of documents) {
       validateUploadedDocument(document, uploadSessionId);
 
-      pendingStoragePaths.push(document.storagePath);
     }
 
     const passportDocument = documents.find(
@@ -568,7 +563,9 @@ export async function POST(request: Request) {
               id,
               first_name,
               last_name,
-              birth_date
+              birth_date,
+              whatsapp_country_code,
+              whatsapp_number
             `,
           )
           .eq("id", identityRequest.client_id)
@@ -592,26 +589,14 @@ export async function POST(request: Request) {
 
       const sameBirthDate = existingClient.birth_date === payload.birthDate;
 
-      if (sameFirstName && sameLastName && sameBirthDate) {
+      if (sameFirstName && sameLastName && sameBirthDate && existingClient.whatsapp_country_code === whatsappCountryCode && existingClient.whatsapp_number?.replace(/\D/g, "") === whatsappNumber) {
         existingClientId = existingClient.id;
 
         break;
       }
     }
 
-    let clientId: string;
-
-    if (existingClientId) {
-      /*
-       * Une demande publique ne modifie
-       * jamais automatiquement la fiche CRM
-       * d'un client existant.
-       */
-      clientId = existingClientId;
-    } else {
-      const { data: newClient, error: clientError } = await serviceClient
-        .from("clients")
-        .insert({
+    const clientInput = {
           last_name: lastName,
 
           first_name: firstName,
@@ -639,31 +624,8 @@ export async function POST(request: Request) {
           building_number: payload.address.buildingNumber.trim(),
 
           apartment_number: payload.address.apartmentNumber?.trim() || null,
-        })
-        .select("id")
-        .single();
-
-      if (clientError || !newClient) {
-        throw new Error(
-          `Création du client impossible : ${
-            clientError?.message ?? "erreur inconnue"
-          }`,
-        );
-      }
-
-      clientId = newClient.id;
-
-      createdClientId = newClient.id;
-    }
-
-    /*
-     * ============================
-     * CRÉATION DU DOSSIER
-     * ============================
-     */
-    const { data: insuranceRequest, error: requestError } = await serviceClient
-      .from("insurance_requests")
-      .insert({
+    };
+    const requestInput = {
         ...((await hasQuoteSchema(serviceClient))
           ? {
               quote_nationality: nationality,
@@ -672,7 +634,6 @@ export async function POST(request: Request) {
           : {}),
         request_code: requestCode,
 
-        client_id: clientId,
 
         preferred_language: preferredLanguage,
 
@@ -701,58 +662,25 @@ export async function POST(request: Request) {
         status: "waiting_payment",
 
         source: "direct",
-      })
-      .select(
-        `
-            id,
-            request_code
-          `,
-      )
-      .single();
+    };
+    const insuranceRequest = { id: crypto.randomUUID(), request_code: requestCode };
 
-    if (requestError || !insuranceRequest) {
-      throw new Error(
-        `Création du dossier impossible : ${
-          requestError?.message ?? "erreur inconnue"
-        }`,
-      );
-    }
-
-    createdRequestId = insuranceRequest.id;
-
-    /*
-     * ============================
-     * DÉPLACEMENT DES DOCUMENTS
-     * ============================
-     *
-     * pending/session/... -> requestId/...
-     */
     const preparedDocuments: PreparedDocument[] = [];
 
     for (const document of documents) {
       const finalPath = buildFinalStoragePath(insuranceRequest.id, document);
 
-      await verifyStoredDocument(
-        serviceClient,
-        BUCKET_NAME,
-        document.storagePath,
-      );
-      const { error: moveError } = await serviceClient.storage
+      const actual = await verifyStoredDocument(serviceClient, BUCKET_NAME, document.storagePath);
+      if (actual.mimeType !== document.mimeType || actual.fileSize !== document.fileSize) throw new Error("Les informations du document ne correspondent pas au fichier envoyé.");
+      await prepareDocumentCopy(serviceClient, document.storagePath, finalPath, insuranceRequest.id);
+      const { error: copyError } = await serviceClient.storage
         .from(BUCKET_NAME)
-        .move(document.storagePath, finalPath);
+        .copy(document.storagePath, finalPath);
 
-      if (moveError) {
+      if (copyError) {
         throw new Error(
-          `Déplacement impossible pour ${document.documentType} : ${moveError.message}`,
+          `Copie impossible pour ${document.documentType} : ${copyError.message}`,
         );
-      }
-
-      movedStoragePaths.push(finalPath);
-
-      const pendingIndex = pendingStoragePaths.indexOf(document.storagePath);
-
-      if (pendingIndex !== -1) {
-        pendingStoragePaths.splice(pendingIndex, 1);
       }
 
       preparedDocuments.push({
@@ -786,29 +714,17 @@ export async function POST(request: Request) {
       uploaded_at: new Date().toISOString(),
     }));
 
-    const { error: documentsError } = await serviceClient
-      .from("uploaded_documents")
-      .insert(documentRows);
-
-    if (documentsError) {
-      throw new Error(
-        `Enregistrement des documents impossible : ${documentsError.message}`,
-      );
-    }
-
-    /*
-     * Historique :
-     * création du dossier.
-     */
-    await logActivity({
-      requestId: insuranceRequest.id,
-
-      userId: null,
-
-      action: "request_created",
-
-      description: "Le dossier d’assurance a été créé par le client.",
+    const { data: saved, error: saveError } = await serviceClient.rpc("create_direct_request", {
+      p_request_id: insuranceRequest.id,
+      p_client: clientInput,
+      p_existing_client_id: existingClientId,
+      p_request: requestInput,
+      p_documents: documentRows,
     });
+    if (saveError || !saved?.success) throw new Error("La demande n’a pas pu être enregistrée. Réessayez avec les mêmes informations.");
+    // The RPC returns the original dossier under the same lock that prevents concurrent duplicates.
+    // Never delete copies on an uncertain RPC response: they may already have been adopted.
+    if (saved.reused) return NextResponse.json(saved, { headers: { "Cache-Control": "no-store" } });
 
     /*
      * ============================
@@ -912,97 +828,12 @@ export async function POST(request: Request) {
       );
     }
 
-    /*
-     * Tout est validé :
-     * ne rien supprimer dans le catch.
-     */
-    movedStoragePaths.length = 0;
-
-    pendingStoragePaths.length = 0;
-
-    return NextResponse.json(
-      {
-        success: true,
-        calculatedPrice,
-        calculatedAge,
-        requestId: insuranceRequest.id,
-
-        requestCode: insuranceRequest.request_code,
-
-        status: "waiting_payment",
-
-        hasKimlik: payload.hasKimlik,
-
-        insuranceStartDate: payload.hasKimlik
-          ? null
-          : payload.insuranceStartDate,
-      },
-      {
-        status: 201,
-
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      },
-    );
+    return NextResponse.json(saved, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Erreur de création du dossier :", error);
 
-    /*
-     * Nettoyage des fichiers déjà déplacés.
-     */
-    if (movedStoragePaths.length > 0) {
-      const { error: movedCleanupError } = await serviceClient.storage
-        .from(BUCKET_NAME)
-        .remove(movedStoragePaths);
-
-      if (movedCleanupError) {
-        console.error(
-          "Nettoyage des fichiers déplacés impossible :",
-          movedCleanupError,
-        );
-      }
-    }
-
-    /*
-     * Nettoyage des fichiers qui seraient
-     * encore dans pending/.
-     */
-    if (pendingStoragePaths.length > 0) {
-      const { error: pendingCleanupError } = await serviceClient.storage
-        .from(BUCKET_NAME)
-        .remove(pendingStoragePaths);
-
-      if (pendingCleanupError) {
-        console.error(
-          "Nettoyage des fichiers temporaires impossible :",
-          pendingCleanupError,
-        );
-      }
-    }
-
-    if (createdRequestId) {
-      const { error: requestCleanupError } = await serviceClient
-        .from("insurance_requests")
-        .delete()
-        .eq("id", createdRequestId);
-
-      if (requestCleanupError) {
-        console.error("Nettoyage du dossier impossible :", requestCleanupError);
-      }
-    }
-
-    if (createdClientId) {
-      const { error: clientCleanupError } = await serviceClient
-        .from("clients")
-        .delete()
-        .eq("id", createdClientId);
-
-      if (clientCleanupError) {
-        console.error("Nettoyage du client impossible :", clientCleanupError);
-      }
-    }
-
+    // Prepared pending files and unadopted copies expire through the existing retention worker.
+    // The database transaction rolls back the client, request, documents and history together.
     return NextResponse.json(
       {
         success: false,

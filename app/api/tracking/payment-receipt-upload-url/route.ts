@@ -485,20 +485,19 @@ export async function POST(
 
     /*
      * ============================================
-     * 7. LE PAIEMENT DOIT ÊTRE REFUSÉ
+     * 7. LE DOSSIER DOIT ATTENDRE UN JUSTIFICATIF
      * ============================================
      */
 
     if (
-      insuranceRequest.status !==
-      "payment_rejected"
+      !["waiting_payment", "payment_rejected"].includes(insuranceRequest.status)
     ) {
       return NextResponse.json(
         {
           success: false,
 
           error:
-            "Un nouveau justificatif ne peut être envoyé que pour un paiement refusé.",
+            "Ce dossier n’attend pas de justificatif. Actualisez le suivi pour consulter son état.",
         },
         {
           status: 409,
@@ -528,7 +527,7 @@ export async function POST(
           "payments",
         )
         .select(
-          "id",
+          "id, status",
         )
         .eq(
           "request_id",
@@ -545,17 +544,18 @@ export async function POST(
     }
 
     if (
-      !payment
+      (insuranceRequest.status === "payment_rejected" && (!payment || payment.status !== "rejected")) ||
+      (insuranceRequest.status === "waiting_payment" && payment)
     ) {
       return NextResponse.json(
         {
           success: false,
 
           error:
-            "Aucun paiement n’est associé à ce dossier.",
+            "Le paiement de ce dossier a changé. Actualisez le suivi.",
         },
         {
-          status: 404,
+          status: 409,
 
           headers: {
             "Cache-Control":
@@ -583,7 +583,7 @@ export async function POST(
       );
 
     const pendingPath =
-      `pending/direct/payment-reupload/` +
+      `pending/direct/${insuranceRequest.status === "payment_rejected" ? "payment-reupload" : "payment"}/` +
       `${insuranceRequest.id}/` +
       `${uploadSessionId}/` +
       `${Date.now()}-${crypto.randomUUID()}-${safeFileName}`;

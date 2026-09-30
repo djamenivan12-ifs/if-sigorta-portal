@@ -258,7 +258,7 @@ export function InsuranceRequestProvider({ children }: InsuranceRequestProviderP
     const clearPendingCancellation = useCallback(() => dispatch({ type: "clear" }), []);
     const resetRequestData = useCallback(() => dispatch({ type: "reset" }), []);
     const contextValue = useMemo(() => ({ ...session, updateRequestData, clearPendingCancellation, resetRequestData }), [session, updateRequestData, clearPendingCancellation, resetRequestData]);
-    return <InsuranceRequestContext.Provider value={contextValue}>{children}</InsuranceRequestContext.Provider>;
+    return <InsuranceRequestContext.Provider value={contextValue}>{hydrationCompleted ? children : <div role="status" aria-label="Chargement" className="p-8 text-center">…</div>}</InsuranceRequestContext.Provider>;
 }
 export function useInsuranceRequest() {
     const context = useContext(InsuranceRequestContext);

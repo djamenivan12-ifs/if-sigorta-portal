@@ -1,3 +1,4 @@
+import { addressError } from "@/lib/insurance/addressValidation";
 import { hasQuoteSchema } from "@/lib/insurance/quoteSchema";
 import { verifyStoredDocument } from "@/lib/security/verifyStoredDocument";
 import { isValidDate } from "@/lib/validation/date";
@@ -403,23 +404,8 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      !payload.address?.provinceId ||
-      !payload.address?.districtId ||
-      !payload.address?.neighborhoodId ||
-      !payload.address?.street?.trim() ||
-      !payload.address?.buildingNumber?.trim()
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "L’adresse complète est obligatoire.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
+    const invalidAddress = addressError(payload.address);
+    if (invalidAddress) return NextResponse.json({ success: false, error: invalidAddress }, { status: 400 });
 
     if (payload.hasKimlik) {
       const kimlikNumber = payload.kimlikNumber?.replace(/\D/g, "") ?? "";

@@ -183,6 +183,19 @@ export default async function PartnerDossiersPage({searchParams}:{searchParams:P
         </Link>
       </div>
 
+      <form action="/partenaire/dossiers" method="get" className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+        <label className="min-w-0 flex-1 text-sm font-semibold">Matricule ou nom du client
+          <input type="search" name="q" defaultValue={filters.q ?? ""} placeholder="IF-2026-…" maxLength={200} className="mt-2 w-full rounded-xl border border-slate-300 p-3" />
+        </label>
+        <label className="text-sm font-semibold">État du dossier
+          <select name="status" defaultValue={filters.status ?? ""} className="mt-2 block rounded-xl border border-slate-300 p-3">
+            <option value="">Tous les dossiers</option><option value="waiting">Reçu à envoyer</option><option value="review">Paiement en vérification</option><option value="processing">Assurance en préparation</option><option value="available">Assurance disponible</option><option value="cancelled">Annulé</option>
+          </select>
+        </label>
+        <button className="rounded-xl bg-[#0B5D3B] px-5 py-3 font-semibold text-white" type="submit">Rechercher</button>
+        <Link href="/partenaire/dossiers" className="px-2 py-3 text-sm underline">Réinitialiser</Link>
+        <p className="w-full text-sm text-slate-600">Déjà un matricule ? Ouvrez le dossier pour envoyer le reçu. Il n’est pas nécessaire de créer une nouvelle demande.</p>
+      </form>
       <div className="mt-6 min-w-0 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-sm sm:mt-7 sm:rounded-3xl">
         <div className="flex min-w-0 flex-col gap-4 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
@@ -221,20 +234,16 @@ export default async function PartnerDossiersPage({searchParams}:{searchParams:P
               </p>
 
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Vous n’avez encore créé
-                aucun dossier
-                d’assurance depuis
-                votre espace
-                partenaire.
+                Aucun dossier ne correspond à votre recherche. Vérifiez le matricule ou réinitialisez les filtres.
               </p>
 
               <Link
-                href="/partenaire/nouvelle-demande"
+                href="/partenaire/dossiers"
                 className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0B5D3B] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#084A2F]"
               >
                 <FilePlus2 className="h-4 w-4" />
 
-                Créer un dossier
+                Afficher tous mes dossiers
               </Link>
             </div>
           </div>
@@ -376,9 +385,9 @@ export default async function PartnerDossiersPage({searchParams}:{searchParams:P
                             <Link
                               href={`/partenaire/dossiers/${request.id}`}
                               aria-label={`Ouvrir le dossier ${request.request_code}`}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                              className="inline-flex min-h-9 items-center justify-center rounded-xl px-3 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
                             >
-                              <ChevronRight className="h-5 w-5" />
+                              {["waiting_payment", "payment_rejected"].includes(request.status) ? "Envoyer le reçu" : "Ouvrir"}<ChevronRight className="h-5 w-5" />
                             </Link>
                           </td>
                         </tr>
@@ -449,6 +458,7 @@ export default async function PartnerDossiersPage({searchParams}:{searchParams:P
                         <ChevronRight className="mt-2 h-5 w-5 shrink-0 text-slate-400" />
                       </div>
 
+                      {["waiting_payment", "payment_rejected"].includes(request.status) && <p className="mt-3 font-semibold text-[#0B5D3B]">Envoyer le reçu →</p>}
                       <div className="mt-4 flex flex-wrap items-center gap-2">
                         <span
                           className={`inline-flex rounded-full px-3 py-1.5 text-xs font-bold ${status.className}`}

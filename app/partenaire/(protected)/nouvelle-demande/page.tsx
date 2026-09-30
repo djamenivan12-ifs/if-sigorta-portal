@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {requirePartner} from "@/lib/auth/requirePartner";
 import {createServiceClient} from "@/lib/supabase/service";
 import PartnerRequestForm from "./PartnerRequestForm";
@@ -19,6 +20,7 @@ export default async function NewPartnerRequestPage() {
         </p>
       </div>
 
+      <p className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><Link href="/partenaire/dossiers" className="font-semibold underline">Déjà un matricule ? Retrouvez le dossier pour envoyer le reçu sans créer une nouvelle demande.</Link></p>
       <PartnerRequestForm initialDraft={current?.payload??null} initialVersion={Number(data?.version??0)} initialSubmissionId={initialSubmissionId}/>
     </div>
   );

@@ -37,7 +37,7 @@ const translations = {
       "Adresse en Turquie",
 
     description:
-      "Recherchez et sélectionnez votre province, district et quartier.",
+      "Sélectionnez une proposition pour la province, le district et le quartier, puis renseignez la rue et le numéro du bâtiment. Seul le numéro d’appartement est facultatif.",
 
     provinceLabel:
       "İl — Province",
@@ -81,7 +81,7 @@ const translations = {
       "Address in Türkiye",
 
     description:
-      "Search and select your province, district and neighborhood.",
+      "Select a province, district and neighborhood, then enter the street and building number. Only the apartment number is optional.",
 
     provinceLabel:
       "İl — Province",
@@ -125,7 +125,7 @@ const translations = {
       "Türkiye adresi",
 
     description:
-      "İl, ilçe ve mahallenizi arayın ve seçin.",
+      "İl, ilçe ve mahalleyi listeden seçin; cadde / sokak ve bina numarasını girin. Yalnızca daire numarası isteğe bağlıdır.",
 
     provinceLabel:
       "İl",
@@ -306,9 +306,9 @@ export default function AddressSelector({
     return () => {active=false;};
   }, [value.districtId,t.neighborhoodsError]);
 
-  function selectProvince(provinceId: string) { onChange({...value,provinceId,districtId:"",neighborhoodId:""}); }
+  function selectProvince(provinceId: string) { if (provinceId === value.provinceId) return; onChange({...value,provinceId,districtId:"",neighborhoodId:""}); }
 
-  function selectDistrict(districtId: string) { onChange({...value,districtId,neighborhoodId:""}); }
+  function selectDistrict(districtId: string) { if (districtId === value.districtId) return; onChange({...value,districtId,neighborhoodId:""}); }
 
   return (
     <section>
@@ -417,6 +417,7 @@ export default function AddressSelector({
 
           <input
             id="street"
+            name="street"
             type="text"
             required
             value={
@@ -448,6 +449,7 @@ export default function AddressSelector({
 
             <input
               id="buildingNumber"
+            name="buildingNumber"
               type="text"
               required
               value={
@@ -478,6 +480,7 @@ export default function AddressSelector({
 
             <input
               id="apartmentNumber"
+            name="apartmentNumber"
               type="text"
               value={
                 value.apartmentNumber

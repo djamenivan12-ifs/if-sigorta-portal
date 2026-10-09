@@ -42,8 +42,8 @@ export default function PartnerShell({
   useModalFocus(mobileMenuOpen, menuRef, () => setMobileMenuOpen(false));
 
   return (
-    <div className="min-h-screen bg-brand-ice">
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[276px]">
+    <div className="if-workspace min-h-screen bg-[#F5F8FB] text-brand-navy">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[244px]">
         <PartnerSidebar
           companyName={
             companyName
@@ -100,7 +100,7 @@ export default function PartnerShell({
         </div>
       )}
 
-      <div className="min-h-screen lg:pl-[276px]">
+      <div className="min-h-screen lg:pl-[244px]">
         <PartnerHeader
           managerName={
             managerName

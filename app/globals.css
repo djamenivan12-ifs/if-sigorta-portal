@@ -34,3 +34,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Workspace design v2: only authenticated admin, agent and partner shells. */
+.if-workspace { color-scheme: light; }
+.if-workspace :where(h1,h2,h3) { letter-spacing: -.025em; }
+.if-workspace :where(.rounded-3xl,.rounded-2xl,.rounded-\[1\.5rem\]) { border-radius: 12px; }
+.if-workspace :where(table) { font-variant-numeric: tabular-nums; }
+.if-workspace :where(thead) { background: #F5F8FB; }
+.if-workspace :where(th) { font-size: 11px; letter-spacing: .045em; }
+.if-workspace :where(button,a,input,select,textarea):focus-visible { outline: 2px solid #536A7B; outline-offset: 3px; }
+.if-sidebar > div:first-child { padding-top: 18px; padding-bottom: 12px; }
+.if-sidebar > div:first-child img { width: 178px; }
+.if-sidebar nav a { min-height: 40px; font-size: 13px; }
+.if-sidebar nav a[aria-current="page"] { font-weight: 700; }
+.if-work-grid { display: grid; gap: 20px; align-items: start; }
+.if-priority-rail { display: grid; gap: 16px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.if-priority-rail > * { margin: 0; }
+@media(min-width:1440px) {
+  .if-work-grid { grid-template-columns: minmax(0,1fr) 280px; }
+  .if-priority-rail { display: block; }
+  .if-priority-rail > * + * { margin-top: 16px; }
+  .if-operations #dashboard-work :where(td,th) { padding-left: 14px; padding-right: 14px; }
+}
+@media(max-width:639px) {
+  .if-priority-rail { grid-template-columns: minmax(0,1fr); }
+  .if-workspace h1 { font-size: 25px; line-height: 1.2; }
+}

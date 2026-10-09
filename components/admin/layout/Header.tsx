@@ -96,8 +96,8 @@ export default function Header({
     );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-16 items-center gap-2 px-3 sm:h-[72px] sm:gap-3 sm:px-4 lg:h-20 lg:px-8">
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+      <div className="flex h-16 items-center gap-2 px-3 sm:h-[72px] sm:gap-3 sm:px-4 lg:h-[72px] lg:px-8">
         {/* MOBILE MENU */}
 
         <button
@@ -106,7 +106,7 @@ export default function Header({
           onClick={
             onOpenMobileMenu
           }
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 sm:h-11 sm:w-11 lg:hidden"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 sm:h-11 sm:w-11 lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -137,12 +137,12 @@ export default function Header({
                 )
               }
               placeholder="Matricule, client, WhatsApp, passeport, Kimlik..."
-              className="h-11 w-full rounded-2xl border border-slate-200 bg-brand-ice pl-11 pr-28 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:bg-white focus:ring-4 focus:ring-brand-navy/10"
+              className="h-11 w-full rounded-lg border border-slate-200 bg-brand-ice pl-11 pr-28 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:bg-white focus:ring-4 focus:ring-brand-navy/10"
             />
 
             <button
               type="submit"
-              className="absolute right-1.5 top-1/2 inline-flex h-8 -translate-y-1/2 items-center justify-center rounded-xl bg-brand-lime px-4 text-xs font-semibold text-brand-navy transition hover:bg-brand-lime/85"
+              className="absolute right-1.5 top-1/2 inline-flex h-8 -translate-y-1/2 items-center justify-center rounded-lg bg-brand-lime px-4 text-xs font-semibold text-brand-navy transition hover:bg-brand-lime/85"
             >
               Rechercher
             </button>
@@ -154,7 +154,7 @@ export default function Header({
 
           <Link
             href="/demande/etape-1"
-            className="hidden min-h-11 items-center gap-2 rounded-xl bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime md:flex"
+            className="hidden min-h-11 items-center gap-2 rounded-lg bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime md:flex"
           >
             <Plus className="h-4 w-4" />
 
@@ -182,7 +182,7 @@ export default function Header({
                 ? `${notificationCount} dossier${notificationCount > 1 ? "s" : ""} nécessite${notificationCount > 1 ? "nt" : ""} votre attention`
                 : "Aucune notification"
             }
-            className="relative z-10 flex h-10 w-10 touch-manipulation items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-50 active:bg-slate-100 sm:h-11 sm:w-11"
+            className="relative z-10 flex h-10 w-10 touch-manipulation items-center justify-center rounded-lg border border-slate-200 bg-white transition hover:bg-slate-50 active:bg-slate-100 sm:h-11 sm:w-11"
           >
             <Bell
               className={`pointer-events-none h-5 w-5 ${
@@ -250,13 +250,13 @@ export default function Header({
                 )
               }
               placeholder="Rechercher..."
-              className="h-10 w-full rounded-xl border border-slate-200 bg-brand-ice pl-9 pr-3 text-sm outline-none transition focus:border-brand-navy focus:bg-white focus:ring-4 focus:ring-brand-navy/10 sm:h-11 sm:pl-10 sm:pr-4"
+              className="h-10 w-full rounded-lg border border-slate-200 bg-brand-ice pl-9 pr-3 text-sm outline-none transition focus:border-brand-navy focus:bg-white focus:ring-4 focus:ring-brand-navy/10 sm:h-11 sm:pl-10 sm:pr-4"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-lime text-sm font-semibold text-brand-navy transition hover:bg-brand-lime/85 sm:h-11 sm:w-auto sm:px-4"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-lime text-sm font-semibold text-brand-navy transition hover:bg-brand-lime/85 sm:h-11 sm:w-auto sm:px-4"
           >
             <Search className="h-4 w-4 sm:hidden" />
 

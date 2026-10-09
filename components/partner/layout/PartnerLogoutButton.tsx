@@ -56,9 +56,9 @@ export default function PartnerLogoutButton() {
       disabled={
         loading
       }
-      className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-white/65 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
     >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
         <LogOut className="h-[17px] w-[17px]" />
       </div>
 

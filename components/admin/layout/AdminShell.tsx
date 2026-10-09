@@ -62,10 +62,10 @@ export default function AdminShell({
 
 
   return (
-    <div className="min-h-screen bg-brand-ice">
+    <div className="if-workspace min-h-screen bg-[#F5F8FB] text-brand-navy">
       {/* SIDEBAR DESKTOP */}
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[276px]">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[244px]">
         <Sidebar
           role={role}
           urgentRenewalCount={
@@ -122,7 +122,7 @@ export default function AdminShell({
 
       {/* MAIN */}
 
-      <div className="min-h-screen lg:pl-[276px]">
+      <div className="min-h-screen lg:pl-[244px]">
         <Header
           userEmail={
             userEmail

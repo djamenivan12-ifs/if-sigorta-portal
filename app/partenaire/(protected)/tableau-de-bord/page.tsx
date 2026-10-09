@@ -479,7 +479,7 @@ export default async function PartnerDashboardPage() {
             }
           </p>
 
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-brand-navy sm:text-3xl">
             Tableau de bord
           </h1>
 
@@ -519,7 +519,7 @@ export default async function PartnerDashboardPage() {
       <div className="mt-6 grid min-w-0 grid-cols-2 gap-3 sm:mt-7 sm:gap-4 xl:grid-cols-5">
         {
           cards.map(
-            (card) => {
+            (card, index) => {
               const Icon =
                 card.icon;
 
@@ -531,14 +531,14 @@ export default async function PartnerDashboardPage() {
                   href={
                     card.href
                   }
-                  className="group min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-border hover:shadow-md sm:p-5"
+                  className={`group min-w-0 rounded-xl border p-4 transition hover:border-brand-soft sm:p-5 ${index === 0 ? "border-brand-navy bg-brand-navy text-white" : "border-slate-200 bg-white"}`}
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-ice text-brand-navy transition group-hover:bg-brand-ice">
                       <Icon className="h-5 w-5" />
                     </div>
 
-                    <span className="shrink-0 text-xl font-black text-brand-navy sm:text-2xl">
+                    <span className={`shrink-0 text-3xl font-bold ${index === 0 ? "text-brand-lime" : "text-brand-navy"}`}>
                       {
                         card.value
                       }
@@ -546,7 +546,7 @@ export default async function PartnerDashboardPage() {
                   </div>
 
                   <div className="mt-4 flex min-w-0 items-end justify-between gap-2 sm:mt-5 sm:gap-3">
-                    <p className="min-w-0 text-xs font-bold leading-5 text-slate-600 sm:text-sm">
+                    <p className={`min-w-0 text-xs font-semibold leading-5 sm:text-sm ${index === 0 ? "text-white/75" : "text-slate-600"}`}>
                       {
                         card.label
                       }
@@ -563,10 +563,10 @@ export default async function PartnerDashboardPage() {
 
       {/* ACTIVITÉ RÉCENTE */}
 
-      <div className="mt-6 min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7">
+      <div className="mt-6 min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-none sm:rounded-3xl sm:p-7">
         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-black text-brand-navy">
+            <h2 className="text-lg font-bold text-brand-navy">
               Activité récente
             </h2>
 
@@ -628,23 +628,23 @@ export default async function PartnerDashboardPage() {
                 <table className="min-w-full">
                   <thead className="bg-brand-ice">
                     <tr className="border-b border-slate-200">
-                      <th className="px-5 py-3 text-left text-xs font-black uppercase tracking-[0.1em] text-slate-400">
+                      <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         Dossier
                       </th>
 
-                      <th className="px-5 py-3 text-left text-xs font-black uppercase tracking-[0.1em] text-slate-400">
+                      <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         Client
                       </th>
 
-                      <th className="px-5 py-3 text-left text-xs font-black uppercase tracking-[0.1em] text-slate-400">
+                      <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         Statut
                       </th>
 
-                      <th className="px-5 py-3 text-left text-xs font-black uppercase tracking-[0.1em] text-slate-400">
+                      <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         Date
                       </th>
 
-                      <th className="px-5 py-3 text-right text-xs font-black uppercase tracking-[0.1em] text-slate-400">
+                      <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         Action
                       </th>
                     </tr>
@@ -684,7 +684,7 @@ export default async function PartnerDashboardPage() {
                               <td className="px-5 py-4">
                                 <Link
                                   href={`/partenaire/dossiers/${request.id}`}
-                                  className="text-sm font-black text-brand-navy transition hover:text-brand-navy"
+                                  className="text-sm font-bold text-brand-navy transition hover:text-brand-navy"
                                 >
                                   {
                                     request.request_code
@@ -775,7 +775,7 @@ export default async function PartnerDashboardPage() {
                         >
                           <div className="flex min-w-0 items-start justify-between gap-4">
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-black text-brand-navy">
+                              <p className="truncate text-sm font-bold text-brand-navy">
                                 {
                                   request.request_code
                                 }

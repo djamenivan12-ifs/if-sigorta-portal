@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -28,6 +28,8 @@ import {
 } from "@/lib/dashboard/model";
 import { money, dateLabel } from "@/lib/accounting/model";
 import ClaimRequestButton from "@/components/admin/requests/ClaimRequestButton";
+import { useModalFocus } from "@/lib/browser/useModalFocus";
+import { X, Eye } from "lucide-react";
 import MonthlyReportButton from "./MonthlyReportButton";
 const control =
   "min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy";
@@ -45,6 +47,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
     [list, setList] = useState<List>("actions"),
     [search, setSearch] = useState(""),
     [page, setPage] = useState(1),
+    [previewId, setPreviewId] = useState<string | null>(null),
     [chartMetric, setChartMetric] = useState<"requests" | "collected">(
       "requests",
     );
@@ -116,7 +119,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
       />
     ) : (
       <Link
-        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-emerald-900 hover:border-emerald-700"
+        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-brand-navy hover:border-brand-navy"
         href={`/admin/dossiers/${row.id}`}
       >
         {actionLabel(row.status)}
@@ -138,14 +141,14 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
     );
   };
   return (
-    <main className="min-h-screen bg-brand-ice px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
+    <div className="if-operations min-h-screen bg-transparent px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1540px] space-y-6">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-800">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-navy">
               IF SIGORTA · {admin ? "PILOTAGE" : "ESPACE AGENT"}
             </p>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="text-2xl font-bold tracking-tight text-brand-navy sm:text-3xl">
               Tableau de bord
             </h1>
             <p className="mt-2 text-sm text-slate-500">
@@ -182,6 +185,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
           className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
         >
           <Metric
+            dark
             title={admin ? "Dossiers à traiter" : "Mes dossiers à traiter"}
             value={model.actions.length.toLocaleString("fr-FR")}
             description="Paiement à vérifier, assureur à choisir ou police à préparer"
@@ -203,7 +207,6 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
             onClick={() => setListView("waiting")}
           />
           <Metric
-            dark
             title="Renouvellements à suivre"
             value={
               renewals === null
@@ -215,43 +218,10 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
             href="#dashboard-renewals"
           />
         </section>
-        <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="rounded-lg bg-emerald-50 p-2 text-emerald-800">
-              <CheckCheck size={20} />
-            </span>
-            <div>
-              <h2 className="text-sm font-bold text-slate-950">
-                Priorités opérationnelles
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">
-                Temps depuis la dernière avancée, sur les dossiers à traiter.
-              </p>
-            </div>
-          </div>
-          {data.activities === null ? (
-            <p role="status" className="text-sm text-amber-800">
-              Historique indisponible : les délais ne peuvent pas être calculés.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <span>
-                <strong className="text-rose-700">{model.critical}</strong> ≥ 30
-                min
-              </span>
-              <span>
-                <strong className="text-amber-700">{model.late}</strong> 15–29
-                min
-              </span>
-              <span>
-                <strong>{model.watch}</strong> 5–14 min
-              </span>
-            </div>
-          )}
-        </section>
+        <div className="if-work-grid">
         <section
           id="dashboard-work"
-          className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+          className="min-w-0 scroll-mt-36 overflow-hidden rounded-xl border border-slate-200 bg-white"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 pt-5">
             <div>
@@ -294,7 +264,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                   key={id}
                   aria-current={list === id ? "page" : undefined}
                   onClick={() => setListView(id)}
-                  className={`min-h-12 shrink-0 border-b-2 px-3 text-sm font-semibold ${id === list ? "border-emerald-800 text-emerald-900" : "border-transparent text-slate-500 hover:text-slate-900"}`}
+                  className={`min-h-12 shrink-0 border-b-2 px-3 text-sm font-semibold ${id === list ? "border-brand-lime text-brand-navy" : "border-transparent text-slate-500 hover:text-slate-900"}`}
                 >
                   {titles[id]}{" "}
                   <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs">
@@ -333,7 +303,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                         <td className="max-w-xs px-5 py-4">
                           <Link
                             href={`/admin/dossiers/${row.id}`}
-                            className="font-semibold text-emerald-900 hover:underline"
+                            className="font-semibold text-brand-navy hover:underline"
                           >
                             {row.request_code}
                           </Link>
@@ -348,7 +318,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                         <td className="whitespace-nowrap px-5 py-4 text-xs text-slate-500">
                           {dateLabel(row.created_at)}
                         </td>
-                        <td className="min-w-52 px-5 py-4">{action(row)}</td>
+                        <td className="min-w-52 px-5 py-4"><div className="flex items-center gap-2"><button type="button" onClick={() => setPreviewId(row.id)} aria-label={`Aperçu du dossier ${row.request_code}`} className="rounded-lg border border-slate-200 p-2.5 text-slate-500 hover:bg-brand-ice"><Eye size={16} /></button>{action(row)}</div></td>
                       </tr>
                     ))}
                   </tbody>
@@ -361,7 +331,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                       <div>
                         <Link
                           href={`/admin/dossiers/${row.id}`}
-                          className="text-sm font-bold text-emerald-900"
+                          className="text-sm font-bold text-brand-navy"
                         >
                           {row.request_code}
                         </Link>
@@ -377,7 +347,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                       </span>
                       {urgency(row)}
                     </div>
-                    {action(row)}
+                    <div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => setPreviewId(row.id)} className="min-h-10 rounded-lg border border-slate-200 px-3 text-xs font-semibold">Aperçu</button>{action(row)}</div>
                   </article>
                 ))}
               </div>
@@ -428,6 +398,25 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
             </div>
           </footer>
         </section>
+        <aside className="if-priority-rail space-y-4">
+          <section className="rounded-xl border border-slate-200 bg-white p-5">
+            <div className="mb-4 flex items-center justify-between gap-2"><h2 className="text-sm font-bold">À votre attention</h2><Clock3 size={16} className="text-slate-400" /></div>
+            {data.activities === null ? <p role="status" className="text-xs text-amber-800">Historique indisponible : les délais ne peuvent pas être calculés.</p> : <div className="mb-4 grid grid-cols-3 gap-2 border-b border-slate-100 pb-4 text-center">
+              <div><strong className="text-xl text-rose-700">{model.critical}</strong><p className="mt-1 text-[10px] text-slate-500">≥ 30 min</p></div>
+              <div><strong className="text-xl text-amber-700">{model.late}</strong><p className="mt-1 text-[10px] text-slate-500">15–29 min</p></div>
+              <div><strong className="text-xl">{model.watch}</strong><p className="mt-1 text-[10px] text-slate-500">5–14 min</p></div>
+            </div>}
+            <p className="mb-4 text-xs leading-5 text-slate-500">Temps depuis la dernière avancée sur les dossiers à traiter.</p>
+            {model.actions.slice(0, 3).map(row => <button key={row.id} type="button" onClick={() => setPreviewId(row.id)} className="flex w-full items-center justify-between gap-2 border-t border-slate-100 py-3 text-left hover:bg-brand-ice"><span className="min-w-0"><strong className="block truncate text-xs">{clientName(row)}</strong><span className="mt-1 block text-[11px] text-slate-500">{row.request_code}</span></span>{urgency(row)}</button>)}
+            {!model.actions.length && <p className="text-xs text-slate-500">Aucun dossier à traiter pour le moment.</p>}
+          </section>
+          <section className="rounded-xl bg-brand-navy p-5 text-white">
+            <CheckCheck size={22} className="mb-3 text-brand-lime" /><h2 className="text-sm font-bold">Votre espace de travail</h2>
+            <p className="mt-2 text-xs leading-5 text-white/65">{admin ? "Supervisez les dossiers, les paiements et votre équipe." : "Retrouvez vos dossiers et prenez en charge les demandes de la file commune."}</p>
+            <button type="button" onClick={() => {setListView("queue"); document.getElementById("dashboard-work")?.scrollIntoView({behavior:"smooth",block:"start"});}} className="mt-4 flex min-h-10 w-full items-center justify-between rounded-lg bg-white/10 px-3 text-xs font-semibold hover:bg-white/15">File commune <span className="text-brand-lime">{model.queue.length} →</span></button>
+          </section>
+        </aside>
+        </div>
         <section className="grid gap-5 xl:grid-cols-3">
           <article
             id="dashboard-renewals"
@@ -444,7 +433,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
               </div>
               <Link
                 href="/admin/renouvellements"
-                className="text-xs font-semibold text-emerald-800"
+                className="text-xs font-semibold text-brand-navy"
               >
                 Tout consulter →
               </Link>
@@ -471,7 +460,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                     <div>
                       <Link
                         href={`/admin/dossiers/${r.requestId}`}
-                        className="text-sm font-semibold text-emerald-900 hover:underline"
+                        className="text-sm font-semibold text-brand-navy hover:underline"
                       >
                         {r.requestCode}
                       </Link>
@@ -495,7 +484,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
             {renewals && renewals.length > 5 && (
               <Link
                 href="/admin/renouvellements"
-                className="mt-3 inline-block text-xs font-semibold text-emerald-800"
+                className="mt-3 inline-block text-xs font-semibold text-brand-navy"
               >
                 Voir les {renewals.length} échéances →
               </Link>
@@ -508,7 +497,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
           </article>
           <aside className="rounded-xl border border-brand-navy bg-brand-navy p-5 text-white">
             <h2 className="text-base font-bold">Accès directs</h2>
-            <p className="mt-2 text-sm leading-6 text-emerald-100/75">
+            <p className="mt-2 text-sm leading-6 text-white/65">
               L’essentiel pour poursuivre votre travail.
             </p>
             <div className="mt-5 space-y-2">
@@ -677,7 +666,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                 })}
               </div>
               <details className="mt-5 border-t border-slate-100 pt-4">
-                <summary className="cursor-pointer text-xs font-semibold text-emerald-800">
+                <summary className="cursor-pointer text-xs font-semibold text-brand-navy">
                   Voir les valeurs du graphique
                 </summary>
                 <table className="mt-3 w-full text-left text-xs">
@@ -751,7 +740,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
               )}
               {admin && (
                 <details className="mt-6 border-t border-slate-100 pt-4">
-                  <summary className="cursor-pointer text-xs font-semibold text-emerald-800">
+                  <summary className="cursor-pointer text-xs font-semibold text-brand-navy">
                     Nationalités des dossiers de la période
                   </summary>
                   <ul className="mt-3 max-h-48 space-y-2 overflow-auto text-xs">
@@ -814,8 +803,22 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
           · Actualisation chaque minute lorsque la page est visible.
         </p>
       </div>
-    </main>
+      <RequestPreview row={[...data.requests, ...data.queue].find(r => r.id === previewId) ?? null} close={() => setPreviewId(null)} />
+    </div>
   );
+}
+function RequestPreview({row, close}: {row: RequestRow | null; close: () => void}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useModalFocus(!!row, ref, close);
+  if (!row) return null;
+  return <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="request-preview-title" tabIndex={-1} className="fixed inset-0 z-[80]">
+    <button type="button" tabIndex={-1} aria-label="Fermer l’aperçu" onClick={close} className="absolute inset-0 bg-brand-navy/40 backdrop-blur-[2px]" />
+    <section className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col bg-white shadow-2xl">
+      <header className="flex items-start justify-between gap-4 border-b border-slate-200 p-6"><div><p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Aperçu du dossier</p><h2 id="request-preview-title" className="my-2 text-xl font-bold">{row.request_code}</h2><Status status={row.status} /></div><button type="button" onClick={close} aria-label="Fermer l’aperçu" className="rounded-lg border border-slate-200 p-2"><X size={20} /></button></header>
+      <div className="flex-1 overflow-y-auto p-6"><h3 className="text-xl font-bold">{clientName(row)}</h3><dl className="mt-6 grid grid-cols-2 gap-5 text-sm"><div><dt className="text-xs text-slate-500">Créé le</dt><dd className="mt-1 font-semibold">{dateLabel(row.created_at)}</dd></div><div><dt className="text-xs text-slate-500">Durée de couverture</dt><dd className="mt-1 font-semibold">{row.insurance_duration_years ? `${row.insurance_duration_years} an${row.insurance_duration_years > 1 ? "s" : ""}` : "Non renseignée"}</dd></div><div><dt className="text-xs text-slate-500">Attribution</dt><dd className="mt-1 font-semibold">{row.assigned_agent_id ? "Dossier attribué" : "File commune"}</dd></div></dl><p className="mt-8 rounded-lg bg-brand-ice p-4 text-sm leading-6 text-brand-muted">Ouvrez le dossier complet pour consulter les documents et effectuer les actions disponibles selon votre rôle.</p></div>
+      <footer className="border-t border-slate-200 p-6"><Link href={`/admin/dossiers/${row.id}`} className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand-lime px-4 text-sm font-bold text-brand-navy">Ouvrir le dossier complet <ArrowRight size={16} /></Link></footer>
+    </section>
+  </div>;
 }
 function Status({ status }: { status: string }) {
   return (
@@ -846,16 +849,16 @@ function Metric({
   const content = (
     <>
       <div
-        className={`flex justify-between gap-3 text-sm ${dark ? "text-emerald-100" : "text-slate-500"}`}
+        className={`flex justify-between gap-3 text-sm ${dark ? "text-white/75" : "text-slate-500"}`}
       >
         <span>{title}</span>
         {icon}
       </div>
-      <p className="mt-4 break-words text-3xl font-bold tracking-tight tabular-nums">
+      <p className={`mt-4 break-words text-3xl font-bold tracking-tight tabular-nums ${dark ? "text-brand-lime" : "text-brand-navy"}`}>
         {value}
       </p>
       <p
-        className={`mt-3 text-xs leading-5 ${dark ? "text-emerald-100/75" : "text-slate-500"}`}
+        className={`mt-3 text-xs leading-5 ${dark ? "text-white/65" : "text-slate-500"}`}
       >
         {description}
       </p>

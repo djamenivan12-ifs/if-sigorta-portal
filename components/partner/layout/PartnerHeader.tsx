@@ -29,15 +29,15 @@ export default function PartnerHeader({
     "P";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-20 items-center gap-3 px-4 sm:px-5 lg:px-8">
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+      <div className="flex h-[72px] items-center gap-3 px-4 sm:px-5 lg:px-8">
         <button
           type="button"
           aria-label="Ouvrir le menu"
           onClick={
             onOpenMobileMenu
           }
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 lg:hidden"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -57,7 +57,7 @@ export default function PartnerHeader({
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <Link
             href="/partenaire/nouvelle-demande"
-            className="hidden min-h-11 items-center gap-2 rounded-xl bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime sm:flex"
+            className="hidden min-h-11 items-center gap-2 rounded-lg bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime sm:flex"
           >
             <FilePlus2 className="h-4 w-4" />
 
@@ -66,7 +66,7 @@ export default function PartnerHeader({
 
           <Link
             href="/partenaire/profil"
-            className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 transition hover:bg-slate-50 sm:px-3"
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 transition hover:bg-slate-50 sm:px-3"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-ice text-xs font-black text-brand-navy">
               {

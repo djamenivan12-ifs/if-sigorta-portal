@@ -144,7 +144,7 @@ export default function Navigation({
   return (
     <nav
       aria-label="Navigation principale"
-      className="space-y-1 lg:space-y-1.5"
+      className="space-y-1"
     >
       {visibleLinks.map((link) => {
         const Icon = link.icon;
@@ -158,18 +158,18 @@ export default function Navigation({
             href={link.href}
             onClick={onNavigate}
             className={[
-              "group flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-11 lg:gap-3 lg:px-3.5 lg:py-2.5 lg:text-sm",
+              "group flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-10 lg:gap-2 lg:px-2.5 lg:py-1.5 lg:text-[13px]",
               active
-                ? "bg-brand-navy text-white shadow-sm"
-                : "text-slate-600 hover:bg-brand-ice hover:text-brand-navy",
+                ? "bg-brand-lime text-brand-navy shadow-sm"
+                : "text-white/70 hover:bg-white/10 hover:text-white",
             ].join(" ")}
           >
             <div
               className={[
                 "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
                 active
-                  ? "bg-white/10 text-brand-lime"
-                  : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-brand-navy",
+                  ? "bg-brand-navy/10 text-brand-navy"
+                  : "bg-transparent text-white/50 group-hover:text-white",
               ].join(" ")}
             >
               <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />

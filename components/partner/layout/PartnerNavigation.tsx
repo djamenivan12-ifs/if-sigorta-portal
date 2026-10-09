@@ -70,7 +70,7 @@ export default function PartnerNavigation({
   }
 
   return (
-    <nav className="space-y-1.5">
+    <nav aria-label="Navigation partenaire" className="space-y-1">
       {links.map(
         (link) => {
           const Icon =
@@ -83,6 +83,7 @@ export default function PartnerNavigation({
 
           return (
             <Link
+              aria-current={active ? "page" : undefined}
               key={
                 link.href
               }
@@ -93,10 +94,10 @@ export default function PartnerNavigation({
                 onNavigate
               }
               className={[
-                "group flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition",
+                "group flex min-h-11 items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition",
                 active
-                  ? "bg-brand-navy text-white shadow-sm"
-                  : "text-slate-600 hover:bg-brand-ice hover:text-brand-navy",
+                  ? "bg-brand-lime text-brand-navy shadow-sm"
+                  : "text-white/70 hover:bg-white/10 hover:text-white",
               ].join(
                 " ",
               )}
@@ -105,8 +106,8 @@ export default function PartnerNavigation({
                 className={[
                   "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
                   active
-                    ? "bg-white/10 text-brand-lime"
-                    : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-brand-navy",
+                    ? "bg-brand-navy/10 text-brand-navy"
+                    : "bg-transparent text-white/50 group-hover:text-white",
                 ].join(
                   " ",
                 )}

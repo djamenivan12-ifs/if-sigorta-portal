@@ -105,21 +105,21 @@ export default function HomeHeader() {
   return (
     <header className="absolute inset-x-0 top-0 z-50">
       <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8">
-        <div className="flex h-[82px] items-center justify-between gap-4 px-1 sm:px-3 lg:px-5">
+        <div className="flex h-[82px] items-center justify-between gap-3 px-6 sm:gap-4 sm:px-8 lg:px-12 xl:px-14">
           {/* LOGO */}
 
           <Link
             href="/"
             aria-label="IF Sigorta"
-            className="flex shrink-0 items-center"
+            className="flex min-w-0 max-w-[160px] flex-1 items-center sm:max-w-[192px] lg:max-w-[224px]"
           >
-            <div className="relative h-10 w-32 shrink-0 sm:h-12 sm:w-44 lg:w-48">
+            <div className="relative aspect-[1413/285] w-full">
               <Image
               src="/brand/if-sigorta-wordmark.png"
               alt="IF Sigorta"
               fill
               preload
-              sizes="(min-width: 1024px) 192px, (min-width: 640px) 176px, 128px"
+              sizes="(min-width: 1024px) 224px, (min-width: 640px) 192px, (min-width: 375px) 160px, 128px"
               className="object-contain object-left brightness-0 invert"
              />
           </div>
@@ -214,7 +214,7 @@ export default function HomeHeader() {
 
           {/* MENU MOBILE / TABLETTE */}
 
-          <div className="flex items-center gap-2 xl:hidden">
+          <div className="flex shrink-0 items-center gap-2 xl:hidden">
             <select
               value={
                 language

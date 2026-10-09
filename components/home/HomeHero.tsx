@@ -137,7 +137,7 @@ export default function HomeHero() {
 
         {/* DEGRADE GAUCHE UNIQUEMENT */}
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0D1D2D]/95 via-[#0D1D2D]/65 to-[#0D1D2D]/25 lg:from-[#0D1D2D]/90 lg:via-[#0D1D2D]/50 lg:via-45% lg:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0E1C2D]/95 via-[#0E1C2D]/65 to-[#0E1C2D]/25 lg:from-[#0E1C2D]/90 lg:via-[#0E1C2D]/50 lg:via-45% lg:to-transparent" />
 
         {/* PETIT DEGRADE HAUT/BAS */}
 
@@ -150,7 +150,7 @@ export default function HomeHero() {
             {/* BADGE */}
 
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-white/85 backdrop-blur-md sm:text-xs">
-              <ShieldCheck className="h-4 w-4 shrink-0 text-[#ACCC00]" />
+              <ShieldCheck className="h-4 w-4 shrink-0 text-[#ADCA0A]" />
 
               {
                 t.badge
@@ -166,7 +166,7 @@ export default function HomeHero() {
     {t.title2}
   </span>
 
-  <span className="mt-3 block max-w-[560px] text-[0.78em] font-semibold leading-[1.08] tracking-[-0.025em] text-[#ACCC00]">
+  <span className="mt-3 block max-w-[560px] text-[0.78em] font-semibold leading-[1.08] tracking-[-0.025em] text-[#ADCA0A]">
     {t.title3}
   </span>
 </h1>
@@ -184,7 +184,7 @@ export default function HomeHero() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/demande/etape-1"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ACCC00] px-6 text-sm font-black text-[#0D1D2D] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#BDD923] sm:text-base"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ADCA0A] px-6 text-sm font-black text-[#0E1C2D] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#ADCA0A] sm:text-base"
               >
                 {
                   t.primary

@@ -532,13 +532,13 @@ export default function HomePage() {
         <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid min-w-0 gap-10 sm:gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
             <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0D1D2D]">
                 {
                   t.processBadge
                 }
               </p>
 
-              <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#102B20] sm:mt-5 sm:text-4xl lg:text-[3.25rem]">
+              <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#0D1D2D] sm:mt-5 sm:text-4xl lg:text-[3.25rem]">
                 {
                   t.processTitle
                 }
@@ -552,7 +552,7 @@ export default function HomePage() {
 
               <Link
                 href="/demande/etape-1"
-                className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-black text-[#0B5D3B] transition-all hover:gap-3 sm:mt-7"
+                className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-black text-[#0D1D2D] transition-all hover:gap-3 sm:mt-7"
               >
                 {
                   t.request
@@ -580,7 +580,7 @@ export default function HomePage() {
                     >
                       <div className="grid min-w-0 gap-4 sm:grid-cols-[72px_1fr] sm:gap-7">
                         <div>
-                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B] transition duration-300 group-hover:bg-[#0B5D3B] group-hover:text-white">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F0F6FC] text-[#0D1D2D] transition duration-300 group-hover:bg-[#0D1D2D] group-hover:text-white">
                             <Icon className="h-5 w-5" />
                           </div>
                         </div>
@@ -588,7 +588,7 @@ export default function HomePage() {
                         <div className="flex min-w-0 gap-3 sm:gap-5">
                           <div className="min-w-0 flex-1">
                             <div className="flex min-w-0 items-baseline gap-3 sm:gap-4">
-                              <span className="text-xs font-black tracking-[0.16em] text-[#90AD97]">
+                              <span className="text-xs font-black tracking-[0.16em] text-[#64748B]">
                                 0
                                 {
                                   index +
@@ -610,7 +610,7 @@ export default function HomePage() {
                             </p>
                           </div>
 
-                          <div className="hidden shrink-0 items-center text-slate-300 transition duration-300 group-hover:translate-x-1 group-hover:text-[#0B5D3B] sm:flex">
+                          <div className="hidden shrink-0 items-center text-slate-300 transition duration-300 group-hover:translate-x-1 group-hover:text-[#0D1D2D] sm:flex">
                             <ArrowRight className="h-5 w-5" />
                           </div>
                         </div>
@@ -630,18 +630,18 @@ export default function HomePage() {
 
       <section
         id="suivi"
-        className="bg-[#F7F8F6] py-14 sm:py-20 lg:py-28"
+        className="bg-[#F0F6FC] py-14 sm:py-20 lg:py-28"
       >
         <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid min-w-0 gap-10 sm:gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-20">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0D1D2D]">
                 {
                   t.trackingBadge
                 }
               </p>
 
-              <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#102B20] sm:mt-5 sm:text-4xl lg:text-[3.2rem]">
+              <h2 className="mt-4 max-w-xl text-[2rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#0D1D2D] sm:mt-5 sm:text-4xl lg:text-[3.2rem]">
                 {
                   t.trackingTitle
                 }
@@ -660,12 +660,12 @@ export default function HomePage() {
 
             <div
               id="assistance"
-              className="relative min-w-0 overflow-hidden rounded-[1.5rem] bg-[#123F2C] px-5 py-7 text-white sm:rounded-[2rem] sm:px-8 sm:py-10 lg:px-10 lg:py-12"
+              className="relative min-w-0 overflow-hidden rounded-[1.5rem] bg-[#0D1D2D] px-5 py-7 text-white sm:rounded-[2rem] sm:px-8 sm:py-10 lg:px-10 lg:py-12"
             >
-              <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#B8E83D]/10" />
+              <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#ACCC00]/10" />
 
               <div className="relative z-10">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#B8E83D]">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#ACCC00]">
                   {
                     t.supportBadge
                   }
@@ -690,7 +690,7 @@ export default function HomePage() {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#B8E83D] px-5 text-center text-sm font-black text-[#15311F] transition hover:-translate-y-0.5 hover:bg-[#C8F24D] sm:mt-8 sm:w-auto sm:px-6"
+                    className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#ACCC00] px-5 text-center text-sm font-black text-[#0D1D2D] transition hover:-translate-y-0.5 hover:bg-[#BDD923] sm:mt-8 sm:w-auto sm:px-6"
                   >
                     <MessageCircle className="h-5 w-5" />
 
@@ -728,7 +728,7 @@ export default function HomePage() {
                     }
                     className="group min-w-0"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF6EC] text-[#0B5D3B] transition duration-300 group-hover:bg-[#0B5D3B] group-hover:text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F0F6FC] text-[#0D1D2D] transition duration-300 group-hover:bg-[#0D1D2D] group-hover:text-white">
                       <Icon className="h-5 w-5" />
                     </div>
 
@@ -755,28 +755,22 @@ export default function HomePage() {
           FOOTER
       ============================================ */}
 
-      <footer className="bg-[#0F2F23] text-white">
+      <footer className="bg-[#0D1D2D] text-white">
         <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
           <div className="grid min-w-0 gap-9 sm:gap-10 md:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.75fr]">
             <div className="max-w-sm">
-              <div className="flex items-center gap-3">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden">
-                  <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
-                    src="/if-sigorta-logo.png"
-                    alt="IF Sigorta"
-                    className="h-full w-full scale-[1.55] object-contain"
-                  />
-                </div>
-
-                <div>
-                  <p className="text-lg font-black">
-                    IF Sigorta
-                  </p>
-
-                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">
-                    Insurance
-                  </p>
-                </div>
+              <div>
+                <Image
+                  src="/brand/if-sigorta-wordmark.png"
+                  alt="IF Sigorta"
+                  width={1413}
+                  height={285}
+                  sizes="224px"
+                  className="h-auto w-56 max-w-full brightness-0 invert"
+                />
+                <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">
+                  Insurance
+                </p>
               </div>
 
               <p className="mt-5 text-sm leading-7 text-white/60">
@@ -861,7 +855,7 @@ export default function HomePage() {
                     href={`https://wa.me/${publicWhatsappNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 pt-2 font-semibold text-[#B8E83D] transition hover:text-[#C8F24D]"
+                    className="inline-flex items-center gap-2 pt-2 font-semibold text-[#ACCC00] transition hover:text-[#BDD923]"
                   >
                     <MessageCircle className="h-4 w-4" />
 
@@ -885,7 +879,7 @@ export default function HomePage() {
             </p>
 
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#B8E83D]" />
+              <span className="h-2 w-2 rounded-full bg-[#ACCC00]" />
 
               <span>
                 FR · EN · TR
@@ -905,7 +899,7 @@ export default function HomePage() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WhatsApp"
-          className="fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#B8E83D] text-[#15311F] shadow-xl shadow-black/10 transition hover:-translate-y-1 hover:bg-[#C8F24D] sm:bottom-6 sm:right-6 sm:h-14 sm:w-14"
+          className="fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#ACCC00] text-[#0D1D2D] shadow-xl shadow-black/10 transition hover:-translate-y-1 hover:bg-[#BDD923] sm:bottom-6 sm:right-6 sm:h-14 sm:w-14"
         >
           <MessageCircle className="h-6 w-6" />
         </a>

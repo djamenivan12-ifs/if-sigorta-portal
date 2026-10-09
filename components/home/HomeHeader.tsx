@@ -113,14 +113,14 @@ export default function HomeHeader() {
             aria-label="IF Sigorta"
             className="flex shrink-0 items-center"
           >
-            <div className="relative h-20 w-36 shrink-0 sm:h-24 sm:w-44 lg:w-48">
+            <div className="relative h-10 w-32 shrink-0 sm:h-12 sm:w-44 lg:w-48">
               <Image
-              src="/if-sigorta-logo.png"
+              src="/brand/if-sigorta-wordmark.png"
               alt="IF Sigorta"
               fill
-              priority
-              sizes="(min-width: 1024px) 192px, (min-width: 640px) 176px, 144px"
-              className="object-contain object-left"
+              preload
+              sizes="(min-width: 1024px) 192px, (min-width: 640px) 176px, 128px"
+              className="object-contain object-left brightness-0 invert"
              />
           </div>
           </Link>
@@ -188,7 +188,7 @@ export default function HomeHeader() {
 
                       language ===
                       item
-                        ? "bg-white text-[#0B5D3B] shadow-sm"
+                        ? "bg-white text-[#0D1D2D] shadow-sm"
                         : "text-white/65 hover:text-white",
                     ].join(
                       " ",
@@ -204,7 +204,7 @@ export default function HomeHeader() {
 
             <Link
               href="/demande/etape-1"
-              className="inline-flex min-h-12 whitespace-nowrap items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#14361F] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#C8F24D]"
+              className="inline-flex min-h-12 whitespace-nowrap items-center justify-center rounded-xl bg-[#ACCC00] px-6 text-sm font-black text-[#0D1D2D] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#BDD923]"
             >
               {
                 t.cta
@@ -284,7 +284,7 @@ export default function HomeHeader() {
 
       {menuOpen && (
         <div className="mx-auto max-w-[1600px] px-4 pt-2 sm:px-6 lg:px-8 xl:hidden">
-          <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#073E2A]/95 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl">
+          <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#0D1D2D]/95 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl">
             <nav className="flex flex-col">
               <MobileLink
                 href="/"
@@ -355,7 +355,7 @@ export default function HomeHeader() {
                     false,
                   )
                 }
-                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-xs font-black text-[#14361F]"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#ACCC00] px-4 text-xs font-black text-[#0D1D2D]"
               >
                 {
                   t.cta
@@ -384,7 +384,7 @@ function NavLink({
       href={
         href
       }
-      className="relative whitespace-nowrap py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#B8E83D] after:transition-all hover:after:w-full"
+      className="relative whitespace-nowrap py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#ACCC00] after:transition-all hover:after:w-full"
     >
       {
         children

@@ -51,8 +51,8 @@ export default function Sidebar({
       <div className="mx-4 shrink-0 border-t border-slate-100" />
 
       <div className="shrink-0 p-3 sm:p-4 lg:p-5">
-        <div className="rounded-xl bg-[#F3F8F2] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
-          <p className="text-xs font-semibold text-[#31513B]">
+        <div className="rounded-xl bg-brand-ice px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+          <p className="text-xs font-semibold text-brand-muted">
             IF Sigorta
           </p>
 

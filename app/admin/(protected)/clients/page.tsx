@@ -86,7 +86,7 @@ const statusLabels: Record<
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   policy_preparation: {
@@ -96,7 +96,7 @@ const statusLabels: Record<
 
   policy_available: {
     label: "Assurance disponible",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   payment_rejected: {
@@ -370,11 +370,11 @@ export default async function ClientsPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 CRM
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Clients
               </h1>
 
@@ -386,7 +386,7 @@ export default async function ClientsPage({
 
             <Link
               href="/demande/etape-1"
-              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               Nouvelle demande
             </Link>
@@ -400,28 +400,28 @@ export default async function ClientsPage({
             label="Clients"
             value={totalClients.toLocaleString("fr-FR")}
             description="Clients visibles"
-            className="bg-[#F3F8F2] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <StatCard
             label="Clients actifs"
             value={clientsWithActiveRequests.toLocaleString("fr-FR")}
             description="Au moins un dossier actif"
-            className="bg-[#EEF6EC] text-[#31513B]"
+            className="bg-brand-ice text-brand-muted"
           />
 
           <StatCard
             label="Dossiers"
             value={totalRequests.toLocaleString("fr-FR")}
             description="Dossiers associés"
-            className="bg-[#EAF4E8] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <StatCard
             label="Valeur totale"
             value={formatMoney(totalAmount)}
             description="Montant cumulé"
-            className="bg-[#F1F6EA] text-[#49613E]"
+            className="bg-brand-ice text-brand-muted"
           />
         </section>
 
@@ -439,7 +439,7 @@ export default async function ClientsPage({
                 name="q"
                 defaultValue={search}
                 placeholder="Nom, WhatsApp, nationalité, matricule..."
-                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:text-sm"
                 aria-label="Rechercher"
               />
             </label>
@@ -449,7 +449,7 @@ export default async function ClientsPage({
               <select
                 name="nationality"
                 defaultValue={nationalityFilter}
-                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:text-sm"
                 aria-label="Nationalité"
               >
                 <option value="">Toutes les nationalités</option>
@@ -464,7 +464,7 @@ export default async function ClientsPage({
 
             <button
               type="submit"
-              className="min-h-11 w-full rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:px-5 sm:text-sm"
+              className="min-h-11 w-full rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:px-5 sm:text-sm"
             >
               Filtrer
             </button>
@@ -484,7 +484,7 @@ export default async function ClientsPage({
           <div className="flex min-w-0 flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-1"
               >
                 Liste des clients
@@ -545,7 +545,7 @@ export default async function ClientsPage({
                         <span
                           className={`inline-flex min-w-9 shrink-0 justify-center rounded-full px-2.5 py-1 text-[10px] font-bold sm:text-xs ${
                             client.activeRequestCount > 0
-                              ? "bg-[#EEF6EC] text-[#31513B]"
+                              ? "bg-brand-ice text-brand-muted"
                               : "bg-slate-100 text-slate-600"
                           }`}
                         >
@@ -565,7 +565,7 @@ export default async function ClientsPage({
                                 href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                className="text-brand-navy transition hover:text-brand-navy hover:underline"
                               >
                                 {client.whatsapp}
                               </a>
@@ -601,7 +601,7 @@ export default async function ClientsPage({
                             {latestRequest ? (
                               <Link
                                 href={`/admin/dossiers/${latestRequest.id}`}
-                                className="text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                className="text-brand-navy transition hover:text-brand-navy hover:underline"
                               >
                                 {latestRequest.request_code}
                               </Link>
@@ -628,7 +628,7 @@ export default async function ClientsPage({
 
                       <Link
                         href={`/admin/clients/${client.id}`}
-                        className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                        className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-bold text-brand-navy transition hover:bg-brand-ice"
                       >
                         Voir le client
                       </Link>
@@ -700,7 +700,7 @@ export default async function ClientsPage({
                                   href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                  className="font-semibold text-brand-navy transition hover:text-brand-navy hover:underline"
                                 >
                                   {client.whatsapp}
                                 </a>
@@ -719,7 +719,7 @@ export default async function ClientsPage({
                               <span
                                 className={`inline-flex min-w-9 justify-center rounded-full px-3 py-1 text-xs font-bold ${
                                   client.activeRequestCount > 0
-                                    ? "bg-[#EEF6EC] text-[#31513B]"
+                                    ? "bg-brand-ice text-brand-muted"
                                     : "bg-slate-100 text-slate-600"
                                 }`}
                               >
@@ -735,7 +735,7 @@ export default async function ClientsPage({
                               {latestRequest ? (
                                 <Link
                                   href={`/admin/dossiers/${latestRequest.id}`}
-                                  className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                  className="font-semibold text-brand-navy transition hover:text-brand-navy hover:underline"
                                 >
                                   {latestRequest.request_code}
                                 </Link>
@@ -763,7 +763,7 @@ export default async function ClientsPage({
                             <TableCell className="whitespace-nowrap text-right">
                               <Link
                                 href={`/admin/clients/${client.id}`}
-                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-sm font-bold text-brand-navy transition hover:bg-brand-ice"
                               >
                                 Voir le client
                               </Link>
@@ -806,7 +806,7 @@ function StatCard({ label, value, description, className }: StatCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-brand-navy sm:mt-4 sm:text-2xl">
         {value}
       </p>
 

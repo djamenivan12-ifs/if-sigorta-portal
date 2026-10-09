@@ -507,14 +507,14 @@ export default async function PartnerDossierPage({
       <div className="mb-5 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <Link
           href="/partenaire/dossiers"
-          className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+          className="text-sm font-semibold text-brand-navy transition hover:text-brand-navy"
         >
           ← Retour à mes dossiers
         </Link>
 
         <Link
           href="/partenaire/tableau-de-bord"
-          className="text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+          className="text-sm font-semibold text-brand-navy transition hover:text-brand-navy"
         >
           Tableau de bord
         </Link>
@@ -525,11 +525,11 @@ export default async function PartnerDossierPage({
       <header className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:rounded-[1.75rem] sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
               Dossier partenaire
             </p>
 
-            <h1 className="mt-3 break-all text-2xl font-black tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+            <h1 className="mt-3 break-all text-2xl font-black tracking-[-0.04em] text-brand-navy sm:text-4xl">
               {
                 insuranceRequest.request_code
               }
@@ -674,7 +674,7 @@ export default async function PartnerDossierPage({
           {/* Informations client */}
 
           <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
+            <h2 className="text-xl font-black tracking-[-0.02em] text-brand-navy">
               Informations du client
             </h2>
 
@@ -743,7 +743,7 @@ export default async function PartnerDossierPage({
                 Adresse
               </p>
 
-              <p className="mt-1 font-semibold leading-7 text-[#102B20]">
+              <p className="mt-1 font-semibold leading-7 text-brand-navy">
                 {address || "—"}
               </p>
             </div>
@@ -752,14 +752,14 @@ export default async function PartnerDossierPage({
           {/* Identité */}
 
           <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
+            <h2 className="text-xl font-black tracking-[-0.02em] text-brand-navy">
               Identité et assurance
             </h2>
 
             <div
               className={`mt-5 rounded-xl px-4 py-3 text-sm font-semibold ${
                 hasKimlik
-                  ? "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                  ? "border border-brand-border bg-brand-ice text-brand-navy"
                   : "border border-blue-200 bg-blue-50 text-blue-700"
               }`}
             >
@@ -942,7 +942,7 @@ export default async function PartnerDossierPage({
           {/* Documents */}
 
           <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.02em] text-[#102B20]">
+            <h2 className="text-xl font-black tracking-[-0.02em] text-brand-navy">
               Documents du client
             </h2>
 
@@ -989,7 +989,7 @@ export default async function PartnerDossierPage({
                           }
                           target="_blank"
                           rel="noreferrer"
-                          className="w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2.5 text-center text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto"
+                          className="w-full shrink-0 rounded-xl border border-brand-border bg-brand-ice px-4 py-2.5 text-center text-sm font-semibold text-brand-navy transition hover:bg-brand-ice sm:w-auto"
                         >
                           Ouvrir
                         </a>
@@ -1017,12 +1017,12 @@ export default async function PartnerDossierPage({
         <aside className="min-w-0 space-y-5">
           {/* Tarif */}
 
-          <section className="min-w-0 rounded-[1.5rem] border border-[#DCE9DD] bg-white p-4 shadow-sm sm:p-6">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          <section className="min-w-0 rounded-[1.5rem] border border-brand-border bg-white p-4 shadow-sm sm:p-6">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
               Tarif partenaire
             </p>
 
-            <p className="mt-3 break-words text-3xl font-black tracking-tight text-[#0B5D3B] sm:text-4xl">
+            <p className="mt-3 break-words text-3xl font-black tracking-tight text-brand-navy sm:text-4xl">
               {calculatedPrice.toLocaleString(
                 "fr-FR",
               )}{" "}
@@ -1042,7 +1042,7 @@ export default async function PartnerDossierPage({
           {/* État */}
 
           <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-black text-[#102B20]">
+            <h2 className="text-lg font-black text-brand-navy">
               État du dossier
             </h2>
 
@@ -1064,7 +1064,7 @@ export default async function PartnerDossierPage({
           {/* Référence */}
 
           <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-black text-[#102B20]">
+            <h2 className="text-lg font-black text-brand-navy">
               Référence
             </h2>
 
@@ -1125,7 +1125,7 @@ function Information({
         {label}
       </dt>
 
-      <dd className="mt-1 break-words font-semibold text-[#102B20]">
+      <dd className="mt-1 break-words font-semibold text-brand-navy">
         {value === null ||
         value === undefined ||
         value === ""

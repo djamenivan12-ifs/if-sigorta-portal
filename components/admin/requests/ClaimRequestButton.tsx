@@ -116,7 +116,7 @@ function ClaimRequestButtonContent({
     return (
       <Link
         href={`/admin/dossiers/${requestId}`}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F]"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85"
       >
         Ouvrir
       </Link>
@@ -127,19 +127,19 @@ function ClaimRequestButtonContent({
     if (currentUserRole === "admin") {
       return (
         <div className="space-y-2">
-          <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-center">
+          <div className="rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-center">
             <p className="text-xs font-medium text-slate-500">
               Pris en charge par
             </p>
 
-            <p className="mt-1 text-sm font-semibold text-[#0B5D3B]">
+            <p className="mt-1 text-sm font-semibold text-brand-navy">
               {localAssignedAgentName || "Agent"}
             </p>
           </div>
 
           <Link
             href={`/admin/dossiers/${requestId}`}
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice"
           >
             Ouvrir
           </Link>
@@ -160,7 +160,7 @@ function ClaimRequestButtonContent({
         type="button"
         onClick={claimRequest}
         disabled={loading}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Prise en charge..." : "Prendre en charge"}
       </button>

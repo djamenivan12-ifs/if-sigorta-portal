@@ -47,7 +47,7 @@ export default function PartnerHeader({
             Espace partenaire
           </p>
 
-          <p className="mt-1 truncate text-sm font-bold text-[#123F2C]">
+          <p className="mt-1 truncate text-sm font-bold text-brand-navy">
             {
               companyName
             }
@@ -57,7 +57,7 @@ export default function PartnerHeader({
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <Link
             href="/partenaire/nouvelle-demande"
-            className="hidden min-h-11 items-center gap-2 rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:flex"
+            className="hidden min-h-11 items-center gap-2 rounded-xl bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime sm:flex"
           >
             <FilePlus2 className="h-4 w-4" />
 
@@ -68,7 +68,7 @@ export default function PartnerHeader({
             href="/partenaire/profil"
             className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 transition hover:bg-slate-50 sm:px-3"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F8F2] text-xs font-black text-[#0B5D3B]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-ice text-xs font-black text-brand-navy">
               {
                 initial
               }

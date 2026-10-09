@@ -132,7 +132,7 @@ export default function UserMenu({
         }
         className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white p-1.5 pr-2 transition hover:border-slate-300 hover:bg-slate-50"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#123F2C] text-xs font-black text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-navy text-xs font-black text-white">
           {initials}
         </div>
 
@@ -157,9 +157,9 @@ export default function UserMenu({
 
       {open && (
         <div className="absolute right-0 mt-3 w-[min(320px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
-          <div className="border-b border-slate-100 bg-[#F8FAF8] p-4">
+          <div className="border-b border-slate-100 bg-brand-ice p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#123F2C] text-sm font-black text-white">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-navy text-sm font-black text-white">
                 {initials}
               </div>
 
@@ -183,9 +183,9 @@ export default function UserMenu({
                   false,
                 )
               }
-              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition hover:bg-[#F3F8F2] hover:text-[#123F2C]"
+              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition hover:bg-brand-ice hover:text-brand-navy"
             >
-              <User className="h-4 w-4 text-[#0B5D3B]" />
+              <User className="h-4 w-4 text-brand-navy" />
 
               Mon profil
             </Link>
@@ -199,9 +199,9 @@ export default function UserMenu({
                     false,
                   )
                 }
-                className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition hover:bg-[#F3F8F2] hover:text-[#123F2C]"
+                className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition hover:bg-brand-ice hover:text-brand-navy"
               >
-                <Settings className="h-4 w-4 text-[#0B5D3B]" />
+                <Settings className="h-4 w-4 text-brand-navy" />
 
                 Paramètres
               </Link>

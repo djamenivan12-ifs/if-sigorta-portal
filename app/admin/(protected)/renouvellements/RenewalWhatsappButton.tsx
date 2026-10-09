@@ -69,7 +69,7 @@ export default function RenewalWhatsappButton({
         type="button"
         onClick={handleClick}
         disabled={loading || !whatsapp}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-5 text-sm font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-border bg-brand-ice px-5 text-sm font-black text-brand-navy transition hover:bg-brand-ice disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Ouverture..." : "Contacter sur WhatsApp"}
       </button>

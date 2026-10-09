@@ -229,11 +229,11 @@ export default function AssignAgent({
   return (
     <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
           Responsable
         </p>
 
-        <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+        <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-brand-navy">
           Agent responsable
         </h2>
 
@@ -243,18 +243,18 @@ export default function AssignAgent({
       </div>
 
       {currentAgentId && (
-        <div className="mt-5 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#0B5D3B]">
+        <div className="mt-5 rounded-2xl border border-brand-border bg-brand-ice p-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-brand-navy">
             Actuellement attribué
           </p>
 
-          <p className="mt-1 font-semibold text-[#102B20]">
+          <p className="mt-1 font-semibold text-brand-navy">
             {currentAgent?.name ??
               "Agent"}
           </p>
 
           {isCurrentUserAssigned && (
-            <p className="mt-2 text-sm font-semibold text-[#0B5D3B]">
+            <p className="mt-2 text-sm font-semibold text-brand-navy">
               ✓ Ce dossier vous est attribué.
             </p>
           )}
@@ -276,7 +276,7 @@ export default function AssignAgent({
           disabled={
             loading
           }
-          className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading
             ? "Prise en charge..."
@@ -312,7 +312,7 @@ export default function AssignAgent({
               disabled={
                 loading
               }
-              className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
               <option value="">
                 Aucun agent
@@ -342,8 +342,8 @@ export default function AssignAgent({
           </div>
 
           {selectedAgent && (
-            <div className="mt-3 rounded-xl border border-slate-100 bg-[#FAFCFA] px-4 py-3">
-              <p className="font-semibold text-[#102B20]">
+            <div className="mt-3 rounded-xl border border-slate-100 bg-brand-ice px-4 py-3">
+              <p className="font-semibold text-brand-navy">
                 {selectedAgent.name}
               </p>
 
@@ -361,7 +361,7 @@ export default function AssignAgent({
             disabled={
               loading
             }
-            className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading
               ? "Enregistrement..."

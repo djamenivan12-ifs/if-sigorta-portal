@@ -68,11 +68,11 @@ export default function DashboardQuickActions({
 }) {
   return (
     <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
         Accès rapide
       </p>
 
-      <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+      <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:mt-2 sm:text-xl">
         Actions rapides
       </h2>
 
@@ -109,9 +109,9 @@ function QuickActionItem({
   return (
     <Link
       href={action.href}
-      className="group flex min-w-0 items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition hover:bg-[#F3F8F2] sm:gap-3 sm:px-3 sm:py-3"
+      className="group flex min-w-0 items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition hover:bg-brand-ice sm:gap-3 sm:px-3 sm:py-3"
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EEF6EC] text-[#0B5D3B] sm:h-9 sm:w-9">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-brand-navy sm:h-9 sm:w-9">
         <Icon className="h-4 w-4" />
       </div>
 
@@ -125,7 +125,7 @@ function QuickActionItem({
         </p>
       </div>
 
-      <span className="shrink-0 text-sm text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#0B5D3B] sm:text-base">
+      <span className="shrink-0 text-sm text-slate-300 transition group-hover:translate-x-1 group-hover:text-brand-navy sm:text-base">
         →
       </span>
     </Link>

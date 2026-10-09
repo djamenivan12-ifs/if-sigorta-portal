@@ -95,8 +95,8 @@ export default function PartnerNavigation({
               className={[
                 "group flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition",
                 active
-                  ? "bg-[#123F2C] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-[#F3F8F2] hover:text-[#123F2C]",
+                  ? "bg-brand-navy text-white shadow-sm"
+                  : "text-slate-600 hover:bg-brand-ice hover:text-brand-navy",
               ].join(
                 " ",
               )}
@@ -105,8 +105,8 @@ export default function PartnerNavigation({
                 className={[
                   "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
                   active
-                    ? "bg-white/10 text-[#B8E83D]"
-                    : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-[#0B5D3B]",
+                    ? "bg-white/10 text-brand-lime"
+                    : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-brand-navy",
                 ].join(
                   " ",
                 )}

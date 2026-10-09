@@ -369,11 +369,11 @@ export default function PartnerReviewStep({
   return (
     <div className="min-w-0 space-y-6 sm:space-y-7">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
           Étape 4 sur 4
         </p>
 
-        <h2 className="mt-2 text-2xl font-black tracking-tight text-[#102B20] sm:text-3xl">
+        <h2 className="mt-2 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
           Vérification
         </h2>
 
@@ -482,13 +482,13 @@ export default function PartnerReviewStep({
         />
       </ReviewSection>
 
-      <section className="min-w-0 overflow-hidden rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6]">
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-brand-border bg-brand-ice">
         <div className="p-4 sm:p-5">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
             Tarif partenaire
           </p>
 
-          <p className="mt-2 break-words text-3xl font-black tracking-tight text-[#0B5D3B] sm:text-4xl">
+          <p className="mt-2 break-words text-3xl font-black tracking-tight text-brand-navy sm:text-4xl">
             {Number(
               data.calculatedPrice ??
                 0,
@@ -536,7 +536,7 @@ export default function PartnerReviewStep({
         )}
       </ReviewSection>
 
-      <label className="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] p-4 sm:p-5">
+      <label className="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-brand-border bg-brand-ice p-4 sm:p-5">
         <input
           type="checkbox"
           checked={confirmed}
@@ -546,10 +546,10 @@ export default function PartnerReviewStep({
               event.target.checked,
             )
           }
-          className="mt-1 h-4 w-4 accent-[#0B5D3B]"
+          className="mt-1 h-4 w-4 accent-brand-navy"
         />
 
-        <span className="text-sm leading-6 text-[#365742]">
+        <span className="text-sm leading-6 text-brand-muted">
           Je confirme que les
           informations et les documents
           fournis correspondent aux
@@ -576,7 +576,7 @@ export default function PartnerReviewStep({
           onClick={() =>
             void handleCreate()
           }
-          className="min-h-12 w-full rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+          className="min-h-12 w-full rounded-xl bg-brand-lime px-7 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
           {submitting
             ? "Création du dossier..."
@@ -598,13 +598,13 @@ function ReviewSection({
     React.ReactNode;
 }) {
   return (
-    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-[#FCFDFC]">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-brand-ice">
       <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
           {number}
         </p>
 
-        <h3 className="mt-1 text-lg font-black text-[#102B20]">
+        <h3 className="mt-1 text-lg font-black text-brand-navy">
           {title}
         </h3>
       </div>
@@ -651,7 +651,7 @@ function DocumentItem({
         {label}
       </p>
 
-      <p className="mt-1.5 break-words text-sm font-semibold text-[#0B5D3B]">
+      <p className="mt-1.5 break-words text-sm font-semibold text-brand-navy">
         {file
           ? `✓ ${file.name}`
           : "Absent"}

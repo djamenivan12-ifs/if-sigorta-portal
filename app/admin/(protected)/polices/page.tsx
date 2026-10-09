@@ -410,11 +410,11 @@ export default async function PoliciesPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Assurances
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Polices
               </h1>
 
@@ -447,14 +447,14 @@ export default async function PoliciesPage({
             label="Disponibles"
             value={availableCount}
             description="Assurances terminées"
-            className="bg-[#EEF6EC] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <StatCard
             label="1 an"
             value={oneYearCount}
             description="Demandes d’un an"
-            className="bg-[#F3F8F2] text-[#31513B]"
+            className="bg-brand-ice text-brand-muted"
           />
 
           <StatCard
@@ -479,7 +479,7 @@ export default async function PoliciesPage({
                 name="q"
                 defaultValue={search}
                 placeholder="Client, code dossier ou WhatsApp..."
-                className="min-h-11 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                className="min-h-11 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:text-sm"
                 aria-label="Rechercher"
               />
             </label>
@@ -489,7 +489,7 @@ export default async function PoliciesPage({
               <select
                 name="status"
                 defaultValue={statusFilter}
-                className="min-h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:text-sm"
+                className="min-h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:text-sm"
                 aria-label="Statut"
               >
                 <option value="">Toutes les polices</option>
@@ -502,7 +502,7 @@ export default async function PoliciesPage({
 
             <button
               type="submit"
-              className="min-h-11 w-full rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:px-5 sm:text-sm"
+              className="min-h-11 w-full rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:px-5 sm:text-sm"
             >
               Filtrer
             </button>
@@ -521,7 +521,7 @@ export default async function PoliciesPage({
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 p-4 sm:p-6">
             <h2
-              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Liste des polices
@@ -564,14 +564,14 @@ export default async function PoliciesPage({
 
                           <Link
                             href={`/admin/dossiers/${item.requestId}`}
-                            className="mt-1.5 inline-block break-all font-mono text-[11px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:text-xs"
+                            className="mt-1.5 inline-block break-all font-mono text-[11px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:text-xs"
                           >
                             {item.requestCode}
                           </Link>
                         </div>
 
                         {item.status === "policy_available" ? (
-                          <span className="inline-flex shrink-0 rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-bold text-[#0B5D3B] sm:px-3 sm:text-xs">
+                          <span className="inline-flex shrink-0 rounded-full border border-brand-border bg-brand-ice px-2.5 py-1 text-[10px] font-bold text-brand-navy sm:px-3 sm:text-xs">
                             Disponible
                           </span>
                         ) : (
@@ -586,7 +586,7 @@ export default async function PoliciesPage({
                           href={`https://wa.me/${item.whatsapp.replace(/\D/g, "")}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-2 block break-all text-[12px] font-medium text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:text-sm"
+                          className="mt-2 block break-all text-[12px] font-medium text-brand-navy transition hover:text-brand-navy hover:underline sm:text-sm"
                         >
                           {item.whatsapp}
                         </a>
@@ -644,12 +644,12 @@ export default async function PoliciesPage({
                                   href={year1.signedUrl}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 text-[11px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:text-xs"
+                                  className="inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-brand-border bg-brand-ice px-3 text-[11px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:text-xs"
                                 >
                                   Ouvrir PDF
                                 </a>
                               ) : (
-                                <span className="text-[11px] font-semibold text-[#0B5D3B] sm:text-xs">
+                                <span className="text-[11px] font-semibold text-brand-navy sm:text-xs">
                                   Enregistrée
                                 </span>
                               )
@@ -674,12 +674,12 @@ export default async function PoliciesPage({
                                     href={year2.signedUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 text-[11px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:text-xs"
+                                    className="inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-brand-border bg-brand-ice px-3 text-[11px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:text-xs"
                                   >
                                     Ouvrir PDF
                                   </a>
                                 ) : (
-                                  <span className="text-[11px] font-semibold text-[#0B5D3B] sm:text-xs">
+                                  <span className="text-[11px] font-semibold text-brand-navy sm:text-xs">
                                     Enregistrée
                                   </span>
                                 )
@@ -695,7 +695,7 @@ export default async function PoliciesPage({
 
                       <Link
                         href={`/admin/dossiers/${item.requestId}`}
-                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:text-sm"
+                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[12px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:text-sm"
                       >
                         {item.status === "policy_preparation"
                           ? "Préparer"
@@ -756,7 +756,7 @@ export default async function PoliciesPage({
                                     href={`https://wa.me/${item.whatsapp.replace(/\D/g, "")}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="mt-1 block text-xs font-medium text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                    className="mt-1 block text-xs font-medium text-brand-navy transition hover:text-brand-navy hover:underline"
                                   >
                                     {item.whatsapp}
                                   </a>
@@ -767,7 +767,7 @@ export default async function PoliciesPage({
                             <TableCell className="whitespace-nowrap">
                               <Link
                                 href={`/admin/dossiers/${item.requestId}`}
-                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                className="font-semibold text-brand-navy transition hover:text-brand-navy hover:underline"
                               >
                                 {item.requestCode}
                               </Link>
@@ -797,12 +797,12 @@ export default async function PoliciesPage({
                                     href={year1.signedUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                                    className="inline-flex rounded-xl border border-brand-border bg-brand-ice px-3 py-2 text-xs font-semibold text-brand-navy transition hover:bg-brand-ice"
                                   >
                                     Ouvrir PDF
                                   </a>
                                 ) : (
-                                  <span className="text-xs font-semibold text-[#0B5D3B]">
+                                  <span className="text-xs font-semibold text-brand-navy">
                                     Enregistrée
                                   </span>
                                 )
@@ -822,12 +822,12 @@ export default async function PoliciesPage({
                                     href={year2.signedUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2 text-xs font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8]"
+                                    className="inline-flex rounded-xl border border-brand-border bg-brand-ice px-3 py-2 text-xs font-semibold text-brand-navy transition hover:bg-brand-ice"
                                   >
                                     Ouvrir PDF
                                   </a>
                                 ) : (
-                                  <span className="text-xs font-semibold text-[#0B5D3B]">
+                                  <span className="text-xs font-semibold text-brand-navy">
                                     Enregistrée
                                   </span>
                                 )
@@ -840,7 +840,7 @@ export default async function PoliciesPage({
 
                             <TableCell className="whitespace-nowrap">
                               {item.status === "policy_available" ? (
-                                <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
+                                <span className="inline-flex rounded-full border border-brand-border bg-brand-ice px-3 py-1 text-xs font-bold text-brand-navy">
                                   Disponible
                                 </span>
                               ) : (
@@ -853,7 +853,7 @@ export default async function PoliciesPage({
                             <TableCell className="whitespace-nowrap text-right">
                               <Link
                                 href={`/admin/dossiers/${item.requestId}`}
-                                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime"
                               >
                                 {item.status === "policy_preparation"
                                   ? "Préparer"
@@ -898,7 +898,7 @@ function StatCard({ label, value, description, className }: StatCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-4 sm:text-3xl">
         {value.toLocaleString("fr-FR")}
       </p>
 

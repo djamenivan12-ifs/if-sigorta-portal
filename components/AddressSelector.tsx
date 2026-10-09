@@ -312,7 +312,7 @@ export default function AddressSelector({
 
   return (
     <section>
-      <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+      <h2 className="text-xl font-semibold tracking-[-0.02em] text-brand-navy">
         {t.title}
       </h2>
 
@@ -432,7 +432,7 @@ export default function AddressSelector({
                   event.target.value,
               })
             }
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           />
         </div>
 
@@ -464,7 +464,7 @@ export default function AddressSelector({
                     event.target.value,
                 })
               }
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
             />
           </div>
 
@@ -494,7 +494,7 @@ export default function AddressSelector({
                     event.target.value,
                 })
               }
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
             />
           </div>
         </div>

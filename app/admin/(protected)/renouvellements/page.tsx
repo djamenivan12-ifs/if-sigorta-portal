@@ -213,13 +213,13 @@ function getStatusInfo(status: string) {
     case "contacted":
       return {
         label: "Déjà contacté",
-        className: "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
+        className: "border border-brand-border bg-brand-ice text-brand-muted",
       };
 
     case "interested":
       return {
         label: "Intéressé",
-        className: "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
+        className: "border border-brand-border bg-brand-ice text-brand-navy",
       };
 
     default:
@@ -371,11 +371,11 @@ export default async function RenewalsPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Suivi client
               </p>
 
-              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Renouvellements
               </h1>
 
@@ -409,7 +409,7 @@ export default async function RenewalsPage({
           <SummaryCard
             label="À contacter"
             value={renewals.filter((item) => item.status === "pending").length}
-            className="bg-[#F3F8F2] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <SummaryCard
@@ -476,7 +476,7 @@ export default async function RenewalsPage({
                           </span>
                         </div>
 
-                        <h2 className="mt-3 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+                        <h2 className="mt-3 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl">
                           {renewal.clientName}
                         </h2>
 
@@ -547,7 +547,7 @@ export default async function RenewalsPage({
 
                         <Link
                           href={`/admin/dossiers/${renewal.requestId}`}
-                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:px-5 sm:text-sm"
+                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:min-h-11 sm:px-5 sm:text-sm"
                         >
                           Ouvrir le dossier →
                         </Link>
@@ -586,7 +586,7 @@ function SummaryCard({ label, value, className }: SummaryCardProps) {
         {label}
       </div>
 
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-4 sm:text-3xl">
         {value.toLocaleString("fr-FR")}
       </p>
     </div>

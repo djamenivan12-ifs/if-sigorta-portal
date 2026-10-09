@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { accounting, money, cents, dateLabel, day, csv, type AccountingData, type Filters } from "@/lib/accounting/model";
-const field = "w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600";
+const field = "w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20";
 const methods: Record<string,string> = {bank_transfer:"Virement bancaire",cash:"Espèces",card:"Carte bancaire",other:"Autre"};
 export default function Refunds({data,filter,requestId=""}:{data:AccountingData;filter:Filters;requestId?:string}) {
  const router=useRouter();
@@ -56,7 +56,7 @@ export default function Refunds({data,filter,requestId=""}:{data:AccountingData;
     <label className="text-sm font-medium sm:col-span-2">Motif<textarea name="reason" className={field} maxLength={1000} required placeholder="Ex. annulation de la demande" /></label>
     <label className="text-sm font-medium sm:col-span-2">Justificatif facultatif · PDF, JPEG ou PNG · 4 Mo maximum<input name="proof" type="file" accept="application/pdf,image/jpeg,image/png" className={field}/></label>
     <label className="flex items-start gap-2 text-sm sm:col-span-2"><input type="checkbox" required className="mt-1"/>Je confirme avoir déjà reversé ce montant au client ou au partenaire concerné.</label>
-    <div className="flex flex-wrap gap-3 sm:col-span-2"><button type="submit" className="rounded-lg bg-emerald-900 px-4 py-3 font-semibold text-white">{busy?"Enregistrement…":"Confirmer le remboursement"}</button><button type="button" onClick={()=>setPaymentId("")} className="rounded-lg border px-4 py-3">Fermer</button></div>
+    <div className="flex flex-wrap gap-3 sm:col-span-2"><button type="submit" className="rounded-lg bg-brand-lime px-4 py-3 font-semibold text-brand-navy">{busy?"Enregistrement…":"Confirmer le remboursement"}</button><button type="button" onClick={()=>setPaymentId("")} className="rounded-lg border px-4 py-3">Fermer</button></div>
    </fieldset>
   </form>}
   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">

@@ -6,7 +6,7 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
       <p className="my-4 text-slate-600">
         Les données n’ont pas pu être chargées. Aucun total incomplet n’est affiché.
       </p>
-      <button onClick={reset} className="rounded-lg bg-emerald-900 px-4 py-3 text-white">
+      <button onClick={reset} className="rounded-lg bg-brand-lime px-4 py-3 text-brand-navy">
         Réessayer
       </button>
     </main>

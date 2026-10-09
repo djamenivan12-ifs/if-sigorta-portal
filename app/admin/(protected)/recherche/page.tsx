@@ -94,17 +94,17 @@ const statusLabels: Record<
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   policy_preparation: {
     label: "Assurance en préparation",
-    className: "border border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]",
+    className: "border border-brand-border bg-brand-ice text-brand-muted",
   },
 
   policy_available: {
     label: "Assurance disponible",
-    className: "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   payment_rejected: {
@@ -284,11 +284,11 @@ export default async function RecherchePage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Recherche globale
               </p>
 
-              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Rechercher dans les dossiers
               </h1>
 
@@ -327,7 +327,7 @@ export default async function RecherchePage({
                 defaultValue={search}
                 autoFocus
                 placeholder="Ex. IFS-260824-AB12, WANDJI, +90..., passeport, Kimlik..."
-                className="h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-12 sm:px-4 sm:text-sm"
+                className="h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-brand-navy outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:h-12 sm:px-4 sm:text-sm"
                 aria-label="Rechercher"
               />
             </div>
@@ -335,7 +335,7 @@ export default async function RecherchePage({
             <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
               <button
                 type="submit"
-                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:h-12 sm:w-auto sm:px-6 sm:text-sm"
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime sm:h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 Rechercher
               </button>
@@ -351,7 +351,7 @@ export default async function RecherchePage({
             </div>
           </form>
 
-          <div className="mt-4 min-w-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[11px] leading-5 text-[#31513B] sm:px-4 sm:text-xs">
+          <div className="mt-4 min-w-0 rounded-xl border border-brand-border bg-brand-ice px-3 py-3 text-[11px] leading-5 text-brand-muted sm:px-4 sm:text-xs">
             La recherche accepte également une partie du nom, du matricule, du
             passeport, du Kimlik ou du numéro WhatsApp.
           </div>
@@ -368,12 +368,12 @@ export default async function RecherchePage({
 
         {!search ? (
           <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white px-4 py-10 text-center sm:mt-6 sm:rounded-[1.5rem] sm:px-6 sm:py-14">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3F8F2] text-xl text-[#0B5D3B]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-ice text-xl text-brand-navy">
               ⌕
             </div>
 
             <h2
-              className="mt-4 text-lg font-semibold text-[#102B20]"
+              className="mt-4 text-lg font-semibold text-brand-navy"
               id="section-1"
             >
               Lancez une recherche
@@ -388,11 +388,11 @@ export default async function RecherchePage({
           <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
             <div className="flex min-w-0 flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs">
                   Résultats
                 </p>
 
-                <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl">
+                <h2 className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl">
                   Résultats pour « {search} »
                 </h2>
 
@@ -404,7 +404,7 @@ export default async function RecherchePage({
               </div>
 
               {totalRequests > 0 && (
-                <span className="w-fit rounded-full border border-slate-200 bg-[#FAFCFA] px-3 py-1 text-[12px] font-semibold text-slate-600 sm:text-sm">
+                <span className="w-fit rounded-full border border-slate-200 bg-brand-ice px-3 py-1 text-[12px] font-semibold text-slate-600 sm:text-sm">
                   {firstVisibleItem}–{lastVisibleItem} sur {totalRequests}
                 </span>
               )}
@@ -412,7 +412,7 @@ export default async function RecherchePage({
 
             {paginatedRequests.length === 0 ? (
               <div className="px-4 py-10 text-center sm:px-6 sm:py-14">
-                <p className="font-semibold text-[#102B20]">Aucun résultat</p>
+                <p className="font-semibold text-brand-navy">Aucun résultat</p>
 
                 <p className="mt-2 text-sm text-slate-500">
                   Vérifiez l’orthographe ou essayez avec une autre information.
@@ -450,12 +450,12 @@ export default async function RecherchePage({
                           <div className="min-w-0">
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="break-all font-mono text-[11px] font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:text-xs"
+                              className="break-all font-mono text-[11px] font-black text-brand-navy transition hover:text-brand-navy hover:underline sm:text-xs"
                             >
                               {request.request_code}
                             </Link>
 
-                            <p className="mt-1.5 break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                            <p className="mt-1.5 break-words text-[15px] font-bold leading-5 text-brand-navy sm:text-base">
                               {clientName}
                             </p>
                           </div>
@@ -520,7 +520,7 @@ export default async function RecherchePage({
                             <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
                               Montant
                             </dt>
-                            <dd className="mt-1 text-[12px] font-bold text-[#102B20] sm:text-sm">
+                            <dd className="mt-1 text-[12px] font-bold text-brand-navy sm:text-sm">
                               {Number(
                                 request.calculated_price ?? 0,
                               ).toLocaleString("fr-FR")}{" "}
@@ -538,11 +538,11 @@ export default async function RecherchePage({
                                   Non attribué
                                 </span>
                               ) : role === "admin" ? (
-                                <span className="inline-flex max-w-full break-words rounded-full border border-[#DDE7D8] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#31513B] sm:text-xs">
+                                <span className="inline-flex max-w-full break-words rounded-full border border-brand-border bg-brand-ice px-2.5 py-1 text-[10px] font-semibold text-brand-muted sm:text-xs">
                                   {assignedAgentName}
                                 </span>
                               ) : isMine ? (
-                                <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:text-xs">
+                                <span className="inline-flex rounded-full border border-brand-border bg-brand-ice px-2.5 py-1 text-[10px] font-semibold text-brand-navy sm:text-xs">
                                   Vous
                                 </span>
                               ) : (
@@ -565,7 +565,7 @@ export default async function RecherchePage({
 
                         <Link
                           href={`/admin/dossiers/${request.id}`}
-                          className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:text-sm"
+                          className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:min-h-11 sm:text-sm"
                         >
                           Ouvrir
                         </Link>
@@ -636,12 +636,12 @@ export default async function RecherchePage({
                           return (
                             <TableRow key={request.id}>
                               <TableCell className="whitespace-nowrap">
-                                <span className="font-black text-[#0B5D3B]">
+                                <span className="font-black text-brand-navy">
                                   {request.request_code}
                                 </span>
                               </TableCell>
 
-                              <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
+                              <TableCell className="whitespace-nowrap font-semibold text-brand-navy">
                                 {clientName}
                               </TableCell>
 
@@ -668,7 +668,7 @@ export default async function RecherchePage({
                                   : ""}
                               </TableCell>
 
-                              <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
+                              <TableCell className="whitespace-nowrap font-semibold text-brand-navy">
                                 {Number(
                                   request.calculated_price ?? 0,
                                 ).toLocaleString("fr-FR")}{" "}
@@ -681,11 +681,11 @@ export default async function RecherchePage({
                                     Non attribué
                                   </span>
                                 ) : role === "admin" ? (
-                                  <span className="inline-flex rounded-full border border-[#DDE7D8] bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#31513B]">
+                                  <span className="inline-flex rounded-full border border-brand-border bg-brand-ice px-3 py-1 text-xs font-semibold text-brand-muted">
                                     {assignedAgentName}
                                   </span>
                                 ) : isMine ? (
-                                  <span className="inline-flex rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                                  <span className="inline-flex rounded-full border border-brand-border bg-brand-ice px-3 py-1 text-xs font-semibold text-brand-navy">
                                     Vous
                                   </span>
                                 ) : (
@@ -710,7 +710,7 @@ export default async function RecherchePage({
                               <TableCell className="whitespace-nowrap text-right">
                                 <Link
                                   href={`/admin/dossiers/${request.id}`}
-                                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice"
                                 >
                                   Ouvrir
                                 </Link>
@@ -728,8 +728,8 @@ export default async function RecherchePage({
             {totalPages > 1 && (
               <div className="flex min-w-0 flex-col gap-4 border-t border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
                 <p className="text-sm text-slate-500">
-                  Page <strong className="text-[#102B20]">{currentPage}</strong>{" "}
-                  sur <strong className="text-[#102B20]">{totalPages}</strong>
+                  Page <strong className="text-brand-navy">{currentPage}</strong>{" "}
+                  sur <strong className="text-brand-navy">{totalPages}</strong>
                 </p>
 
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -756,7 +756,7 @@ export default async function RecherchePage({
                       })}
                       className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-semibold transition ${
                         pageNumber === currentPage
-                          ? "bg-[#0B5D3B] text-white"
+                          ? "bg-brand-lime text-brand-navy"
                           : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                       }`}
                     >

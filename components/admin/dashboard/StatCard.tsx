@@ -33,17 +33,17 @@ export default function StatCard({
   href,
   trendValue,
   trendDirection = "neutral",
-  accentClassName = "bg-[#EEF6EC] text-[#0B5D3B]",
+  accentClassName = "bg-brand-ice text-brand-navy",
 }: StatCardProps) {
   const content = (
-    <article className="group relative h-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#CFE3CF] hover:shadow-[0_18px_50px_-35px_rgba(15,23,42,0.35)] sm:rounded-[1.35rem] sm:p-5 lg:rounded-[1.5rem] lg:p-5">
+    <article className="group relative h-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 transition hover:-translate-y-0.5 hover:border-brand-border hover:shadow-[0_18px_50px_-35px_rgba(15,23,42,0.35)] sm:rounded-[1.35rem] sm:p-5 lg:rounded-[1.5rem] lg:p-5">
       <div className="flex items-start justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-medium leading-5 text-slate-500 sm:text-sm">
             {title}
           </p>
 
-          <p className="mt-2 break-words text-[1.7rem] font-semibold leading-none tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl">
+          <p className="mt-2 break-words text-[1.7rem] font-semibold leading-none tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl">
             {value}
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function StatCard({
       )}
 
       {href && (
-        <p className="mt-4 text-[13px] font-semibold text-[#0B5D3B] transition group-hover:translate-x-1 sm:mt-5 sm:text-sm">
+        <p className="mt-4 text-[13px] font-semibold text-brand-navy transition group-hover:translate-x-1 sm:mt-5 sm:text-sm">
           Voir les détails →
         </p>
       )}

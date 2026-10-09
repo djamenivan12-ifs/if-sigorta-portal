@@ -31,7 +31,7 @@ const variantClassNames: Record<
   string
 > = {
   primary:
-    "bg-blue-700 text-white shadow-sm hover:bg-blue-800 focus-visible:ring-blue-200",
+    "bg-brand-lime text-brand-navy shadow-sm hover:bg-brand-lime/85 focus-visible:ring-brand-navy/20",
 
   secondary:
     "border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50 focus-visible:ring-slate-200",

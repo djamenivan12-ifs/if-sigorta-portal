@@ -688,7 +688,7 @@ export default function PolicyUploader({
       {/* TITRE */}
 
       <div>
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+        <h2 className="text-xl font-semibold tracking-[-0.02em] text-brand-navy">
           Polices d’assurance
         </h2>
 
@@ -700,9 +700,9 @@ export default function PolicyUploader({
 
       {/* DATES */}
 
-      <div className="mt-6 min-w-0 rounded-2xl border border-slate-100 bg-[#FAFCFA] p-4 sm:p-5">
+      <div className="mt-6 min-w-0 rounded-2xl border border-slate-100 bg-brand-ice p-4 sm:p-5">
         <div>
-          <h3 className="font-semibold text-[#102B20]">Période de validité</h3>
+          <h3 className="font-semibold text-brand-navy">Période de validité</h3>
 
           <p className="mt-1 text-sm leading-6 text-slate-500">
             Ces dates seront utilisées pour gérer automatiquement les futurs
@@ -736,7 +736,7 @@ export default function PolicyUploader({
                 clearMessages();
               }}
               disabled={loading}
-              className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -763,7 +763,7 @@ export default function PolicyUploader({
                 clearMessages();
               }}
               disabled={loading}
-              className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="mt-2 h-11 w-full min-w-0 max-w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -775,7 +775,7 @@ export default function PolicyUploader({
         </div>
 
         {policyStartDate && policyEndDate && (
-          <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm text-[#0B5D3B]">
+          <div className="mt-4 rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm text-brand-navy">
             ✓ Une période de validité est déjà enregistrée. Vous pouvez la
             corriger si nécessaire.
           </div>
@@ -793,12 +793,12 @@ export default function PolicyUploader({
       </div>
 
       {allRequiredExistingPoliciesArePresent && (
-        <div className="mt-5 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
-          <p className="font-semibold text-[#0B5D3B]">
+        <div className="mt-5 rounded-xl border border-brand-border bg-brand-ice p-4">
+          <p className="font-semibold text-brand-navy">
             ✓ Toutes les polices requises sont déjà enregistrées.
           </p>
 
-          <p className="mt-2 text-sm leading-6 text-[#31513B]">
+          <p className="mt-2 text-sm leading-6 text-brand-muted">
             Vous pouvez modifier uniquement les dates ou remplacer un PDF
             existant.
           </p>
@@ -867,7 +867,7 @@ export default function PolicyUploader({
         type="button"
         onClick={uploadPolicies}
         disabled={loading}
-        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         {loading
           ? "Enregistrement en cours..."
@@ -924,9 +924,9 @@ function PolicyFileField({
   onRemove,
 }: PolicyFileFieldProps) {
   return (
-    <article className="rounded-2xl border border-slate-100 bg-[#FAFCFA] p-5">
+    <article className="rounded-2xl border border-slate-100 bg-brand-ice p-5">
       <div>
-        <h3 className="text-lg font-semibold text-[#102B20]">
+        <h3 className="text-lg font-semibold text-brand-navy">
           Police — Année {year}
         </h3>
 
@@ -938,7 +938,7 @@ function PolicyFileField({
       </div>
 
       {alreadyExists && (
-        <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]">
+        <div className="mt-4 rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm font-semibold text-brand-navy">
           ✓ PDF année {year} enregistré
         </div>
       )}
@@ -968,13 +968,13 @@ function PolicyFileField({
           onDrop={onDrop}
           className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-8 text-center transition ${
             isDragging
-              ? "border-[#0B5D3B] bg-[#F3F8F2]"
-              : "border-slate-200 bg-white hover:border-[#0B5D3B] hover:bg-[#F3F8F2]"
+              ? "border-brand-navy bg-brand-ice"
+              : "border-slate-200 bg-white hover:border-brand-navy hover:bg-brand-ice"
           } ${loading ? "cursor-not-allowed opacity-60" : ""}`}
         >
           <span className="text-4xl">📄</span>
 
-          <p className="mt-3 font-semibold text-[#0B5D3B]">
+          <p className="mt-3 font-semibold text-brand-navy">
             {alreadyExists
               ? `Remplacer le PDF année ${year}`
               : `Choisir le PDF année ${year}`}
@@ -998,10 +998,10 @@ function PolicyFileField({
           />
         </div>
       ) : (
-        <div className="mt-4 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-5">
+        <div className="mt-4 rounded-2xl border border-brand-border bg-brand-ice p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-semibold text-[#0B5D3B]">
+              <p className="font-semibold text-brand-navy">
                 ✓ Nouveau PDF sélectionné
               </p>
 

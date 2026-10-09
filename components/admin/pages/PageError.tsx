@@ -16,7 +16,7 @@ export default function PageError({ reset,dashboardHref="/admin/dashboard" }: { 
       <div className="mt-5 flex flex-wrap gap-3">
         <button
           onClick={reset}
-          className="rounded-lg bg-emerald-900 px-4 py-3 text-sm font-semibold text-white"
+          className="rounded-lg bg-brand-lime px-4 py-3 text-sm font-semibold text-brand-navy"
         >
           Réessayer
         </button>

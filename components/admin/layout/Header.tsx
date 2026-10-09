@@ -137,12 +137,12 @@ export default function Header({
                 )
               }
               placeholder="Matricule, client, WhatsApp, passeport, Kimlik..."
-              className="h-11 w-full rounded-2xl border border-slate-200 bg-[#F8FAF8] pl-11 pr-28 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10"
+              className="h-11 w-full rounded-2xl border border-slate-200 bg-brand-ice pl-11 pr-28 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:bg-white focus:ring-4 focus:ring-brand-navy/10"
             />
 
             <button
               type="submit"
-              className="absolute right-1.5 top-1/2 inline-flex h-8 -translate-y-1/2 items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-xs font-semibold text-white transition hover:bg-[#084A2F]"
+              className="absolute right-1.5 top-1/2 inline-flex h-8 -translate-y-1/2 items-center justify-center rounded-xl bg-brand-lime px-4 text-xs font-semibold text-brand-navy transition hover:bg-brand-lime/85"
             >
               Rechercher
             </button>
@@ -154,7 +154,7 @@ export default function Header({
 
           <Link
             href="/demande/etape-1"
-            className="hidden min-h-11 items-center gap-2 rounded-xl bg-[#B8E83D] px-4 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] md:flex"
+            className="hidden min-h-11 items-center gap-2 rounded-xl bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime md:flex"
           >
             <Plus className="h-4 w-4" />
 
@@ -250,13 +250,13 @@ export default function Header({
                 )
               }
               placeholder="Rechercher..."
-              className="h-10 w-full rounded-xl border border-slate-200 bg-[#F8FAF8] pl-9 pr-3 text-sm outline-none transition focus:border-[#0B5D3B] focus:bg-white focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-11 sm:pl-10 sm:pr-4"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-brand-ice pl-9 pr-3 text-sm outline-none transition focus:border-brand-navy focus:bg-white focus:ring-4 focus:ring-brand-navy/10 sm:h-11 sm:pl-10 sm:pr-4"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] text-sm font-semibold text-white transition hover:bg-[#084A2F] sm:h-11 sm:w-auto sm:px-4"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-lime text-sm font-semibold text-brand-navy transition hover:bg-brand-lime/85 sm:h-11 sm:w-auto sm:px-4"
           >
             <Search className="h-4 w-4 sm:hidden" />
 

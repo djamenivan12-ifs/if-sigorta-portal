@@ -440,11 +440,11 @@ export default async function DossiersPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 IF Sigorta
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Tous les dossiers
               </h1>
 
@@ -494,7 +494,7 @@ export default async function DossiersPage({
                       }
                     : {}),
                 }).toString()}`}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:w-auto sm:px-5 sm:text-sm"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:w-auto sm:px-5 sm:text-sm"
               >
                 📊 Export Excel
               </a>
@@ -511,7 +511,7 @@ export default async function DossiersPage({
 
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-[#102B20]" id="section-1">
+            <h2 className="text-lg font-semibold text-brand-navy" id="section-1">
               Recherche et filtres
             </h2>
 
@@ -535,7 +535,7 @@ export default async function DossiersPage({
                 type="search"
                 defaultValue={search}
                 placeholder="Matricule, nom, prénom, WhatsApp, passeport, Kimlik, partenaire ou code partenaire"
-                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-[13px] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                className="min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-[13px] outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                 aria-label="Rechercher"
               />
             </div>
@@ -553,7 +553,7 @@ export default async function DossiersPage({
                   id="status"
                   name="status"
                   defaultValue={status}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Statut"
                 >
                   {statusOptions.map((option) => (
@@ -576,7 +576,7 @@ export default async function DossiersPage({
                   id="nationality"
                   name="nationality"
                   defaultValue={nationality}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Nationalité"
                 >
                   <option value="">Toutes les nationalités</option>
@@ -601,7 +601,7 @@ export default async function DossiersPage({
                   id="duration"
                   name="duration"
                   defaultValue={duration}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Durée"
                 >
                   <option value="">Toutes les durées</option>
@@ -624,7 +624,7 @@ export default async function DossiersPage({
                   id="agent"
                   name="agent"
                   defaultValue={agent}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Responsable"
                 >
                   <option value="">Tous les responsables</option>
@@ -655,7 +655,7 @@ export default async function DossiersPage({
                   id="source"
                   name="source"
                   defaultValue={source}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Origine"
                 >
                   <option value="">Toutes les sources</option>
@@ -677,7 +677,7 @@ export default async function DossiersPage({
                   name="dateFrom"
                   type="date"
                   defaultValue={dateFrom}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Du"
                 />
               </div>
@@ -697,7 +697,7 @@ export default async function DossiersPage({
                   name="dateTo"
                   type="date"
                   defaultValue={dateTo}
-                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-4 sm:py-3 sm:text-sm"
+                  className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-4 sm:py-3 sm:text-sm"
                   aria-label="Au"
                 />
               </div>
@@ -705,7 +705,7 @@ export default async function DossiersPage({
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
                 <button
                   type="submit"
-                  className="min-h-11 w-full rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
+                  className="min-h-11 w-full rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
                 >
                   Appliquer les filtres
                 </button>
@@ -734,7 +734,7 @@ export default async function DossiersPage({
           <div className="flex min-w-0 flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <h2
-                className="text-xl font-semibold tracking-[-0.02em] text-[#102B20]"
+                className="text-xl font-semibold tracking-[-0.02em] text-brand-navy"
                 id="section-2"
               >
                 Résultats
@@ -802,7 +802,7 @@ export default async function DossiersPage({
                         <div className="min-w-0">
                           <Link
                             href={`/admin/dossiers/${request.id}`}
-                            className="break-all text-[13px] font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                            className="break-all text-[13px] font-black text-brand-navy transition hover:text-brand-navy hover:underline"
                           >
                             {request.request_code}
                           </Link>
@@ -820,7 +820,7 @@ export default async function DossiersPage({
                       </div>
 
                       <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3">
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Source
                           </dt>
@@ -829,7 +829,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Responsable
                           </dt>
@@ -844,7 +844,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Nationalité
                           </dt>
@@ -853,7 +853,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             WhatsApp
                           </dt>
@@ -862,7 +862,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Passeport
                           </dt>
@@ -871,7 +871,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Kimlik
                           </dt>
@@ -880,7 +880,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Durée
                           </dt>
@@ -890,7 +890,7 @@ export default async function DossiersPage({
                           </dd>
                         </div>
 
-                        <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                        <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                           <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                             Montant
                           </dt>
@@ -1021,11 +1021,11 @@ export default async function DossiersPage({
                                   Non attribué
                                 </span>
                               ) : role === "admin" ? (
-                                <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                                <span className="inline-flex rounded-full bg-brand-ice px-3 py-1 text-xs font-semibold text-brand-navy">
                                   Pris en charge par {assignedAgentName}
                                 </span>
                               ) : isMine ? (
-                                <span className="inline-flex rounded-full bg-[#EEF6EC] px-3 py-1 text-xs font-semibold text-[#0B5D3B]">
+                                <span className="inline-flex rounded-full bg-brand-ice px-3 py-1 text-xs font-semibold text-brand-navy">
                                   Vous
                                 </span>
                               ) : (
@@ -1103,7 +1103,7 @@ export default async function DossiersPage({
                       agent,
                       source,
                     })}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand-border hover:bg-brand-ice hover:text-brand-navy"
                   >
                     ← Précédent
                   </Link>
@@ -1126,8 +1126,8 @@ export default async function DossiersPage({
                     })}
                     className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${
                       pageNumber === currentPage
-                        ? "bg-[#0B5D3B] text-white"
-                        : "border border-slate-200 bg-white text-slate-600 hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
+                        ? "bg-brand-lime text-brand-navy"
+                        : "border border-slate-200 bg-white text-slate-600 hover:border-brand-border hover:bg-brand-ice hover:text-brand-navy"
                     }`}
                   >
                     {pageNumber}
@@ -1148,7 +1148,7 @@ export default async function DossiersPage({
                       agent,
                       source,
                     })}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand-border hover:bg-brand-ice hover:text-brand-navy"
                   >
                     Suivant →
                   </Link>

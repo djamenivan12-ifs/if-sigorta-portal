@@ -173,11 +173,11 @@ export default function PartnerClientStep({
   return (
     <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
           Étape 1 sur 4
         </p>
 
-        <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-[#102B20] sm:text-3xl">
+        <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-brand-navy sm:text-3xl">
           Informations du client
         </h2>
 
@@ -212,7 +212,7 @@ export default function PartnerClientStep({
             }
             required
             autoComplete="given-name"
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           />
         </div>
 
@@ -234,7 +234,7 @@ export default function PartnerClientStep({
             }
             required
             autoComplete="family-name"
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           />
         </div>
 
@@ -255,7 +255,7 @@ export default function PartnerClientStep({
               updateField("fatherName", uppercaseName(event.target.value))
             }
             required
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           />
         </div>
 
@@ -274,7 +274,7 @@ export default function PartnerClientStep({
             value={data.birthDate}
             onChange={(event) => updateField("birthDate", event.target.value)}
             required
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           />
         </div>
 
@@ -297,7 +297,7 @@ export default function PartnerClientStep({
               )
             }
             required
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           >
             <option value="">Sélectionner</option>
 
@@ -321,7 +321,7 @@ export default function PartnerClientStep({
             value={data.nationality}
             onChange={(event) => updateField("nationality", event.target.value)}
             required
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
           >
             <option value="">Sélectionner</option>
 
@@ -335,7 +335,7 @@ export default function PartnerClientStep({
       </div>
 
       <div className="min-w-0 border-t border-slate-200 pt-6">
-        <h3 className="text-lg font-black text-[#102B20]">Contact WhatsApp</h3>
+        <h3 className="text-lg font-black text-brand-navy">Contact WhatsApp</h3>
 
         <p className="mt-1 mb-4 text-sm leading-6 text-slate-500">
           Le numéro est enregistré dans le dossier du client.
@@ -353,7 +353,7 @@ export default function PartnerClientStep({
       </div>
 
       <div className="min-w-0 border-t border-slate-200 pt-6">
-        <h3 className="text-lg font-black text-[#102B20]">
+        <h3 className="text-lg font-black text-brand-navy">
           Adresse en Turquie
         </h3>
 
@@ -370,7 +370,7 @@ export default function PartnerClientStep({
       <div className="flex min-w-0 justify-end border-t border-slate-200 pt-6">
         <button
           type="submit"
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-6 py-3 font-black text-white transition hover:bg-[#084A2F] focus:outline-none focus:ring-4 focus:ring-[#0B5D3B]/20 sm:w-auto"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-lime px-6 py-3 font-black text-brand-navy transition hover:bg-brand-lime/85 focus:outline-none focus:ring-4 focus:ring-brand-navy/20 sm:w-auto"
         >
           Continuer
           <span aria-hidden="true" className="ml-2">

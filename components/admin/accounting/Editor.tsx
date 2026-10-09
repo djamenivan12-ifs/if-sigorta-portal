@@ -40,7 +40,7 @@ type Pending = {
   method: string;
 };
 const input =
-  "mt-1.5 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100";
+  "mt-1.5 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-navy focus:ring-2 focus:ring-brand-navy/10 disabled:bg-slate-100";
 export default function Editor({
   mode,
   companies,
@@ -474,7 +474,7 @@ export default function Editor({
           <button
             type="submit"
             disabled={busy}
-            className="flex items-center gap-2 rounded-lg bg-emerald-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-brand-lime px-5 py-2.5 text-sm font-semibold text-brand-navy hover:bg-brand-lime/85 disabled:opacity-50"
           >
             {busy && <LoaderCircle size={16} className="animate-spin" />}
             {busy

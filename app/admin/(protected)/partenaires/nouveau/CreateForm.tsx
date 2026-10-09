@@ -240,7 +240,7 @@ export default function NouveauPartenairePage() {
   }
 
   const inputClassName =
-    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-12 sm:px-4 sm:text-sm";
+    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-brand-navy outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:h-12 sm:px-4 sm:text-sm";
 
   return (
     <PageFrame
@@ -256,7 +256,7 @@ export default function NouveauPartenairePage() {
       <div className="mx-auto w-full min-w-0 max-w-4xl">
         <Link
           href="/admin/partenaires"
-          className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
+          className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy sm:text-sm"
         >
           <span aria-hidden="true">←</span>
           Retour aux partenaires
@@ -265,16 +265,16 @@ export default function NouveauPartenairePage() {
         <div className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.75rem]">
           <div className="border-b border-slate-100 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
             <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F3F8F2] text-lg font-black text-[#0B5D3B] sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-lg font-black text-brand-navy sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
                 +
               </div>
 
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                   Administration
                 </p>
 
-                <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl">
+                <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-3xl">
                   Ajouter un partenaire
                 </h1>
 
@@ -289,12 +289,12 @@ export default function NouveauPartenairePage() {
           <form onSubmit={handleSubmit} className="min-w-0 p-4 sm:p-6 lg:p-8">
             <div>
               <div className="mb-4 min-w-0 sm:mb-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs">
                   Partenaire
                 </p>
 
                 <h2
-                  className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg"
+                  className="mt-2 text-base font-semibold text-brand-navy sm:text-lg"
                   id="section-1"
                 >
                   Informations générales
@@ -354,12 +354,12 @@ export default function NouveauPartenairePage() {
 
             <div className="mt-6 min-w-0 border-t border-slate-100 pt-6 sm:mt-8 sm:pt-8">
               <div className="mb-4 min-w-0 sm:mb-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs">
                   Connexion
                 </p>
 
                 <h2
-                  className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg"
+                  className="mt-2 text-base font-semibold text-brand-navy sm:text-lg"
                   id="section-2"
                 >
                   Accès à l’espace partenaire
@@ -432,12 +432,12 @@ export default function NouveauPartenairePage() {
 
             <div className="mt-6 min-w-0 border-t border-slate-100 pt-6 sm:mt-8 sm:pt-8">
               <div className="mb-4 min-w-0 sm:mb-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs">
                   Contact
                 </p>
 
                 <h2
-                  className="mt-2 text-base font-semibold text-[#102B20] sm:text-lg"
+                  className="mt-2 text-base font-semibold text-brand-navy sm:text-lg"
                   id="section-3"
                 >
                   Coordonnées du partenaire
@@ -496,8 +496,8 @@ export default function NouveauPartenairePage() {
               </div>
             </div>
 
-            <div className="mt-6 min-w-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4 sm:mt-8 sm:rounded-2xl sm:p-5">
-              <p className="font-semibold text-[#102B20]">Code partenaire</p>
+            <div className="mt-6 min-w-0 rounded-xl border border-brand-border bg-brand-ice p-4 sm:mt-8 sm:rounded-2xl sm:p-5">
+              <p className="font-semibold text-brand-navy">Code partenaire</p>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Le code partenaire sera généré automatiquement lors de la
@@ -516,7 +516,7 @@ export default function NouveauPartenairePage() {
 
             {successMessage && (
               <div
-                className="mt-5 min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[13px] font-semibold text-[#0B5D3B] sm:mt-6 sm:px-4 sm:text-sm"
+                className="mt-5 min-w-0 break-words rounded-xl border border-brand-border bg-brand-ice px-3 py-3 text-[13px] font-semibold text-brand-navy sm:mt-6 sm:px-4 sm:text-sm"
                 role="status"
               >
                 {successMessage}
@@ -534,7 +534,7 @@ export default function NouveauPartenairePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 {loading ? "Création..." : "Créer le partenaire"}
               </button>

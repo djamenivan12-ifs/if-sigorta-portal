@@ -144,7 +144,7 @@ const statusLabels: Record<
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   policy_preparation: {
@@ -154,7 +154,7 @@ const statusLabels: Record<
 
   policy_available: {
     label: "Assurance disponible",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   payment_rejected: {
@@ -182,17 +182,17 @@ const paymentStatusLabels: Record<
 
   submitted: {
     label: "Envoyé",
-    className: "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
+    className: "border border-brand-border bg-brand-ice text-brand-muted",
   },
 
   verified: {
     label: "Validé",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   confirmed: {
     label: "Validé",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   rejected: {
@@ -328,7 +328,7 @@ function getActivityDot(action: string) {
     action.startsWith("policy_uploaded") ||
     action.startsWith("policy_replaced")
   ) {
-    return "bg-[#0B5D3B]";
+    return "bg-brand-navy";
   }
 
   if (action === "payment_uploaded") {
@@ -340,11 +340,11 @@ function getActivityDot(action: string) {
     action === "request_claimed" ||
     action === "request_unassigned"
   ) {
-    return "bg-[#7AA88A]";
+    return "bg-brand-soft";
   }
 
   if (action === "policy_preparation_started") {
-    return "bg-[#31513B]";
+    return "bg-brand-muted";
   }
 
   return "bg-slate-400";
@@ -803,7 +803,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
         <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
           <Link
             href="/admin/clients"
-            className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-sm"
+            className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:min-h-0 sm:text-sm"
           >
             ← Retour aux clients
           </Link>
@@ -811,7 +811,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
           {latestRequest && (
             <Link
               href={`/admin/dossiers/${latestRequest.id}`}
-              className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-sm"
+              className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:min-h-0 sm:text-sm"
             >
               Dernier dossier →
             </Link>
@@ -824,7 +824,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="flex min-w-0 flex-col gap-4 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] text-base font-black text-white sm:h-16 sm:w-16 sm:rounded-2xl sm:text-xl">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-navy text-base font-black text-white sm:h-16 sm:w-16 sm:rounded-2xl sm:text-xl">
                   {getInitials({
                     firstName: client.first_name,
                     lastName: client.last_name,
@@ -832,11 +832,11 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                     Fiche client
                   </p>
 
-                  <h1 className="mt-1.5 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-2 sm:text-3xl lg:text-4xl">
+                  <h1 className="mt-1.5 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-2 sm:text-3xl lg:text-4xl">
                     {clientName}
                   </h1>
 
@@ -861,7 +861,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                     href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-[13px] font-bold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto sm:px-5 sm:text-sm"
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-border bg-brand-ice px-4 text-[13px] font-bold text-brand-navy transition hover:bg-brand-ice sm:w-auto sm:px-5 sm:text-sm"
                   >
                     Ouvrir WhatsApp
                   </a>
@@ -869,7 +869,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
                 <Link
                   href="/demande/etape-1"
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:w-auto sm:px-5 sm:text-sm"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime sm:w-auto sm:px-5 sm:text-sm"
                 >
                   Nouvelle demande
                 </Link>
@@ -885,35 +885,35 @@ export default async function ClientDetailsPage({ params }: PageProps) {
             label="Dossiers"
             value={totalRequests.toLocaleString("fr-FR")}
             description="Dossiers visibles"
-            className="bg-[#F3F8F2] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <StatCard
             label="En cours"
             value={activeCount.toLocaleString("fr-FR")}
             description="Dossiers actifs"
-            className="border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]"
+            className="border border-brand-border bg-brand-ice text-brand-muted"
           />
 
           <StatCard
             label="Assurances disponibles"
             value={availablePoliciesCount.toLocaleString("fr-FR")}
             description={`${policyYearsCount} police(s) déposée(s)`}
-            className="border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+            className="border border-brand-border bg-brand-ice text-brand-navy"
           />
 
           <StatCard
             label="Paiements validés"
             value={verifiedPayments.toLocaleString("fr-FR")}
             description="Paiements confirmés"
-            className="border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]"
+            className="border border-brand-border bg-brand-ice text-brand-navy"
           />
 
           <StatCard
             label="Valeur dossiers"
             value={formatMoney(totalAmount)}
             description="Montant cumulé"
-            className="bg-[#F1F6EA] text-[#49613E]"
+            className="bg-brand-ice text-brand-muted"
           />
         </section>
 
@@ -925,7 +925,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold text-[#102B20]"
+                className="text-lg font-semibold text-brand-navy"
                 id="section-1"
               >
                 Identité
@@ -968,7 +968,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold text-[#102B20]"
+                className="text-lg font-semibold text-brand-navy"
                 id="section-2"
               >
                 Contact & adresse
@@ -985,7 +985,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold text-[#102B20]"
+                className="text-lg font-semibold text-brand-navy"
                 id="section-3"
               >
                 Agents associés
@@ -1000,7 +1000,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                   {agents.map((agent) => (
                     <div
                       key={agent.id}
-                      className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] px-3 py-3 sm:px-4"
+                      className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice px-3 py-3 sm:px-4"
                     >
                       <p className="font-semibold text-slate-800">
                         {agent.name}
@@ -1021,7 +1021,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
               <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
                   <h2
-                    className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                    className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                     id="section-4"
                   >
                     Dossiers du client
@@ -1073,7 +1073,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                             <div className="min-w-0">
                               <Link
                                 href={`/admin/dossiers/${request.id}`}
-                                className="break-all text-[13px] font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                className="break-all text-[13px] font-black text-brand-navy transition hover:text-brand-navy hover:underline"
                               >
                                 {request.request_code}
                               </Link>
@@ -1094,7 +1094,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                           </div>
 
                           <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3">
-                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                            <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                               <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                                 Responsable
                               </dt>
@@ -1106,7 +1106,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                               </dd>
                             </div>
 
-                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                            <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                               <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                                 Montant
                               </dt>
@@ -1115,7 +1115,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                               </dd>
                             </div>
 
-                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                            <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                               <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                                 Paiement
                               </dt>
@@ -1134,7 +1134,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                               </dd>
                             </div>
 
-                            <div className="min-w-0 rounded-xl bg-[#FAFCFA] p-3">
+                            <div className="min-w-0 rounded-xl bg-brand-ice p-3">
                               <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                                 Polices
                               </dt>
@@ -1155,7 +1155,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
                           <Link
                             href={`/admin/dossiers/${request.id}`}
-                            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-bold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-bold text-brand-navy transition hover:bg-brand-ice"
                           >
                             Ouvrir le dossier
                           </Link>
@@ -1216,7 +1216,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                             >
                               <TableCell>
                                 <div>
-                                  <p className="font-black text-[#0B5D3B]">
+                                  <p className="font-black text-brand-navy">
                                     {request.request_code}
                                   </p>
 
@@ -1279,7 +1279,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                               <TableCell>
                                 <Link
                                   href={`/admin/dossiers/${request.id}`}
-                                  className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-sm"
+                                  className="inline-flex min-h-10 items-center break-words text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:min-h-0 sm:text-sm"
                                 >
                                   Ouvrir
                                 </Link>
@@ -1298,7 +1298,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-5"
               >
                 Paiements
@@ -1329,12 +1329,12 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                   return (
                     <div
                       key={request.id}
-                      className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-100 bg-brand-ice p-3.5 sm:rounded-2xl sm:p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div>
                         <Link
                           href={`/admin/dossiers/${request.id}`}
-                          className="font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                          className="font-black text-brand-navy transition hover:text-brand-navy hover:underline"
                         >
                           {request.request_code}
                         </Link>
@@ -1372,7 +1372,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
               <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div>
                   <h2
-                    className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                    className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                     id="section-6"
                   >
                     Documents
@@ -1440,7 +1440,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-7"
               >
                 Notes internes
@@ -1464,10 +1464,10 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                     return (
                       <div
                         key={note.id}
-                        className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3.5 sm:rounded-2xl sm:p-4"
+                        className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-3.5 sm:rounded-2xl sm:p-4"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-xs font-black text-[#0B5D3B]">
+                          <p className="text-xs font-black text-brand-navy">
                             {request?.request_code ?? "Dossier"}
                           </p>
 
@@ -1497,7 +1497,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-8"
               >
                 Historique récent
@@ -1542,7 +1542,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
                             {request && (
                               <Link
                                 href={`/admin/dossiers/${request.id}`}
-                                className="text-xs font-black text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline"
+                                className="text-xs font-black text-brand-navy transition hover:text-brand-navy hover:underline"
                               >
                                 {request.request_code}
                               </Link>
@@ -1593,7 +1593,7 @@ function StatCard({ label, value, description, className }: StatCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-brand-navy sm:mt-4 sm:text-2xl">
         {value}
       </p>
 
@@ -1620,8 +1620,8 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function DocumentCounter({ label, value }: { label: string; value: number }) {
   return (
-    <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3 sm:p-4">
-      <p className="text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:text-2xl">
+    <div className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-3 sm:p-4">
+      <p className="text-xl font-semibold tracking-[-0.03em] text-brand-navy sm:text-2xl">
         {value.toLocaleString("fr-FR")}
       </p>
 

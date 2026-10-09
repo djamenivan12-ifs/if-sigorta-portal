@@ -19,16 +19,16 @@ export default function NationalityStats({
     <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
             Clients
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold text-brand-navy">
             Répartition par nationalité
           </h2>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF6EC] text-[#0B5D3B]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-ice text-brand-navy">
           <Globe2 className="h-5 w-5" />
         </div>
       </div>
@@ -66,7 +66,7 @@ export default function NationalityStats({
 
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-[#0B5D3B]"
+                    className="h-full rounded-full bg-brand-navy"
                     style={{
                       width: `${Math.min(
                         item.percentage,
@@ -86,7 +86,7 @@ export default function NationalityStats({
           Total clients
         </span>
 
-        <span className="text-lg font-semibold text-[#102B20]">
+        <span className="text-lg font-semibold text-brand-navy">
           {total.toLocaleString("fr-FR")}
         </span>
       </div>

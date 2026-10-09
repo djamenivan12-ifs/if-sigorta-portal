@@ -75,11 +75,11 @@ export default function PartnerDocumentsStep({
   return (
     <div className="min-w-0 space-y-6 sm:space-y-8">
       <div className="min-w-0">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
           Étape 3 sur 4
         </p>
 
-        <h2 className="mt-2 text-2xl font-black tracking-tight text-[#102B20] sm:text-3xl">
+        <h2 className="mt-2 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
           Documents du client
         </h2>
 
@@ -89,14 +89,14 @@ export default function PartnerDocumentsStep({
       </div>
 
       {!data.hasKimlik && (
-        <div className="rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] px-4 py-3.5 text-sm leading-6 text-[#31513B]">
+        <div className="rounded-2xl border border-brand-border bg-brand-ice px-4 py-3.5 text-sm leading-6 text-brand-muted">
           Le client ne possède pas encore de Kimlik. Seul son passeport est obligatoire.
         </div>
       )}
 
-      <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
+      <section className="min-w-0 rounded-2xl border border-slate-200 bg-brand-ice p-4 sm:p-5">
         <div className="mb-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
             01
           </p>
 
@@ -124,9 +124,9 @@ export default function PartnerDocumentsStep({
 
       {data.hasKimlik && (
         <>
-          <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
+          <section className="min-w-0 rounded-2xl border border-slate-200 bg-brand-ice p-4 sm:p-5">
             <div className="mb-4">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                 02
               </p>
 
@@ -152,9 +152,9 @@ export default function PartnerDocumentsStep({
             />
           </section>
 
-          <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
+          <section className="min-w-0 rounded-2xl border border-slate-200 bg-brand-ice p-4 sm:p-5">
             <div className="mb-4">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                 03
               </p>
 
@@ -211,7 +211,7 @@ export default function PartnerDocumentsStep({
           type="button"
           disabled={!complete}
           onClick={handleNext}
-          className="min-h-12 w-full rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+          className="min-h-12 w-full rounded-xl bg-brand-lime px-7 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
           Continuer →
         </button>

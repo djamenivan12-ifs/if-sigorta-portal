@@ -154,11 +154,11 @@ export default async function SettingsPage() {
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Paramètres
               </h1>
 
@@ -181,12 +181,12 @@ export default async function SettingsPage() {
 
         <section className="mt-6 min-w-0 sm:mt-8">
           <div className="mb-4 min-w-0 sm:mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
               Tarification
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Tarifs d’assurance
@@ -207,12 +207,12 @@ export default async function SettingsPage() {
 
         <section className="mt-8 min-w-0 sm:mt-10 lg:mt-12">
           <div className="mb-4 min-w-0 sm:mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
               Paiement
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-2"
             >
               Coordonnées bancaires
@@ -237,12 +237,12 @@ export default async function SettingsPage() {
 
         <section className="mt-8 min-w-0 sm:mt-10 lg:mt-12">
           <div className="mb-4 min-w-0 sm:mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
               Contact
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-3"
             >
               WhatsApp IF Sigorta

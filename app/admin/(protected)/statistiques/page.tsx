@@ -794,11 +794,11 @@ export default async function StatisticsPage() {
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 Administration
               </p>
 
-              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-3xl lg:text-4xl">
                 Statistiques
               </h1>
 
@@ -807,7 +807,7 @@ export default async function StatisticsPage() {
                 des partenaires.
               </p>
 
-              <p className="mt-3 text-sm font-semibold capitalize text-[#0B5D3B]">
+              <p className="mt-3 text-sm font-semibold capitalize text-brand-navy">
                 {monthLabel}
               </p>
             </div>
@@ -815,7 +815,7 @@ export default async function StatisticsPage() {
             <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
               <Link
                 href="/admin/agents/performance"
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[12px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
               >
                 Performance agents
               </Link>
@@ -841,7 +841,7 @@ export default async function StatisticsPage() {
         <section className="mt-4 sm:mt-6">
           <div className="mb-3 min-w-0 sm:mb-4">
             <h2
-              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Vue globale
@@ -857,28 +857,28 @@ export default async function StatisticsPage() {
               label="Dossiers"
               value={totalRequests.toLocaleString("fr-FR")}
               description="Total des demandes enregistrées"
-              className="bg-[#EEF6EC] text-[#31513B]"
+              className="bg-brand-ice text-brand-muted"
             />
 
             <StatCard
               label="Assurances disponibles"
               value={totalPoliciesAvailable.toLocaleString("fr-FR")}
               description="Polices finalisées"
-              className="bg-[#EAF4E8] text-[#0B5D3B]"
+              className="bg-brand-ice text-brand-navy"
             />
 
             <StatCard
               label="Paiements confirmés"
               value={totalConfirmedPayments.length.toLocaleString("fr-FR")}
               description="Paiements validés"
-              className="bg-[#F3F8F2] text-[#0B5D3B]"
+              className="bg-brand-ice text-brand-navy"
             />
 
             <StatCard
               label="Encaissements confirmés"
               value={formatCurrency(totalRevenue)}
               description="Somme des paiements confirmés"
-              className="bg-[#F1F6EA] text-[#49613E]"
+              className="bg-brand-ice text-brand-muted"
             />
           </div>
         </section>
@@ -906,17 +906,17 @@ export default async function StatisticsPage() {
 
           <Link
             href="/admin/polices?status=preparation"
-            className="min-w-0 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-4 transition hover:-translate-y-0.5 sm:rounded-[1.5rem] sm:p-6"
+            className="min-w-0 rounded-2xl border border-brand-border bg-brand-ice p-4 transition hover:-translate-y-0.5 sm:rounded-[1.5rem] sm:p-6"
           >
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
               Polices
             </p>
 
-            <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#102B20]">
+            <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-brand-navy">
               {policiesToPrepare.toLocaleString("fr-FR")}
             </p>
 
-            <p className="mt-2 text-sm text-[#31513B]">
+            <p className="mt-2 text-sm text-brand-muted">
               police
               {policiesToPrepare !== 1 ? "s" : ""} à préparer
             </p>
@@ -928,12 +928,12 @@ export default async function StatisticsPage() {
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 Acquisition
               </p>
 
               <h2
-                className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-2"
               >
                 Origine des dossiers
@@ -945,12 +945,12 @@ export default async function StatisticsPage() {
               </p>
             </div>
 
-            <div className="w-full min-w-0 rounded-xl bg-[#EEF6EC] px-3 py-3 sm:w-auto sm:px-4">
-              <p className="text-xs font-semibold text-[#31513B]">
+            <div className="w-full min-w-0 rounded-xl bg-brand-ice px-3 py-3 sm:w-auto sm:px-4">
+              <p className="text-xs font-semibold text-brand-muted">
                 Part des partenaires
               </p>
 
-              <p className="mt-1 text-xl font-black text-[#0B5D3B]">
+              <p className="mt-1 text-xl font-black text-brand-navy">
                 {formatPercentage(partnerShare)}
               </p>
             </div>
@@ -1017,12 +1017,12 @@ export default async function StatisticsPage() {
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 Partenaires
               </p>
 
               <h2
-                className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-3"
               >
                 Performance des partenaires
@@ -1043,8 +1043,8 @@ export default async function StatisticsPage() {
           </div>
 
           {partnerPerformance.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-[#FAFCFA] p-5 text-center sm:mt-6 sm:p-8">
-              <p className="text-sm font-semibold text-[#102B20]">
+            <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-brand-ice p-5 text-center sm:mt-6 sm:p-8">
+              <p className="text-sm font-semibold text-brand-navy">
                 Aucun partenaire enregistré
               </p>
 
@@ -1059,13 +1059,13 @@ export default async function StatisticsPage() {
                 {partnerPerformance.map((partner) => (
                   <article
                     key={partner.id}
-                    className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4"
+                    className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-4"
                   >
                     <div className="flex min-w-0 items-start justify-between gap-3">
                       <div className="min-w-0">
                         <Link
                           href={`/admin/partenaires/${partner.id}`}
-                          className="break-words text-[14px] font-semibold text-[#102B20] hover:text-[#0B5D3B]"
+                          className="break-words text-[14px] font-semibold text-brand-navy hover:text-brand-navy"
                         >
                           {partner.companyName}
                         </Link>
@@ -1078,7 +1078,7 @@ export default async function StatisticsPage() {
                           <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                               partner.isActive
-                                ? "bg-[#EEF6EC] text-[#0B5D3B]"
+                                ? "bg-brand-ice text-brand-navy"
                                 : "bg-slate-100 text-slate-500"
                             }`}
                           >
@@ -1120,7 +1120,7 @@ export default async function StatisticsPage() {
                         <dt className="text-[10px] uppercase tracking-wide text-slate-400">
                           Encaissements confirmés
                         </dt>
-                        <dd className="mt-1 break-words text-sm font-black text-[#0B5D3B]">
+                        <dd className="mt-1 break-words text-sm font-black text-brand-navy">
                           {formatCurrency(partner.revenue)}
                         </dd>
                       </div>
@@ -1128,7 +1128,7 @@ export default async function StatisticsPage() {
 
                     <Link
                       href={`/admin/partenaires/${partner.id}`}
-                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice"
                     >
                       Voir le partenaire
                     </Link>
@@ -1172,7 +1172,7 @@ export default async function StatisticsPage() {
                           <td className="px-3 py-4">
                             <Link
                               href={`/admin/partenaires/${partner.id}`}
-                              className="font-semibold text-[#102B20] hover:text-[#0B5D3B]"
+                              className="font-semibold text-brand-navy hover:text-brand-navy"
                             >
                               {partner.companyName}
                             </Link>
@@ -1185,7 +1185,7 @@ export default async function StatisticsPage() {
                               <span
                                 className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
                                   partner.isActive
-                                    ? "bg-[#EEF6EC] text-[#0B5D3B]"
+                                    ? "bg-brand-ice text-brand-navy"
                                     : "bg-slate-100 text-slate-500"
                                 }`}
                               >
@@ -1206,7 +1206,7 @@ export default async function StatisticsPage() {
                             {partner.confirmedPayments.toLocaleString("fr-FR")}
                           </td>
 
-                          <td className="px-3 py-4 text-right font-black text-[#0B5D3B]">
+                          <td className="px-3 py-4 text-right font-black text-brand-navy">
                             {formatCurrency(partner.revenue)}
                           </td>
                         </tr>
@@ -1223,12 +1223,12 @@ export default async function StatisticsPage() {
 
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
               Évolution
             </p>
 
             <h2
-              className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-4"
             >
               Comparaison mensuelle
@@ -1240,12 +1240,12 @@ export default async function StatisticsPage() {
           </div>
 
           <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:mt-6 md:grid-cols-2 sm:gap-4">
-            <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4 sm:rounded-2xl sm:p-5">
+            <div className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-4 sm:rounded-2xl sm:p-5">
               <p className="text-sm font-medium text-slate-500">
                 Nouvelles demandes
               </p>
 
-              <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl lg:text-4xl">
+              <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-3xl lg:text-4xl">
                 {currentMonthRequests.toLocaleString("fr-FR")}
               </p>
 
@@ -1265,12 +1265,12 @@ export default async function StatisticsPage() {
               </div>
             </div>
 
-            <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4 sm:rounded-2xl sm:p-5">
+            <div className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-4 sm:rounded-2xl sm:p-5">
               <p className="text-sm font-medium text-slate-500">
                 Encaissements confirmés du mois
               </p>
 
-              <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-3xl lg:text-4xl">
+              <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-3xl lg:text-4xl">
                 {formatCurrency(currentMonthRevenue)}
               </p>
 
@@ -1321,12 +1321,12 @@ export default async function StatisticsPage() {
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 Équipe
               </p>
 
               <h2
-                className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="mt-2 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-5"
               >
                 Performance des agents
@@ -1340,7 +1340,7 @@ export default async function StatisticsPage() {
 
             <Link
               href="/admin/agents/performance"
-              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[12px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               Voir les performances →
             </Link>
@@ -1367,7 +1367,7 @@ function StatCard({ label, value, description, className }: StatCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-brand-navy sm:mt-4 sm:text-2xl">
         {value}
       </p>
 
@@ -1393,7 +1393,7 @@ function SourceRow({
 }) {
   return (
     <tr className={last ? "" : "border-b border-slate-100"}>
-      <td className="px-3 py-4 text-sm font-semibold text-[#102B20]">
+      <td className="px-3 py-4 text-sm font-semibold text-brand-navy">
         {label}
       </td>
 
@@ -1401,11 +1401,11 @@ function SourceRow({
         {direct}
       </td>
 
-      <td className="px-3 py-4 text-right text-sm font-black text-[#0B5D3B]">
+      <td className="px-3 py-4 text-right text-sm font-black text-brand-navy">
         {partner}
       </td>
 
-      <td className="px-3 py-4 text-right text-sm font-semibold text-[#102B20]">
+      <td className="px-3 py-4 text-right text-sm font-semibold text-brand-navy">
         {total}
       </td>
     </tr>

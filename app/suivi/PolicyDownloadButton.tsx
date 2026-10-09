@@ -501,7 +501,7 @@ export default function PolicyDownloadButton({
           disabled={
             isDownloading
           }
-          className="inline-flex min-h-12 w-full min-w-0 items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-center text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-400 sm:px-5"
+          className="inline-flex min-h-12 w-full min-w-0 items-center justify-center rounded-xl bg-brand-lime px-4 text-center text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-400 sm:px-5"
         >
           {loadingYear ===
           1
@@ -524,7 +524,7 @@ export default function PolicyDownloadButton({
             disabled={
               isDownloading
             }
-            className="inline-flex min-h-12 w-full min-w-0 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-center text-sm font-black text-[#0B5D3B] transition hover:bg-[#F3F8F2] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 sm:px-5"
+            className="inline-flex min-h-12 w-full min-w-0 items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-center text-sm font-black text-brand-navy transition hover:bg-brand-ice disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 sm:px-5"
           >
             {loadingYear ===
             2

@@ -95,7 +95,7 @@ export default function PartnerRequestForm({initialDraft,initialVersion,initialS
       <div className="mb-5 min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:mb-6 sm:px-5">
         <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-black text-[#102B20]">
+            <p className="text-sm font-black text-brand-navy">
               Nouvelle demande
             </p>
 
@@ -104,7 +104,7 @@ export default function PartnerRequestForm({initialDraft,initialVersion,initialS
             </p>
           </div>
 
-          <span className="shrink-0 rounded-full bg-[#EEF6EC] px-3 py-1.5 text-xs font-black text-[#0B5D3B]">
+          <span className="shrink-0 rounded-full bg-brand-ice px-3 py-1.5 text-xs font-black text-brand-navy">
             {Math.round(
               (step / 4) * 100,
             )}
@@ -114,7 +114,7 @@ export default function PartnerRequestForm({initialDraft,initialVersion,initialS
 
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-[#B8E83D] transition-all duration-300"
+            className="h-full rounded-full bg-brand-lime transition-all duration-300"
             style={{
               width: progress,
             }}

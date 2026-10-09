@@ -93,7 +93,7 @@ export default function PartnerPolicyDownload({
         <div className="mt-6 min-w-0 rounded-2xl border border-emerald-200 bg-white p-4 sm:p-5">
           <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-black text-[#102B20]">
+              <p className="font-black text-brand-navy">
                 Police d&apos;assurance
               </p>
 
@@ -106,7 +106,7 @@ export default function PartnerPolicyDownload({
               type="button"
               onClick={() => void handleDownload(1)}
               disabled={isDownloading}
-              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[#0B5D3B] px-5 py-3 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-brand-lime px-5 py-3 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {downloadingYear === 1
                 ? "Préparation..."
@@ -183,11 +183,11 @@ function PolicyCard({
 
   return (
     <article className="min-w-0 rounded-2xl border border-emerald-200 bg-white p-4 sm:p-5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F8F2] text-sm font-black text-[#0B5D3B]">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-ice text-sm font-black text-brand-navy">
         {year}
       </div>
 
-      <h3 className="mt-4 font-black text-[#102B20]">
+      <h3 className="mt-4 font-black text-brand-navy">
         {title}
       </h3>
 
@@ -199,7 +199,7 @@ function PolicyCard({
         type="button"
         onClick={() => void onDownload(year)}
         disabled={disabled}
-        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 py-3 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 py-3 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isCurrentDownload
           ? "Préparation..."

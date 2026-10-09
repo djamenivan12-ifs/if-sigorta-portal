@@ -116,11 +116,11 @@ export default async function AgentsPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Gestion des agents
               </h1>
 
@@ -131,7 +131,7 @@ export default async function AgentsPage({
 
             <Link
               href="/admin/agents/nouveau"
-              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               + Ajouter un agent
             </Link>
@@ -153,7 +153,7 @@ export default async function AgentsPage({
             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="min-w-0">
                 <h2
-                  className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                  className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                   id="section-1"
                 >
                   Utilisateurs internes
@@ -167,7 +167,7 @@ export default async function AgentsPage({
 
               <Link
                 href="/admin/agents/performance"
-                className="w-fit text-[12px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
+                className="w-fit text-[12px] font-semibold text-brand-navy transition hover:text-brand-navy sm:text-sm"
               >
                 Voir les performances →
               </Link>
@@ -187,7 +187,7 @@ export default async function AgentsPage({
                   <article key={agent.id} className="min-w-0 p-4 sm:p-5">
                     <div className="flex min-w-0 items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                        <p className="break-words text-[15px] font-bold leading-5 text-brand-navy sm:text-base">
                           {getDisplayName(agent)}
                         </p>
 
@@ -199,8 +199,8 @@ export default async function AgentsPage({
                       <span
                         className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${
                           agent.role === "admin"
-                            ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
-                            : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
+                            ? "border-brand-border bg-brand-ice text-brand-navy"
+                            : "border-brand-border bg-brand-ice text-brand-muted"
                         }`}
                       >
                         {agent.role === "admin" ? "Administrateur" : "Agent"}
@@ -231,7 +231,7 @@ export default async function AgentsPage({
 
                     <Link
                       href={`/admin/agents/${agent.id}`}
-                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
+                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:text-sm"
                     >
                       Modifier
                     </Link>
@@ -261,7 +261,7 @@ export default async function AgentsPage({
                     <TableBody>
                       {listing.rows.map((agent) => (
                         <TableRow key={agent.id}>
-                          <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
+                          <TableCell className="whitespace-nowrap font-semibold text-brand-navy">
                             {getDisplayName(agent)}
                           </TableCell>
 
@@ -273,8 +273,8 @@ export default async function AgentsPage({
                             <span
                               className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
                                 agent.role === "admin"
-                                  ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
-                                  : "border-[#DDE7D8] bg-[#EEF6EC] text-[#31513B]"
+                                  ? "border-brand-border bg-brand-ice text-brand-navy"
+                                  : "border-brand-border bg-brand-ice text-brand-muted"
                               }`}
                             >
                               {agent.role === "admin"
@@ -294,7 +294,7 @@ export default async function AgentsPage({
                           <TableCell className="whitespace-nowrap text-right">
                             <Link
                               href={`/admin/agents/${agent.id}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice"
                             >
                               Modifier
                             </Link>

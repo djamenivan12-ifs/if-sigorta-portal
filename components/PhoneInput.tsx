@@ -131,7 +131,7 @@ export default function PhoneInput({
         {t.label}
       </label>
 
-      <div className="flex overflow-hidden rounded-xl border border-slate-300 bg-white transition focus-within:border-[#0B5D3B] focus-within:ring-4 focus-within:ring-[#0B5D3B]/10">
+      <div className="flex overflow-hidden rounded-xl border border-slate-300 bg-white transition focus-within:border-brand-navy focus-within:ring-4 focus-within:ring-brand-navy/10">
         <select
           id="countryCode"
           name="countryCode"

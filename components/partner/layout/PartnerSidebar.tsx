@@ -17,7 +17,7 @@ export default function PartnerSidebar({
   return (
     <aside className="flex h-full flex-col border-r border-slate-200/80 bg-white">
       <div className="px-5 pb-4 pt-5">
-        <Logo />
+        <Logo href="/partenaire/tableau-de-bord" label="IF Sigorta - Espace partenaire" />
       </div>
 
       <div className="mx-4 border-t border-slate-100" />
@@ -39,8 +39,8 @@ export default function PartnerSidebar({
       <div className="mx-4 border-t border-slate-100" />
 
       <div className="p-5">
-        <div className="rounded-2xl bg-[#F3F8F2] px-4 py-3">
-          <p className="truncate text-xs font-bold text-[#31513B]">
+        <div className="rounded-2xl bg-brand-ice px-4 py-3">
+          <p className="truncate text-xs font-bold text-brand-muted">
             {companyName}
           </p>
 

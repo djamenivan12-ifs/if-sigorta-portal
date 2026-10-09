@@ -1,23 +1,15 @@
-import Image from "next/image";
 import Link from "next/link";
+import BrandLogo from "@/components/brand/BrandLogo";
 
-export default function Logo() {
+type LogoProps = { href?: string; label?: string };
+
+export default function Logo({
+  href = "/admin/dashboard",
+  label = "IF Sigorta - Tableau de bord",
+}: LogoProps) {
   return (
-    <Link
-      href="/admin/dashboard"
-      className="group flex items-center"
-      aria-label="IF Sigorta - Tableau de bord"
-    >
-      <div className="relative h-[82px] w-[220px]">
-        <Image
-          src="/if-sigorta-logo-light.png"
-          alt="IF Sigorta"
-          fill
-          priority
-          sizes="220px"
-          className="object-contain object-left transition duration-200 group-hover:scale-[1.02]"
-        />
-      </div>
+    <Link href={href} className="flex min-w-0 items-center py-4" aria-label={label}>
+      <BrandLogo />
     </Link>
   );
 }

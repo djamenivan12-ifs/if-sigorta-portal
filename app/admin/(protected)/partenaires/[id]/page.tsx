@@ -175,7 +175,7 @@ export default async function PartnerPage({ params }: PageProps) {
       <div className="mx-auto w-full min-w-0 max-w-5xl">
         <Link
           href="/admin/partenaires"
-          className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
+          className="inline-flex min-h-10 items-center gap-2 text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy sm:text-sm"
         >
           <span aria-hidden="true">←</span>
           Retour aux partenaires
@@ -185,20 +185,20 @@ export default async function PartnerPage({ params }: PageProps) {
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="flex min-w-0 flex-col gap-5 sm:gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F3F8F2] text-lg font-black text-[#0B5D3B] sm:h-14 sm:w-14 sm:rounded-2xl sm:text-xl">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-lg font-black text-brand-navy sm:h-14 sm:w-14 sm:rounded-2xl sm:text-xl">
                   {partner.company_name.charAt(0).toUpperCase()}
                 </div>
 
                 <div className="min-w-0">
                   <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
-                    <h1 className="break-words text-xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-2xl lg:text-3xl">
+                    <h1 className="break-words text-xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-2xl lg:text-3xl">
                       {partner.company_name}
                     </h1>
 
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${
                         partner.is_active
-                          ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                          ? "border-brand-border bg-brand-ice text-brand-navy"
                           : "border-red-200 bg-red-50 text-red-700"
                       }`}
                     >
@@ -218,12 +218,12 @@ export default async function PartnerPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className="w-full min-w-0 rounded-xl border border-slate-200 bg-[#FAFBF9] px-4 py-3 sm:rounded-2xl sm:px-5 sm:py-4 lg:w-auto lg:min-w-[170px]">
+              <div className="w-full min-w-0 rounded-xl border border-slate-200 bg-brand-ice px-4 py-3 sm:rounded-2xl sm:px-5 sm:py-4 lg:w-auto lg:min-w-[170px]">
                 <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 sm:text-xs">
                   Dossiers créés
                 </p>
 
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-2 sm:text-3xl">
+                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-2 sm:text-3xl">
                   {totalDossiers.toLocaleString("fr-FR")}
                 </p>
               </div>
@@ -236,7 +236,7 @@ export default async function PartnerPage({ params }: PageProps) {
                 Email
               </p>
 
-              <p className="mt-1.5 break-all text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
+              <p className="mt-1.5 break-all text-[12px] font-medium text-brand-navy sm:mt-2 sm:text-sm">
                 {partner.email}
               </p>
             </div>
@@ -246,7 +246,7 @@ export default async function PartnerPage({ params }: PageProps) {
                 WhatsApp
               </p>
 
-              <p className="mt-1.5 break-words text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
+              <p className="mt-1.5 break-words text-[12px] font-medium text-brand-navy sm:mt-2 sm:text-sm">
                 {partner.whatsapp_country_code} {partner.whatsapp_number}
               </p>
             </div>
@@ -256,7 +256,7 @@ export default async function PartnerPage({ params }: PageProps) {
                 Créé le
               </p>
 
-              <p className="mt-1.5 break-words text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
+              <p className="mt-1.5 break-words text-[12px] font-medium text-brand-navy sm:mt-2 sm:text-sm">
                 {formatDate(partner.created_at)}
               </p>
             </div>
@@ -266,7 +266,7 @@ export default async function PartnerPage({ params }: PageProps) {
                 Dernière modification
               </p>
 
-              <p className="mt-1.5 break-words text-[12px] font-medium text-[#102B20] sm:mt-2 sm:text-sm">
+              <p className="mt-1.5 break-words text-[12px] font-medium text-brand-navy sm:mt-2 sm:text-sm">
                 {formatDate(partner.updated_at)}
               </p>
             </div>
@@ -277,12 +277,12 @@ export default async function PartnerPage({ params }: PageProps) {
 
         <section className="mt-6 min-w-0 sm:mt-8">
           <div className="mb-4 min-w-0 sm:mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
               Informations
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Informations du partenaire
@@ -322,12 +322,12 @@ export default async function PartnerPage({ params }: PageProps) {
 
         <section className="mt-8 min-w-0 sm:mt-10 lg:mt-12">
           <div className="mb-4 min-w-0 sm:mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
               Tarification
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-2"
             >
               Tarifs du partenaire
@@ -335,7 +335,7 @@ export default async function PartnerPage({ params }: PageProps) {
 
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500 sm:text-sm">
               Cette grille est propre à{" "}
-              <span className="font-semibold text-[#102B20]">
+              <span className="font-semibold text-brand-navy">
                 {partner.company_name}
               </span>
               . Les modifications effectuées ici n’affectent ni les tarifs

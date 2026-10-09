@@ -62,7 +62,7 @@ export default function AdminShell({
 
 
   return (
-    <div className="min-h-screen bg-[#F6F8F5]">
+    <div className="min-h-screen bg-brand-ice">
       {/* SIDEBAR DESKTOP */}
 
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[276px]">

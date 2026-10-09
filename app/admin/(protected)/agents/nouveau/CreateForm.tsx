@@ -117,7 +117,7 @@ export default function NouveauAgentPage() {
   }
 
   const inputClassName =
-    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:h-12 sm:px-4 sm:text-sm";
+    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-brand-navy outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:h-12 sm:px-4 sm:text-sm";
 
   return (
     <PageFrame
@@ -133,7 +133,7 @@ export default function NouveauAgentPage() {
       <div className="mx-auto w-full min-w-0 max-w-4xl">
         <Link
           href="/admin/agents"
-          className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
+          className="inline-flex items-center gap-2 text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy sm:text-sm"
         >
           <span aria-hidden="true">←</span>
           Retour aux agents
@@ -142,16 +142,16 @@ export default function NouveauAgentPage() {
         <div className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.75rem]">
           <div className="border-b border-slate-100 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
             <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F3F8F2] text-lg font-black text-[#0B5D3B] sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-lg font-black text-brand-navy sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
                 +
               </div>
 
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                   Administration
                 </p>
 
-                <h1 className="mt-2 break-words text-xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-2xl lg:text-3xl">
+                <h1 className="mt-2 break-words text-xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-2xl lg:text-3xl">
                   Ajouter un utilisateur interne
                 </h1>
 
@@ -166,12 +166,12 @@ export default function NouveauAgentPage() {
           <form onSubmit={handleSubmit} className="min-w-0 p-4 sm:p-6 lg:p-8">
             <div>
               <div className="mb-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                   Informations personnelles
                 </p>
 
                 <h2
-                  className="mt-2 text-lg font-semibold text-[#102B20]"
+                  className="mt-2 text-lg font-semibold text-brand-navy"
                   id="section-1"
                 >
                   Identité de l’utilisateur
@@ -227,12 +227,12 @@ export default function NouveauAgentPage() {
 
             <div className="mt-6 border-t border-slate-100 pt-6 sm:mt-8 sm:pt-8">
               <div className="mb-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                   Connexion
                 </p>
 
                 <h2
-                  className="mt-2 text-lg font-semibold text-[#102B20]"
+                  className="mt-2 text-lg font-semibold text-brand-navy"
                   id="section-2"
                 >
                   Identifiants du compte
@@ -295,12 +295,12 @@ export default function NouveauAgentPage() {
 
             <div className="mt-6 border-t border-slate-100 pt-6 sm:mt-8 sm:pt-8">
               <div className="mb-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                   Autorisations
                 </p>
 
                 <h2
-                  className="mt-2 text-lg font-semibold text-[#102B20]"
+                  className="mt-2 text-lg font-semibold text-brand-navy"
                   id="section-3"
                 >
                   Rôle de l’utilisateur
@@ -317,13 +317,13 @@ export default function NouveauAgentPage() {
                   onClick={() => setRole("agent")}
                   className={`relative min-w-0 rounded-xl border p-4 text-left transition sm:rounded-2xl sm:p-5 ${
                     role === "agent"
-                      ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/5"
-                      : "border-slate-200 bg-white hover:border-[#CFE3CF] hover:bg-[#FAFCFA]"
+                      ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/5"
+                      : "border-slate-200 bg-white hover:border-brand-border hover:bg-brand-ice"
                   }`}
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-4">
                     <div>
-                      <span className="block font-semibold text-[#102B20]">
+                      <span className="block font-semibold text-brand-navy">
                         Agent
                       </span>
 
@@ -336,7 +336,7 @@ export default function NouveauAgentPage() {
                     <span
                       className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                         role === "agent"
-                          ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                          ? "border-brand-navy bg-brand-navy"
                           : "border-slate-300 bg-white"
                       }`}
                     >
@@ -352,13 +352,13 @@ export default function NouveauAgentPage() {
                   onClick={() => setRole("admin")}
                   className={`relative min-w-0 rounded-xl border p-4 text-left transition sm:rounded-2xl sm:p-5 ${
                     role === "admin"
-                      ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/5"
-                      : "border-slate-200 bg-white hover:border-[#CFE3CF] hover:bg-[#FAFCFA]"
+                      ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/5"
+                      : "border-slate-200 bg-white hover:border-brand-border hover:bg-brand-ice"
                   }`}
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-4">
                     <div>
-                      <span className="block font-semibold text-[#102B20]">
+                      <span className="block font-semibold text-brand-navy">
                         Administrateur
                       </span>
 
@@ -371,7 +371,7 @@ export default function NouveauAgentPage() {
                     <span
                       className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                         role === "admin"
-                          ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                          ? "border-brand-navy bg-brand-navy"
                           : "border-slate-300 bg-white"
                       }`}
                     >
@@ -395,7 +395,7 @@ export default function NouveauAgentPage() {
 
             {successMessage && (
               <div
-                className="mt-6 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]"
+                className="mt-6 rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm font-semibold text-brand-navy"
                 role="status"
               >
                 {successMessage}
@@ -413,7 +413,7 @@ export default function NouveauAgentPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 {loading
                   ? "Création..."

@@ -134,8 +134,8 @@ export default function PartnerPriceSettingsForm({
   return (
     <div className="space-y-4">
       {ranges.length === 0 && (
-        <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-[#FAFCFA] px-6 py-8 text-center">
-          <p className="text-sm font-semibold text-[#102B20]">
+        <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-brand-ice px-6 py-8 text-center">
+          <p className="text-sm font-semibold text-brand-navy">
             Aucun tarif configuré
           </p>
 
@@ -180,13 +180,13 @@ export default function PartnerPriceSettingsForm({
             <label
               className={`flex h-12 cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 transition ${
                 range.isActive
-                  ? "border-[#CFE3CF] bg-[#F3F8F2]"
+                  ? "border-brand-border bg-brand-ice"
                   : "border-slate-200 bg-white"
               }`}
             >
               <span
                 className={`text-sm font-semibold ${
-                  range.isActive ? "text-[#0B5D3B]" : "text-slate-600"
+                  range.isActive ? "text-brand-navy" : "text-slate-600"
                 }`}
               >
                 {range.isActive ? "Actif" : "Inactif"}
@@ -198,13 +198,13 @@ export default function PartnerPriceSettingsForm({
                 onChange={(event) =>
                   updateRange(index, "isActive", event.target.checked)
                 }
-                className="h-4 w-4 accent-[#0B5D3B]"
+                className="h-4 w-4 accent-brand-navy"
               />
             </label>
           </div>
 
           <div className="flex items-end">
-            <div className="flex h-12 w-full items-center rounded-xl border border-slate-100 bg-[#FAFCFA] px-4">
+            <div className="flex h-12 w-full items-center rounded-xl border border-slate-100 bg-brand-ice px-4">
               <span className="text-sm font-semibold text-slate-500">
                 Tranche {index + 1}
               </span>
@@ -235,7 +235,7 @@ export default function PartnerPriceSettingsForm({
 
       {successMessage && (
         <div
-          className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-medium text-[#0B5D3B]"
+          className="rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm font-medium text-brand-navy"
           role="status"
         >
           {successMessage}
@@ -256,7 +256,7 @@ export default function PartnerPriceSettingsForm({
           type="button"
           onClick={save}
           disabled={loading || ranges.length === 0}
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-lime px-6 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           {loading ? "Enregistrement..." : "Enregistrer les tarifs"}
         </button>
@@ -284,7 +284,7 @@ function Field({ label, value, onChange }: FieldProps) {
         min={0}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+        className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-brand-navy outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
       />
     </div>
   );

@@ -104,7 +104,7 @@ export function ListFilters({
       )}
       <button
         type="submit"
-        className="min-h-11 rounded-lg bg-emerald-900 px-4 text-sm font-semibold text-white"
+        className="min-h-11 rounded-lg bg-brand-lime px-4 text-sm font-semibold text-brand-navy"
       >
         Appliquer
       </button>

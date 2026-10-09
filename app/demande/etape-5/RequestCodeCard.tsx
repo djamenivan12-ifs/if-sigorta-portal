@@ -61,8 +61,8 @@ export default function RequestCodeCard({ requestCode }: RequestCodeCardProps) {
   }
 
   return (
-    <section className="min-w-0 rounded-[1.5rem] border border-[#DCE9DD] bg-white p-4 sm:p-6">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+    <section className="min-w-0 rounded-[1.5rem] border border-brand-border bg-white p-4 sm:p-6">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
         01
       </p>
 
@@ -71,7 +71,7 @@ export default function RequestCodeCard({ requestCode }: RequestCodeCardProps) {
       </h2>
 
       <div className="mt-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="min-w-0 break-all rounded-xl bg-[#F3F8F2] px-3 py-3 font-mono text-base font-black tracking-wide text-[#0B5D3B] sm:px-4 sm:text-xl">
+        <p className="min-w-0 break-all rounded-xl bg-brand-ice px-3 py-3 font-mono text-base font-black tracking-wide text-brand-navy sm:px-4 sm:text-xl">
           {requestCode || t.generating}
         </p>
 
@@ -79,7 +79,7 @@ export default function RequestCodeCard({ requestCode }: RequestCodeCardProps) {
           type="button"
           disabled={!requestCode}
           onClick={copyRequestCode}
-          className="w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-white px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+          className="w-full shrink-0 rounded-xl border border-brand-border bg-white px-4 py-2.5 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           {t.copy}
         </button>

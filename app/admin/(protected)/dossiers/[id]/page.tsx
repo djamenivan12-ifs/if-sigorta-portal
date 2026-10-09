@@ -223,11 +223,11 @@ function getActivityDotClassName(action: string) {
     action.startsWith("policy_uploaded") ||
     action.startsWith("policy_replaced")
   ) {
-    return "bg-[#0B5D3B]";
+    return "bg-brand-navy";
   }
 
   if (action === "policy_preparation_started") {
-    return "bg-[#0B5D3B]";
+    return "bg-brand-navy";
   }
 
   if (action === "payment_uploaded") {
@@ -235,11 +235,11 @@ function getActivityDotClassName(action: string) {
   }
 
   if (action === "note_added") {
-    return "bg-[#31513B]";
+    return "bg-brand-muted";
   }
 
   if (action === "request_assigned" || action === "request_unassigned") {
-    return "bg-[#7AA88A]";
+    return "bg-brand-soft";
   }
 
   return "bg-slate-500";
@@ -655,14 +655,14 @@ export default async function DossierPage({ params }: PageProps) {
         <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Link
             href="/admin/dossiers"
-            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:min-h-0 sm:text-sm"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy sm:min-h-0 sm:text-sm"
           >
             ← Retour aux dossiers
           </Link>
 
           <Link
             href="/admin/dashboard"
-            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] sm:min-h-0 sm:text-sm"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy sm:min-h-0 sm:text-sm"
           >
             Tableau de bord
           </Link>
@@ -671,11 +671,11 @@ export default async function DossierPage({ params }: PageProps) {
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 Dossier d’assurance
               </p>
 
-              <h1 className="mt-2 break-all text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 break-all text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 {insuranceRequest.request_code}
               </h1>
 
@@ -697,16 +697,16 @@ export default async function DossierPage({ params }: PageProps) {
             <section
               className={`min-w-0 rounded-2xl border p-4 sm:rounded-[1.5rem] sm:p-6 ${
                 isPartnerRequest
-                  ? "border-[#CFE3CF] bg-[#F3F8F2]"
+                  ? "border-brand-border bg-brand-ice"
                   : "border-slate-200/80 bg-white"
               }`}
             >
               <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                     Source du dossier
                   </p>
-                  <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+                  <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:mt-2 sm:text-xl">
                     {isPartnerRequest ? "Partenaire" : "Client direct"}
                   </h2>
                 </div>
@@ -714,7 +714,7 @@ export default async function DossierPage({ params }: PageProps) {
                 <span
                   className={`inline-flex w-fit max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:py-1.5 sm:text-xs ${
                     isPartnerRequest
-                      ? "bg-[#0B5D3B] text-white"
+                      ? "bg-brand-navy text-white"
                       : "bg-slate-100 text-slate-700"
                   }`}
                 >
@@ -723,7 +723,7 @@ export default async function DossierPage({ params }: PageProps) {
               </div>
 
               {isPartnerRequest && (
-                <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 border-t border-[#CFE3CF] pt-4 sm:mt-6 sm:grid-cols-3 sm:gap-5 sm:pt-5">
+                <dl className="mt-4 grid min-w-0 grid-cols-1 gap-4 border-t border-brand-border pt-4 sm:mt-6 sm:grid-cols-3 sm:gap-5 sm:pt-5">
                   <Information
                     label="Partenaire"
                     value={
@@ -744,7 +744,7 @@ export default async function DossierPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-1"
               >
                 Informations du client
@@ -788,7 +788,7 @@ export default async function DossierPage({ params }: PageProps) {
               <div className="mt-4 border-t border-slate-200 pt-4 sm:mt-6 sm:pt-5">
                 <p className="text-[12px] text-slate-500 sm:text-sm">Adresse</p>
 
-                <p className="mt-1 break-words text-[13px] font-semibold leading-6 text-[#102B20] sm:text-base sm:leading-7">
+                <p className="mt-1 break-words text-[13px] font-semibold leading-6 text-brand-navy sm:text-base sm:leading-7">
                   {address || "—"}
                 </p>
               </div>
@@ -796,7 +796,7 @@ export default async function DossierPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-2"
               >
                 Identité et assurance
@@ -805,7 +805,7 @@ export default async function DossierPage({ params }: PageProps) {
               <div
                 className={`mt-4 min-w-0 rounded-xl px-3 py-3 text-[12px] font-semibold sm:mt-5 sm:px-4 sm:text-sm ${
                   hasKimlik
-                    ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                    ? "border-brand-border bg-brand-ice text-brand-navy"
                     : "border-blue-200 bg-blue-50 text-blue-700"
                 }`}
               >
@@ -866,7 +866,7 @@ export default async function DossierPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-3"
               >
                 Documents
@@ -901,7 +901,7 @@ export default async function DossierPage({ params }: PageProps) {
                           href={document.signedUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2 text-center text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-auto sm:min-h-0 sm:text-sm"
+                          className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-brand-border bg-brand-ice px-4 py-2 text-center text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:w-auto sm:min-h-0 sm:text-sm"
                         >
                           Ouvrir
                         </a>
@@ -938,7 +938,7 @@ export default async function DossierPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-4"
               >
                 Paiement
@@ -1027,7 +1027,7 @@ export default async function DossierPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold text-[#102B20]"
+                className="text-lg font-semibold text-brand-navy"
                 id="section-5"
               >
                 Polices enregistrées
@@ -1038,7 +1038,7 @@ export default async function DossierPage({ params }: PageProps) {
                   {existingPolicyYears.map((policyYear) => (
                     <div
                       key={policyYear}
-                      className="min-w-0 break-words rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-3 text-[12px] font-semibold text-[#0B5D3B] sm:px-4 sm:text-sm"
+                      className="min-w-0 break-words rounded-xl border border-brand-border bg-brand-ice px-3 py-3 text-[12px] font-semibold text-brand-navy sm:px-4 sm:text-sm"
                     >
                       ✓ Police année {policyYear}
                     </div>
@@ -1054,7 +1054,7 @@ export default async function DossierPage({ params }: PageProps) {
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-3">
                 <h2
-                  className="text-lg font-semibold text-[#102B20]"
+                  className="text-lg font-semibold text-brand-navy"
                   id="section-6"
                 >
                   Historique
@@ -1123,7 +1123,7 @@ export default async function DossierPage({ params }: PageProps) {
 
             <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
               <h2
-                className="text-lg font-semibold text-[#102B20]"
+                className="text-lg font-semibold text-brand-navy"
                 id="section-7"
               >
                 Dernière mise à jour
@@ -1150,7 +1150,7 @@ function Information({ label, value }: InformationProps) {
     <div className="min-w-0">
       <dt className="text-[11px] text-slate-500 sm:text-sm">{label}</dt>
 
-      <dd className="mt-1 break-words text-[13px] font-semibold leading-5 text-[#102B20] sm:text-base sm:leading-6">
+      <dd className="mt-1 break-words text-[13px] font-semibold leading-5 text-brand-navy sm:text-base sm:leading-6">
         {value === null || value === undefined || value === "" ? "—" : value}
       </dd>
     </div>

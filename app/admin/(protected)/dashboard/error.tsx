@@ -11,7 +11,7 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
       </p>
       <button
         onClick={reset}
-        className="rounded-lg bg-emerald-900 px-4 py-3 text-white"
+        className="rounded-lg bg-brand-lime px-4 py-3 text-brand-navy"
       >
         Réessayer
       </button>

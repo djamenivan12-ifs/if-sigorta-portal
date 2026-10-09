@@ -222,11 +222,11 @@ export default function RequestActions({
     <>
       <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
             Traitement
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-brand-navy">
             Actions du dossier
           </h2>
 
@@ -242,7 +242,7 @@ export default function RequestActions({
                 type="button"
                 disabled={loadingAction !== null}
                 onClick={() => void performAction("confirm_payment")}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loadingAction === "confirm_payment"
                   ? "Validation en cours..."
@@ -267,7 +267,7 @@ export default function RequestActions({
               type="button"
               disabled={loadingAction !== null}
               onClick={() => void openInsurerModal()}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:opacity-50"
             >
               Commencer l’assurance
             </button>
@@ -297,7 +297,7 @@ export default function RequestActions({
         )}
 
         {noActionAvailable && (
-          <div className="mt-5 rounded-xl border border-slate-100 bg-[#FAFCFA] px-4 py-3 text-sm text-slate-500">
+          <div className="mt-5 rounded-xl border border-slate-100 bg-brand-ice px-4 py-3 text-sm text-slate-500">
             Aucune action n’est disponible pour ce dossier.
           </div>
         )}
@@ -325,13 +325,13 @@ export default function RequestActions({
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                   Préparation
                 </p>
 
                 <h2
                   id="insurer-selection-title"
-                  className="mt-2 text-xl font-bold tracking-[-0.02em] text-[#102B20] sm:text-2xl"
+                  className="mt-2 text-xl font-bold tracking-[-0.02em] text-brand-navy sm:text-2xl"
                 >
                   Choisir l’assureur
                 </h2>
@@ -355,7 +355,7 @@ export default function RequestActions({
 
             <div className="mt-6">
               {insurersLoading ? (
-                <div className="rounded-2xl border border-slate-200 bg-[#FAFCFA] px-4 py-5 text-center text-sm font-medium text-slate-500">
+                <div className="rounded-2xl border border-slate-200 bg-brand-ice px-4 py-5 text-center text-sm font-medium text-slate-500">
                   Chargement des assureurs disponibles...
                 </div>
               ) : insurers.length > 0 ? (
@@ -375,12 +375,12 @@ export default function RequestActions({
                         }}
                         className={`flex min-h-16 w-full items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left transition sm:px-5 ${
                           selected
-                            ? "border-[#0B5D3B] bg-[#F2F8F4] ring-1 ring-[#0B5D3B]"
-                            : "border-slate-200 bg-white hover:border-[#8EB7A3] hover:bg-[#FAFCFA]"
+                            ? "border-brand-navy bg-brand-ice ring-1 ring-brand-navy"
+                            : "border-slate-200 bg-white hover:border-brand-soft hover:bg-brand-ice"
                         } disabled:cursor-not-allowed disabled:opacity-50`}
                       >
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-black text-[#102B20] sm:text-base">
+                          <span className="block truncate text-sm font-black text-brand-navy sm:text-base">
                             {insurer.name}
                           </span>
 
@@ -392,7 +392,7 @@ export default function RequestActions({
                         <span
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                             selected
-                              ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                              ? "border-brand-navy bg-brand-navy"
                               : "border-slate-300 bg-white"
                           }`}
                         >
@@ -438,7 +438,7 @@ export default function RequestActions({
                   loadingAction === "start_policy"
                 }
                 onClick={confirmInsurerSelection}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 {loadingAction === "start_policy"
                   ? "Démarrage en cours..."

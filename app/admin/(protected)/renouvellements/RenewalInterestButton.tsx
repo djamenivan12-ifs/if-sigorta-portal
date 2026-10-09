@@ -58,7 +58,7 @@ export default function RenewalInterestButton({
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Mise à jour..." : "Marquer comme intéressé"}
       </button>

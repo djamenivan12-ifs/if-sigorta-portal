@@ -1,6 +1,5 @@
 "use client";
-import Image from "next/image";
-
+import BrandLogo from "@/components/brand/BrandLogo";
 
 import {
   FormEvent,
@@ -96,14 +95,14 @@ export default function ConnexionAgentPage() {
   }
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-brand-ice">
       <div className="grid min-h-screen min-w-0 lg:grid-cols-[0.9fr_1.1fr]">
         {/* PANNEAU GAUCHE */}
 
-        <section className="relative hidden overflow-hidden bg-[#123F2C] px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-16">
+        <section className="relative hidden overflow-hidden bg-brand-navy px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-16">
           {/* Décoration */}
 
-          <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#B8E83D]/10" />
+          <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand-lime/10" />
 
           <div className="pointer-events-none absolute -bottom-40 -left-32 h-[420px] w-[420px] rounded-full bg-white/5" />
 
@@ -115,18 +114,14 @@ export default function ConnexionAgentPage() {
               aria-label="IF Sigorta"
               className="inline-flex items-center"
             >
-              <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
-                src="/if-sigorta-logo.png"
-                alt="IF Sigorta"
-                className="h-[110px] w-auto object-contain object-left"
-              />
+              <BrandLogo tone="light" />
             </Link>
           </div>
 
           {/* TEXTE */}
 
           <div className="relative z-10 max-w-md">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#B8E83D] text-[#15311F]">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-lime text-brand-navy">
               <ShieldCheck className="h-6 w-6" />
             </div>
 
@@ -171,11 +166,7 @@ export default function ConnexionAgentPage() {
                 href="/"
                 aria-label="IF Sigorta"
               >
-                <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
-                  src="/if-sigorta-logo.png"
-                  alt="IF Sigorta"
-                  className="h-[78px] max-w-full object-contain sm:h-[95px]"
-                />
+                <BrandLogo />
               </Link>
             </div>
 
@@ -183,11 +174,11 @@ export default function ConnexionAgentPage() {
 
             <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.3)] sm:rounded-[2rem] sm:p-8 lg:p-10">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.18em]">
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-navy sm:text-xs sm:tracking-[0.18em]">
                   Espace sécurisé
                 </p>
 
-                <h2 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-4xl">
+                <h2 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-4xl">
                   Connexion agent
                 </h2>
 
@@ -228,7 +219,7 @@ export default function ConnexionAgentPage() {
                       autoComplete="email"
                       placeholder="agent@if-sigorta.com"
                       required
-                      className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-3 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:rounded-2xl sm:py-3.5 sm:pl-12 sm:pr-4 sm:text-[15px]"
+                      className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-3 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:rounded-2xl sm:py-3.5 sm:pl-12 sm:pr-4 sm:text-[15px]"
                     />
                   </div>
                 </div>
@@ -263,7 +254,7 @@ export default function ConnexionAgentPage() {
                       }}
                       autoComplete="current-password"
                       required
-                      className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-11 text-[14px] text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:rounded-2xl sm:py-3.5 sm:pl-12 sm:pr-12 sm:text-[15px]"
+                      className="min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-11 text-[14px] text-slate-900 outline-none transition hover:border-slate-300 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:rounded-2xl sm:py-3.5 sm:pl-12 sm:pr-12 sm:text-[15px]"
                     />
 
                     <button
@@ -303,7 +294,7 @@ export default function ConnexionAgentPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:min-h-12 sm:px-5 sm:text-sm"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy shadow-lg shadow-brand-navy/10 transition hover:-translate-y-0.5 hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:min-h-12 sm:px-5 sm:text-sm"
                 >
                   {loading
                     ? "Connexion en cours..."
@@ -316,7 +307,7 @@ export default function ConnexionAgentPage() {
               <div className="mt-5 border-t border-slate-100 pt-5 text-center sm:mt-6 sm:pt-6">
                 <Link
                   href="/"
-                  className="text-[13px] font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:text-sm"
+                  className="text-[13px] font-semibold text-slate-500 transition hover:text-brand-navy sm:text-sm"
                 >
                   ← Retour à l’accueil
                 </Link>
@@ -342,7 +333,7 @@ function FeatureLine({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#B8E83D]">
+      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-brand-lime">
         ✓
       </div>
 

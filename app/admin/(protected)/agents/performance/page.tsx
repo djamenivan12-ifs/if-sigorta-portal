@@ -427,11 +427,11 @@ export default async function AgentPerformancePage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Performance des agents
               </h1>
 
@@ -468,19 +468,19 @@ export default async function AgentPerformancePage({
           <SummaryCard
             label="Attribués"
             value={totalAssigned}
-            className="bg-[#EEF6EC] text-[#31513B]"
+            className="bg-brand-ice text-brand-muted"
           />
 
           <SummaryCard
             label="Actifs"
             value={totalActive}
-            className="bg-[#F3F8F2] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <SummaryCard
             label="Terminés"
             value={totalCompleted}
-            className="bg-[#EAF4E8] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <SummaryCard
@@ -500,7 +500,7 @@ export default async function AgentPerformancePage({
 
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
-            <h2 className="text-lg font-semibold text-[#102B20]" id="section-1">
+            <h2 className="text-lg font-semibold text-brand-navy" id="section-1">
               Agents
             </h2>
 
@@ -526,7 +526,7 @@ export default async function AgentPerformancePage({
                   <article key={agent.id} className="min-w-0 p-4 sm:p-5">
                     <div className="flex min-w-0 items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                        <p className="break-words text-[15px] font-bold leading-5 text-brand-navy sm:text-base">
                           {agent.name}
                         </p>
 
@@ -589,7 +589,7 @@ export default async function AgentPerformancePage({
 
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-[#0B5D3B]"
+                          className="h-full rounded-full bg-brand-navy"
                           style={{
                             width: `${Math.min(
                               100,
@@ -602,7 +602,7 @@ export default async function AgentPerformancePage({
 
                     <Link
                       href={`/admin/agents/${agent.id}`}
-                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:text-sm"
+                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:text-sm"
                     >
                       Voir l’agent
                     </Link>
@@ -647,7 +647,7 @@ export default async function AgentPerformancePage({
                         <TableRow key={agent.id}>
                           <TableCell>
                             <div className="min-w-[220px]">
-                              <p className="font-semibold text-[#102B20]">
+                              <p className="font-semibold text-brand-navy">
                                 {agent.name}
                               </p>
 
@@ -662,19 +662,19 @@ export default async function AgentPerformancePage({
                           </TableCell>
 
                           <TableCell className="whitespace-nowrap">
-                            <span className="font-semibold text-[#102B20]">
+                            <span className="font-semibold text-brand-navy">
                               {agent.total}
                             </span>
                           </TableCell>
 
                           <TableCell className="whitespace-nowrap">
-                            <span className="inline-flex min-w-9 justify-center rounded-full border border-[#DDE7D8] bg-[#F3F8F2] px-3 py-1 text-xs font-bold text-[#31513B]">
+                            <span className="inline-flex min-w-9 justify-center rounded-full border border-brand-border bg-brand-ice px-3 py-1 text-xs font-bold text-brand-muted">
                               {agent.active}
                             </span>
                           </TableCell>
 
                           <TableCell className="whitespace-nowrap">
-                            <span className="inline-flex min-w-9 justify-center rounded-full border border-[#CFE3CF] bg-[#EEF6EC] px-3 py-1 text-xs font-bold text-[#0B5D3B]">
+                            <span className="inline-flex min-w-9 justify-center rounded-full border border-brand-border bg-brand-ice px-3 py-1 text-xs font-bold text-brand-navy">
                               {agent.completed}
                             </span>
                           </TableCell>
@@ -721,7 +721,7 @@ export default async function AgentPerformancePage({
 
                               <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
                                 <div
-                                  className="h-full rounded-full bg-[#0B5D3B]"
+                                  className="h-full rounded-full bg-brand-navy"
                                   style={{
                                     width: `${Math.min(
                                       100,
@@ -736,7 +736,7 @@ export default async function AgentPerformancePage({
                           <TableCell className="whitespace-nowrap text-right">
                             <Link
                               href={`/admin/agents/${agent.id}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice"
                             >
                               Voir l’agent
                             </Link>
@@ -754,7 +754,7 @@ export default async function AgentPerformancePage({
         {/* LÉGENDE */}
 
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
-          <h2 className="font-semibold text-[#102B20]" id="section-2">
+          <h2 className="font-semibold text-brand-navy" id="section-2">
             Niveaux de surveillance
           </h2>
 
@@ -802,7 +802,7 @@ function PriorityBadge({ priority }: { priority: AgentPriority }) {
     normal: {
       label: "Normal",
 
-      className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+      className: "border border-brand-border bg-brand-ice text-brand-navy",
     },
 
     watch: {
@@ -842,12 +842,12 @@ type PerformanceMetricProps = {
 
 function PerformanceMetric({ label, value }: PerformanceMetricProps) {
   return (
-    <div className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-3">
+    <div className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-3">
       <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 sm:text-[10px]">
         {label}
       </p>
 
-      <p className="mt-1 break-words text-[13px] font-bold leading-5 text-[#102B20] sm:text-sm">
+      <p className="mt-1 break-words text-[13px] font-bold leading-5 text-brand-navy sm:text-sm">
         {value}
       </p>
     </div>
@@ -869,7 +869,7 @@ function SummaryCard({ label, value, className }: SummaryCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-4 sm:text-3xl">
         {value.toLocaleString("fr-FR")}
       </p>
     </div>

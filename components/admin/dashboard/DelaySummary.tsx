@@ -26,11 +26,11 @@ export default function DelaySummary({
     <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
       <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
             Priorités
           </p>
 
-          <h2 className="mt-1.5 break-words text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+          <h2 className="mt-1.5 break-words text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:mt-2 sm:text-xl">
             Dossiers sans progression
           </h2>
 
@@ -48,7 +48,7 @@ export default function DelaySummary({
                 ? "bg-orange-50 text-orange-700"
                 : watchCount > 0
                   ? "bg-amber-50 text-amber-700"
-                  : "bg-[#EEF6EC] text-[#0B5D3B]",
+                  : "bg-brand-ice text-brand-navy",
           ].join(" ")}
         >
           {total > 99

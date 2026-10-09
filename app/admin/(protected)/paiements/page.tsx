@@ -348,11 +348,11 @@ export default async function PaymentsPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Finance
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Paiements
               </h1>
 
@@ -385,7 +385,7 @@ export default async function PaymentsPage({
             label="Confirmés"
             value={confirmedCount.toLocaleString("fr-FR")}
             description="Paiements validés"
-            className="bg-[#EEF6EC] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <StatCard
@@ -399,7 +399,7 @@ export default async function PaymentsPage({
             label="Montant"
             value={formatAmount(totalAmount)}
             description="Montants attendus des lignes affichées"
-            className="bg-[#F3F8F2] text-[#31513B]"
+            className="bg-brand-ice text-brand-muted"
           />
         </section>
 
@@ -417,7 +417,7 @@ export default async function PaymentsPage({
                 name="q"
                 defaultValue={search}
                 placeholder="Client, code dossier ou WhatsApp..."
-                className="min-h-10 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
+                className="min-h-10 min-w-0 w-full rounded-xl border border-slate-300 px-3 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:min-h-11 sm:px-4 sm:text-sm"
                 aria-label="Rechercher"
               />
             </label>
@@ -427,7 +427,7 @@ export default async function PaymentsPage({
               <select
                 name="status"
                 defaultValue={statusFilter}
-                className="min-h-10 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:min-h-11 sm:px-4 sm:text-sm"
+                className="min-h-10 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:min-h-11 sm:px-4 sm:text-sm"
                 aria-label="Statut"
               >
                 <option value="">Tous les paiements</option>
@@ -442,7 +442,7 @@ export default async function PaymentsPage({
 
             <button
               type="submit"
-              className="min-h-10 w-full rounded-xl bg-[#0B5D3B] px-4 text-[13px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-11 sm:px-5 sm:text-sm"
+              className="min-h-10 w-full rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:min-h-11 sm:px-5 sm:text-sm"
             >
               Filtrer
             </button>
@@ -461,7 +461,7 @@ export default async function PaymentsPage({
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 p-4 sm:p-6">
             <h2
-              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Liste des paiements
@@ -494,13 +494,13 @@ export default async function PaymentsPage({
                     >
                       <div className="flex min-w-0 items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                          <p className="break-words text-[15px] font-bold leading-5 text-brand-navy sm:text-base">
                             {payment.clientName}
                           </p>
 
                           <Link
                             href={`/admin/dossiers/${payment.requestId}`}
-                            className="mt-1 inline-block break-all text-[12px] font-bold text-[#0B5D3B] transition hover:text-[#084A2F] sm:text-sm"
+                            className="mt-1 inline-block break-all text-[12px] font-bold text-brand-navy transition hover:text-brand-navy sm:text-sm"
                           >
                             {payment.requestCode}
                           </Link>
@@ -538,7 +538,7 @@ export default async function PaymentsPage({
                                 href={`https://wa.me/${payment.whatsapp.replace(/\D/g, "")}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="break-all text-[#0B5D3B] transition hover:text-[#084A2F]"
+                                className="break-all text-brand-navy transition hover:text-brand-navy"
                               >
                                 {payment.whatsapp}
                               </a>
@@ -580,7 +580,7 @@ export default async function PaymentsPage({
 
                       <Link
                         href={`/admin/dossiers/${payment.requestId}`}
-                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-[12px] font-black text-white transition hover:bg-[#084A2F] sm:min-h-11 sm:text-sm"
+                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[12px] font-black text-brand-navy transition hover:bg-brand-lime/85 sm:min-h-11 sm:text-sm"
                       >
                         {payment.requestStatus === "payment_review"
                           ? "Vérifier"
@@ -635,7 +635,7 @@ export default async function PaymentsPage({
                             <TableCell className="whitespace-nowrap">
                               <Link
                                 href={`/admin/dossiers/${payment.requestId}`}
-                                className="font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+                                className="font-semibold text-brand-navy transition hover:text-brand-navy"
                               >
                                 {payment.requestCode}
                               </Link>
@@ -652,7 +652,7 @@ export default async function PaymentsPage({
                                   href={`https://wa.me/${payment.whatsapp.replace(/\D/g, "")}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="font-medium text-[#0B5D3B] transition hover:text-[#084A2F]"
+                                  className="font-medium text-brand-navy transition hover:text-brand-navy"
                                 >
                                   {payment.whatsapp}
                                 </a>
@@ -690,7 +690,7 @@ export default async function PaymentsPage({
                             <TableCell className="whitespace-nowrap text-right">
                               <Link
                                 href={`/admin/dossiers/${payment.requestId}`}
-                                className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0B5D3B] px-4 text-sm font-black text-white transition hover:bg-[#084A2F]"
+                                className="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-lime px-4 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85"
                               >
                                 {payment.requestStatus === "payment_review"
                                   ? "Vérifier"
@@ -735,7 +735,7 @@ function StatCard({ label, value, description, className }: StatCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-[#102B20] sm:mt-4 sm:text-2xl">
+      <p className="mt-3 break-words text-xl font-semibold tracking-[-0.03em] text-brand-navy sm:mt-4 sm:text-2xl">
         {value}
       </p>
 

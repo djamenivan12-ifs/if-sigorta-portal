@@ -812,11 +812,11 @@ export default function RequestTimeline({
       {/* En-tête */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
             Progression
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-brand-navy">
             Progression du dossier
           </h2>
 
@@ -826,7 +826,7 @@ export default function RequestTimeline({
         </div>
 
         <div className="shrink-0 lg:text-right">
-          <p className="text-3xl font-semibold tracking-[-0.04em] text-[#0B5D3B]">
+          <p className="text-3xl font-semibold tracking-[-0.04em] text-brand-navy">
             {progress} %
           </p>
 
@@ -848,7 +848,7 @@ export default function RequestTimeline({
                 : status ===
                     "payment_rejected"
                   ? "bg-red-500"
-                  : "bg-[#0B5D3B]"
+                  : "bg-brand-navy"
             }`}
             style={{
               width:
@@ -895,12 +895,12 @@ export default function RequestTimeline({
 
       {/* Indicateurs */}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-[#F3F8F2] px-4 py-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0B5D3B]">
+        <div className="rounded-xl bg-brand-ice px-4 py-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-navy">
             Temps total
           </p>
 
-          <p className="mt-1 text-lg font-semibold text-[#102B20]">
+          <p className="mt-1 text-lg font-semibold text-brand-navy">
             {totalProcessingTime ??
               "—"}
           </p>
@@ -917,7 +917,7 @@ export default function RequestTimeline({
             Sans progression
           </p>
 
-          <p className="mt-1 text-lg font-semibold text-[#102B20]">
+          <p className="mt-1 text-lg font-semibold text-brand-navy">
             {isCompleted
               ? "Terminé"
               : currentWaitingTime ??
@@ -992,7 +992,7 @@ export default function RequestTimeline({
                       className={`min-h-24 w-0.5 flex-1 ${
                         step.status ===
                           "completed"
-                          ? "bg-[#A8D8B5]"
+                          ? "bg-brand-soft"
                           : step.status ===
                               "error"
                             ? "bg-red-200"
@@ -1099,7 +1099,7 @@ function TimelineDot({
 }) {
   const styles = {
     completed:
-      "border-[#0B5D3B] bg-[#0B5D3B] text-white",
+      "border-brand-navy bg-brand-navy text-white",
 
     current:
       "border-amber-500 bg-amber-100 text-amber-700",
@@ -1141,7 +1141,7 @@ function TimelineBadge({
         "Terminé",
 
       className:
-        "bg-[#EEF6EC] text-[#0B5D3B]",
+        "bg-brand-ice text-brand-navy",
     },
 
     current: {

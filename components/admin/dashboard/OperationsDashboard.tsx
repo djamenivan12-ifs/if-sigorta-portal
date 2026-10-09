@@ -30,7 +30,7 @@ import { money, dateLabel } from "@/lib/accounting/model";
 import ClaimRequestButton from "@/components/admin/requests/ClaimRequestButton";
 import MonthlyReportButton from "./MonthlyReportButton";
 const control =
-  "min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700";
+  "min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy";
 const periods = [
   ["today", "Aujourd’hui"],
   ["7d", "7 jours"],
@@ -138,7 +138,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
     );
   };
   return (
-    <main className="min-h-screen bg-[#F6F7F5] px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-brand-ice px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1540px] space-y-6">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -170,7 +170,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
             </button>
             <Link
               href="/admin/dossiers"
-              className="flex min-h-10 items-center gap-2 rounded-lg bg-emerald-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800"
+              className="flex min-h-10 items-center gap-2 rounded-lg bg-brand-lime px-4 py-2.5 text-sm font-semibold text-brand-navy hover:bg-brand-lime/85"
             >
               <FileText size={16} />
               Ouvrir les dossiers
@@ -506,7 +506,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
               </p>
             )}
           </article>
-          <aside className="rounded-xl border border-emerald-950 bg-emerald-950 p-5 text-white">
+          <aside className="rounded-xl border border-brand-navy bg-brand-navy p-5 text-white">
             <h2 className="text-base font-bold">Accès directs</h2>
             <p className="mt-2 text-sm leading-6 text-emerald-100/75">
               L’essentiel pour poursuivre votre travail.
@@ -558,7 +558,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                   key={id}
                   aria-pressed={period === id}
                   onClick={() => setPeriod(id)}
-                  className={`min-h-9 rounded-md px-3 text-xs font-semibold ${period === id ? "bg-emerald-900 text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                  className={`min-h-9 rounded-md px-3 text-xs font-semibold ${period === id ? "bg-brand-lime text-brand-navy" : "text-slate-600 hover:bg-slate-50"}`}
                 >
                   {label}
                 </button>
@@ -658,7 +658,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                               })}
                       </span>
                       <div
-                        className="w-full max-w-12 rounded-t-md bg-emerald-800"
+                        className="w-full max-w-12 rounded-t-md bg-brand-navy"
                         style={{
                           height:
                             value === null
@@ -732,7 +732,7 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-2 rounded-full bg-emerald-800"
+                          className="h-2 rounded-full bg-brand-navy"
                           style={{
                             width: `${model.selected.length ? (value / model.selected.length) * 100 : 0}%`,
                           }}
@@ -861,7 +861,7 @@ function Metric({
       </p>
     </>
   );
-  const className = `block h-full w-full rounded-xl border p-5 text-left shadow-sm ${dark ? "border-emerald-950 bg-emerald-950 text-white" : "border-slate-200 bg-white"} ${onClick || href ? "transition hover:border-emerald-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700" : ""}`;
+  const className = `block h-full w-full rounded-xl border p-5 text-left shadow-sm ${dark ? "border-brand-navy bg-brand-navy text-white" : "border-slate-200 bg-white"} ${onClick || href ? "transition hover:border-brand-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy" : ""}`;
   return href ? (
     <a href={href} className={className}>
       {content}

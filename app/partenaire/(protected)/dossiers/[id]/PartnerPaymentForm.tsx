@@ -594,14 +594,14 @@ export default function PartnerPaymentForm({
   }
 
   return (
-    <section className="min-w-0 rounded-[1.5rem] border border-[#DCE9DD] bg-white p-4 shadow-sm sm:p-6">
+    <section className="min-w-0 rounded-[1.5rem] border border-brand-border bg-white p-4 shadow-sm sm:p-6">
       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
             Paiement
           </p>
 
-          <h2 className="mt-2 text-xl font-black tracking-[-0.02em] text-[#102B20]">
+          <h2 className="mt-2 text-xl font-black tracking-[-0.02em] text-brand-navy">
             {isResubmission
               ? "Envoyer un nouveau justificatif"
               : "Envoyer le justificatif"}
@@ -628,12 +628,12 @@ export default function PartnerPaymentForm({
         </div>
       )}
 
-      <div className="mt-5 rounded-2xl border border-[#DCE9DD] bg-[#F3F8F2] p-4">
-        <p className="text-sm font-semibold text-[#0B5D3B]">
+      <div className="mt-5 rounded-2xl border border-brand-border bg-brand-ice p-4">
+        <p className="text-sm font-semibold text-brand-navy">
           Montant à payer
         </p>
 
-        <p className="mt-1 break-words text-2xl font-black tracking-tight text-[#102B20] sm:text-3xl">
+        <p className="mt-1 break-words text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
           {amount.toLocaleString(
             "fr-FR",
           )}{" "}
@@ -651,7 +651,7 @@ export default function PartnerPaymentForm({
       </div>
 
       <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-navy">
           Informations de virement
         </p>
 
@@ -671,14 +671,14 @@ export default function PartnerPaymentForm({
               </dt>
 
               <dd className="mt-2 flex flex-col gap-3">
-                <span className="break-words text-sm font-black text-[#102B20]">
+                <span className="break-words text-sm font-black text-brand-navy">
                   {bankSettings.beneficiary}
                 </span>
 
                 <button
                   type="button"
                   onClick={handleCopyBeneficiary}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2.5 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-fit"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-brand-border bg-brand-ice px-3 py-2.5 text-xs font-black text-brand-navy transition hover:bg-brand-ice sm:w-fit"
                 >
                   {copiedBeneficiary
                     ? "Nom copié ✓"
@@ -691,7 +691,7 @@ export default function PartnerPaymentForm({
               <dt className="text-xs font-semibold text-slate-500">
                 Banque
               </dt>
-              <dd className="mt-1 break-words text-sm font-black text-[#102B20]">
+              <dd className="mt-1 break-words text-sm font-black text-brand-navy">
                 {bankSettings.bankName}
               </dd>
             </div>
@@ -701,14 +701,14 @@ export default function PartnerPaymentForm({
                 IBAN
               </dt>
               <dd className="mt-2 flex flex-col gap-3">
-                <span className="break-all font-mono text-sm font-black tracking-wide text-[#102B20]">
+                <span className="break-all font-mono text-sm font-black tracking-wide text-brand-navy">
                   {bankSettings.iban}
                 </span>
 
                 <button
                   type="button"
                   onClick={handleCopyIban}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-2.5 text-xs font-black text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:w-fit"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-brand-border bg-brand-ice px-3 py-2.5 text-xs font-black text-brand-navy transition hover:bg-brand-ice sm:w-fit"
                 >
                   {copiedIban
                     ? "IBAN copié ✓"
@@ -718,11 +718,11 @@ export default function PartnerPaymentForm({
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
-                <dt className="text-xs font-semibold text-[#0B5D3B]">
+              <div className="rounded-xl border border-brand-border bg-brand-ice p-4">
+                <dt className="text-xs font-semibold text-brand-navy">
                   Montant à virer
                 </dt>
-                <dd className="mt-1 text-lg font-black text-[#102B20]">
+                <dd className="mt-1 text-lg font-black text-brand-navy">
                   {amount.toLocaleString(
                     "fr-FR",
                   )}{" "}
@@ -730,11 +730,11 @@ export default function PartnerPaymentForm({
                 </dd>
               </div>
 
-              <div className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
-                <dt className="text-xs font-semibold text-[#0B5D3B]">
+              <div className="rounded-xl border border-brand-border bg-brand-ice p-4">
+                <dt className="text-xs font-semibold text-brand-navy">
                   Référence du dossier
                 </dt>
-                <dd className="mt-1 break-all text-sm font-black text-[#102B20]">
+                <dd className="mt-1 break-all text-sm font-black text-brand-navy">
                   {requestCode}
                 </dd>
               </div>
@@ -762,7 +762,7 @@ export default function PartnerPaymentForm({
         <div>
           <label
             htmlFor="partner-payment-receipt"
-            className="block text-sm font-bold text-[#102B20]"
+            className="block text-sm font-bold text-brand-navy"
           >
             Justificatif de paiement
           </label>
@@ -777,10 +777,10 @@ export default function PartnerPaymentForm({
             className={`mt-3 flex min-w-0 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-6 text-center transition sm:px-5 sm:py-7 ${
               isSubmitting
                 ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-70"
-                : "border-[#CFE3CF] bg-[#F8FBF7] hover:border-[#0B5D3B] hover:bg-[#F3F8F2]"
+                : "border-brand-border bg-brand-ice hover:border-brand-navy hover:bg-brand-ice"
             }`}
           >
-            <span className="text-sm font-bold text-[#0B5D3B]">
+            <span className="text-sm font-bold text-brand-navy">
               {file
                 ? "Changer le fichier"
                 : "Choisir un fichier"}
@@ -808,7 +808,7 @@ export default function PartnerPaymentForm({
 
           {file && (
             <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
-              <p className="break-all text-sm font-semibold text-[#102B20]">
+              <p className="break-all text-sm font-semibold text-brand-navy">
                 {file.name}
               </p>
 
@@ -837,18 +837,18 @@ export default function PartnerPaymentForm({
                 event.target.checked,
               )
             }
-            className="mt-1 h-4 w-4 accent-[#0B5D3B]"
+            className="mt-1 h-4 w-4 accent-brand-navy"
           />
 
           <span className="text-sm leading-6 text-slate-600">
             Je confirme que ce
             justificatif correspond au
             paiement du dossier{" "}
-            <strong className="text-[#102B20]">
+            <strong className="text-brand-navy">
               {requestCode}
             </strong>{" "}
             pour un montant de{" "}
-            <strong className="text-[#102B20]">
+            <strong className="text-brand-navy">
               {amount.toLocaleString(
                 "fr-FR",
               )}{" "}
@@ -879,7 +879,7 @@ export default function PartnerPaymentForm({
             !file ||
             !confirmed
           }
-          className="inline-flex w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 py-3.5 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center rounded-xl bg-brand-lime px-5 py-3.5 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting
             ? "Envoi en cours..."

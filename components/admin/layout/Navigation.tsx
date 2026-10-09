@@ -160,16 +160,16 @@ export default function Navigation({
             className={[
               "group flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-11 lg:gap-3 lg:px-3.5 lg:py-2.5 lg:text-sm",
               active
-                ? "bg-[#123F2C] text-white shadow-sm"
-                : "text-slate-600 hover:bg-[#F3F8F2] hover:text-[#123F2C]",
+                ? "bg-brand-navy text-white shadow-sm"
+                : "text-slate-600 hover:bg-brand-ice hover:text-brand-navy",
             ].join(" ")}
           >
             <div
               className={[
                 "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
                 active
-                  ? "bg-white/10 text-[#B8E83D]"
-                  : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-[#0B5D3B]",
+                  ? "bg-white/10 text-brand-lime"
+                  : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-brand-navy",
               ].join(" ")}
             >
               <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />

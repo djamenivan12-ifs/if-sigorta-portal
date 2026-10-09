@@ -130,18 +130,18 @@ export default function RecentRequestsTable({
     <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:rounded-[1.5rem]">
       <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-6">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
             Activité
           </p>
 
-          <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+          <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:mt-2 sm:text-xl">
             Dossiers récents
           </h2>
         </div>
 
         <Link
           href="/admin/dossiers"
-          className="inline-flex w-fit items-center gap-1.5 text-[12px] font-semibold text-[#0B5D3B] sm:gap-2 sm:text-sm"
+          className="inline-flex w-fit items-center gap-1.5 text-[12px] font-semibold text-brand-navy sm:gap-2 sm:text-sm"
         >
           Voir tous les dossiers
 
@@ -179,7 +179,7 @@ export default function RecentRequestsTable({
                     className="p-4 sm:p-5"
                   >
                     <div className="flex min-w-0 items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EEF6EC] text-[11px] font-black text-[#0B5D3B] sm:h-11 sm:w-11 sm:text-xs">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-[11px] font-black text-brand-navy sm:h-11 sm:w-11 sm:text-xs">
                         {getInitials(
                           request.clientName,
                         )}
@@ -261,7 +261,7 @@ export default function RecentRequestsTable({
 
                     <Link
                       href={`/admin/dossiers/${request.id}`}
-                      className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B] sm:min-h-11 sm:text-sm"
+                      className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-600 transition hover:border-brand-border hover:bg-brand-ice hover:text-brand-navy sm:min-h-11 sm:text-sm"
                     >
                       Ouvrir le dossier
                     </Link>
@@ -327,7 +327,7 @@ export default function RecentRequestsTable({
                         >
                           <TableCell>
                             <div className="flex min-w-[190px] items-center gap-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EEF6EC] text-xs font-black text-[#0B5D3B]">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-xs font-black text-brand-navy">
                                 {getInitials(
                                   request.clientName,
                                 )}
@@ -391,7 +391,7 @@ export default function RecentRequestsTable({
                           <TableCell className="text-right">
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:border-[#CFE3CF] hover:bg-[#F3F8F2] hover:text-[#0B5D3B]"
+                              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:border-brand-border hover:bg-brand-ice hover:text-brand-navy"
                             >
                               Ouvrir
                             </Link>

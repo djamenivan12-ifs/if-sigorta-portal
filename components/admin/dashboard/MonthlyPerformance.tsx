@@ -82,11 +82,11 @@ export default function MonthlyPerformance({
 
   return (
     <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
-      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
         Performance
       </p>
 
-      <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+      <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:mt-2 sm:text-xl">
         Analyse du mois
       </h2>
 
@@ -94,13 +94,13 @@ export default function MonthlyPerformance({
         {metrics.map(([label, value, description]) => (
           <div
             key={label}
-            className="min-w-0 rounded-xl border border-slate-100 bg-[#FAFCFA] p-4 sm:rounded-2xl sm:p-5"
+            className="min-w-0 rounded-xl border border-slate-100 bg-brand-ice p-4 sm:rounded-2xl sm:p-5"
           >
             <p className="text-[13px] font-medium leading-5 text-slate-500 sm:text-sm">
               {label}
             </p>
 
-            <p className="mt-1.5 break-words text-xl font-semibold leading-tight tracking-[-0.03em] text-[#102B20] sm:mt-2 sm:text-2xl">
+            <p className="mt-1.5 break-words text-xl font-semibold leading-tight tracking-[-0.03em] text-brand-navy sm:mt-2 sm:text-2xl">
               {value}
             </p>
 

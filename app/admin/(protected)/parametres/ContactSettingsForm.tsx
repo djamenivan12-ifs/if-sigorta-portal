@@ -69,7 +69,7 @@ export default function ContactSettingsForm({
   }
 
   const inputClassName =
-    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-brand-navy outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10";
 
   return (
     <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
@@ -122,7 +122,7 @@ export default function ContactSettingsForm({
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm leading-6 text-[#31513B]">
+      <div className="mt-4 rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm leading-6 text-brand-muted">
         Numéro utilisé par les clients pour contacter IF Sigorta sur WhatsApp.
       </div>
 
@@ -137,7 +137,7 @@ export default function ContactSettingsForm({
 
       {successMessage && (
         <div
-          className="mt-4 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-medium text-[#0B5D3B]"
+          className="mt-4 rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm font-medium text-brand-navy"
           role="status"
         >
           {successMessage}
@@ -148,7 +148,7 @@ export default function ContactSettingsForm({
         type="button"
         onClick={save}
         disabled={loading}
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-lime px-6 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         {loading ? "Enregistrement..." : "Enregistrer le numéro WhatsApp"}
       </button>

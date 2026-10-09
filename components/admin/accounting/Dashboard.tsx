@@ -31,7 +31,7 @@ import {
 import Refunds from "./Refunds";
 import Editor, { type EditorMode } from "./Editor";
 const control =
-  "min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100";
+  "min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-navy focus:ring-2 focus:ring-brand-navy/10";
 const tabs = [
   ["overview", "Vue d’ensemble"],
   ["companies", "Assureurs"],
@@ -605,7 +605,7 @@ export default function Dashboard({
     setPage(1);
   }
   return (
-    <main className="min-h-screen bg-[#F6F7F5] px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-brand-ice px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1540px] space-y-6">
         <header className="flex flex-wrap items-start justify-between gap-5">
           <div>
@@ -643,7 +643,7 @@ export default function Dashboard({
               onClick={() =>
                 setEditor({ mode: "deposit", company: selectedCompany })
               }
-              className="flex min-h-10 items-center gap-2 rounded-lg bg-emerald-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
+              className="flex min-h-10 items-center gap-2 rounded-lg bg-brand-lime px-4 py-2.5 text-sm font-semibold text-brand-navy shadow-sm hover:bg-brand-lime/85"
             >
               <Plus size={17} />
               Enregistrer un dépôt
@@ -1049,7 +1049,7 @@ export default function Dashboard({
                   {tab === "overview" && (
                     <button
                       onClick={() => setEditor({ mode: "company" })}
-                      className="mt-5 rounded-lg bg-emerald-900 px-4 py-2.5 text-sm font-semibold text-white"
+                      className="mt-5 rounded-lg bg-brand-lime px-4 py-2.5 text-sm font-semibold text-brand-navy"
                     >
                       Ajouter un assureur
                     </button>
@@ -1173,7 +1173,7 @@ function Kpi({
 }) {
   return (
     <article
-      className={`rounded-xl border p-5 shadow-sm ${dark ? "border-emerald-950 bg-emerald-950 text-white" : "border-slate-200 bg-white"}`}
+      className={`rounded-xl border p-5 shadow-sm ${dark ? "border-brand-navy bg-brand-navy text-white" : "border-slate-200 bg-white"}`}
     >
       <div
         className={`flex items-center justify-between gap-2 text-sm ${dark ? "text-emerald-100" : "text-slate-500"}`}

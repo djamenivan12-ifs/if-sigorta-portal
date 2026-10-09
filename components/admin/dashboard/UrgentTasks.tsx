@@ -67,11 +67,11 @@ export default function UrgentTasks({
     <section className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
             Priorités
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-brand-navy">
             Tâches urgentes
           </h2>
 
@@ -186,7 +186,7 @@ function TaskItem({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
-          <p className="font-semibold text-[#102B20]">
+          <p className="font-semibold text-brand-navy">
             {
               task.label
             }
@@ -212,7 +212,7 @@ function TaskItem({
           }
         </p>
 
-        <p className="mt-2 text-xs font-semibold text-slate-500 transition group-hover:text-[#0B5D3B]">
+        <p className="mt-2 text-xs font-semibold text-slate-500 transition group-hover:text-brand-navy">
           Ouvrir la liste →
         </p>
       </div>

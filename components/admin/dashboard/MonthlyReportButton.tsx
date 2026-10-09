@@ -113,7 +113,7 @@ export default function MonthlyReportButton({
             type="button"
             onClick={download}
             disabled={busy}
-            className="flex min-h-10 items-center gap-2 rounded-lg bg-emerald-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="flex min-h-10 items-center gap-2 rounded-lg bg-brand-lime px-4 py-2.5 text-sm font-semibold text-brand-navy disabled:opacity-50"
           >
             {busy ? (
               <LoaderCircle className="animate-spin" size={16} />

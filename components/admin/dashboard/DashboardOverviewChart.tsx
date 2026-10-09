@@ -28,11 +28,11 @@ export default function DashboardOverviewChart({
   return (
     <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
       <div className="min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
           Performance
         </p>
 
-        <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:mt-2 sm:text-xl">
+        <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:mt-2 sm:text-xl">
           Évolution des demandes
         </h2>
 
@@ -65,13 +65,13 @@ export default function DashboardOverviewChart({
               >
                 <stop
                   offset="5%"
-                  stopColor="#0B5D3B"
+                  stopColor="#011A2E"
                   stopOpacity={0.2}
                 />
 
                 <stop
                   offset="95%"
-                  stopColor="#0B5D3B"
+                  stopColor="#011A2E"
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -113,14 +113,14 @@ export default function DashboardOverviewChart({
             <Area
               type="monotone"
               dataKey="requests"
-              stroke="#0B5D3B"
+              stroke="#011A2E"
               strokeWidth={3}
               fill="url(#requestsGradient)"
               activeDot={{
                 r: 5,
                 strokeWidth: 3,
                 stroke: "#FFFFFF",
-                fill: "#0B5D3B",
+                fill: "#011A2E",
               }}
             />
           </AreaChart>
@@ -167,7 +167,7 @@ function CustomTooltip({
 
       <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
         Revenu :{" "}
-        <span className="font-semibold text-[#0B5D3B]">
+        <span className="font-semibold text-brand-navy">
           {item.revenue.toLocaleString(
             "fr-FR",
           )}{" "}

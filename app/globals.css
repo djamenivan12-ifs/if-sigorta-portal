@@ -5,6 +5,16 @@
   --foreground: #171717;
 }
 
+/* Official IF Sigorta palette, shared by all application interfaces. */
+@theme {
+  --color-brand-navy: #011A2E;
+  --color-brand-lime: #AEED02;
+  --color-brand-ice: #EEF7FF;
+  --color-brand-border: #D8E6F0;
+  --color-brand-muted: #536A7B;
+  --color-brand-soft: #94AFC2;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

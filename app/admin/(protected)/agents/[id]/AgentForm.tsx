@@ -94,18 +94,18 @@ export default function AgentForm({
   }
 
   const inputClassName =
-    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 disabled:cursor-not-allowed disabled:bg-slate-100 sm:h-12 sm:px-4 sm:text-sm";
+    "h-11 min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-brand-navy outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 disabled:cursor-not-allowed disabled:bg-slate-100 sm:h-12 sm:px-4 sm:text-sm";
 
   return (
     <section className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.5rem] sm:p-6">
       <form onSubmit={handleSubmit} className="min-w-0 space-y-6 sm:space-y-8">
         <div>
           <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
               Informations personnelles
             </p>
 
-            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+            <h3 className="mt-2 text-lg font-semibold text-brand-navy">
               Identité de l’utilisateur
             </h3>
           </div>
@@ -159,11 +159,11 @@ export default function AgentForm({
 
         <div className="min-w-0 border-t border-slate-100 pt-6 sm:pt-8">
           <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
               Connexion
             </p>
 
-            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+            <h3 className="mt-2 text-lg font-semibold text-brand-navy">
               Identifiants du compte
             </h3>
           </div>
@@ -224,11 +224,11 @@ export default function AgentForm({
 
         <div className="min-w-0 border-t border-slate-100 pt-6 sm:pt-8">
           <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
               Autorisations
             </p>
 
-            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+            <h3 className="mt-2 text-lg font-semibold text-brand-navy">
               Rôle de l’utilisateur
             </h3>
 
@@ -248,13 +248,13 @@ export default function AgentForm({
               }}
               className={`relative min-w-0 rounded-xl border p-4 text-left transition sm:rounded-2xl sm:p-5 ${
                 role === "agent"
-                  ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/5"
-                  : "border-slate-200 bg-white hover:border-[#CFE3CF] hover:bg-[#FAFCFA]"
+                  ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/5"
+                  : "border-slate-200 bg-white hover:border-brand-border hover:bg-brand-ice"
               }`}
             >
               <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-4">
                 <div>
-                  <span className="block font-semibold text-[#102B20]">
+                  <span className="block font-semibold text-brand-navy">
                     Agent
                   </span>
 
@@ -267,7 +267,7 @@ export default function AgentForm({
                 <span
                   className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                     role === "agent"
-                      ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                      ? "border-brand-navy bg-brand-navy"
                       : "border-slate-300 bg-white"
                   }`}
                 >
@@ -288,13 +288,13 @@ export default function AgentForm({
               }}
               className={`relative min-w-0 rounded-xl border p-4 text-left transition sm:rounded-2xl sm:p-5 ${
                 role === "admin"
-                  ? "border-[#0B5D3B] bg-[#F3F8F2] ring-4 ring-[#0B5D3B]/5"
-                  : "border-slate-200 bg-white hover:border-[#CFE3CF] hover:bg-[#FAFCFA]"
+                  ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/5"
+                  : "border-slate-200 bg-white hover:border-brand-border hover:bg-brand-ice"
               }`}
             >
               <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-4">
                 <div>
-                  <span className="block font-semibold text-[#102B20]">
+                  <span className="block font-semibold text-brand-navy">
                     Administrateur
                   </span>
 
@@ -306,7 +306,7 @@ export default function AgentForm({
                 <span
                   className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                     role === "admin"
-                      ? "border-[#0B5D3B] bg-[#0B5D3B]"
+                      ? "border-brand-navy bg-brand-navy"
                       : "border-slate-300 bg-white"
                   }`}
                 >
@@ -321,11 +321,11 @@ export default function AgentForm({
 
         <div className="min-w-0 border-t border-slate-100 pt-6 sm:pt-8">
           <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
               État du compte
             </p>
 
-            <h3 className="mt-2 text-lg font-semibold text-[#102B20]">
+            <h3 className="mt-2 text-lg font-semibold text-brand-navy">
               Accès à la plateforme
             </h3>
           </div>
@@ -334,13 +334,13 @@ export default function AgentForm({
             className={`flex min-w-0 cursor-pointer flex-col items-stretch justify-between gap-4 rounded-xl border p-4 transition sm:flex-row sm:items-center sm:gap-5 sm:rounded-2xl sm:p-5 ${
               disabled
                 ? "border-red-200 bg-red-50"
-                : "border-[#CFE3CF] bg-[#F3F8F2]"
+                : "border-brand-border bg-brand-ice"
             }`}
           >
             <div>
               <p
                 className={`font-semibold ${
-                  disabled ? "text-red-800" : "text-[#102B20]"
+                  disabled ? "text-red-800" : "text-brand-navy"
                 }`}
               >
                 {disabled ? "Compte désactivé" : "Compte actif"}
@@ -374,7 +374,7 @@ export default function AgentForm({
                   setSuccessMessage("");
                 }}
                 className={`relative h-7 w-12 rounded-full transition ${
-                  disabled ? "bg-red-500" : "bg-[#0B5D3B]"
+                  disabled ? "bg-red-500" : "bg-brand-navy"
                 }`}
               >
                 <span
@@ -398,7 +398,7 @@ export default function AgentForm({
 
         {successMessage && (
           <div
-            className="rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]"
+            className="rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm font-semibold text-brand-navy"
             role="status"
           >
             {successMessage}
@@ -409,7 +409,7 @@ export default function AgentForm({
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:px-5 sm:text-sm"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:min-h-12 sm:px-5 sm:text-sm"
           >
             {loading ? "Enregistrement..." : "Enregistrer les modifications"}
           </button>

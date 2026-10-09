@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import BrandLogo from "@/components/brand/BrandLogo";
 
 import Link from "next/link";
 
@@ -628,7 +628,7 @@ const statusLabels: Record<
       description:
         "Votre police d’assurance est en cours de création.",
       className:
-        "bg-[#EAF4ED] text-[#0B5D3B]",
+        "bg-brand-ice text-brand-navy",
     },
 
     policy_available: {
@@ -702,7 +702,7 @@ const statusLabels: Record<
       description:
         "Your insurance policy is being prepared.",
       className:
-        "bg-[#EAF4ED] text-[#0B5D3B]",
+        "bg-brand-ice text-brand-navy",
     },
 
     policy_available: {
@@ -776,7 +776,7 @@ const statusLabels: Record<
       description:
         "Sigorta poliçeniz hazırlanıyor.",
       className:
-        "bg-[#EAF4ED] text-[#0B5D3B]",
+        "bg-brand-ice text-brand-navy",
     },
 
     policy_available: {
@@ -1469,7 +1469,7 @@ export default function SuiviClient({
         : "Başvurunuzun durumunu görmek için başvuru kodunuzu ve WhatsApp numaranızı girin.";
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-brand-ice">
       <div className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           <Link
@@ -1477,11 +1477,7 @@ export default function SuiviClient({
             className="flex min-w-0 shrink-0 items-center"
             aria-label="IF Sigorta"
           >
-            <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
-              src="/if-sigorta-logo-light.png"
-              alt="IF Sigorta"
-              className="h-[58px] w-auto object-contain object-left sm:h-[82px]"
-            />
+            <BrandLogo />
           </Link>
 
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -1501,7 +1497,7 @@ export default function SuiviClient({
                     .value as Language,
                 )
               }
-              className="min-h-10 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-black text-[#0B5D3B] outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10 sm:px-3 sm:text-sm"
+              className="min-h-10 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-black text-brand-navy outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10 sm:px-3 sm:text-sm"
               aria-label="Language"
             >
               <option value="fr">
@@ -1519,7 +1515,7 @@ export default function SuiviClient({
 
             <Link
               href="/"
-              className="hidden text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B] sm:inline"
+              className="hidden text-sm font-semibold text-slate-500 transition hover:text-brand-navy sm:inline"
             >
               {
                 t.backHome
@@ -1532,14 +1528,14 @@ export default function SuiviClient({
       <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
         <div className="grid min-w-0 gap-6 sm:gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-10 xl:gap-14">
           <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start">
-            <div className="relative min-w-0 overflow-hidden rounded-[1.5rem] bg-[#123F2C] px-5 py-6 text-white sm:rounded-[2rem] sm:px-8 sm:py-8 lg:min-h-[560px] lg:px-8 lg:py-10">
-              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#B8E83D]/10" />
+            <div className="relative min-w-0 overflow-hidden rounded-[1.5rem] bg-brand-navy px-5 py-6 text-white sm:rounded-[2rem] sm:px-8 sm:py-8 lg:min-h-[560px] lg:px-8 lg:py-10">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-lime/10" />
 
               <div className="pointer-events-none absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/5" />
 
               <div className="relative z-10 flex h-full flex-col">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#B8E83D]">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-lime">
                     IF SIGORTA
                   </p>
 
@@ -1558,7 +1554,7 @@ export default function SuiviClient({
 
                 <div className="mt-7 space-y-4 sm:mt-10 lg:mt-auto">
                   <div className="flex gap-3 border-t border-white/10 pt-5">
-                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B8E83D] text-xs font-black text-[#15311F]">
+                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-lime text-xs font-black text-brand-navy">
                       ✓
                     </div>
 
@@ -1595,11 +1591,11 @@ export default function SuiviClient({
 
           <section className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.24)] sm:rounded-[2rem] sm:p-8 lg:p-10">
             <div className="max-w-2xl">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-navy">
                 IF SIGORTA
               </p>
 
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-4xl">
                 {
                   t.title
                 }
@@ -1650,7 +1646,7 @@ export default function SuiviClient({
                       placeholder="IFS-260808-DF56"
                       autoComplete="off"
                       required
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 uppercase outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 uppercase outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
                     />
                   </div>
 
@@ -1664,7 +1660,7 @@ export default function SuiviClient({
                       }
                     </label>
 
-                    <div className="flex min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white transition focus-within:border-[#0B5D3B] focus-within:ring-4 focus-within:ring-[#0B5D3B]/10">
+                    <div className="flex min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white transition focus-within:border-brand-navy focus-within:ring-4 focus-within:ring-brand-navy/10">
                       <select
                         value={
                           whatsappCountryCode
@@ -1741,7 +1737,7 @@ export default function SuiviClient({
                     disabled={
                       loading
                     }
-                    className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-6 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-lime px-6 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300"
                   >
                     {loading
                       ? t.searching
@@ -1752,14 +1748,14 @@ export default function SuiviClient({
 
             {loading &&
               hasTrackingData && (
-                <div className="mt-8 rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] p-5">
-                  <p className="font-semibold text-[#244A34]">
+                <div className="mt-8 rounded-2xl border border-brand-border bg-brand-ice p-5">
+                  <p className="font-semibold text-brand-navy">
                     {
                       t.loadingTitle
                     }
                   </p>
 
-                  <p className="mt-1 text-sm text-[#52705B]">
+                  <p className="mt-1 text-sm text-brand-muted">
                     {
                       t.loadingText
                     }
@@ -1798,7 +1794,7 @@ export default function SuiviClient({
                     />
                   </div>
 
-                  <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
+                  <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-6">
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
                       {
                         t.currentStatus
@@ -1858,8 +1854,8 @@ export default function SuiviClient({
                   {duplicateDetected && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{language === "fr" ? "Une demande identique a déjà été créée dans les 10 dernières minutes. Vous avez été redirigé vers ce dossier : conservez ce matricule et envoyez votre reçu ci-dessous si le paiement est encore attendu." : language === "en" ? "An identical request was created in the last 10 minutes. You have been redirected to that request. Keep this code and upload your receipt below if payment is still pending." : "Son 10 dakika içinde aynı bilgilerle bir başvuru oluşturuldu. Bu başvuruya yönlendirildiniz. Aynı kodu kullanın; ödeme bekleniyorsa dekontunuzu aşağıdan yükleyin."}</p>}
 
                   {result.payment && (
-                    <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
-                      <h3 className="text-xl font-semibold text-[#102B20]">
+                    <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-6">
+                      <h3 className="text-xl font-semibold text-brand-navy">
                         {
                           t.payment
                         }
@@ -1997,7 +1993,7 @@ export default function SuiviClient({
                                 "",
                               );
                             }}
-                            className="block min-w-0 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-700 file:mr-2 file:rounded-lg file:border-0 file:bg-[#0B5D3B] file:px-3 file:py-2 file:font-semibold file:text-white hover:file:bg-[#084A2F] sm:px-4 sm:file:mr-4 sm:file:px-4"
+                            className="block min-w-0 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-700 file:mr-2 file:rounded-lg file:border-0 file:bg-brand-navy file:px-3 file:py-2 file:font-semibold file:text-white hover:file:bg-brand-navy sm:px-4 sm:file:mr-4 sm:file:px-4"
                           />
 
                           <p className="mt-2 text-xs text-slate-500">
@@ -2037,7 +2033,7 @@ export default function SuiviClient({
                             uploadingReceipt ||
                             !newReceiptFile
                           }
-                          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-semibold text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-400"
+                          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-semibold text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-400"
                         >
                           {uploadingReceipt
                             ? t.sendingReceipt
@@ -2157,8 +2153,8 @@ export default function SuiviClient({
                     </div>
                   )}
 
-                  <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
-                    <h3 className="text-lg font-semibold text-[#102B20]">
+                  <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-6">
+                    <h3 className="text-lg font-semibold text-brand-navy">
                       {
                         t.history
                       }
@@ -2215,7 +2211,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-5">
+    <div className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-5">
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
         {
           label

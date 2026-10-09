@@ -174,7 +174,7 @@ export default function PartnerForm({
   const [successMessage, setSuccessMessage] = useState("");
 
   const inputClassName =
-    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#102B20] outline-none transition placeholder:text-slate-400 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+    "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-brand-navy outline-none transition placeholder:text-slate-400 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10";
 
   function clearMessages() {
     setErrorMessage("");
@@ -382,11 +382,11 @@ export default function PartnerForm({
     <div className="space-y-6">
       <section className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white">
         <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
             Partenaire
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold text-brand-navy">
             Modifier le partenaire
           </h2>
 
@@ -473,11 +473,11 @@ export default function PartnerForm({
 
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">
                 Sécurité
               </p>
 
-              <h3 className="mt-2 font-semibold text-[#102B20]">
+              <h3 className="mt-2 font-semibold text-brand-navy">
                 Modifier le mot de passe
               </h3>
 
@@ -616,7 +616,7 @@ export default function PartnerForm({
 
           {successMessage && (
             <div
-              className="mt-6 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-3 text-sm font-semibold text-[#0B5D3B]"
+              className="mt-6 rounded-xl border border-brand-border bg-brand-ice px-4 py-3 text-sm font-semibold text-brand-navy"
               role="status"
             >
               {successMessage}
@@ -627,7 +627,7 @@ export default function PartnerForm({
             <button
               type="submit"
               disabled={saving || changingStatus || deleting}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#B8E83D] px-6 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-lime px-6 text-sm font-black text-brand-navy transition hover:bg-brand-lime disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
             >
               {saving ? "Enregistrement..." : "Enregistrer les modifications"}
             </button>
@@ -641,7 +641,7 @@ export default function PartnerForm({
             Accès
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold text-brand-navy">
             Statut du partenaire
           </h2>
         </div>
@@ -652,14 +652,14 @@ export default function PartnerForm({
               <span
                 className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
                   isActive
-                    ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                    ? "border-brand-border bg-brand-ice text-brand-navy"
                     : "border-red-200 bg-red-50 text-red-700"
                 }`}
               >
                 {isActive ? "Actif" : "Inactif"}
               </span>
 
-              <p className="font-semibold text-[#102B20]">
+              <p className="font-semibold text-brand-navy">
                 {isActive ? "Accès autorisé" : "Accès désactivé"}
               </p>
             </div>
@@ -678,7 +678,7 @@ export default function PartnerForm({
             className={`inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
               isActive
                 ? "border border-red-200 bg-white text-red-700 hover:bg-red-50"
-                : "bg-[#0B5D3B] text-white hover:bg-[#084A2F]"
+                : "bg-brand-lime text-brand-navy hover:bg-brand-lime/85"
             }`}
           >
             {changingStatus
@@ -696,14 +696,14 @@ export default function PartnerForm({
             Zone sensible
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold text-[#102B20]">
+          <h2 className="mt-2 text-xl font-semibold text-brand-navy">
             Supprimer le partenaire
           </h2>
         </div>
 
         <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
-            <p className="font-semibold text-[#102B20]">
+            <p className="font-semibold text-brand-navy">
               Suppression définitive
             </p>
 
@@ -728,7 +728,7 @@ export default function PartnerForm({
       <div>
         <Link
           href="/admin/partenaires"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#0B5D3B] transition hover:text-[#084A2F]"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-brand-navy transition hover:text-brand-navy"
         >
           <span aria-hidden="true">←</span>
           Retour aux partenaires

@@ -90,7 +90,7 @@ const Select = forwardRef<
             leftIcon ? "pl-11" : "",
             error
               ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-              : "border-slate-300 focus:border-blue-600 focus:ring-blue-100",
+              : "border-slate-300 focus:border-brand-navy focus:ring-brand-navy/10",
             className,
           ]
             .filter(Boolean)

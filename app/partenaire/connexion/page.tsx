@@ -1,6 +1,5 @@
 "use client";
-import Image from "next/image";
-
+import BrandLogo from "@/components/brand/BrandLogo";
 
 import {
   FormEvent,
@@ -51,7 +50,7 @@ export default function ConnexionPartenairePage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-[#F6F8F5] px-4">
+        <main className="flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-brand-ice px-4">
           <p className="text-sm font-semibold text-slate-500">
             Chargement...
           </p>
@@ -178,10 +177,10 @@ function ConnexionPartenaireContent() {
   }
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#F6F8F5]">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-brand-ice">
       <div className="grid min-h-screen min-w-0 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="relative hidden overflow-hidden bg-[#123F2C] px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-16">
-          <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#B8E83D]/10" />
+        <section className="relative hidden overflow-hidden bg-brand-navy px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-16">
+          <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand-lime/10" />
 
           <div className="pointer-events-none absolute -bottom-40 -left-32 h-[420px] w-[420px] rounded-full bg-white/5" />
 
@@ -191,16 +190,12 @@ function ConnexionPartenaireContent() {
               aria-label="IF Sigorta"
               className="inline-flex items-center"
             >
-              <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
-                src="/if-sigorta-logo.png"
-                alt="IF Sigorta"
-                className="h-[110px] w-auto object-contain object-left"
-              />
+              <BrandLogo tone="light" />
             </Link>
           </div>
 
           <div className="relative z-10 max-w-md">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#B8E83D] text-[#15311F]">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-lime text-brand-navy">
               <Handshake className="h-6 w-6" />
             </div>
 
@@ -241,23 +236,19 @@ function ConnexionPartenaireContent() {
                 href="/"
                 aria-label="IF Sigorta"
               >
-                <Image width={2938} height={2463} sizes="(max-width: 640px) 180px, 300px"
-                  src="/if-sigorta-logo.png"
-                  alt="IF Sigorta"
-                  className="h-[82px] w-auto object-contain sm:h-[105px]"
-                />
+                <BrandLogo />
               </Link>
             </div>
 
             <div className="min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.3)] sm:rounded-[2rem] sm:p-8 lg:p-10">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#F3F8F2] px-3 py-1.5 text-xs font-bold text-[#0B5D3B]">
+                <div className="inline-flex items-center gap-2 rounded-full bg-brand-ice px-3 py-1.5 text-xs font-bold text-brand-navy">
                   <ShieldCheck className="h-4 w-4" />
 
                   Espace sécurisé
                 </div>
 
-                <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:text-4xl">
+                <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:text-4xl">
                   Connexion partenaire
                 </h2>
 
@@ -296,7 +287,7 @@ function ConnexionPartenaireContent() {
                       autoComplete="email"
                       placeholder="partenaire@exemple.com"
                       required
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
                     />
                   </div>
                 </div>
@@ -329,7 +320,7 @@ function ConnexionPartenaireContent() {
                       }}
                       autoComplete="current-password"
                       required
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-12 text-[15px] text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10"
+                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-12 text-[15px] text-slate-900 outline-none transition hover:border-slate-300 focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10"
                     />
 
                     <button
@@ -365,7 +356,7 @@ function ConnexionPartenaireContent() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-black text-white shadow-lg shadow-[#0B5D3B]/10 transition hover:-translate-y-0.5 hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy shadow-lg shadow-brand-navy/10 transition hover:-translate-y-0.5 hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                 >
                   {loading
                     ? "Connexion en cours..."
@@ -376,7 +367,7 @@ function ConnexionPartenaireContent() {
               <div className="mt-5 border-t border-slate-100 pt-5 text-center sm:mt-6 sm:pt-6">
                 <Link
                   href="/"
-                  className="text-sm font-semibold text-slate-500 transition hover:text-[#0B5D3B]"
+                  className="text-sm font-semibold text-slate-500 transition hover:text-brand-navy"
                 >
                   ← Retour à l’accueil
                 </Link>
@@ -401,7 +392,7 @@ function FeatureLine({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#B8E83D]">
+      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-brand-lime">
         ✓
       </div>
 

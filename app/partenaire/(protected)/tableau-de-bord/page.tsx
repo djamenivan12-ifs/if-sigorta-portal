@@ -113,7 +113,7 @@ function getStatusClassName(
       return "bg-violet-50 text-violet-700 ring-violet-200";
 
     case "policy_available":
-      return "bg-[#EEF6EC] text-[#0B5D3B] ring-[#CFE3CF]";
+      return "bg-brand-ice text-brand-navy ring-brand-border";
 
     case "cancelled":
       return "bg-slate-100 text-slate-500 ring-slate-200";
@@ -472,14 +472,14 @@ export default async function PartnerDashboardPage() {
 
       <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
         <div>
-          <p className="text-sm font-semibold text-[#0B5D3B]">
+          <p className="text-sm font-semibold text-brand-navy">
             Bonjour{" "}
             {
               partner.managerName
             }
           </p>
 
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#102B20] sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
             Tableau de bord
           </h1>
 
@@ -492,7 +492,7 @@ export default async function PartnerDashboardPage() {
 
         <Link
           href="/partenaire/nouvelle-demande"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#0B5D3B] px-5 text-sm font-bold text-white transition hover:bg-[#084A2F] sm:w-auto"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-bold text-brand-navy transition hover:bg-brand-lime/85 sm:w-auto"
         >
           Nouvelle demande
         </Link>
@@ -531,14 +531,14 @@ export default async function PartnerDashboardPage() {
                   href={
                     card.href
                   }
-                  className="group min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#CFE3CF] hover:shadow-md sm:p-5"
+                  className="group min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-border hover:shadow-md sm:p-5"
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F8F2] text-[#0B5D3B] transition group-hover:bg-[#EEF6EC]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-ice text-brand-navy transition group-hover:bg-brand-ice">
                       <Icon className="h-5 w-5" />
                     </div>
 
-                    <span className="shrink-0 text-xl font-black text-[#102B20] sm:text-2xl">
+                    <span className="shrink-0 text-xl font-black text-brand-navy sm:text-2xl">
                       {
                         card.value
                       }
@@ -552,7 +552,7 @@ export default async function PartnerDashboardPage() {
                       }
                     </p>
 
-                    <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#0B5D3B]" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-navy" />
                   </div>
                 </Link>
               );
@@ -566,14 +566,14 @@ export default async function PartnerDashboardPage() {
       <div className="mt-6 min-w-0 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7">
         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-black text-[#102B20]">
+            <h2 className="text-lg font-black text-brand-navy">
               Activité récente
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
               Les derniers dossiers
               de{" "}
-              <span className="font-semibold text-[#31513B]">
+              <span className="font-semibold text-brand-muted">
                 {
                   partner.companyName
                 }
@@ -587,7 +587,7 @@ export default async function PartnerDashboardPage() {
               0 && (
               <Link
                 href="/partenaire/dossiers"
-                className="inline-flex min-h-10 w-fit items-center gap-2 text-sm font-bold text-[#0B5D3B] transition hover:text-[#084A2F]"
+                className="inline-flex min-h-10 w-fit items-center gap-2 text-sm font-bold text-brand-navy transition hover:text-brand-navy"
               >
                 Voir tous les dossiers
 
@@ -600,7 +600,7 @@ export default async function PartnerDashboardPage() {
         {
           recentRequests.length ===
           0 ? (
-            <div className="mt-6 flex min-h-44 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-[#FAFCF9] px-6 text-center">
+            <div className="mt-6 flex min-h-44 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-brand-ice px-6 text-center">
               <div>
                 <FolderOpen className="mx-auto h-7 w-7 text-slate-300" />
 
@@ -614,7 +614,7 @@ export default async function PartnerDashboardPage() {
 
                 <Link
                   href="/partenaire/nouvelle-demande"
-                  className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl bg-[#0B5D3B] px-4 text-xs font-bold text-white transition hover:bg-[#084A2F]"
+                  className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-lime px-4 text-xs font-bold text-brand-navy transition hover:bg-brand-lime/85"
                 >
                   Créer une demande
                 </Link>
@@ -626,7 +626,7 @@ export default async function PartnerDashboardPage() {
 
               <div className="hidden overflow-x-auto md:block">
                 <table className="min-w-full">
-                  <thead className="bg-[#FAFCF9]">
+                  <thead className="bg-brand-ice">
                     <tr className="border-b border-slate-200">
                       <th className="px-5 py-3 text-left text-xs font-black uppercase tracking-[0.1em] text-slate-400">
                         Dossier
@@ -684,7 +684,7 @@ export default async function PartnerDashboardPage() {
                               <td className="px-5 py-4">
                                 <Link
                                   href={`/partenaire/dossiers/${request.id}`}
-                                  className="text-sm font-black text-[#102B20] transition hover:text-[#0B5D3B]"
+                                  className="text-sm font-black text-brand-navy transition hover:text-brand-navy"
                                 >
                                   {
                                     request.request_code
@@ -723,7 +723,7 @@ export default async function PartnerDashboardPage() {
                               <td className="px-5 py-4 text-right">
                                 <Link
                                   href={`/partenaire/dossiers/${request.id}`}
-                                  className="inline-flex items-center gap-1 text-sm font-bold text-[#0B5D3B] transition hover:text-[#084A2F]"
+                                  className="inline-flex items-center gap-1 text-sm font-bold text-brand-navy transition hover:text-brand-navy"
                                 >
                                   Ouvrir
 
@@ -771,11 +771,11 @@ export default async function PartnerDashboardPage() {
                             request.id
                           }
                           href={`/partenaire/dossiers/${request.id}`}
-                          className="block min-w-0 p-4 transition hover:bg-[#FAFCF9]"
+                          className="block min-w-0 p-4 transition hover:bg-brand-ice"
                         >
                           <div className="flex min-w-0 items-start justify-between gap-4">
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-black text-[#102B20]">
+                              <p className="truncate text-sm font-black text-brand-navy">
                                 {
                                   request.request_code
                                 }
@@ -788,7 +788,7 @@ export default async function PartnerDashboardPage() {
                               </p>
                             </div>
 
-                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#0B5D3B]" />
+                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-brand-navy" />
                           </div>
 
                           <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-3">

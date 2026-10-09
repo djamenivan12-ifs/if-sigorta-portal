@@ -71,7 +71,7 @@ const statusLabels: Record<
 
   payment_confirmed: {
     label: "Paiement confirmé",
-    className: "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   policy_preparation: {
@@ -81,7 +81,7 @@ const statusLabels: Record<
 
   policy_available: {
     label: "Assurance disponible",
-    className: "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]",
+    className: "border border-brand-border bg-brand-ice text-brand-navy",
   },
 
   payment_rejected: {
@@ -365,14 +365,14 @@ export default async function AgentDetailsPage({ params }: PageProps) {
         <div className="mb-4 flex min-w-0 flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Link
             href="/admin/agents/performance"
-            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-base"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:min-h-0 sm:text-base"
           >
             ← Performance des agents
           </Link>
 
           <Link
             href="/admin/agents"
-            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-base"
+            className="inline-flex min-h-10 items-center text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:min-h-0 sm:text-base"
           >
             Gestion des agents
           </Link>
@@ -381,11 +381,11 @@ export default async function AgentDetailsPage({ params }: PageProps) {
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
                 Agent IF Sigorta
               </p>
 
-              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 {agentName}
               </h1>
 
@@ -394,7 +394,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
               </p>
             </div>
 
-            <span className="inline-flex w-fit max-w-full rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-3 py-1.5 text-[11px] font-semibold text-[#0B5D3B] sm:px-4 sm:py-2 sm:text-sm">
+            <span className="inline-flex w-fit max-w-full rounded-full border border-brand-border bg-brand-ice px-3 py-1.5 text-[11px] font-semibold text-brand-navy sm:px-4 sm:py-2 sm:text-sm">
               {role === "admin" ? "Administrateur" : "Agent"}
             </span>
           </div>
@@ -402,12 +402,12 @@ export default async function AgentDetailsPage({ params }: PageProps) {
 
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div className="mb-4 sm:mb-6">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
               Gestion du compte
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Informations de l’utilisateur
@@ -434,19 +434,19 @@ export default async function AgentDetailsPage({ params }: PageProps) {
           <SummaryCard
             label="Dossiers attribués"
             value={total}
-            className="bg-[#F3F8F2] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <SummaryCard
             label="En cours"
             value={active}
-            className="bg-[#EEF6EC] text-[#31513B]"
+            className="bg-brand-ice text-brand-muted"
           />
 
           <SummaryCard
             label="Terminés"
             value={completed}
-            className="bg-[#EAF4E8] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <SummaryCard
@@ -459,7 +459,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                   ? "bg-orange-50 text-orange-700"
                   : watchCount > 0
                     ? "bg-amber-50 text-amber-700"
-                    : "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                    : "border border-brand-border bg-brand-ice text-brand-navy"
             }
           />
         </section>
@@ -467,12 +467,12 @@ export default async function AgentDetailsPage({ params }: PageProps) {
         {/* Retards */}
         <section className="mt-4 min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:mt-6 sm:rounded-[1.5rem] sm:p-6">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
               Priorités
             </p>
 
             <h2
-              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="mt-2 text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-2"
             >
               Retards de l’agent
@@ -547,7 +547,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
           <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <h2
-                className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+                className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
                 id="section-3"
               >
                 Dossiers de l’agent
@@ -560,7 +560,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
 
             <Link
               href={`/admin/dossiers?responsable=${agent.id}`}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:min-h-10 sm:w-auto sm:text-sm"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-border bg-brand-ice px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:min-h-10 sm:w-auto sm:text-sm"
             >
               Voir tous les dossiers
             </Link>
@@ -608,12 +608,12 @@ export default async function AgentDetailsPage({ params }: PageProps) {
 
                   let delayLabel = "Normal";
                   let delayClassName =
-                    "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]";
+                    "border border-brand-border bg-brand-ice text-brand-navy";
 
                   if (completedRequest) {
                     delayLabel = "Terminé";
                     delayClassName =
-                      "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]";
+                      "border border-brand-border bg-brand-ice text-brand-navy";
                   } else if (!ACTIVE_STATUSES.includes(request.status)) {
                     delayLabel =
                       request.status === "waiting_payment"
@@ -639,12 +639,12 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                         <div className="min-w-0">
                           <Link
                             href={`/admin/dossiers/${request.id}`}
-                            className="break-all text-[13px] font-black text-[#0B5D3B] hover:underline sm:text-sm"
+                            className="break-all text-[13px] font-black text-brand-navy hover:underline sm:text-sm"
                           >
                             {request.request_code}
                           </Link>
 
-                          <p className="mt-1 break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                          <p className="mt-1 break-words text-[15px] font-bold leading-5 text-brand-navy sm:text-base">
                             {clientName}
                           </p>
                         </div>
@@ -676,7 +676,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                           <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
                             Montant
                           </dt>
-                          <dd className="mt-1 text-[12px] font-black text-[#102B20] sm:text-sm">
+                          <dd className="mt-1 text-[12px] font-black text-brand-navy sm:text-sm">
                             {Number(
                               request.calculated_price ?? 0,
                             ).toLocaleString("fr-FR")}{" "}
@@ -707,7 +707,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
 
                       <Link
                         href={`/admin/dossiers/${request.id}`}
-                        className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#EAF4E8] sm:text-sm"
+                        className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-border bg-brand-ice px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:text-sm"
                       >
                         Ouvrir le dossier
                       </Link>
@@ -721,7 +721,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                   className="min-w-full divide-y divide-slate-200"
                   aria-label="Agents"
                 >
-                  <thead className="bg-[#FAFCFA]">
+                  <thead className="bg-brand-ice">
                     <tr>
                       <TableHeader>Matricule</TableHeader>
 
@@ -775,13 +775,13 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                       let delayLabel = "Normal";
 
                       let delayClassName =
-                        "border border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]";
+                        "border border-brand-border bg-brand-ice text-brand-navy";
 
                       if (completedRequest) {
                         delayLabel = "Terminé";
 
                         delayClassName =
-                          "border border-[#CFE3CF] bg-[#EEF6EC] text-[#0B5D3B]";
+                          "border border-brand-border bg-brand-ice text-brand-navy";
                       } else if (!ACTIVE_STATUSES.includes(request.status)) {
                         delayLabel =
                           request.status === "waiting_payment"
@@ -807,7 +807,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                       return (
                         <tr
                           key={request.id}
-                          className="transition hover:bg-[#FAFCFA]"
+                          className="transition hover:bg-brand-ice"
                         >
                           <TableCell>
                             <strong className="text-slate-900">
@@ -860,7 +860,7 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                           <TableCell>
                             <Link
                               href={`/admin/dossiers/${request.id}`}
-                              className="inline-flex min-h-10 items-center text-[13px] font-semibold text-[#0B5D3B] transition hover:text-[#084A2F] hover:underline sm:min-h-0 sm:text-base"
+                              className="inline-flex min-h-10 items-center text-[13px] font-semibold text-brand-navy transition hover:text-brand-navy hover:underline sm:min-h-0 sm:text-base"
                             >
                               Ouvrir
                             </Link>
@@ -894,7 +894,7 @@ function SummaryCard({ label, value, className }: SummaryCardProps) {
         {label}
       </span>
 
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-4 sm:text-3xl">
         {value.toLocaleString("fr-FR")}
       </p>
     </div>
@@ -922,7 +922,7 @@ function DelayCard({
         {value.toLocaleString("fr-FR")}
       </p>
 
-      <p className="mt-2 text-[13px] font-semibold text-[#102B20] sm:mt-3 sm:text-base">
+      <p className="mt-2 text-[13px] font-semibold text-brand-navy sm:mt-3 sm:text-base">
         {label}
       </p>
 

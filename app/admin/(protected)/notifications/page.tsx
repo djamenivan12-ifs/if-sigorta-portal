@@ -307,7 +307,7 @@ function getRequestPriority({
 
     label: "Pris en charge",
 
-    className: "border border-[#DDE7D8] bg-[#F3F8F2] text-[#31513B]",
+    className: "border border-brand-border bg-brand-ice text-brand-muted",
 
     title: "Dossier sous votre responsabilité",
   };
@@ -829,11 +829,11 @@ export default async function NotificationsPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 IF Sigorta
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Notifications
               </h1>
 
@@ -865,19 +865,19 @@ export default async function NotificationsPage({
           <SummaryCard
             label="Total"
             value={notifications.length}
-            className="bg-[#F3F8F2] text-[#0B5D3B]"
+            className="bg-brand-ice text-brand-navy"
           />
 
           <SummaryCard
             label="Dossiers"
             value={requestCount}
-            className="bg-[#EEF6EC] text-[#31513B]"
+            className="bg-brand-ice text-brand-muted"
           />
 
           <SummaryCard
             label="Renouvellements"
             value={renewalCount}
-            className="bg-[#F1F6EA] text-[#49613E]"
+            className="bg-brand-ice text-brand-muted"
           />
 
           <SummaryCard
@@ -896,7 +896,7 @@ export default async function NotificationsPage({
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-200 p-4 sm:p-6">
             <h2
-              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               À traiter
@@ -923,7 +923,7 @@ export default async function NotificationsPage({
               {listing.rows.map((notification) => (
                 <article
                   key={notification.key}
-                  className="min-w-0 p-4 transition hover:bg-[#FAFCFA] sm:p-6"
+                  className="min-w-0 p-4 transition hover:bg-brand-ice sm:p-6"
                 >
                   <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
@@ -937,7 +937,7 @@ export default async function NotificationsPage({
                         <span
                           className={
                             notification.kind === "renewal"
-                              ? "rounded-full bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs"
+                              ? "rounded-full bg-brand-ice px-2.5 py-1 text-[10px] font-semibold text-brand-navy sm:px-3 sm:text-xs"
                               : "rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700 sm:px-3 sm:text-xs"
                           }
                         >
@@ -957,7 +957,7 @@ export default async function NotificationsPage({
                           role === "admin" &&
                           !notification.isUnassigned &&
                           notification.assignedAgentName && (
-                            <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
+                            <span className="rounded-full border border-brand-border bg-brand-ice px-2.5 py-1 text-[10px] font-semibold text-brand-navy sm:px-3 sm:text-xs">
                               Pris en charge par{" "}
                               {notification.assignedAgentName}
                             </span>
@@ -966,17 +966,17 @@ export default async function NotificationsPage({
                         {notification.kind === "request" &&
                           role === "agent" &&
                           notification.assignedAgentId === user.id && (
-                            <span className="rounded-full border border-[#CFE3CF] bg-[#F3F8F2] px-2.5 py-1 text-[10px] font-semibold text-[#0B5D3B] sm:px-3 sm:text-xs">
+                            <span className="rounded-full border border-brand-border bg-brand-ice px-2.5 py-1 text-[10px] font-semibold text-brand-navy sm:px-3 sm:text-xs">
                               Pris en charge par vous
                             </span>
                           )}
 
-                        <span className="break-all text-[12px] font-black text-[#0B5D3B] sm:text-sm">
+                        <span className="break-all text-[12px] font-black text-brand-navy sm:text-sm">
                           {notification.requestCode}
                         </span>
                       </div>
 
-                      <h3 className="mt-3 text-[15px] font-semibold leading-5 text-[#102B20] sm:text-base">
+                      <h3 className="mt-3 text-[15px] font-semibold leading-5 text-brand-navy sm:text-base">
                         {notification.title}
                       </h3>
 
@@ -1084,7 +1084,7 @@ IF Sigorta`}
 
                       <Link
                         href={`/admin/dossiers/${notification.requestId}`}
-                        className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:px-5 sm:text-sm"
+                        className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:min-h-11 sm:px-5 sm:text-sm"
                       >
                         Ouvrir le dossier →
                       </Link>
@@ -1092,7 +1092,7 @@ IF Sigorta`}
                       {notification.kind === "renewal" && (
                         <Link
                           href="/admin/renouvellements"
-                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[12px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:px-5 sm:text-sm"
+                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[12px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:px-5 sm:text-sm"
                         >
                           Renouvellements
                         </Link>
@@ -1131,7 +1131,7 @@ function SummaryCard({ label, value, className }: SummaryCardProps) {
         {label}
       </div>
 
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-4 sm:text-3xl">
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-4 sm:text-3xl">
         {value.toLocaleString("fr-FR")}
       </p>
     </div>

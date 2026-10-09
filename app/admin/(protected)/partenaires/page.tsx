@@ -122,11 +122,11 @@ export default async function PartnersPage({
         <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0B5D3B] sm:text-xs sm:tracking-[0.16em]">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-navy sm:text-xs sm:tracking-[0.16em]">
                 Administration
               </p>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl lg:text-4xl">
                 Gestion des partenaires
               </h1>
 
@@ -138,7 +138,7 @@ export default async function PartnersPage({
 
             <Link
               href="/admin/partenaires/nouveau"
-              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[#B8E83D] px-4 text-[13px] font-black text-[#15311F] transition hover:bg-[#C7F34E] sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
+              className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               + Ajouter un partenaire
             </Link>
@@ -161,7 +161,7 @@ export default async function PartnersPage({
               Total partenaires
             </p>
 
-            <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#102B20] sm:mt-3 sm:text-3xl">
+            <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl">
               {partners.length.toLocaleString("fr-FR")}
             </p>
           </div>
@@ -171,7 +171,7 @@ export default async function PartnersPage({
               Partenaires actifs
             </p>
 
-            <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-[#0B5D3B] sm:mt-3 sm:text-3xl">
+            <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-brand-navy sm:mt-3 sm:text-3xl">
               {activePartners.toLocaleString("fr-FR")}
             </p>
           </div>
@@ -190,7 +190,7 @@ export default async function PartnersPage({
         <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.5rem]">
           <div className="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
             <h2
-              className="text-lg font-semibold tracking-[-0.02em] text-[#102B20] sm:text-xl"
+              className="text-lg font-semibold tracking-[-0.02em] text-brand-navy sm:text-xl"
               id="section-1"
             >
               Partenaires enregistrés
@@ -204,11 +204,11 @@ export default async function PartnersPage({
 
           {listing.total === 0 ? (
             <div className="px-4 py-10 text-center sm:px-6 sm:py-16">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F3F8F2] text-xl font-black text-[#0B5D3B]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-ice text-xl font-black text-brand-navy">
                 P
               </div>
 
-              <p className="mt-5 font-semibold text-[#102B20]">
+              <p className="mt-5 font-semibold text-brand-navy">
                 Aucun partenaire enregistré
               </p>
 
@@ -218,7 +218,7 @@ export default async function PartnersPage({
 
               <Link
                 href="/admin/partenaires/nouveau"
-                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#B8E83D] px-5 text-sm font-black text-[#15311F] transition hover:bg-[#C7F34E]"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-lime px-5 text-sm font-black text-brand-navy transition hover:bg-brand-lime"
               >
                 Ajouter un partenaire
               </Link>
@@ -230,7 +230,7 @@ export default async function PartnersPage({
                   <article key={partner.id} className="min-w-0 p-4 sm:p-5">
                     <div className="flex min-w-0 items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="break-words text-[15px] font-bold leading-5 text-[#102B20] sm:text-base">
+                        <p className="break-words text-[15px] font-bold leading-5 text-brand-navy sm:text-base">
                           {partner.company_name}
                         </p>
 
@@ -242,7 +242,7 @@ export default async function PartnersPage({
                       <span
                         className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${
                           partner.is_active
-                            ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                            ? "border-brand-border bg-brand-ice text-brand-navy"
                             : "border-red-200 bg-red-50 text-red-700"
                         }`}
                       >
@@ -293,7 +293,7 @@ export default async function PartnersPage({
 
                     <Link
                       href={`/admin/partenaires/${partner.id}`}
-                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-[12px] font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2] sm:min-h-11 sm:text-sm"
+                      className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-[12px] font-semibold text-brand-navy transition hover:bg-brand-ice sm:min-h-11 sm:text-sm"
                     >
                       Ouvrir
                     </Link>
@@ -327,7 +327,7 @@ export default async function PartnersPage({
                     <TableBody>
                       {listing.rows.map((partner) => (
                         <TableRow key={partner.id}>
-                          <TableCell className="whitespace-nowrap font-semibold text-[#102B20]">
+                          <TableCell className="whitespace-nowrap font-semibold text-brand-navy">
                             {partner.company_name}
                           </TableCell>
 
@@ -356,7 +356,7 @@ export default async function PartnersPage({
                             <span
                               className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
                                 partner.is_active
-                                  ? "border-[#CFE3CF] bg-[#F3F8F2] text-[#0B5D3B]"
+                                  ? "border-brand-border bg-brand-ice text-brand-navy"
                                   : "border-red-200 bg-red-50 text-red-700"
                               }`}
                             >
@@ -371,7 +371,7 @@ export default async function PartnersPage({
                           <TableCell className="whitespace-nowrap text-right">
                             <Link
                               href={`/admin/partenaires/${partner.id}`}
-                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#CFE3CF] bg-white px-4 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#F3F8F2]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-border bg-white px-4 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice"
                             >
                               Ouvrir
                             </Link>

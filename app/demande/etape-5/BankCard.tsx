@@ -326,8 +326,8 @@ export default function BankCard({
 
   if (loading) {
     return (
-      <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
+      <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-6">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">03</p>
         <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
         <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
           {t.loading}
@@ -338,8 +338,8 @@ export default function BankCard({
 
   if (!bankInformation) {
     return (
-      <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
+      <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-6">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">03</p>
         <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
         <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
           {errorMessage || t.unavailable}
@@ -349,8 +349,8 @@ export default function BankCard({
   }
 
   return (
-    <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-[#FCFDFC] p-4 sm:p-6">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0B5D3B]">03</p>
+    <section className="min-w-0 rounded-[1.5rem] border border-slate-200 bg-brand-ice p-4 sm:p-6">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-navy">03</p>
       <h2 className="mt-1 text-xl font-semibold text-slate-900">{t.title}</h2>
 
       <dl className="mt-6 divide-y divide-slate-100">
@@ -396,14 +396,14 @@ export default function BankCard({
         <div className="pt-4">
           <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t.transferReference}</dt>
           <dd className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="break-all rounded-xl bg-[#EEF6EC] px-3 py-2 font-mono text-sm font-black text-[#0B5D3B]">
+            <span className="break-all rounded-xl bg-brand-ice px-3 py-2 font-mono text-sm font-black text-brand-navy">
               {requestCode}
             </span>
             <button
               type="button"
               disabled={!requestCode}
               onClick={() => copyText(requestCode, t.referenceCopied)}
-              className="w-full shrink-0 rounded-xl border border-[#CFE3CF] bg-[#F3F8F2] px-4 py-2.5 text-sm font-semibold text-[#0B5D3B] transition hover:bg-[#EAF3E9] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              className="w-full shrink-0 rounded-xl border border-brand-border bg-brand-ice px-4 py-2.5 text-sm font-semibold text-brand-navy transition hover:bg-brand-ice disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {t.copyReference}
             </button>

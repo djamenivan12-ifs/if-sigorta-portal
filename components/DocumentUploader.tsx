@@ -205,12 +205,12 @@ export default function DocumentUploader({
       </div>
 
       {!file ? (
-        <label className="mt-3 flex cursor-pointer focus-within:ring-4 focus-within:ring-[#0B5D3B]/30 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 px-4 py-8 text-center transition hover:border-[#0B5D3B] hover:bg-[#F3F8F2]">
+        <label className="mt-3 flex cursor-pointer focus-within:ring-4 focus-within:ring-brand-navy/30 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 px-4 py-8 text-center transition hover:border-brand-navy hover:bg-brand-ice">
           <span className="text-3xl">
             📄
           </span>
 
-          <span className="mt-3 font-semibold text-[#0B5D3B]">
+          <span className="mt-3 font-semibold text-brand-navy">
             {t.chooseFile}
           </span>
 
@@ -229,9 +229,9 @@ export default function DocumentUploader({
           />
         </label>
       ) : (
-        <div className="mt-3 flex items-center justify-between gap-4 rounded-2xl border border-[#CFE3CF] bg-[#F3F8F2] p-4">
+        <div className="mt-3 flex items-center justify-between gap-4 rounded-2xl border border-brand-border bg-brand-ice p-4">
           <div className="min-w-0">
-            <p className="font-semibold text-[#0B5D3B]">
+            <p className="font-semibold text-brand-navy">
               {t.documentAdded}
             </p>
 

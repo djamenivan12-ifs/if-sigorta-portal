@@ -266,7 +266,7 @@ export default function PartnerInsuranceStep({
   }
 
   const inputClass =
-    "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#0B5D3B] focus:ring-4 focus:ring-[#0B5D3B]/10";
+    "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-navy focus:ring-4 focus:ring-brand-navy/10";
 
   const labelClass =
     "mb-2 block text-sm font-semibold text-slate-700";
@@ -274,11 +274,11 @@ export default function PartnerInsuranceStep({
   return (
     <div className="min-w-0 space-y-6 sm:space-y-8">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0B5D3B]">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">
           Étape 2 sur 4
         </p>
 
-        <h2 className="mt-2 text-2xl font-black tracking-tight text-[#102B20] sm:text-3xl">
+        <h2 className="mt-2 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
           Identité et assurance
         </h2>
 
@@ -303,7 +303,7 @@ export default function PartnerInsuranceStep({
             }
             className={`rounded-2xl border p-5 text-left transition ${
               data.hasKimlik
-                ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/10"
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
@@ -324,7 +324,7 @@ export default function PartnerInsuranceStep({
             }
             className={`rounded-2xl border p-5 text-left transition ${
               !data.hasKimlik
-                ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/10"
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
@@ -417,7 +417,7 @@ export default function PartnerInsuranceStep({
             </>
           ) : (
             <div className="sm:col-span-2">
-              <div className="rounded-2xl border border-[#D9E9D9] bg-[#F3F8F2] p-4 text-sm leading-6 text-[#31513B]">
+              <div className="rounded-2xl border border-brand-border bg-brand-ice p-4 text-sm leading-6 text-brand-muted">
                 Aucun numéro de Kimlik
                 n’est nécessaire.
                 Indiquez la date
@@ -482,7 +482,7 @@ export default function PartnerInsuranceStep({
       </section>
 
       <section className="border-t border-slate-100 pt-7">
-        <h3 className="text-xl font-black text-[#102B20]">
+        <h3 className="text-xl font-black text-brand-navy">
           Durée de l’assurance
         </h3>
 
@@ -502,7 +502,7 @@ export default function PartnerInsuranceStep({
                 className={`rounded-2xl border p-5 text-left transition ${
                   data.duration ===
                   duration
-                    ? "border-[#0B5D3B] bg-[#EEF6EC] ring-4 ring-[#0B5D3B]/10"
+                    ? "border-brand-navy bg-brand-ice ring-4 ring-brand-navy/10"
                     : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
@@ -524,9 +524,9 @@ export default function PartnerInsuranceStep({
         </div>
       </section>
 
-      <section className="min-w-0 overflow-hidden rounded-2xl border border-[#DCE9DD] bg-[#F7FAF6]">
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-brand-border bg-brand-ice">
         {priceLoading ? (
-          <div className="p-5 text-sm font-semibold text-[#31513B]">
+          <div className="p-5 text-sm font-semibold text-brand-muted">
             Calcul du tarif partenaire...
           </div>
         ) : priceError ? (
@@ -566,12 +566,12 @@ export default function PartnerInsuranceStep({
               </div>
             </div>
 
-            <div className="min-w-0 border-t border-[#DCE9DD] bg-white p-4 sm:p-5">
+            <div className="min-w-0 border-t border-brand-border bg-white p-4 sm:p-5">
               <p className="text-sm font-medium text-slate-500">
                 Tarif partenaire
               </p>
 
-              <p className="mt-1 break-words text-3xl font-black tracking-tight text-[#0B5D3B] sm:text-4xl">
+              <p className="mt-1 break-words text-3xl font-black tracking-tight text-brand-navy sm:text-4xl">
                 {data.calculatedPrice.toLocaleString(
                   "fr-FR",
                 )}{" "}
@@ -601,7 +601,7 @@ export default function PartnerInsuranceStep({
               null
           }
           onClick={handleNext}
-          className="min-h-12 w-full rounded-xl bg-[#0B5D3B] px-7 text-sm font-black text-white transition hover:bg-[#084A2F] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+          className="min-h-12 w-full rounded-xl bg-brand-lime px-7 text-sm font-black text-brand-navy transition hover:bg-brand-lime/85 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
           Continuer →
         </button>

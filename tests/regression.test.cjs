@@ -84,3 +84,5 @@ require('./refunds.test.cjs');
 require("./request-resume.test.cjs");
 
 require("./direct-request-api.test.cjs");
+
+require('./rpc-conflicts.test.cjs');

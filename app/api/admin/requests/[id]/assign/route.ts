@@ -378,7 +378,7 @@ export async function PATCH(
       p_request: requestId, p_actor: currentUser.id, p_expected_agent: previousAgentId,
       p_agent: agentId, p_email: agentEmail, p_name: agentName, p_client_name: clientName,
     });
-    if (adoptionError) return NextResponse.json({ error: adoptionError.code === "40001" ? "L’attribution a changé. Actualisez la page." : "L’attribution n’a pas pu être enregistrée." }, { status: adoptionError.code === "40001" ? 409 : adoptionError.code === "42501" ? 403 : adoptionError.code === "P0002" ? 404 : 503, headers: { "Cache-Control": "no-store" } });
+    if (adoptionError) return NextResponse.json({ error: ["40001", "PT409"].includes(adoptionError.code) ? "L’attribution a changé. Actualisez la page." : "L’attribution n’a pas pu être enregistrée." }, { status: ["40001", "PT409"].includes(adoptionError.code) ? 409 : adoptionError.code === "42501" ? 403 : adoptionError.code === "P0002" ? 404 : 503, headers: { "Cache-Control": "no-store" } });
     try { await processOutbox(); } catch { /* The durable event remains available for controlled recovery. */ }
     let assignmentEmailSent = false;
     if (adopted?.eventId) {

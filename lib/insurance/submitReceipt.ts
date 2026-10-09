@@ -39,7 +39,7 @@ export async function submitReceipt(request:Request,context:ReceiptContext){
   const {error:copyError}=await db.storage.from("insurance-documents").copy(pending,finalPath);if(copyError)throw copyError;
   const {data:result,error:saveError}=await db.rpc("submit_payment_receipt",{p_request_id:row.id,p_actor_id:context.actorId??null,p_partner_id:context.partnerId??null,p_request_code:code,p_country:country,p_phone:phone,p_pending_path:pending,p_document:{...document,storage_path:finalPath}});
   // Do not delete on an uncertain network response: the transaction may have committed.
-  if(saveError){const status=saveError.code==="42501"?403:saveError.code==="40001"?409:saveError.code==="22023"?400:saveError.code==="PGRST202"?503:500;return reply({success:false,error:status===409?"Le dossier a changé. Actualisez la page.":status===503?"La mise à jour de la base est nécessaire.":"Le justificatif n’a pas pu être enregistré. Réessayez."},status);}
+  if(saveError){const status=saveError.code==="42501"?403:["40001", "PT409"].includes(saveError.code)?409:saveError.code==="22023"?400:saveError.code==="PGRST202"?503:500;return reply({success:false,error:status===409?"Le dossier a changé. Actualisez la page.":status===503?"La mise à jour de la base est nécessaire.":"Le justificatif n’a pas pu être enregistré. Réessayez."},status);}
   await processOutbox().catch(()=>{});
   return reply(result);
  }catch{return reply({success:false,error:"Le justificatif n’a pas pu être enregistré. Réessayez."},500);}

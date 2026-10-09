@@ -409,7 +409,7 @@ export async function POST(request: Request) {
         }));
         movedStoragePaths.length=0;pendingStoragePaths.length=0;
         const {data:adopted,error:adoptError}=await serviceClient.rpc("create_partner_request",{p_partner_id:partner.id,p_actor_id:authenticatedUser.id,p_submission_id:submissionId,p_payload:payload,p_client:clientSnapshot,p_existing_client_id:existingClientId,p_request:requestFields,p_documents:documentRows});
-        if(adoptError){movedStoragePaths.length=0;pendingStoragePaths.length=0;return jsonError(adoptError.code==="40001"?"Le dossier a changé. Réessayez.":"Le dossier n’a pas pu être enregistré. Réessayez.",adoptError.code==="40001"?409:500);}
+        if(adoptError){movedStoragePaths.length=0;pendingStoragePaths.length=0;return jsonError(["40001", "PT409"].includes(adoptError.code)?"Le dossier a changé. Réessayez.":"Le dossier n’a pas pu être enregistré. Réessayez.",["40001", "PT409"].includes(adoptError.code)?409:500);}
         movedStoragePaths.length = 0;
         pendingStoragePaths.length = 0;
         return NextResponse.json({

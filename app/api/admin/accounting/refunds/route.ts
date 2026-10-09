@@ -15,7 +15,7 @@ function dbFailure(code: string) {
   if (["PGRST202", "42P01", "42883"].includes(code)) return fail("La gestion des remboursements doit être activée dans la base.", 503);
   if (code === "42501") return fail("Accès réservé à l’administrateur.", 403);
   if (code === "P0002") return fail("Paiement ou remboursement introuvable.", 404);
-  if (code === "40001") return fail("Opération déjà utilisée avec d’autres informations. Actualisez avant de réessayer.", 409);
+  if (["40001", "PT409"].includes(code)) return fail("Opération déjà utilisée avec d’autres informations. Actualisez avant de réessayer.", 409);
   if (code === "P0001") return fail("Le montant dépasse le reste remboursable ou le paiement n’est pas confirmé. Actualisez la page.", 409);
   if (["22023", "23514"].includes(code)) return fail("Vérifiez le montant, la date, le moyen de paiement et les références.");
   return fail("Enregistrement incertain. Actualisez avant de réessayer ; conservez les mêmes informations pour éviter un doublon.", 503);

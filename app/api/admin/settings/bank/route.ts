@@ -106,7 +106,7 @@ export async function PUT(
 
     if(!body.expected)return NextResponse.json({success:false,error:"Actualisez les coordonnées avant de les enregistrer."},{status:400});
     const {data:saved,error:saveError}=await serviceClient.rpc("save_bank_settings",{p_actor:auth.user.id,p_expected:body.expected,p_values:{beneficiary,bankName,iban}});
-    if(saveError)return NextResponse.json({success:false,error:saveError.code==="40001"?"Les coordonnées ont été modifiées. Actualisez avant de réessayer.":"Les coordonnées n’ont pas pu être enregistrées."},{status:saveError.code==="40001"?409:saveError.code==="PGRST202"?503:500});
+    if(saveError)return NextResponse.json({success:false,error:["40001", "PT409"].includes(saveError.code)?"Les coordonnées ont été modifiées. Actualisez avant de réessayer.":"Les coordonnées n’ont pas pu être enregistrées."},{status:["40001", "PT409"].includes(saveError.code)?409:saveError.code==="PGRST202"?503:500});
     return NextResponse.json(
       {
         success:

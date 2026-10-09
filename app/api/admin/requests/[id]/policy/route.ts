@@ -388,7 +388,7 @@ export async function POST(request: Request, context: RouteContext) {
         if(adoptError){
           // A network failure is ambiguous; retained objects can be recovered by the same submission.
           cleanupFinalPaths.clear(); cleanupPendingPaths.clear();
-          return NextResponse.json({success:false,error:adoptError.code==="40001"?"Le dossier a changé. Actualisez la page.":adoptError.code==="42501"?"Accès refusé après réattribution.":"Les polices n’ont pas pu être enregistrées. Réessayez."},{status:adoptError.code==="40001"?409:adoptError.code==="42501"?403:adoptError.code==="PGRST202"?503:500,headers:{"Cache-Control":"no-store"}});
+          return NextResponse.json({success:false,error:["40001", "PT409"].includes(adoptError.code)?"Le dossier a changé. Actualisez la page.":adoptError.code==="42501"?"Accès refusé après réattribution.":"Les polices n’ont pas pu être enregistrées. Réessayez."},{status:["40001", "PT409"].includes(adoptError.code)?409:adoptError.code==="42501"?403:adoptError.code==="PGRST202"?503:500,headers:{"Cache-Control":"no-store"}});
         }
         await processOutbox().catch(()=>{});
         const allRequiredPoliciesExist=Boolean(adopted.completed),finalStatus=adopted.status,savedPolicyYears=adopted.existingYears,becamePolicyAvailable=Boolean(adopted.whatsappNotificationTriggered);

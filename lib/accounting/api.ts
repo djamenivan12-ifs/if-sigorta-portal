@@ -38,7 +38,7 @@ export async function accountingMutation(
           "Un assureur de ce nom ou une tranche tarifaire correspondante existe déjà. Vérifiez les valeurs.",
           409,
         );
-      if (error.code === "40001")
+      if (["40001", "PT409"].includes(error.code))
         throw new AccountingError(
           "Cette ligne a changé ou cette opération a déjà été utilisée. Actualisez la page avant de réessayer.",
           409,

@@ -27,7 +27,7 @@ export async function savePriceRanges(
     p_partner_id: partnerId ?? null,
   });
   if (error) {
-    if (["40001", "P0002"].includes(error.code))
+    if (["40001", "PT409", "P0002"].includes(error.code))
       throw new PriceGridError("La grille a changé entre-temps. Rechargez la page avant de réessayer.", 409);
     if (["23P01", "23514", "22023", "22003", "22P02"].includes(error.code))
       throw new PriceGridError("Les valeurs tarifaires sont invalides ou les tranches actives se chevauchent.", 400);

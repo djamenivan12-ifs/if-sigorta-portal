@@ -16,6 +16,7 @@ import {
   RefreshCcw,
   Search,
   Settings,
+  Tags,
   UserCog,
   Users,
   WalletCards,
@@ -64,6 +65,11 @@ export default function Navigation({
       href: "/admin/polices",
       label: "Polices",
       icon: FileCheck2,
+    },
+    {
+      href: "/admin/grille-de-prix",
+      label: "Grille de prix",
+      icon: Tags,
     },
     {
       href: "/admin/clients",

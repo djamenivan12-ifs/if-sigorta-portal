@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   title: "IF Sigorta",
   description: "Demandez votre assurance en Turquie et suivez votre dossier avec IF Sigorta.",
   icons: {
-    icon: "/icon.png?v=3",
-    apple: "/apple-icon.png?v=3",
+    icon: "/icon.png?v=4",
+    apple: "/apple-icon.png?v=4",
   },
 };
 

@@ -120,7 +120,7 @@ export default function TrackRequestForm() {
             }}
             placeholder="IFS-260808-DF56"
             autoComplete="off"
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold uppercase text-[#0E1C2D] outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#0E1C2D] focus:ring-4 focus:ring-[#0E1C2D]/10"
+            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold uppercase text-[#011A2E] outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#011A2E] focus:ring-4 focus:ring-[#011A2E]/10"
           />
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function TrackRequestForm() {
           className="text-sm font-bold text-slate-700"
         >{t.phone}</label>
 
-        <div className="mt-3 flex overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-slate-300 focus-within:border-[#0E1C2D] focus-within:ring-4 focus-within:ring-[#0E1C2D]/10">
+        <div className="mt-3 flex overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-slate-300 focus-within:border-[#011A2E] focus-within:ring-4 focus-within:ring-[#011A2E]/10">
           <select
             value={
               whatsappCountryCode
@@ -146,7 +146,7 @@ export default function TrackRequestForm() {
               )
             }
             aria-label={t.dial}
-            className="max-w-[180px] border-r border-slate-200 bg-[#EEF6FD] px-3 text-sm font-semibold text-slate-700 outline-none"
+            className="max-w-[180px] border-r border-slate-200 bg-[#EEF7FF] px-3 text-sm font-semibold text-slate-700 outline-none"
           >
             {countryCodes.map(
               (
@@ -186,7 +186,7 @@ export default function TrackRequestForm() {
             }}
             placeholder="5XXXXXXXXX"
             autoComplete="tel"
-            className="h-12 min-w-0 flex-1 bg-white px-4 text-sm text-[#0E1C2D] outline-none placeholder:text-slate-400"
+            className="h-12 min-w-0 flex-1 bg-white px-4 text-sm text-[#011A2E] outline-none placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function TrackRequestForm() {
 
       <button
         type="submit"
-        className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#ADCA0A] px-5 text-sm font-black text-[#0E1C2D] transition hover:-translate-y-0.5 hover:bg-[#ADCA0A]"
+        className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#AEED02] px-5 text-sm font-black text-[#011A2E] transition hover:-translate-y-0.5 hover:bg-[#AEED02]"
       >{t.submit}<ArrowRight className="h-4 w-4" />
       </button>
     </form>

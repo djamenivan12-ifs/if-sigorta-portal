@@ -188,7 +188,7 @@ export default function HomeHeader() {
 
                       language ===
                       item
-                        ? "bg-white text-[#0E1C2D] shadow-sm"
+                        ? "bg-white text-[#011A2E] shadow-sm"
                         : "text-white/65 hover:text-white",
                     ].join(
                       " ",
@@ -204,7 +204,7 @@ export default function HomeHeader() {
 
             <Link
               href="/demande/etape-1"
-              className="inline-flex min-h-12 whitespace-nowrap items-center justify-center rounded-xl bg-[#ADCA0A] px-6 text-sm font-black text-[#0E1C2D] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#ADCA0A]"
+              className="inline-flex min-h-12 whitespace-nowrap items-center justify-center rounded-xl bg-[#AEED02] px-6 text-sm font-black text-[#011A2E] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#AEED02]"
             >
               {
                 t.cta
@@ -284,7 +284,7 @@ export default function HomeHeader() {
 
       {menuOpen && (
         <div className="mx-auto max-w-[1600px] px-4 pt-2 sm:px-6 lg:px-8 xl:hidden">
-          <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#0E1C2D]/95 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl">
+          <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#011A2E]/95 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl">
             <nav className="flex flex-col">
               <MobileLink
                 href="/"
@@ -355,7 +355,7 @@ export default function HomeHeader() {
                     false,
                   )
                 }
-                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#ADCA0A] px-4 text-xs font-black text-[#0E1C2D]"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#AEED02] px-4 text-xs font-black text-[#011A2E]"
               >
                 {
                   t.cta
@@ -384,7 +384,7 @@ function NavLink({
       href={
         href
       }
-      className="relative whitespace-nowrap py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#ADCA0A] after:transition-all hover:after:w-full"
+      className="relative whitespace-nowrap py-2 text-sm font-semibold text-white/85 transition hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-[#AEED02] after:transition-all hover:after:w-full"
     >
       {
         children

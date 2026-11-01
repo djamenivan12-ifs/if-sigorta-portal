@@ -18,7 +18,7 @@ export function ListPagination({
   return (
     <nav
       aria-label="Pagination des résultats"
-      className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm"
+      className="if-admin-pagination mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm"
     >
       <p role="status" className="text-slate-600">
         {summary.first}–{summary.last} sur {summary.total} résultat
@@ -73,7 +73,7 @@ export function ListFilters({
     <form
       method="GET"
       action={base}
-      className="my-5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4"
+      className="if-admin-filters my-5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4"
     >
       <label className="flex min-w-0 flex-1 flex-col gap-2 text-xs font-semibold text-slate-600">
         Rechercher

@@ -140,7 +140,7 @@ export default function NouveauAgentPage() {
         </Link>
 
         <div className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.75rem]">
-          <div className="border-b border-slate-100 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+          <div data-admin-page-heading="card" className="border-b border-slate-100 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
             <div className="flex min-w-0 items-start gap-3 sm:gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-ice text-lg font-black text-brand-navy sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
                 +

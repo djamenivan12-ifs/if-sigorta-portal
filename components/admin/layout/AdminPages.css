@@ -1,0 +1,278 @@
+/* Shared admin design. The role class deliberately leaves agent/partner views alone. */
+.if-admin-workspace {
+  --admin-surface: #fff;
+  --admin-line: #d8e6f0;
+  --admin-muted: #536a7b;
+  --admin-radius: 12px;
+}
+.if-admin-workspace .if-admin-page {
+  min-width: 0;
+  padding: 24px 16px 40px;
+  background: #eef7ff;
+  color: #011a2e;
+}
+.if-admin-workspace .if-admin-page > :where(nav, header, dl),
+.if-admin-workspace .if-admin-page > div[class*="max-w-[1500px]"] {
+  max-width: 1540px;
+  margin-inline: auto;
+}
+.if-admin-workspace .if-admin-breadcrumb {
+  min-height: 32px;
+  margin-bottom: 16px;
+  gap: 10px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.if-admin-workspace .if-admin-breadcrumb [aria-current="page"] {
+  color: #011a2e;
+  font-weight: 600;
+}
+.if-admin-workspace .if-admin-sections {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 12px;
+  margin-bottom: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #94afc2 transparent;
+}
+.if-admin-workspace .if-admin-sections a {
+  flex: 0 0 auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.if-admin-workspace .if-admin-sections a:hover {
+  color: #011a2e;
+  background: #aeed02;
+  border-color: #aeed02;
+}
+.if-admin-workspace .if-admin-page [data-admin-page-heading="plain"] {
+  padding: 0 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.if-admin-workspace .if-admin-page [data-admin-page-heading="card"] {
+  border-color: var(--admin-line);
+  border-radius: var(--admin-radius);
+  background: var(--admin-surface);
+  box-shadow: none;
+}
+.if-admin-workspace .if-admin-page h1 {
+  color: #011a2e;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+.if-admin-workspace .if-admin-page [data-admin-page-heading] :where(p) {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.if-admin-workspace
+  .if-admin-page
+  [data-admin-page-heading]
+  :where(p.uppercase) {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+.if-admin-workspace .if-admin-page h2 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  scroll-margin-top: 150px;
+}
+.if-admin-workspace .if-admin-page h2:target {
+  text-decoration: underline;
+  text-decoration-color: #aeed02;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 7px;
+}
+.if-admin-workspace
+  .if-admin-page
+  :is(
+    section,
+    article,
+    div,
+    form,
+    dl,
+    nav
+  )[class*="bg-white"][class*="border"] {
+  border-color: var(--admin-line);
+  border-radius: var(--admin-radius);
+  box-shadow: none;
+}
+.if-admin-workspace .if-admin-page :where(a, button)[class*="rounded"] {
+  border-radius: 8px;
+}
+.if-admin-workspace .if-admin-page :where(a, button)[class*="bg-brand-lime"] {
+  color: #011a2e;
+  font-weight: 600;
+  box-shadow: none;
+}
+.if-admin-workspace
+  .if-admin-page
+  :where(a, button)[class*="bg-brand-lime"]:hover:not(:disabled) {
+  background: #9fd900;
+}
+.if-admin-workspace
+  .if-admin-page
+  :where(input, select, textarea):not([type="checkbox"]):not(
+    [type="radio"]
+  ):not([type="hidden"]):not([type="file"]) {
+  min-width: 0;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: #fff;
+  color: #011a2e;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.if-admin-workspace
+  .if-admin-page
+  :where(input, select):not([type="checkbox"]):not([type="radio"]):not(
+    [type="hidden"]
+  ) {
+  min-height: 44px;
+}
+.if-admin-workspace .if-admin-page :where(input, textarea)::placeholder {
+  color: #71889a;
+}
+.if-admin-workspace .if-admin-page :where(input, select, textarea):disabled {
+  background: #f1f7fc;
+  color: #64748b;
+}
+.if-admin-workspace
+  .if-admin-page
+  :where(input, select, textarea)[aria-invalid="true"] {
+  border-color: #be123c;
+}
+.if-admin-workspace
+  .if-admin-page
+  :where(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #536a7b;
+  outline-offset: 3px;
+}
+.if-admin-workspace .if-admin-page table {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.if-admin-workspace .if-admin-page thead :is(th, td) {
+  background: #f1f7fc;
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+.if-admin-workspace .if-admin-page :is(th, td) {
+  padding: 14px 16px;
+}
+.if-admin-workspace .if-admin-page tbody tr {
+  border-color: #e5edf4;
+}
+.if-admin-workspace .if-admin-page tbody tr:hover,
+.if-admin-workspace .if-admin-page tbody tr:hover td {
+  background: #f6fafe;
+}
+.if-admin-workspace .if-admin-page :is(th, td):first-child {
+  box-shadow: none;
+}
+.if-admin-workspace .if-admin-page .if-admin-filters {
+  gap: 12px;
+  padding: 20px;
+}
+.if-admin-workspace .if-admin-page .if-admin-pagination {
+  border-color: var(--admin-line);
+  padding: 16px 20px;
+  font-size: 12px;
+}
+.if-admin-workspace .if-admin-page .if-admin-pagination a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  background: white;
+}
+.if-admin-workspace .if-admin-dialog {
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius);
+  color: #011a2e;
+}
+.if-admin-workspace .if-admin-dialog > header {
+  border-radius: 0;
+  padding: 20px 24px;
+  background: #f6fafe;
+}
+.if-admin-workspace .if-admin-dialog::backdrop {
+  background: rgb(1 26 46 / 45%);
+  backdrop-filter: blur(2px);
+}
+.if-admin-workspace .if-admin-loading,
+.if-admin-workspace .if-admin-error {
+  max-width: 1540px;
+}
+.if-admin-workspace .if-admin-loading [aria-hidden] > div {
+  border: 1px solid var(--admin-line);
+  background: #fff;
+}
+.if-admin-workspace .if-admin-error {
+  border-radius: var(--admin-radius);
+  border-color: #fecdd3;
+}
+@media (min-width: 640px) {
+  .if-admin-workspace .if-admin-page {
+    padding-inline: 24px;
+  }
+  .if-admin-workspace .if-admin-page h1 {
+    font-size: 32px;
+  }
+}
+@media (min-width: 1024px) {
+  .if-admin-workspace .if-admin-page {
+    padding: 28px 32px 48px;
+  }
+  .if-admin-workspace .if-admin-page h1 {
+    font-size: 36px;
+  }
+  .if-admin-workspace .if-admin-page h2 {
+    scroll-margin-top: 100px;
+  }
+}
+@media (max-width: 639px) {
+  .if-admin-workspace .if-admin-page .if-admin-filters > label {
+    flex: 1 1 100%;
+  }
+  .if-admin-workspace .if-admin-page .if-admin-filters :is(button, a) {
+    flex: 1;
+    justify-content: center;
+  }
+  .if-admin-workspace .if-admin-page .if-admin-pagination {
+    justify-content: center;
+  }
+  .if-admin-workspace .if-admin-page .if-admin-pagination > div {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .if-admin-workspace
+    .if-admin-page
+    :where(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
+    font-size: 16px;
+  }
+  .if-admin-workspace .if-admin-page :where(dd) {
+    overflow-wrap: anywhere;
+  }
+}

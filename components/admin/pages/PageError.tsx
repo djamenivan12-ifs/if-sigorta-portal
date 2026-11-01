@@ -4,7 +4,7 @@ export default function PageError({ reset,dashboardHref="/admin/dashboard" }: { 
   return (
     <section
       role="alert"
-      className="m-4 rounded-xl border border-red-200 bg-white p-6 sm:m-8"
+      className="if-admin-error m-4 rounded-xl border border-red-200 bg-white p-6 sm:m-8"
     >
       <h1 className="text-xl font-bold text-slate-900">
         Cette page n’a pas pu être chargée

@@ -18,6 +18,7 @@ type UpdatePartnerPayload = {
   whatsappCountryCode?: string;
   whatsappNumber?: string;
   isActive?: boolean;
+  preferredLanguage?: string;
 };
 
 function cleanPhoneNumber(
@@ -266,6 +267,7 @@ export async function PATCH(
             email,
             whatsapp_country_code,
             whatsapp_number,
+            preferred_language,
             auth_user_id,
             is_active,
             created_at,
@@ -389,6 +391,9 @@ export async function PATCH(
       whatsappNumber ??
       existingPartner.whatsapp_number;
 
+    const preferredLanguage = body.preferredLanguage ?? existingPartner.preferred_language;
+    if (!["fr", "en", "tr"].includes(preferredLanguage)) return NextResponse.json({ success: false, error: "Langue invalide." }, { status: 400 });
+
     const finalIsActive =
       typeof body.isActive ===
       "boolean"
@@ -442,6 +447,7 @@ export async function PATCH(
           whatsapp_number:
             finalWhatsappNumber,
 
+          preferred_language: preferredLanguage,
           is_active:
             finalIsActive,
 
@@ -461,6 +467,7 @@ export async function PATCH(
             email,
             whatsapp_country_code,
             whatsapp_number,
+            preferred_language,
             auth_user_id,
             is_active,
             created_at,
@@ -578,6 +585,7 @@ export async function PATCH(
               whatsapp_number:
                 existingPartner.whatsapp_number,
 
+              preferred_language: existingPartner.preferred_language,
               is_active:
                 existingPartner.is_active,
 

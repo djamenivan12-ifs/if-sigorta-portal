@@ -19,6 +19,7 @@ type Partner = {
   whatsapp_country_code: string;
   whatsapp_number: string;
   is_active: boolean;
+  preferred_language: string;
   created_at: string;
   updated_at: string;
 };
@@ -30,6 +31,7 @@ type PartnerPriceRangeRow = {
   one_year_price: number | string;
   two_year_price: number | string;
   is_active: boolean;
+  preferred_language: string;
 };
 
 type PageProps = {
@@ -76,6 +78,7 @@ export default async function PartnerPage({ params }: PageProps) {
           email,
           whatsapp_country_code,
           whatsapp_number,
+          preferred_language,
           is_active,
           created_at,
           updated_at
@@ -312,6 +315,7 @@ export default async function PartnerPage({ params }: PageProps) {
                 whatsappNumber: partner.whatsapp_number,
 
                 isActive: partner.is_active,
+                preferredLanguage: partner.preferred_language,
               }}
               dossierCount={totalDossiers}
             />

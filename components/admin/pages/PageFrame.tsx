@@ -15,8 +15,15 @@ export default function PageFrame({
   sections?: { id: string; label: string }[];
 }) {
   return (
-    <section className={styles.page} aria-label={section}>
-      <nav aria-label="Fil d’Ariane" className={styles.breadcrumb}>
+    <section
+      className={`${styles.page} if-admin-page`}
+      data-page-kind={detail ? "detail" : "list"}
+      aria-label={section}
+    >
+      <nav
+        aria-label="Fil d’Ariane"
+        className={`${styles.breadcrumb} if-admin-breadcrumb`}
+      >
         <Link href="/admin/dashboard">Tableau de bord</Link>
         <span aria-hidden="true">/</span>
         {detail ? (
@@ -30,7 +37,10 @@ export default function PageFrame({
         )}
       </nav>
       {sections.length > 1 && (
-        <nav aria-label="Sections de la page" className={styles.sections}>
+        <nav
+          aria-label="Sections de la page"
+          className={`${styles.sections} if-admin-sections`}
+        >
           {sections.map((item) => (
             <a key={item.id} href={"#" + item.id}>
               {item.label}

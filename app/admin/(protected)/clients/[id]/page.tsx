@@ -820,7 +820,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
         {/* En-tête client */}
 
-        <header className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:rounded-[1.5rem]">
+        <header data-admin-page-heading="card" className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:rounded-[1.5rem]">
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="flex min-w-0 flex-col gap-4 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">

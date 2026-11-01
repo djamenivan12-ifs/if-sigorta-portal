@@ -1,6 +1,6 @@
 export default function PageLoading() {
   return (
-    <section role="status" aria-live="polite" className="p-5 sm:p-8">
+    <section role="status" aria-live="polite" className="if-admin-loading p-5 sm:p-8">
       <p className="text-sm font-semibold text-slate-600">
         Chargement de la page…
       </p>

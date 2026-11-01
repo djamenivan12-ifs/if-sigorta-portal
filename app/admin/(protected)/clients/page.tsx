@@ -367,7 +367,7 @@ export default async function ClientsPage({
       <div className="mx-auto w-full min-w-0 max-w-[1500px]">
         {/* HEADER */}
 
-        <header className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
+        <header data-admin-page-heading="plain" className="min-w-0 rounded-2xl border border-slate-200/80 bg-white p-4 sm:rounded-[1.75rem] sm:p-6 lg:p-8">
           <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-navy">

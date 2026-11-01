@@ -184,7 +184,7 @@ export default async function PartnerPage({ params }: PageProps) {
           Retour aux partenaires
         </Link>
 
-        <header className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.75rem]">
+        <header data-admin-page-heading="card" className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white sm:mt-6 sm:rounded-[1.75rem]">
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="flex min-w-0 flex-col gap-5 sm:gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">

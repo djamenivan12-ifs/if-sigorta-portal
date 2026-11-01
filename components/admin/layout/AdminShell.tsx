@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 
+import "./AdminPages.css";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 

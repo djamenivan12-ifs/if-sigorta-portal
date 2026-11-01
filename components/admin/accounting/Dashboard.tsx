@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import PageFrame from "@/components/admin/pages/PageFrame";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -605,9 +606,9 @@ export default function Dashboard({
     setPage(1);
   }
   return (
-    <main className="min-h-screen bg-brand-ice px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
+    <PageFrame section="Comptabilité" href="/admin/comptabilite" detail={!!initialCompany}>
       <div className="mx-auto max-w-[1540px] space-y-6">
-        <header className="flex flex-wrap items-start justify-between gap-5">
+        <header data-admin-page-heading="plain" className="flex flex-wrap items-start justify-between gap-5">
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-800">
               IF SIGORTA · FINANCES
@@ -848,7 +849,7 @@ export default function Dashboard({
                   key={id}
                   onClick={() => changeTab(id)}
                   aria-current={tab === id ? "page" : undefined}
-                  className={`min-h-12 shrink-0 border-b-2 px-4 text-sm font-semibold ${tab === id ? "border-emerald-800 text-emerald-900" : "border-transparent text-slate-500 hover:text-slate-900"}`}
+                  className={`min-h-12 shrink-0 border-b-2 px-4 text-sm font-semibold ${tab === id ? "border-brand-lime bg-brand-ice text-brand-navy" : "border-transparent text-slate-500 hover:bg-brand-ice hover:text-brand-navy"}`}
                 >
                   {label}
                 </button>
@@ -1155,7 +1156,7 @@ export default function Dashboard({
           />
         )}
       </div>
-    </main>
+    </PageFrame>
   );
 }
 function Kpi({

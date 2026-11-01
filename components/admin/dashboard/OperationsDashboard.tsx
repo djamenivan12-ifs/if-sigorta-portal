@@ -141,9 +141,9 @@ export default function OperationsDashboard({ data }: { data: DashboardData }) {
     );
   };
   return (
-    <div className="if-operations min-h-screen bg-transparent px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
+    <div className="if-operations if-admin-page min-h-screen bg-transparent px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1540px] space-y-6">
-        <header className="flex flex-wrap items-start justify-between gap-4">
+        <header data-admin-page-heading="plain" className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-navy">
               IF SIGORTA · {admin ? "PILOTAGE" : "ESPACE AGENT"}

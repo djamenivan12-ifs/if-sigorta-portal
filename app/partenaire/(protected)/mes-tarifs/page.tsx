@@ -1,10 +1,10 @@
 import { LockKeyhole, Tags } from "lucide-react";
-import PageFrame from "@/components/admin/pages/PageFrame";
-import { requireRole } from "@/lib/auth/requireRole";
+
+import { requirePartner } from "@/lib/auth/requirePartner";
 import { createServiceClient } from "@/lib/supabase/service";
 import { readAll } from "@/lib/supabase/readAll";
 
-export const metadata = { title: "Grille de prix | IF Sigorta" };
+export const metadata = { title: "Mes tarifs | IF Sigorta" };
 
 function priceLabel(value: number | string | null) {
   const price = Number(value);
@@ -13,24 +13,27 @@ function priceLabel(value: number | string | null) {
     : "Non disponible";
 }
 
-export default async function AgentPriceGridPage() {
-  await requireRole(["agent", "admin"]);
+export default async function PartnerPriceGridPage() {
+  const { partner } = await requirePartner();
   const db = createServiceClient();
   const { data, error } = await readAll(
-    db.from("insurance_price_ranges")
-      .select("id, minimum_age, maximum_age, one_year_price, two_year_price")
+    db.from("partner_price_ranges")
+      .select("id, minimum_age, maximum_age, one_year_price, two_year_price, updated_at")
+      .eq("partner_id", partner.id)
       .eq("is_active", true)
       .order("minimum_age", { ascending: true })
       .order("id"),
   );
   if (error) throw new Error("La grille de prix est temporairement indisponible. Veuillez réessayer.");
 
+  const updatedAt = data?.reduce((latest, row) => row.updated_at > latest ? row.updated_at : latest, "");
+
   return (
-    <PageFrame section="Grille de prix" href="/admin/grille-de-prix">
+    <section className="mx-auto max-w-6xl p-4 sm:p-6" aria-label="Mes tarifs">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-muted">IF Sigorta · Tarifs de vente</p>
-          <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">Grille de prix</h1>
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-muted">IF Sigorta · Tarifs partenaires</p>
+          <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">Mes tarifs</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Consultez les tarifs actifs d’assurance santé pour étrangers, par tranche d’âge et durée de couverture.</p>
         </div>
         <span className="inline-flex items-center gap-2 rounded-lg bg-brand-ice px-3 py-2 text-xs font-semibold text-brand-navy"><LockKeyhole size={15} />Consultation uniquement</span>
@@ -38,7 +41,7 @@ export default async function AgentPriceGridPage() {
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white" aria-label="Tarifs en livres turques">
         <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-4 sm:px-6">
           <span className="rounded-lg bg-brand-lime p-2 text-brand-navy"><Tags size={20} /></span>
-          <div><h2 className="text-sm font-bold text-brand-navy">Demandes directes</h2><p className="mt-1 text-xs text-slate-500">Montants en livres turques (TRY) · grille définie par l’administration</p></div>
+          <div><h2 className="text-sm font-bold text-brand-navy">{partner.companyName}</h2><p className="mt-1 text-xs text-slate-500">Montants en livres turques (TRY) · grille définie par l’administration</p></div>
         </div>
         {data?.length ? (
           <div className="overflow-x-auto">
@@ -53,9 +56,10 @@ export default async function AgentPriceGridPage() {
         ) : <p role="status" className="px-6 py-12 text-center text-sm text-slate-500">Aucun tarif actif pour le moment. Contactez l’administration.</p>}
       </section>
       <div className="mt-5 space-y-2 text-xs leading-6 text-slate-500">
+        {updatedAt && <p>Dernière mise à jour : {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Istanbul" }).format(new Date(updatedAt))}</p>}
         <p>Les bornes des tranches d’âge sont incluses. L’âge d’assurance correspond à l’année d’émission moins l’année de naissance.</p>
-        <p>Cette grille s’applique aux demandes directes. Les partenaires disposent de leurs propres tarifs. Le montant enregistré sur un dossier existant reste la référence pour ce dossier.</p>
+        <p>Cette grille s’applique uniquement aux demandes de votre compte partenaire. Le montant enregistré sur un dossier existant reste la référence pour ce dossier.</p>
       </div>
-    </PageFrame>
+    </section>
   );
 }

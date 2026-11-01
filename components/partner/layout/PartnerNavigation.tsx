@@ -11,6 +11,7 @@ import {
   FolderOpen,
   LayoutDashboard,
   UserRound,
+  Tags,
 } from "lucide-react";
 
 type PartnerNavigationProps = {
@@ -18,6 +19,7 @@ type PartnerNavigationProps = {
 };
 
 const links = [
+  { href: "/partenaire/mes-tarifs", label: "Mes tarifs", icon: Tags },
   {
     href:
       "/partenaire/tableau-de-bord",
@@ -49,6 +51,7 @@ const links = [
       "Mon profil",
     icon:
       UserRound,
+  Tags,
   },
 ];
 

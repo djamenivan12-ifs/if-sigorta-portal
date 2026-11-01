@@ -14,6 +14,7 @@ type Partner = {
   whatsappCountryCode: string;
   whatsappNumber: string;
   isActive: boolean;
+  preferredLanguage: string;
 };
 
 type PartnerFormProps = {
@@ -161,6 +162,8 @@ export default function PartnerForm({
 
   const [whatsappNumber, setWhatsappNumber] = useState(partner.whatsappNumber);
 
+  const [preferredLanguage, setPreferredLanguage] = useState(partner.preferredLanguage);
+
   const [isActive, setIsActive] = useState(partner.isActive);
 
   const [saving, setSaving] = useState(false);
@@ -242,6 +245,7 @@ export default function PartnerForm({
           whatsappCountryCode,
 
           whatsappNumber: cleanedNumber,
+          preferredLanguage,
         }),
       });
 
@@ -397,6 +401,7 @@ export default function PartnerForm({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 sm:p-8">
+          <div className="mb-5"><label htmlFor="preferredLanguage" className="mb-2 block text-sm font-semibold text-slate-700">Langue des relances de paiement</label><select id="preferredLanguage" className={inputClassName} value={preferredLanguage} onChange={event => setPreferredLanguage(event.target.value)}><option value="fr">Français</option><option value="en">English</option><option value="tr">Türkçe</option></select></div>
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label

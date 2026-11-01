@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Safe template only; real environment files remain ignored.
 !.env.example
+
+# Supabase CLI cache
+/supabase/.temp/

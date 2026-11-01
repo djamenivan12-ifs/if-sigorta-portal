@@ -33,3 +33,9 @@ Désactivation immédiate : vider `PAYMENT_REMINDERS_ENABLED_FROM` et arrêter l
 ## Validation
 
 `npm run test:payment-reminders` exécute les contrôles SQL sur une base locale jetable, sans client réel et sans message. `npm test` couvre les régressions existantes. La compilation et les tests ne valident pas l’approbation des modèles, les secrets hébergeur ni la planification réelle.
+
+## Gestion temporaire des modèles sans exposer le jeton
+
+`POST /api/maintenance/whatsapp-templates` fonctionne uniquement avec le secret dédié `WHATSAPP_TEMPLATE_SETUP_SECRET` et avant la date `WHATSAPP_TEMPLATE_SETUP_UNTIL`. `WHATSAPP_BUSINESS_ACCOUNT_ID` identifie le compte. Le corps `{ "name": "payment_reminder_fr", "create": false }` consulte un modèle ; `create: true` soumet le modèle préétabli uniquement s’il est absent. Les six noms et contenus sont fixes. Le numéro configuré doit appartenir au compte. Aucun message n’est envoyé et aucune valeur secrète n’est retournée.
+
+Après la configuration, mettre la date de fin dans le passé et redéployer. Ne jamais réutiliser le secret du planificateur pour cette opération. Les statuts Meta doivent être APPROVED, avec un contenu compatible, avant l’activation des relances.

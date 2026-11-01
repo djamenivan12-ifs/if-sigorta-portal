@@ -47,7 +47,7 @@ export default function Navigation({
   const links: NavigationLink[] = [
     {
       href: "/admin/dashboard",
-      label: "Tableau de bord",
+      label: role === "admin" ? "Vue d’ensemble" : "Tableau de bord",
       icon: LayoutDashboard,
     },
     {
@@ -141,55 +141,96 @@ export default function Navigation({
     (link) => !link.adminOnly || role === "admin",
   );
 
+  const groups =
+    role === "admin"
+      ? [
+          { label: "", paths: ["dashboard"] },
+          {
+            label: "Opérations",
+            paths: ["dossiers", "paiements", "polices", "renouvellements"],
+          },
+          {
+            label: "Réseau",
+            paths: ["clients", "partenaires", "agents", "agents/performance"],
+          },
+          {
+            label: "Gestion",
+            paths: ["comptabilite", "statistiques", "parametres"],
+          },
+          { label: "Outils", paths: ["recherche", "notifications"] },
+        ]
+      : [
+          {
+            label: "",
+            paths: visibleLinks.map((link) => link.href.replace("/admin/", "")),
+          },
+        ];
+
   return (
-    <nav
-      aria-label="Navigation principale"
-      className="space-y-1"
-    >
-      {visibleLinks.map((link) => {
-        const Icon = link.icon;
+    <nav aria-label="Navigation principale" className="space-y-1">
+      {groups.map((group) => (
+        <div
+          key={group.label || "main"}
+          className={role === "agent" ? "space-y-1" : undefined}
+        >
+          {group.label && (
+            <p className="px-3 pb-2 pt-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
+              {group.label}
+            </p>
+          )}
+          {group.paths
+            .map((path) =>
+              visibleLinks.find((link) => link.href === `/admin/${path}`)!,
+            )
+            .filter(Boolean)
+            .map((link) => {
+              const Icon = link.icon;
 
-        const active = isActive(link.href);
+              const active = isActive(link.href);
 
-        return (
-          <Link
-            aria-current={active ? "page" : undefined}
-            key={link.href}
-            href={link.href}
-            onClick={onNavigate}
-            className={[
-              "group flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-10 lg:gap-2 lg:px-2.5 lg:py-1.5 lg:text-[13px]",
-              active
-                ? "bg-brand-lime text-brand-navy shadow-sm"
-                : "text-white/70 hover:bg-white/10 hover:text-white",
-            ].join(" ")}
-          >
-            <div
-              className={[
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
-                active
-                  ? "bg-brand-navy/10 text-brand-navy"
-                  : "bg-transparent text-white/50 group-hover:text-white",
-              ].join(" ")}
-            >
-              <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />
-            </div>
+              return (
+                <Link
+                  aria-current={active ? "page" : undefined}
+                  key={link.href}
+                  href={link.href}
+                  onClick={onNavigate}
+                  className={[
+                    "group flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:min-h-11 sm:gap-3 sm:px-3.5 sm:py-2.5 sm:text-sm lg:min-h-10 lg:gap-2 lg:px-2.5 lg:py-1.5 lg:text-[13px]",
+                    active
+                      ? "bg-brand-lime text-brand-navy shadow-sm"
+                      : "text-white/70 hover:bg-white/10 hover:text-white",
+                  ].join(" ")}
+                >
+                  <div
+                    className={[
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition sm:h-8 sm:w-8 lg:h-8 lg:w-8",
+                      active
+                        ? "bg-brand-navy/10 text-brand-navy"
+                        : "bg-transparent text-white/50 group-hover:text-white",
+                    ].join(" ")}
+                  >
+                    <Icon className="h-4 w-4 sm:h-[17px] sm:w-[17px] lg:h-[17px] lg:w-[17px]" />
+                  </div>
 
-            <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
 
-            {typeof link.badge === "number" && link.badge > 0 && (
-              <span
-                className={[
-                  "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black sm:min-w-6 sm:px-2 sm:text-[11px] lg:min-w-6 lg:px-2 lg:text-[11px]",
-                  active ? "bg-white text-red-600" : "bg-red-500 text-white",
-                ].join(" ")}
-              >
-                {link.badge > 99 ? "99+" : link.badge}
-              </span>
-            )}
-          </Link>
-        );
-      })}
+                  {typeof link.badge === "number" && link.badge > 0 && (
+                    <span
+                      className={[
+                        "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black sm:min-w-6 sm:px-2 sm:text-[11px] lg:min-w-6 lg:px-2 lg:text-[11px]",
+                        active
+                          ? "bg-white text-red-600"
+                          : "bg-red-500 text-white",
+                      ].join(" ")}
+                    >
+                      {link.badge > 99 ? "99+" : link.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+        </div>
+      ))}
     </nav>
   );
 }

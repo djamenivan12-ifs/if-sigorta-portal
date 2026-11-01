@@ -32,7 +32,7 @@ export default function Sidebar({
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4 sm:py-5 lg:px-4">
         <p className="mb-2 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-white/50 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
-          {role === "admin" ? "Administration" : "Espace agent"}
+          {role === "admin" ? "Espace admin" : "Espace agent"}
         </p>
 
         <Navigation

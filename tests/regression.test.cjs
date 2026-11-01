@@ -86,3 +86,5 @@ require("./request-resume.test.cjs");
 require("./direct-request-api.test.cjs");
 
 require('./rpc-conflicts.test.cjs');
+
+require("./admin-overview.test.cjs");

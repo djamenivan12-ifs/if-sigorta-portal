@@ -62,7 +62,7 @@ export default function AdminShell({
 
 
   return (
-    <div className="if-workspace min-h-screen bg-[#F5F8FB] text-brand-navy">
+    <div className={`if-workspace min-h-screen text-brand-navy ${role === "admin" ? "if-admin-workspace bg-brand-ice" : "bg-[#F5F8FB]"}`}>
       {/* SIDEBAR DESKTOP */}
 
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[244px]">

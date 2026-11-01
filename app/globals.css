@@ -60,3 +60,17 @@ body {
   .if-priority-rail { grid-template-columns: minmax(0,1fr); }
   .if-workspace h1 { font-size: 25px; line-height: 1.2; }
 }
+
+/* Admin redesign: scoped so agent and partner screens retain their presentation. */
+.if-admin-workspace .if-sidebar { background: #011A2E; }
+.if-admin-workspace .if-sidebar nav a { border-radius: 8px; }
+.if-admin-workspace .if-sidebar nav a[aria-current="page"] { box-shadow: none; }
+.if-admin-workspace main { min-width: 0; }
+.if-admin-workspace main > section { background: #EEF7FF; }
+.if-admin-workspace main :where(thead) { background: #F1F7FC; }
+.if-admin-workspace main :where(tbody tr) { transition: background-color .15s; }
+.if-admin-workspace :where(button,a,select,input):focus-visible { outline-color: #536A7B; }
+@media (prefers-reduced-motion: reduce) {
+  .if-admin-workspace * { scroll-behavior: auto !important; transition: none !important; }
+}
+.if-admin-workspace .if-sidebar nav a > span:first-of-type { white-space: normal; overflow: visible; }

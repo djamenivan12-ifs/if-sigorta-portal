@@ -136,12 +136,15 @@ export default async function PartnersPage({
               </p>
             </div>
 
+            <div className="flex flex-wrap gap-3">
+            <Link href="/admin/partenaires/tarifs" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-border bg-white px-5 text-sm font-semibold text-brand-navy">Tarifs groupés</Link>
             <Link
               href="/admin/partenaires/nouveau"
               className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-lime px-4 text-[13px] font-black text-brand-navy transition hover:bg-brand-lime sm:min-h-11 sm:w-auto sm:px-5 sm:text-sm"
             >
               + Ajouter un partenaire
             </Link>
+            </div>
           </div>
         </header>
         <ListFilters

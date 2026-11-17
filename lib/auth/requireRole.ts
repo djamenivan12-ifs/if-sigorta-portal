@@ -5,25 +5,20 @@ import {
   UserRole,
 } from "@/lib/auth/roles";
 
-import {
-  createServerSupabaseClient,
-} from "@/lib/supabase/server";
+import { getVerifiedUser } from "./getVerifiedUser";
 
 export async function requireRole<
   TAllowedRole extends UserRole,
 >(
   allowedRoles: readonly TAllowedRole[],
 ) {
-  const supabase =
-    await createServerSupabaseClient();
-
   const {
     data: {
       user,
     },
     error,
   } =
-    await supabase.auth.getUser();
+    await getVerifiedUser();
 
   if (
     error ||

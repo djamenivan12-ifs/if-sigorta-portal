@@ -88,3 +88,4 @@ require("./direct-request-api.test.cjs");
 require('./rpc-conflicts.test.cjs');
 
 require("./admin-overview.test.cjs");
+require('./admin-performance.test.cjs');

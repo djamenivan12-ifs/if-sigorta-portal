@@ -312,13 +312,32 @@ export async function getNotificationSummary({
         );
     }
 
-    const {
-      data:
-        requestsData,
-      error:
-        requestsError,
-    } =
-      await readAll(requestQuery.order("id"));
+    // Independent reads start together instead of waiting for the activity scan.
+    const [requestResult, renewalResult] = await Promise.all([
+      readAll(requestQuery.order("id")),
+      readAll(supabase
+        .from(
+          "insurance_renewals",
+        )
+        .select(
+          `
+            id,
+            status,
+
+            request:insurance_requests!insurance_renewals_request_id_fkey (
+              id,
+              assigned_agent_id,
+              policy_end_date
+            )
+          `,
+        )
+        .in(
+          "status",
+          ACTIVE_RENEWAL_STATUSES,
+        ).order("id")),
+    ]);
+    const { data: requestsData, error: requestsError } = requestResult;
+    const { data: renewalsData, error: renewalsError } = renewalResult;
 
     if (
       requestsError
@@ -448,33 +467,6 @@ export async function getNotificationSummary({
      * 2. RENOUVELLEMENTS
      * ============================
      */
-
-    const {
-      data:
-        renewalsData,
-      error:
-        renewalsError,
-    } =
-      await readAll(supabase
-        .from(
-          "insurance_renewals",
-        )
-        .select(
-          `
-            id,
-            status,
-
-            request:insurance_requests!insurance_renewals_request_id_fkey (
-              id,
-              assigned_agent_id,
-              policy_end_date
-            )
-          `,
-        )
-        .in(
-          "status",
-          ACTIVE_RENEWAL_STATUSES,
-        ).order("id"));
 
     if (
       renewalsError
